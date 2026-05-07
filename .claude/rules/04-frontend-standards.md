@@ -72,8 +72,8 @@ The Worship Room app uses a dark cinematic theme throughout. All component patte
  
 - **Mood Selector Buttons**: Abstract colored orbs (~56px mobile, ~64px desktop) using the canonical `MOOD_COLORS` palette. Selected orb scales 1.15x with glow; others fade to 30% opacity. `role="radiogroup"` with roving tabindex.
 - **Scripture Display**: Lora serif font (canonical scripture font). Centered, large size, gentle fade-in via CSS transition. Devotional passages use the Tier 2 scripture callout (`rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-3`) per the FrostedCard Tier System in `09-design-system.md`.
-- **Frosted Glass Cards**: Use the `FrostedCard` component (`bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-2xl` with dual box-shadow). Do NOT roll your own card with soft shadows and 8px radius — that was the pre-Round-3 light-theme pattern and is deprecated. For reading-heavy content, use the Tier 1 / Tier 2 system documented in `09-design-system.md` § "FrostedCard Tier System".
-- **Textareas (Pray, Journal)**: Use the canonical white textarea glow class string from `09-design-system.md` § "Textarea Glow Pattern". Do NOT use `animate-glow-pulse` (removed in Wave 6). Do NOT use cyan border or cyan glow (deprecated). Static white box-shadow only.
+- **Frosted Glass Cards**: Use the `FrostedCard` component (`bg-white/[0.07] backdrop-blur-sm border border-white/[0.12] rounded-3xl` with dual box-shadow — post-Visual-Rollout values). Do NOT roll your own card with soft shadows and 8px radius — that was the pre-Round-3 light-theme pattern and is deprecated. Do NOT hardcode `rounded-2xl` — that was the pre-Visual-Rollout default and is now drift. For reading-heavy content, use the Tier 1 / Tier 2 system documented in `09-design-system.md` § "FrostedCard Tier System".
+- **Textareas (Pray, Journal)**: Use the canonical violet textarea glow class string from `09-design-system.md` § "Textarea Glow Pattern" (DailyHub 1B / Visual Rollout). Do NOT use `animate-glow-pulse` (removed in Wave 6). Do NOT use cyan border or cyan glow (deprecated). Do NOT use the prior white-glow shadow (deprecated post-Visual-Rollout). Static violet box-shadow only.
 - **Primary CTA Buttons**: Use the white pill CTA patterns from `09-design-system.md` § "White Pill CTA Patterns". Pattern 1 (inline, smaller) for cross-feature CTAs inside cards. Pattern 2 (homepage primary, larger with white drop shadow) for the main action of a screen.
 - **Forms**: Clear labels, inline validation, accessible error messages. The `FormField` component (`components/FormField.tsx`) provides `aria-invalid`, `aria-describedby`, character count, and inline validation in one accessible wrapper — built but not yet adopted by all production forms.
 - **Navigation**: Clean glass-morphism navbar. Transparent variant on landing/hero pages, glassmorphic backdrop blur on inner pages. The Navbar checks `isAuthenticated` and renders different button sets — see `10-ux-flows.md` § "Navigation Structure".
@@ -93,19 +93,28 @@ See `09-design-system.md` § "Inline Element Layout — Position Verification" f
  
 The following frontend patterns are deprecated and must not be used in new components. The full list with replacements lives in `09-design-system.md` § "Deprecated Patterns":
  
-- `Caveat` font on headings (use `GRADIENT_TEXT_STYLE` instead)
-- `BackgroundSquiggle` on Daily Hub (Daily Hub uses HorizonGlow only; squiggles remain on homepage JourneySection)
-- `GlowBackground` per Daily Hub section (replaced by HorizonGlow at Daily Hub root)
-- `animate-glow-pulse` on textareas (replaced with static white box-shadow)
+- `Caveat` font on headings outside the wordmark and `RouteLoadingFallback` (use `GRADIENT_TEXT_STYLE` instead)
+- `BackgroundSquiggle` on Daily Hub (Daily Hub uses BackgroundCanvas atmospheric layer; squiggles remain on homepage JourneySection)
+- `GlowBackground` per Daily Hub section (replaced by `BackgroundCanvas` at Daily Hub root post-Visual-Rollout Spec 1A; HorizonGlow.tsx is now orphaned legacy)
+- `HorizonGlow` on Daily Hub (replaced by `BackgroundCanvas` post-Visual-Rollout Spec 1A — orphaned legacy pending cleanup)
+- `animate-glow-pulse` on textareas (replaced with static violet box-shadow)
 - Inline expanding dropdown panel for AmbientSoundPill idle state (Wave 7 unified — both states open AudioDrawer)
 - `font-serif italic` on Journal prompts (now Inter sans, no italic, white)
 - "What's On Your Heart/Mind/Spirit?" headings on Daily Hub tabs (removed in Wave 5)
-- Cyan textarea glow border (replaced with white)
+- Cyan textarea glow border (replaced with violet)
+- White textarea glow shadow (deprecated post-Visual-Rollout; replaced with violet)
 - Soft-shadow 8px-radius cards on dark backgrounds (replaced with `FrostedCard`)
 - `line-clamp-3` on guided prayer card descriptions (replaced with `min-h-[260px]`)
 - `PageTransition` component (removed in Wave 2; route background continuity is handled by `html`/`body`/`#root` background colors in `src/index.css`)
+- `bg-primary` solid CTAs on dark surfaces (replaced with `Button variant="subtle"` for secondary, `variant="gradient"` for emotional-peak)
+- `text-primary` text-button on dark surfaces (replaced with `text-violet-300 hover:text-violet-200` for WCAG AA — see Spec 10A audit)
+- `text-success` / `text-danger` CSS-variable colors (replaced with explicit `text-emerald-300` / `text-red-300`)
+- `border-white/10` decorative borders on dark surfaces (replaced with `border-white/[0.12]` post-Visual-Rollout border opacity unification)
+- `rounded-2xl` as default `FrostedCard` radius (replaced with `rounded-3xl` post-Visual-Rollout)
+- Saturated `bg-red-700` / `bg-red-800` destructive buttons (replaced with muted `bg-red-950/30 border-red-400/30 text-red-100`)
+- `Layout transparentNav: false` as default (post-Spec-12 the default is `transparentNav: true`; opaque mode is defensive fallback only)
  
-When in doubt about whether a pattern is current or deprecated, check `09-design-system.md` first.
+**See `09-design-system.md` § "Deprecated Patterns" for the full post-Visual-Rollout deprecation table.** When in doubt about whether a pattern is current or deprecated, check `09-design-system.md` first.
 
 ### CRUD Verb Conventions
 

@@ -465,6 +465,7 @@ If the diff touches UI components or the plan references a recon report or desig
 - [ ] Gradients match expected angle and color stops (if applicable)
 - [ ] Text using `background-clip: text` has a color fallback for unsupported browsers
 - [ ] `prefers-reduced-motion` respected for all animations and video
+- [ ] No deprecated visual patterns from the post-Visual-Rollout era introduced in the diff (`09-design-system.md` § "Deprecated Patterns" — Step 10 gates this formally; this is a pre-commit spot-check)
  
 **If visual verification has NOT been run yet:** This code review can still proceed — it checks code accuracy, patterns, and cleanliness independently. But do NOT commit until `/verify-with-playwright` has been run and all items above are confirmed.
 ```
@@ -512,6 +513,7 @@ Consider how you (or a future you) will experience this diff:
 | All `wr_*` localStorage keys use correct prefix | OK / WRONG PREFIX / N/A | {file}:{line} |
 | Streak reset messaging is gentle (not punitive) | OK / PUNITIVE LANGUAGE / N/A | {file}:{line} |
 | Faith points calculation uses correct multiplier tiers | OK / WRONG TIERS / N/A | {file}:{line} |
+| No deprecated visual patterns introduced (cross-reference `09-design-system.md` § "Deprecated Patterns" — including post-Visual-Rollout entries: HorizonGlow imports, white textarea glow, `bg-primary` solid CTAs on dark, `text-primary` text-buttons on dark, `text-success`/`text-danger` CSS-variable colors, `border-white/10`, `rounded-2xl` as FrostedCard default, `ring-primary` selected-card ring, saturated `bg-red-700`/`bg-red-800` destructive, `Layout transparentNav: false` default, Caveat font outside wordmark/RouteLoadingFallback, `aria-pressed` on radio-style options) | OK / VIOLATION / N/A | {file}:{line} |
  
 **Worship Room-specific violations are ALWAYS Blocker severity.**
  

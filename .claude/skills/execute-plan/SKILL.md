@@ -44,7 +44,7 @@ Before doing anything, read and internalize:
  
 2. **Design System Reference** — Check if `_plans/recon/design-system.md` exists. If it does, read it and internalize the full design system: color tokens, typography scale, spacing values, component patterns (hero, card, button, section, decorative elements), and the CSS Mapping Table. **This is the single source of truth for all UI styling.** When the plan says "match the existing hero" or "use the same card style," look up the exact computed values from this file — do NOT inspect other components at build time or guess. If the design system file does not exist, proceed without it but flag to the user: "No design system reference found at `_plans/recon/design-system.md`. Consider running `/playwright-recon --internal` to generate one for more accurate UI implementation."
  
-3. **`.claude/rules/09-design-system.md`** — Read this for architectural patterns, the Round 3 Visual Patterns section, the Daily Hub Visual Architecture section, the FrostedCard Tier System, the white pill CTA patterns, the textarea glow pattern, the sticky FAB pattern, the drawer-aware visibility pattern, the inline element layout verification rule, and the Deprecated Patterns table. The recon snapshot wins on specific CSS values; this file wins on architectural principles and component patterns.
+3. **`.claude/rules/09-design-system.md`** — Read this for architectural patterns, the Round 3 Visual Patterns section, the BackgroundCanvas Atmospheric Layer section (which includes the Daily Hub-specific structure paragraph), the FrostedCard Tier System, the Button variant taxonomy, the Active-State and Selection Patterns, the Text-Button Pattern, the Tonal Icon Pattern, the white pill CTA patterns, the violet textarea glow pattern, the AlertDialog Pattern, the sticky FAB pattern, the drawer-aware visibility pattern, the inline element layout verification rule, and the Deprecated Patterns table. The recon snapshot wins on specific CSS values; this file wins on architectural principles and component patterns.
  
 4. **Master Spec Plan** — Check the plan header for a "Master Spec Plan" reference. If one exists, read it for shared data models, localStorage keys, cross-spec integration points, and constants. When implementing data models or storage keys, use the exact interfaces and key names from the master plan — do not invent alternatives.
  
@@ -203,28 +203,37 @@ checkpoint (4g) should specifically compare these against the design system or e
  
 **1. Display the Design System Reminder from the plan (if present):**
  
+<!-- MAINTENANCE NOTE: This canonical patterns block must stay in sync with `.claude/rules/09-design-system.md` § "Round 3 Visual Patterns" AND with the matching block in `.claude/skills/plan/SKILL.md` § "Design System Reminder". When 09 updates, update both inline copies. The original visual-rollout sync was performed in the 2026-05-07 reconciliation (see `_plans/reconciliation/2026-05-07-post-rollout-audit-addendum.md`). -->
+ 
 ```text
 ⚠️  DESIGN SYSTEM REMINDER:
  
 Canonical patterns (always check):
-- Worship Room uses GRADIENT_TEXT_STYLE for headings on dark backgrounds, NOT Caveat (deprecated)
-- Daily Hub uses HorizonGlow at the page root, NOT per-section GlowBackground (deprecated on Daily Hub)
-- Daily Hub tab content uses transparent backgrounds with `mx-auto max-w-2xl px-4 py-10 sm:py-14`
-- No "What's On Your Heart/Mind/Spirit?" headings on Daily Hub tabs (removed)
-- Pray/Journal textareas use static white box-shadow glow, NOT animate-glow-pulse (removed)
-- White pill CTAs use Pattern 1 (inline) or Pattern 2 (homepage primary) from `09-design-system.md`
-- FrostedCard tier system: Tier 1 for primary reading, Tier 2 (left-border accent) for scripture callouts
-- Sticky FABs use pointer-events-none outer + pointer-events-auto inner with env(safe-area-inset-*)
-- Drawer-aware FABs auto-hide when state.drawerOpen === true
-- Frosted glass cards: bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-2xl
-- Mood colors: Struggling=#D97706, Heavy=#C2703E, Okay=#8B7FA8, Good=#2DD4BF, Thriving=#34D399
+- Worship Room uses GRADIENT_TEXT_STYLE for headings on dark backgrounds. Caveat font is restricted to the wordmark and RouteLoadingFallback only — deprecated for every other h1/h2.
+- Daily Hub and most inner pages (Bible Landing, MyBible, Local Support, Grow, Ask, RegisterPage, Reading Plan detail, Challenge detail, etc.) wrap content in `<BackgroundCanvas>` (5-stop multi-bloom gradient at `components/ui/BackgroundCanvas.tsx`). Settings and Insights stay on `bg-dashboard-dark + ATMOSPHERIC_HERO_BG` (intentional drift per Spec 10A). Music preserves rolls-own atmospheric layers (audio engine + AudioProvider / audioReducer / AudioContext cluster integrity per Spec 11A — Decision 24). HorizonGlow.tsx is orphaned legacy as of Visual Rollout Spec 1A. GlowBackground remains active on the homepage only.
+- Daily Hub tab content uses transparent backgrounds with `mx-auto max-w-2xl px-4 py-10 sm:py-14` — the BackgroundCanvas atmospheric layer shows through.
+- No "What's On Your Heart/Mind/Spirit?" headings on Daily Hub tabs (removed in Wave 5).
+- Pray/Journal textareas use the canonical violet-glow pattern (DailyHub 1B): `shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] border border-violet-400/30 bg-white/[0.04] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30 placeholder:text-white/40`. White-glow shadow, cyan border, and animate-glow-pulse are deprecated.
+- White pill CTAs use Pattern 1 (inline, `text-primary`) or Pattern 2 (homepage primary, `text-hero-bg` NOT `text-primary`) from `09-design-system.md` — verbatim only, drift is a regression.
+- Default secondary CTA on dark surfaces is `<Button variant="subtle">` (frosted pill — replaces most `bg-primary` solid usage). Default emotional-peak CTA is `<Button variant="gradient" size="lg">` (text-black, NOT text-violet-900). Default text-button on dark is `text-violet-300 hover:text-violet-200` (NOT `text-primary` — fails WCAG 4.5:1 floor).
+- Selectable pills (settings tabs, time-range, RadioPillGroup) use the muted-white active-state: `bg-white/15 text-white border border-white/30`. Tab bars use pill+halo: outer `bg-white/[0.07] border-white/[0.08]`, active `bg-violet-500/[0.13] border-violet-400/45 + violet halo`. Selected card ring: `ring-violet-400/60` (NOT `ring-primary`).
+- Border opacity unification (Visual Rollout): all decorative card/chrome borders on dark use `border-white/[0.12]` (NOT `border-white/10`). Tighter `/[0.18]` acceptable for hover emphasis. Looser `/[0.08]` acceptable for pill tabs' outer border.
+- FrostedCard tier system: variant API `accent | default | subdued`, `rounded-3xl`, `bg-white/[0.07]` (default) / `bg-violet-500/[0.08]` (accent) / `bg-white/[0.05]` (subdued). Tier 1 (`variant="accent"`) eyebrow has violet leading dot signature; Tier 2 (rolls-own scripture callout `border-l-4 border-l-primary/60`) eyebrow has NO dot — left-stripe is its signature.
+- Tonal Icon Pattern (Spec 4B — dashboard widget headers): per-widget header icon palette: `text-pink-300` (gratitude), `text-sky-300` (insight/data), `text-violet-300` (default/spiritual), `text-emerald-300` (positive/success), `text-amber-100`/`text-amber-300` (recap/seasonal), `text-yellow-300` (achievement). Status indicators: `text-emerald-300`/`text-red-300`/`text-amber-300` (NOT `text-success`/`text-danger`/`text-warning` — deprecated).
+- AlertDialog pattern (Spec 10A / 11B): destructive confirmations use `<Button variant="alertdialog">` + `AlertTriangle` icon in heading + muted treatment (`bg-red-950/30 border-red-400/30 text-red-100`). Saturated `bg-red-700/800` is deprecated.
+- Cross-surface card pattern (Spec 3): navigable cards use `<Link>` outer + `<FrostedCard variant="default" as="article">` inner with group-hover. FrostedCard does NOT receive `onClick`; the Link handles navigation.
+- Layout default flipped to `transparentNav: true` post-Spec-12. The transparent overlay navbar is the canonical production state on every page including non-hero pages. Opaque mode is retained only as `transparentNav={false}` defensive fallback.
+- Auth deep links (Spec 7): `/?auth=login` and `/?auth=register` open the AuthModal in the corresponding mode. Cross-surface auth-gating CTAs use these query-param deep links, not hard-routing to `/login`.
+- Sticky FABs use `pointer-events-none` outer + `pointer-events-auto` inner with `env(safe-area-inset-*)` for iOS notch and Android nav bar respect. Drawer-aware FABs (like `DailyAmbientPillFAB`) auto-hide when `state.drawerOpen === true`.
+- Frosted glass cards: `bg-white/[0.07] backdrop-blur-sm border border-white/[0.12] rounded-3xl` (post-Visual-Rollout — earlier `bg-white/[0.06]` + `rounded-2xl` are drift). Use the FrostedCard component, not a hand-rolled card.
+- Mood colors: Struggling=#D97706, Heavy=#C2703E, Okay=#8B7FA8, Good=#2DD4BF, Thriving=#34D399.
  
 {plan-specific quirks from the Design System Reminder block}
  
 All styling for this step must account for these patterns.
 ```
  
-**2. Re-read the relevant section of the Design System Reference** (`_plans/recon/design-system.md`) AND the relevant Round 3 / Daily Hub Visual Architecture sections of `.claude/rules/09-design-system.md` for the specific component being built in this step. Do not rely on values memorized from Step 2 — re-read fresh to ensure accuracy. Look up the exact values for this component's colors, typography, spacing, gradients, and hover states.
+**2. Re-read the relevant section of the Design System Reference** (`_plans/recon/design-system.md`) AND the relevant Round 3 Visual Patterns / BackgroundCanvas Atmospheric Layer / FrostedCard Tier System / Button Component Variants / Active-State and Selection Patterns sections of `.claude/rules/09-design-system.md` for the specific component being built in this step. Do not rely on values memorized from Step 2 — re-read fresh to ensure accuracy. Look up the exact values for this component's colors, typography, spacing, gradients, and hover states.
  
 **If no Design System Reminder in the plan:** Skip the plan-specific quirk display, but still show the canonical patterns block above and re-read both design system files.
  

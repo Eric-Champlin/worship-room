@@ -8,6 +8,10 @@ This file is descriptive, not prescriptive — nothing here is a rule. For rules
 
 ## Routes
 
+### Query-param deep links (Spec 7 — Visual Rollout)
+
+`/?auth=login` and `/?auth=register` open the AuthModal in the corresponding mode on top of `/`. The legacy `/login` direct route redirects to `/?auth=login` for back-compat (`/register` continues to render `RegisterPage` directly). Implementation lives in `AuthQueryParamHandler` inside `App.tsx`. Documented in `02-security.md` § "Auth Gating Strategy" → "Query-param-driven AuthModal (Spec 7)".
+
 ### Public Routes (No Authentication Required)
 
 | Route                                                         | Component                  | Description                                                                                                                       |
@@ -41,8 +45,8 @@ This file is descriptive, not prescriptive — nothing here is a rule. For rules
 | `/reading-plans/:planId`                                      | `ReadingPlanDetail`        | Plan detail with daily progress                                                                                                   |
 | `/challenges/:challengeId`                                    | `ChallengeDetail`          | Challenge daily content + progress                                                                                                |
 | `/accessibility`                                              | `AccessibilityPage`        | BB-35 accessibility statement                                                                                                     |
-| `/community-guidelines`                                       | `CommunityGuidelines`      | Community Guidelines (Phase 1 Spec 1.10m — conduct, content boundaries, crisis protocol)                                          |
-| `/login`                                                      | `ComingSoon`               | Login placeholder (stub)                                                                                                          |
+| `/community-guidelines`                                       | `CommunityGuidelines`      | **Deferred** — markdown content shipped at `content/community-guidelines.md`; page component + route pending Spec 1.10m completion (per 2026-04-28 audit note in `spec-tracker.md`)         |
+| `/login`                                                      | Redirect → `/?auth=login`  | Spec 7 (Visual Rollout) redirect to query-param-driven AuthModal                                                                  |
 | `/register`                                                   | `RegisterPage`             | Registration page (UI shell, backend in Phase 3)                                                                                  |
 | `/health`                                                     | `Health`                   | Backend health check                                                                                                              |
 | `/dev/mood-checkin`                                           | `MoodCheckInPreview`       | Dev-only mood check-in preview                                                                                                    |
@@ -60,7 +64,7 @@ This file is descriptive, not prescriptive — nothing here is a rule. For rules
 | `/settings`         | `Settings`      | User settings (4 sections, including BB-41 notification preferences) |
 | `/my-prayers`       | `MyPrayers`     | Personal prayer list                                                 |
 
-**Forums Wave will add:** `/u/:username` unified profile (Phase 8), `/forgot-password` and `/reset-password` (Spec 1.5b — deferred until SMTP wired), `/admin/audit-log` (Spec 10.10b), `/settings/sessions` (Spec 1.5g — deferred until SMTP wired). Also 301 redirects from `/profile/:userId` and `/prayer-wall/user/:id` to `/u/:username`. **Already shipped:** `/community-guidelines` (Spec 1.10m). See `_forums_master_plan/round3-master-plan.md`.
+**Forums Wave will add:** `/u/:username` unified profile (Phase 8), `/forgot-password` and `/reset-password` (Spec 1.5b — deferred until SMTP wired), `/admin/audit-log` (Spec 10.10b), `/settings/sessions` (Spec 1.5g — deferred until SMTP wired), `/community-guidelines` (Spec 1.10m — markdown content shipped at `content/community-guidelines.md`; page component + route pending). Also 301 redirects from `/profile/:userId` and `/prayer-wall/user/:id` to `/u/:username`. See `_forums_master_plan/round3-master-plan.md`.
 
 ---
 

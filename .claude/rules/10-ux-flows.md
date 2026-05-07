@@ -106,6 +106,23 @@ Settings
 **Implementation:** The Navbar component checks `isAuthenticated` from the auth context and conditionally renders the appropriate button set. The logged-in state applies on ALL pages, not just the dashboard.
  
 **BibleReader exception:** The Navbar is NOT mounted on the BibleReader page (`/bible/:book/:chapter`). The BibleReader uses its own `ReaderChrome` component with reader-specific top and bottom toolbars. See "Bible Reader Flow" section below.
+
+**Transparent navbar default (Visual Rollout Spec 12):** Post-Spec-12, `Layout` defaults `transparentNav: true`. The transparent overlay navbar is the canonical production state on every page, including non-hero pages. The `transparent` prop on Navbar still exists; opaque mode is retained as `transparentNav={false}` defensive fallback only.
+
+## Auth Surface Deep Links (Visual Rollout Spec 7)
+
+The Visual Rollout introduced two query-param deep links that open the AuthModal in the corresponding mode on top of the home page:
+
+- **`/?auth=login`** — opens AuthModal in login mode
+- **`/?auth=register`** — opens AuthModal in register mode
+
+The legacy `/login` route is now a `<Navigate to="/?auth=login" replace />` redirect. `/register` continues to render `RegisterPage` directly (it is a real page, not a modal-only flow), but cross-surface auth-gating CTAs that previously hard-routed to `/login` now use the query-param deep link instead.
+
+**Implementation:** `AuthQueryParamHandler` inside `App.tsx` reads `useSearchParams` on every render. When `?auth=login|register` is present it dispatches `openAuthModal({ mode })` and strips the query param via `setSearchParams({}, { replace: true })` so the URL stays clean while the modal is open.
+
+**When to use:** Any cross-surface CTA that previously did a hard route to `/login` should be migrated to use the query-param deep link. This preserves the user's current page context (scroll position on the homepage, the visible content behind the modal) while interrupting only with the modal.
+
+Documented in `02-security.md` § "Auth Gating Strategy" → "Query-param-driven AuthModal (Spec 7)".
  
 ---
  
@@ -297,13 +314,13 @@ See [02-security.md](02-security.md) for the canonical Demo Mode Data Policy and
  
 The Daily Hub is a single-page tabbed experience at `/daily`. Old routes (`/pray`, `/journal`, `/meditate`, `/scripture`, `/devotional`) redirect here with the appropriate `?tab=` query param.
  
-**Page-level visual architecture (Spec Y + Wave 7):**
+**Page-level visual architecture (Spec Y → Wave 7 → Visual Rollout Spec 1A):**
  
 The DailyHub root is structured as:
  
 ```
-<div className="relative flex min-h-screen flex-col overflow-hidden bg-hero-bg font-sans">
-  <HorizonGlow />              {/* atmospheric purple glow layer, z-0 */}
+<BackgroundCanvas className="relative flex min-h-screen flex-col font-sans">
+  {/* BackgroundCanvas renders the 5-stop multi-bloom gradient at z-0 */}
   <Navbar />                   {/* z-10 */}
   <Hero section>               {/* z-10, time-aware greeting only */}
   <Tab bar>                    {/* z-40 sticky */}
@@ -311,10 +328,10 @@ The DailyHub root is structured as:
   <SongPickSection />          {/* z-10, transparent */}
   <SiteFooter />               {/* z-10 */}
   <DailyAmbientPillFAB />      {/* z-40 fixed bottom-right */}
-</div>
+</BackgroundCanvas>
 ```
  
-There is **no per-section GlowBackground** anywhere on the Daily Hub. The HorizonGlow layer provides continuous atmospheric depth across all tab content and section boundaries. Tab content components use plain `<div>` wrappers with transparent backgrounds. See `09-design-system.md` § "Daily Hub Visual Architecture" for full detail.
+There is **no per-section GlowBackground** anywhere on the Daily Hub. The `BackgroundCanvas` 5-stop multi-bloom gradient (introduced in Visual Rollout Spec 1A, replacing the prior `HorizonGlow` layer) provides continuous atmospheric depth across all tab content and section boundaries. Tab content components use plain `<div>` wrappers with transparent backgrounds. See `09-design-system.md` § "Daily Hub Visual Architecture" for full detail. **`HorizonGlow.tsx` is orphaned legacy as of Spec 1A — pending removal in a future cleanup spec.**
  
 **Tab Structure:**
  
@@ -327,7 +344,7 @@ There is **no per-section GlowBackground** anywhere on the Daily Hub. The Horizo
  
 **Hero Section (above tabs):**
  
-The hero section contains **only the time-aware greeting** — a single `<h1>` styled with `GRADIENT_TEXT_STYLE` (white-to-purple gradient via `background-clip: text`). The greeting reads "Good Morning!" / "Good Afternoon!" / "Good Evening!" when logged out, or "Good Morning, [Name]!" when logged in. The hero sits at `z-10 relative` over the HorizonGlow layer.
+The hero section contains **only the time-aware greeting** — a single `<h1>` styled with `GRADIENT_TEXT_STYLE` (white-to-purple gradient via `background-clip: text`). The greeting reads "Good Morning!" / "Good Afternoon!" / "Good Evening!" when logged out, or "Good Morning, [Name]!" when logged in. The hero sits at `z-10 relative` over the `BackgroundCanvas` atmospheric layer.
  
 **The hero does NOT contain:**
 - A Verse of the Day card (the `VerseOfTheDayBanner` was removed from the Daily Hub in commit `4da1b34` as part of the daily-hub-hero-redesign — the component still exists in the codebase for use elsewhere but is not mounted in DailyHub.tsx)
@@ -335,7 +352,7 @@ The hero section contains **only the time-aware greeting** — a single `<h1>` s
 - Any decorative cards
 - Any subtitle, tagline, or supporting copy
  
-The intentional minimalism is part of the Spec Y "looking out into space" atmospheric design — the HorizonGlow does the visual work, and the greeting alone sets the tone before the user engages with the tabs. Do NOT add cards or banners to the hero without an explicit spec; the minimalism is load-bearing.
+The intentional minimalism is part of the Spec Y "looking out into space" atmospheric design — `BackgroundCanvas` (Visual Rollout Spec 1A, replacing the original HorizonGlow) does the visual work, and the greeting alone sets the tone before the user engages with the tabs. Do NOT add cards or banners to the hero without an explicit spec; the minimalism is load-bearing.
  
 **Echo card on Devotional tab (BB-46):** The devotional tab includes a single `EchoCard` mounted below the devotional content, before the footer area. Same component as the Dashboard echo card — surfaces a verse from the user's past engagement. Renders nothing if the user has no history. See "Verse Echoes Flow" below.
  

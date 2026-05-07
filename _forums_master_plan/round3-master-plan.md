@@ -499,7 +499,7 @@ The Forums Wave is the first slice of CLAUDE.md's official Phase 3 (Auth & Backe
 | 2.5 | Friends Backend Migration                 | `wr_friends` data and friend request flow to backend, block + mute user features                                                                                                                                                    | 8             |
 | 3   | Prayer Wall Data Migration                | Posts / comments / reactions / bookmarks / reports / QOTD on backend, frontend service swap, **fixes the reaction bug for cross-device**                                                        | 12            |
 | 4   | Post Type Expansion                       | Prayer Request polish, Testimony, Question, Devotional Discussion, Encouragement, Composer Chooser, Room Selector                                                                               | 10            |
-| 5   | Visual Migration to Round 2 Brand         | FrostedCard, HorizonGlow, 2-line headings, animation tokens, ring colors                                                                                                                        | 6             |
+| 5   | Prayer Wall Visual Migration              | FrostedCard, BackgroundCanvas, 2-line headings, animation tokens, ring colors — scoped to Prayer Wall only (every other page migrated outside Phase 5 via Round 3 Visual Rollout)               | 6             |
 | 6   | Hero Features                             | Prayer Receipt, Quick Lift, Night Mode, 3am Watch, Intercessor Timeline, Answered Wall, Shareable Testimony Cards, Verse-Finds-You                                                              | 14            |
 | 7   | Cross-Feature Integration                 | Bible ↔ Wall, Music ↔ Wall, Daily Hub rituals, Privacy tiers, Local Support bridges                                                                                                             | 8             |
 | 8   | Unified Profile System                    | Username, URL merge to `/u/:username`, Summary/Activity tabs, name canonicalization, customization                                                                                              | 9             |
@@ -4558,13 +4558,51 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 ---
 
-## Phase 5 — Visual Migration to Round 2 Brand
+## Phase 5 — Prayer Wall Visual Migration
 
-> **Phase purpose:** Bring Prayer Wall up to the Round 2 visual standard that already governs Daily Hub, Bible, Music, and Grow. FrostedCard tier system, HorizonGlow ambient background, 2-line heading treatments, animation tokens from BB-33, deprecated patterns purged. After this phase, Prayer Wall feels like the same product as the rest of the app.
+> **Phase purpose:** Bring Prayer Wall up to the **post-Round-3-Visual-Rollout** visual standard that now governs Daily Hub, Bible, Music, Grow, Local Support, Ask, RegisterPage, Reading Plan / Challenge detail pages, and the Dashboard. FrostedCard tier system (`accent` / `default` / `subdued` with `rounded-3xl`), `BackgroundCanvas` 5-stop atmospheric layer, 2-line heading treatments, violet-glow textareas (DailyHub 1B), muted-white active-state for selectable pills, `Button variant="subtle"` for secondary CTAs and `variant="gradient"` for emotional-peak, `text-violet-300` text-buttons (WCAG AA), Tonal Icon Pattern for widget headers, border opacity unification (`border-white/[0.12]`), animation tokens from BB-33, the full post-rollout deprecated-pattern list purged. After this phase, Prayer Wall feels like the same product as the rest of the app.
 
-**What this phase accomplishes:** All Prayer Wall components render with the canonical FrostedCard component (tier 1 for prayers, tier 2 for inline scripture callouts), HorizonGlow appears at the page root, page hero matches the canonical PageHero pattern, all animations import from `frontend/src/constants/animation.ts`, all deprecated patterns from `09-design-system.md` are purged from the prayer wall codebase, font sizes and line heights match the design system standards.
+**Phase rename note (2026-05-07 reconciliation):** This phase was previously titled "Visual Migration to Round 2 Brand." The Round 3 Visual Rollout (2026-04-30 → 2026-05-07, 26 specs) migrated **every page except Prayer Wall** to the canonical post-rollout patterns. Phase 5 now delivers Prayer Wall only. The renamed title reflects that scope. Spec body text below was written before the Visual Rollout shipped — it references some patterns that have evolved since (e.g., HorizonGlow → BackgroundCanvas, `rounded-2xl` → `rounded-3xl`, white-glow textarea → violet-glow). The body refresh happens at `/spec-forums 5.1` extraction time when each spec is pulled into a standalone `_specs/` file. The post-rollout canonical patterns are catalogued in Spec 5.0 below.
 
-**Sequencing notes:** Specs in this phase are mostly independent and can run in parallel with each other. Specs 5.1 and 5.2 are the highest-impact visual changes. Spec 5.5 is the verification sweep.
+**What this phase accomplishes:** All Prayer Wall components render with the canonical `<FrostedCard>` component (variant `accent` for emphasis cards, `default` for general content, `subdued` for nested panels — all `rounded-3xl`); `<BackgroundCanvas>` appears at the page root (replacing any reliance on the legacy HorizonGlow); page hero uses `<SectionHeading topLine bottomLine />` from `homepage/SectionHeading.tsx`; all animations import from `frontend/src/constants/animation.ts`; the post-rollout deprecated-pattern list (see `09-design-system.md` § "Deprecated Patterns") is purged from the prayer-wall codebase; font sizes and line heights match the design-system standards; `<Button variant="subtle">` replaces `bg-primary` solid CTAs on dark surfaces; `text-violet-300` replaces `text-primary` text-buttons; `border-white/[0.12]` replaces `border-white/10` decorative borders.
+
+**Sequencing notes:** Spec 5.0 (Architecture Context Refresh) is the orientation prelude — read it before extracting any other Phase 5 spec. Specs 5.1 and 5.2 are the highest-impact visual changes. Spec 5.5 is the verification sweep with the expanded post-rollout deprecation list.
+
+### Spec 5.0 — Architecture Context Refresh
+
+- **ID:** `round3-phase05-spec00-architecture-context-refresh`
+- **Size:** XS (stub-tier — orientation prelude, not a code-changing spec)
+- **Risk:** None (documentation only)
+- **Prerequisites:** None
+- **Goal:** Catalog the canonical post-Visual-Rollout patterns Phase 5 will apply to Prayer Wall, so subsequent Phase 5 specs are self-contained and don't force readers to chase rules files mid-extraction.
+
+**Why this exists:** When Phase 5 was originally written, the rest of the app shared the same older Round-2 visual idiom as Prayer Wall, and Phase 5 was scoped to migrate everything in lockstep. The Round 3 Visual Rollout (merged 2026-05-07) migrated every page except Prayer Wall, introducing ~24 new canonical patterns documented in `09-design-system.md`. Phase 5 specs 5.1 / 5.2 / 5.3 / 5.5 were written referencing the older idiom (HorizonGlow, white-glow textarea, `rounded-2xl`, `bg-primary` solid CTAs). This stub catalogs the post-rollout canonical so Phase 5 spec extraction (`/spec-forums 5.1` etc.) refreshes spec body text against the right reference.
+
+**The post-rollout canonical Phase 5 will apply** (full reference: `09-design-system.md`):
+
+- **`BackgroundCanvas`** at the page root for every Prayer Wall page (PrayerWall, PrayerWallDashboard, PrayerDetail, PrayerWallProfile). Replaces the ad-hoc per-page background.
+- **FrostedCard tier system** — `variant="accent"` (`bg-violet-500/[0.08] border-violet-400/70 rounded-3xl`) for emphasis cards (e.g., the Prayer Wall hero callout, "answered" badges, primary action cards); `variant="default"` (`bg-white/[0.07] border-white/[0.12] rounded-3xl`) for general content (PrayerCard, CommentsSection, ComposerChooser, AuthModal, ReportDialog, DeletePrayerDialog, MarkAsAnsweredForm, SaveToPrayersForm); `variant="subdued"` (`bg-white/[0.05]`) for nested panels.
+- **Eyebrow + violet leading dot** on Tier 1 cards via `<FrostedCard variant="accent" eyebrow="..." eyebrowColor="violet">`. Tier 2 scripture callouts (`rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04]`) for inline scripture references render the eyebrow with NO leading dot — the left-stripe is its visual signature.
+- **Violet-glow textarea pattern** for the Prayer Wall composer and comment input: `shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] border border-violet-400/30 bg-white/[0.04] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30 placeholder:text-white/40` — replaces any white-glow or cyan-glow leftovers.
+- **Muted-white active-state** for selectable pills (filter tabs, sort tabs, time-range selectors): `bg-white/15 text-white border border-white/30`. Pill+halo tab bar pattern for the Prayer Wall feed-tab bar: outer `bg-white/[0.07] border-white/[0.08]`, active tab `bg-violet-500/[0.13] border-violet-400/45 + violet halo shadow`.
+- **Button variants:** `<Button variant="subtle">` for secondary CTAs ("Comment", "Share", "Report", "Bookmark"); `<Button variant="gradient" size="lg">` for the post-prayer "I prayed" emotional-peak CTA (text-black, NOT text-violet-900); `<Button variant="ghost">` for tertiary actions; `<Button variant="alertdialog">` for the "Delete prayer" destructive confirmation in DeletePrayerDialog.
+- **Text-button pattern** on dark surfaces: `text-violet-300 hover:text-violet-200` (NOT `text-primary` — fails WCAG 4.5:1 floor).
+- **Tonal Icon Pattern** for any widget header icons on the Prayer Wall dashboard: `text-pink-300` (gratitude family), `text-sky-300` (insight/data family), `text-violet-300` (default/spiritual family), `text-emerald-300` (positive/success family), `text-amber-100` / `text-amber-300` (recap/seasonal family), `text-yellow-300` (achievement family).
+- **Border opacity unification**: `border-white/[0.12]` for all decorative card/chrome borders. `border-white/10` is drift.
+- **Section heading**: 2-line `<SectionHeading topLine bottomLine />` from `homepage/SectionHeading.tsx` (the canonical primitive — replaces any rolls-own heading or PageHero variant).
+- **Cross-surface card pattern** for navigable Prayer Wall items (e.g., a comment that links to the prayer detail): outer `<Link className="block group focus-visible:outline-none focus-visible:ring-2 ring-white/50 rounded-3xl">` with inner `<FrostedCard variant="default" as="article" className="group-hover:bg-white/[0.10] group-hover:shadow-frosted-hover group-hover:-translate-y-0.5">`. FrostedCard does NOT receive `onClick`.
+- **AlertDialog pattern** for DeletePrayerDialog: `<Button variant="alertdialog">` for the destructive action, `AlertTriangle` icon in the heading row, muted destructive treatment (`bg-red-950/30 border-red-400/30 text-red-100 hover:bg-red-900/40`).
+- **Layout default** flipped to `transparentNav: true` post-Spec-12 — Prayer Wall pages get the transparent overlay navbar by default, no opt-in needed.
+- **Animation tokens** from `frontend/src/constants/animation.ts` — never hardcode `200ms` / `cubic-bezier(...)` strings.
+- **GRADIENT_TEXT_STYLE** on every h1/h2 outside the wordmark and `RouteLoadingFallback` (Caveat font is restricted to those two cases only).
+
+**Acceptance criteria:**
+
+- [ ] No code changes (this is documentation-only)
+- [ ] When `/spec-forums 5.1`, `/spec-forums 5.2`, `/spec-forums 5.3`, `/spec-forums 5.5` are run, the extracted spec body refreshes against the post-rollout canonical above (the `/spec-forums` skill should refresh stale references like HorizonGlow → BackgroundCanvas, white-glow textarea → violet-glow, `rounded-2xl` → `rounded-3xl`, `bg-primary` solid → `Button variant="subtle"`, `text-primary` → `text-violet-300`, `border-white/10` → `border-white/[0.12]` as part of extraction)
+- [ ] Spec 5.5 ("Deprecated Pattern Purge") acceptance criteria expanded to include the full post-rollout deprecation list from `09-design-system.md` § "Deprecated Patterns" (~30 entries vs the original ~10)
+
+**Reference:** Reconciliation report at `_plans/reconciliation/2026-05-07-post-rollout-audit.md`.
 
 ### Spec 5.1 — FrostedCard Migration
 
@@ -4596,13 +4634,13 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 - [ ] Visual regression tests pass (Playwright screenshots)
 - [ ] All existing component tests pass
 
-### Spec 5.2 — HorizonGlow at Prayer Wall Root
+### Spec 5.2 — BackgroundCanvas at Prayer Wall Root
 
-- **ID:** `round3-phase05-spec02-horizon-glow`
+- **ID:** `round3-phase05-spec02-background-canvas`
 - **Size:** S
 - **Risk:** Low
 - **Prerequisites:** 5.1
-- **Goal:** Add the canonical HorizonGlow ambient background at the Prayer Wall page root, matching the Daily Hub treatment.
+- **Goal:** Add the canonical `<BackgroundCanvas>` 5-stop atmospheric layer at the Prayer Wall page root, matching the Daily Hub / Bible Landing / Local Support / Grow / Ask treatment post-Visual-Rollout Spec 1A. **Note (2026-05-07 reconciliation):** Original spec body referenced `HorizonGlow`, which is now orphaned legacy. The `Approach`, `Files to modify`, and `Acceptance criteria` below predate the rollout — they will be refreshed at `/spec-forums 5.2` extraction time per Spec 5.0's reconciliation note. The opacity-range concern in the body ("0.25-0.50") is moot for `BackgroundCanvas` (it has its own gradient stops) — that paragraph is dropped at extraction.
 
 **Approach:** Wrap `PrayerWall.tsx`, `PrayerWallDashboard.tsx`, `PrayerDetail.tsx`, `PrayerWallProfile.tsx` in `<HorizonGlow>` (the existing component from the Daily Hub era). Verify glow opacity is in the 0.25-0.50 range (per the corrected glow opacity standard). Remove any existing per-section `GlowBackground` instances on Prayer Wall (deprecated per `09-design-system.md`).
 
@@ -8138,8 +8176,9 @@ These are decisions that have been made but should be revisited if circumstances
 
 - **BB-N** — "Big Build" specs from previous waves (Bible wave numbering). Referenced when current standards trace back to a specific BB spec.
 - **CC** — Claude Code, the implementation agent.
-- **FrostedCard** — The canonical card component with frosted-glass treatment, dual box-shadow, and tier system.
-- **HorizonGlow** — The canonical ambient gradient background component.
+- **FrostedCard** — The canonical card component with frosted-glass treatment, dual box-shadow, and `accent | default | subdued` tier system. Post-Visual-Rollout: `bg-white/[0.07] border-white/[0.12] rounded-3xl`.
+- **BackgroundCanvas** — The canonical inner-page atmospheric layer post-Visual-Rollout Spec 1A. 5-stop multi-bloom gradient at `frontend/src/components/ui/BackgroundCanvas.tsx`. Used by Daily Hub, Bible Landing, MyBible, Local Support, Grow, Ask, RegisterPage, Reading Plan / Challenge detail pages, and (Phase 5) Prayer Wall.
+- **HorizonGlow** — Pre-Visual-Rollout Daily Hub atmospheric layer. **Orphaned legacy** as of Spec 1A; replaced by `BackgroundCanvas`. The component file still exists pending a cleanup spec but has zero production consumers.
 - **JPA** — Java Persistence API (Spring Data JPA).
 - **JWT** — JSON Web Token. The auth token format.
 - **OP** — Original poster (the user who created a post).

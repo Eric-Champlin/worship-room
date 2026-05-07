@@ -91,7 +91,7 @@ After 5.6 ships: 1.5g.
 | 46  | 2.5.4  | Frontend Friends Dual-Write                       | L    | Medium | ✅     |
 | 47  | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M    | Medium | ✅     |
 | 48  | 2.5.5  | Phase 2.5 Cutover                                 | S    | Medium | ✅     |
-| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ✅     |
+| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ⬜     |
 | 50  | 2.5.7  | Mute User Feature                                 | S    | Low    | ✅     |
 
 > **2.5.6 verification (2026-04-28 audit):** Despite earlier ✅, no `com.worshiproom.block/` package exists, no `UserBlock*` Java code, and no `user_blocks` Liquibase changeset. Spec 2.5.7 Mute (the sibling spec) DID ship — `user_mutes` table at changeset 013, `MutesService`, `useMutes` hook all exist. Block remains unimplemented; reverted to ⬜.
@@ -135,16 +135,19 @@ Checklist. The S3StorageAdapter fail-fast check (Spec 1.10e) will
 reject the deploy if any are missing, but knowing this in advance
 prevents a wasted deploy attempt.
 
-## Phase 5 — Visual Polish (6 specs)
+## Phase 5 — Prayer Wall Visual Migration (7 specs)
 
-| #   | Spec | Title                                        | Size | Risk   | Status |
-| --- | ---- | -------------------------------------------- | ---- | ------ | ------ |
-| 73  | 5.1  | FrostedCard Migration                        | L    | Medium | ⬜     |
-| 74  | 5.2  | HorizonGlow at Prayer Wall Root              | S    | Low    | ⬜     |
-| 75  | 5.3  | 2-Line Heading Treatment                     | M    | Low    | ⬜     |
-| 76  | 5.4  | Animation Token Migration (BB-33 Compliance) | M    | Low    | ⬜     |
-| 77  | 5.5  | Deprecated Pattern Purge and Visual Audit    | M    | Low    | ⬜     |
-| 78  | 5.6  | Redis Cache Foundation                       | M    | Medium | ⬜     |
+> Renamed from "Visual Polish" / "Visual Migration to Round 2 Brand" on 2026-05-07. The Round 3 Visual Rollout (2026-04-30 → 2026-05-07, 26 specs) migrated every page except Prayer Wall. Phase 5 now delivers Prayer Wall only. See `_plans/reconciliation/2026-05-07-post-rollout-audit.md` for the reconciliation report and the post-rollout canonical patterns Phase 5 will apply.
+
+| #    | Spec | Title                                        | Size | Risk   | Status |
+| ---- | ---- | -------------------------------------------- | ---- | ------ | ------ |
+| 72.5 | 5.0  | Architecture Context Refresh (stub)          | XS   | None   | ⬜     |
+| 73   | 5.1  | FrostedCard Migration                        | L    | Medium | ⬜     |
+| 74   | 5.2  | BackgroundCanvas at Prayer Wall Root         | S    | Low    | ⬜     |
+| 75   | 5.3  | 2-Line Heading Treatment                     | M    | Low    | ⬜     |
+| 76   | 5.4  | Animation Token Migration (BB-33 Compliance) | M    | Low    | ⬜     |
+| 77   | 5.5  | Deprecated Pattern Purge and Visual Audit    | M    | Low    | ⬜     |
+| 78   | 5.6  | Redis Cache Foundation                       | M    | Medium | ⬜     |
 
 ## Phase 6 — Engagement Features (14 specs)
 

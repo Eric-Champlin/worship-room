@@ -30,13 +30,31 @@ Auth gating uses `useAuth()` hook + `useAuthModal()` context. The auth modal is 
 - **Local Support search and results display (Decision 12 — Spec 5):** browsing churches, counselors, and Celebrate Recovery groups is intentionally public — anyone can find local support without an account. Especially for crisis-adjacent surfaces (Counselors, Celebrate Recovery), removing barriers to discovery is a moral imperative, not just a UX preference. Search input, geolocation, geocoding, results list, results map, "View Details" deep links, "Get Directions" external links, and the share dropdown all work freely; only bookmark and visit-recording are gated.
 - Landing page, quiz, all navigation
 - **Bible features (intentionally unauthenticated):** Bible reader, highlighting verses, taking notes, bookmarking, building memorization decks, viewing reading heatmap and progress map, AI Explain, AI Reflect, full-text search, PWA install
+- **`/bible/my` (post-Visual-Rollout Spec 8B):** Fully public. Device-local highlights, notes, bookmarks, memorization cards, journal entries, and the BB-43 reading heatmap are all viewable without authentication. See "Bible Wave Auth Posture" below for the device-storage banner detail.
 - **BB-41 push notifications:** A logged-out user can grant notification permission and receive daily verse pushes. The subscription is keyed by browser, not by user account.
+
+#### Query-param-driven AuthModal (Spec 7 — Visual Rollout)
+
+The Visual Rollout introduced two deep-link query parameters for opening the AuthModal:
+
+- `/?auth=login` — opens AuthModal in **login** mode on top of `/`
+- `/?auth=register` — opens AuthModal in **register** mode on top of `/`
+
+Implementation lives in `AuthQueryParamHandler` inside `App.tsx`, which reads `useSearchParams` on every render and dispatches `openAuthModal({ mode })` when `?auth=login|register` is present, then strips the query param via `setSearchParams({}, { replace: true })` so the URL stays clean while the modal is open.
+
+The legacy `/login` route is now `<Navigate to="/?auth=login" replace />`. Same shape applies to `/register` (which is a real registration page and continues to render `RegisterPage`, but cross-surface auth-gating CTAs that previously hard-routed to `/login` now use the query-param deep link instead).
+
+This pattern is canonical for any future cross-surface CTA that needs to surface auth without a full-page navigation. Use the query-param deep link rather than a hard route — it preserves the user's current page context (their scroll position on the homepage, the visible content behind the modal) while interrupting only with the modal.
  
 ### Bible Wave Auth Posture (BB-0 through BB-46)
  
 The Bible wave deliberately adds **zero new auth gates**. Reading the Bible, building personal history (highlights, notes, bookmarks, memorization cards), running AI Explain/Reflect, viewing the heatmap and progress map, searching scripture, and receiving push notifications are all available without an account. This is a deliberate design decision — the unauthenticated experience must be complete for the project's positioning to hold.
  
 Phase 3 will introduce optional sync for users who DO have accounts so that personal history can be preserved across devices, but the unauthenticated experience will never be crippled to push signup.
+
+**Visual Rollout addenda (Spec 8B):**
+- **`/bible/my` is fully public post-Spec-8B.** Logged-out users see the My Bible page with their device-local highlights, notes, bookmarks, memorization cards, journal entries, and reading heatmap. The first-time visitor sees a "Your data lives on this device" banner (`wr_mybible_device_storage_seen` once-per-user dismissal flag) explaining the device-local storage scope.
+- **`markChapterRead` is no longer auth-gated post-Spec-8B.** Chapter visit writes happen on every chapter mount via `recordChapterVisit()` regardless of authentication state. Per-day visit data persists in `wr_chapters_visited` for both logged-in and logged-out users so the BB-43 reading heatmap reflects activity for everyone.
  
 ### Notification Permissions (BB-41)
  
@@ -137,7 +155,7 @@ Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` +
   - **Existing email**: No-op (do not create duplicate), return same `200 OK` with same message (prevents enumeration)
   - **Rationale**: Generic message works for both cases without lying (more honest than "Account created" for existing emails)
   - **Email sending**: Do not send different emails (or any email) based solely on account existence (prevents inbox-based enumeration)
-  - **Email verification flow** — Implemented in Forums Wave Spec 1.5d (`email_verified_at` on users, `@RequireVerifiedEmail` gate on write endpoints, 7-day grace period for reads). See Auth Lifecycle section below.
+  - **Email verification flow** — Spec 1.5d drafted; deferred until SMTP infrastructure ships (current tracker status: ‼️ — SMTP-blocked until domain purchase). When 1.5d ships, it adds `email_verified_at` on users, `@RequireVerifiedEmail` gate on write endpoints, 7-day grace period for reads. See Auth Lifecycle section below.
 - **Validation**: Frontend validation (Zod schemas with controlled inputs) + backend validation (Spring Validation)
 - **Storage**: BCrypt hashing with salt (Spring Security default)
 - **Future Enhancement**: Password strength meter, common password blacklist, 2FA
@@ -217,18 +235,18 @@ The six headers (canonical values pinned by `SecurityHeadersConfigTest.csp_direc
 
 ## Forums Wave Security Additions
 
-### Auth Lifecycle (Phase 1 — v2.8 Spec stubs 1.5b through 1.5g)
+### Auth Lifecycle (Phase 1 — Specs 1.5b through 1.5g — mixed shipped / deferred)
 
-Specs 1.5b–1.5g close auth lifecycle gaps identified during v2.8 pre-execution review:
+Specs 1.5b–1.5g close auth lifecycle gaps identified during v2.8 pre-execution review. Two have shipped (1.5c, 1.5f); four are deferred until SMTP infrastructure is in place (1.5b, 1.5d, 1.5e, 1.5g).
 
-- **1.5b Password Reset** — Email-triggered single-use token, 1-hour expiry, anti-enumeration (always 200), rate limited (5/hour per email + 10/hour per IP). Invalidates all sessions on success.
-- **1.5c Change Password** — Current-password gated; invalidates all OTHER sessions (current stays alive).
-- **1.5d Email Verification** — `email_verified_at` on users; `@RequireVerifiedEmail` annotation gates write endpoints (returns 403 `EMAIL_NOT_VERIFIED`). 7-day read grace period. Resend rate-limited 5/hour.
-- **1.5e Change Email** — Password-gated + new-email verification. Old email gets alert notification. Anti-enumeration on new-email uniqueness.
-- **1.5f Account Lockout** — 5 failures in 15 min → 15-min lockout (423 `ACCOUNT_LOCKED`). Per-IP rate limit (20/hour) at filter layer catches distributed attacks. Admin manual-unlock endpoint.
-- **1.5g Session Invalidation** — Redis-backed `jwt_blocklist` keyed by `jti`; `active_sessions` table for per-user tracking. Password/email change → automatic logout-all. `/settings/sessions` lists active devices with Revoke buttons.
+- **1.5b Password Reset** ‼️ deferred (SMTP-blocked) — Spec drafted: email-triggered single-use token, 1-hour expiry, anti-enumeration (always 200), rate limited (5/hour per email + 10/hour per IP). Invalidates all sessions on success.
+- **1.5c Change Password** ✅ shipped — Current-password gated; invalidates all OTHER sessions (current stays alive). Backend implementation includes `ChangePasswordRateLimitConfig`.
+- **1.5d Email Verification** ‼️ deferred (SMTP-blocked) — Spec drafted: `email_verified_at` on users; `@RequireVerifiedEmail` annotation gates write endpoints (returns 403 `EMAIL_NOT_VERIFIED`). 7-day read grace period. Resend rate-limited 5/hour.
+- **1.5e Change Email** ‼️ deferred (SMTP-blocked) — Spec drafted: Password-gated + new-email verification. Old email gets alert notification. Anti-enumeration on new-email uniqueness.
+- **1.5f Account Lockout** ✅ shipped — 5 failures in 15 min → 15-min lockout (423 `ACCOUNT_LOCKED`). Per-IP rate limit (20/hour) at filter layer catches distributed attacks. Admin manual-unlock endpoint.
+- **1.5g Session Invalidation** ‼️ deferred (Redis + SMTP dependencies) — Spec drafted: Redis-backed `jwt_blocklist` keyed by `jti`; `active_sessions` table for per-user tracking. Password/email change → automatic logout-all. `/settings/sessions` lists active devices with Revoke buttons.
 
-See `_forums_master_plan/round3-master-plan.md` Appendix E for full spec stubs.
+See `_forums_master_plan/round3-master-plan.md` Appendix E for full spec stubs. Live tracker status in `_forums_master_plan/spec-tracker.md`.
 
 ### JWT Authentication (Phase 1 — Spring Security)
 
@@ -261,6 +279,8 @@ See `_forums_master_plan/round3-master-plan.md` Appendix E for full spec stubs.
 - Trust levels gate feature access, NOT content visibility
 
 ### Forums Wave Rate Limits (master plan specifics)
+
+This table is the **target enforcement on spec ship**. Rate limits are NOT yet enforced in production for endpoints from non-shipped phases (Phases 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16). Currently-enforced rate limits are limited to Phase 1 auth-lifecycle (1.5c change-password, 1.5f account-lockout) and Phase 3 endpoints (posts, comments, reactions, bookmarks, reports — backed by `PostsRateLimitConfig`, `CommentsRateLimitConfig`, `ReactionsRateLimitConfig`, `BookmarksRateLimitConfig`, `ReportsRateLimitConfig`). Login-attempts and registration-IP limits ship with Phase 1 auth (`LoginRateLimitFilter`).
 
 | Endpoint category | Limit | Enforcement |
 |---|---|---|

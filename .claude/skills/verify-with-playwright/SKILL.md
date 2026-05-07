@@ -936,7 +936,7 @@ At each viewport, use `getComputedStyles()` helper to inspect computed styles on
 | Lucide icons render (not broken images) | YES / NO / N/A | {details} |
 | Design system colors match (primary violet for accents) | YES / NO / N/A | {details} |
 | No `dangerouslySetInnerHTML` on user content | SAFE / FLAGGED | {details} |
-| No deprecated visual patterns (Caveat headings, BackgroundSquiggle on Daily Hub, GlowBackground on Daily Hub, animate-glow-pulse, cyan textarea borders, italic Lora prompts) | CLEAN / DEPRECATED PATTERN FOUND | {details} |
+| No deprecated visual patterns — see `09-design-system.md` § "Deprecated Patterns" for the canonical table. Pre-Visual-Rollout entries: Caveat headings outside wordmark/RouteLoadingFallback, BackgroundSquiggle on Daily Hub, GlowBackground on Daily Hub or inner pages, animate-glow-pulse, cyan/purple textarea borders, italic Lora/serif prompts. Post-Visual-Rollout entries: HorizonGlow imports, white textarea glow, `bg-primary` solid CTAs on dark, `text-primary`/`text-primary-lt` text-buttons on dark, `text-success`/`text-danger`/`text-warning` CSS-variable colors, `border-white/10` decorative borders, `rounded-2xl` as FrostedCard default, `ring-primary` selected-card ring, saturated `bg-red-700`/`bg-red-800` destructive, `Layout transparentNav: false` default, `aria-pressed` on radio-style options, AuthModal trailing-period subtitles. | CLEAN / DEPRECATED PATTERN FOUND | {details} |
  
 ### Landing Page Checks (if target is `/` logged-out)
  
@@ -955,20 +955,20 @@ At each viewport, use `getComputedStyles()` helper to inspect computed styles on
  
 | Check | Status | Evidence |
 |-------|--------|----------|
-| Daily Hub root has bg-hero-bg with relative min-h-screen overflow-hidden | YES / NO / N/A | {details} |
-| HorizonGlow layer renders behind content (5 large soft purple blobs at strategic vertical positions) | YES / NO / N/A | {details} |
-| Tab content backgrounds are transparent (no per-section bg, no GlowBackground wrapper) | YES / NO / N/A | {details} |
-| Tab content uses `mx-auto max-w-2xl px-4 py-10 sm:py-14` padding pattern | YES / NO / N/A | {details} |
+| Daily Hub root mounts `<BackgroundCanvas>` directly (BackgroundCanvas's own root provides `min-h-screen overflow-hidden`); no separate HorizonGlow layer | YES / NO / N/A | {details} |
+| BackgroundCanvas renders with `data-testid="background-canvas"` and the 5-stop multi-bloom gradient (top-left + mid-right + bottom-left violet blooms, dark center vignette, diagonal base) | YES / NO / N/A | {details} |
+| Tab content backgrounds are transparent (no per-section bg, no GlowBackground wrapper) — the BackgroundCanvas atmospheric layer shows through | YES / NO / N/A | {details} |
+| Tab content uses `mx-auto max-w-2xl px-4 py-10 sm:py-14` padding pattern with `relative z-10` so it sits above the gradient | YES / NO / N/A | {details} |
 | No "What's On Your Heart/Mind/Spirit?" headings on tabs (removed in Wave 5) | CLEAN / FOUND HEADING | {details} |
 | No BackgroundSquiggle on any Daily Hub tab (removed in Wave 5) | CLEAN / FOUND SQUIGGLE | {details} |
-| Pray/Journal textareas use static white box-shadow glow (NOT animate-glow-pulse) | YES / NO / N/A | {details} |
-| Pray/Journal "Help Me Pray" / "Save Entry" buttons use homepage white pill CTA pattern (Pattern 2) | YES / NO / N/A | {details} |
+| Pray/Journal textareas use the canonical violet-glow pattern (`shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] border-violet-400/30 bg-white/[0.04]`); white-glow shadow, cyan border, and animate-glow-pulse are deprecated | YES / NO / N/A | {details} |
+| Pray/Journal "Help Me Pray" / "Save Entry" buttons use homepage white pill CTA Pattern 2 (`text-hero-bg`, NOT `text-primary` — Spec 7 reconciliation) | YES / NO / N/A | {details} |
 | DailyAmbientPillFAB renders bottom-right with safe-area-inset support | YES / NO / N/A | {details} |
 | DailyAmbientPillFAB hides when AudioDrawer is open (drawer-aware visibility) | YES / NO / N/A | {details} |
 | DailyAmbientPillFAB NOT mounted on /meditate/* sub-pages | YES / NO / N/A | {details} |
 | Inline AmbientSoundPill is NOT present in PrayerInput, JournalInput, or MeditateTabContent (Wave 7 removed) | CLEAN / FOUND INLINE PILL | {details} |
 | Devotional uses Tier 2 scripture callout (border-l-4 border-l-primary/60 bg-white/[0.04]) for passage | YES / NO / N/A | {details} |
-| Devotional uses Tier 1 FrostedCard for reflection body, saint quote, and reflection question | YES / NO / N/A | {details} |
+| Devotional uses Tier 1 (`<FrostedCard variant="accent">` + eyebrow + violet leading dot) for reflection body. Saint quote uses `<FrostedCard variant="default">` (quieter supporting voice; italic preserved). Reflection question uses Tier 2 rolls-own callout (DailyHub 2 unified to scripture-callout treatment). | YES / NO / N/A | {details} |
 | Devotional reflection body is NOT italic (italic removed in Spec T) | CLEAN / FOUND ITALIC | {details} |
 | Devotional saint quote is positioned BELOW reflection body (Wave 5 reordered) | YES / NO / N/A | {details} |
 | "Journal about this question" CTA is embedded INSIDE the reflection question card (Spec O) | YES / NO / N/A | {details} |
@@ -1000,6 +1000,7 @@ At each viewport, use `getComputedStyles()` helper to inspect computed styles on
 | Bell badge count matches unread notifications | YES / NO / N/A | {details} |
 | Avatar dropdown renders all menu items | YES / NO / N/A | {details} |
 | Log In / Get Started buttons hidden when authenticated | YES / NO / N/A | {details} |
+| Layout uses transparent overlay nav (`transparentNav: true` is the post-Spec-12 default; opaque mode is defensive fallback only) | YES / NO / N/A | {details} |
  
 ### Auth Modal Checks (if page has gated actions)
  
@@ -1007,6 +1008,7 @@ At each viewport, use `getComputedStyles()` helper to inspect computed styles on
 |-------|--------|----------|
 | Auth modal appears for gated actions (not redirect) | CORRECT / WRONG / N/A | {details} |
 | Auth modal subtitle reads "Your draft is safe — we'll bring it back after" when triggered from Pray/Journal with draft (Spec V) | YES / NO / N/A | {details} |
+| Cross-surface auth CTAs use `/?auth=login` query-param deep link, NOT hard-routing to `/login` (Spec 7 — legacy `/login` redirects to `/?auth=login` via `<Navigate>`) | YES / NO / N/A | {details} |
  
 ### Music Page Checks (if target is `/music`)
  
@@ -1255,8 +1257,7 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
  
 ### Deprecated Patterns
 - The Worship Room Safety check in Step 9 includes a deprecated patterns sweep
-- Finding any deprecated pattern (Caveat headings, BackgroundSquiggle on Daily Hub, GlowBackground on Daily Hub, animate-glow-pulse, cyan textarea borders, italic Lora prompts, soft-shadow 8px-radius cards on dark backgrounds, "What's On Your Heart/Mind/Spirit?" headings, inline AmbientSoundPill in tab content, theme tag pills on devotional, static Closing Prayer section, PageTransition component) is a HIGH severity finding and makes the overall verdict FAIL
-- Reference `09-design-system.md` § "Deprecated Patterns" for the canonical list
+- Finding any deprecated pattern from `09-design-system.md` § "Deprecated Patterns" (currently ~50 entries — pre- and post-Visual-Rollout) is a HIGH severity finding and makes the overall verdict FAIL. The canonical table is the single source of truth; do not duplicate it inline (it grows). The Step 9 Worship Room Checks table includes the most-likely-to-regress patterns as explicit table rows.
  
 ### Error Handling
 - Playwright install fails → **Stop**

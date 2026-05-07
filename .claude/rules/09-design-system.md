@@ -206,7 +206,7 @@ placeholder:text-white/40
 
 ### Layout Components
 
-- **Layout.tsx** — Wrapper: `<Navbar>` + content + `<SiteFooter>`. Passes `transparent` prop on landing page.
+- **Layout.tsx** — Wrapper: `<Navbar>` + content + `<SiteFooter>`. **Default flipped to `transparentNav: true` in Visual Rollout Spec 12** — the transparent overlay navbar is the canonical production state on every page. Opaque mode is retained as `transparentNav={false}` defensive fallback only.
 - **Navbar.tsx** — Glassmorphic navigation. Desktop: 5 top-level items + Local Support dropdown + avatar dropdown. Mobile: hamburger drawer (`MobileDrawer`). `transparent` prop controls absolute vs relative positioning. Logged-in state: replaces Log In/Get Started with notification bell + avatar dropdown (see `10-ux-flows.md` for nav structure). The navbar mounts the canonical skip-to-main-content link.
 - **SiteFooter.tsx** — Dark purple footer. Nav columns (Daily, Music, Support), crisis resources, app download badges (Coming Soon), "Listen on Spotify" badge, BB-35 accessibility statement link, copyright.
 - ~~**PageTransition.tsx**~~ — **REMOVED.** Previously did 150ms opacity fade-out + 200ms fade-in on route changes. Removed in Wave 2 because it caused a route flicker/white flash. The `html`, `body`, and `#root` backgrounds remain set to `#08051A` in `src/index.css` to prevent any white flash during navigation.
@@ -226,10 +226,11 @@ The reader's settings drawer also includes BB-41's notification permission entry
 
 ### Design System Components
 
-- **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. Used by Prayer Wall, Local Support pages.
+- **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. Used by Prayer Wall, Local Support pages. **Exports `ATMOSPHERIC_HERO_BG` constant** (Visual Rollout Specs 8C / 6A consolidated this) for pages that use the atmospheric hero background without the full PageHero component — Settings and Insights consume the constant directly as part of their documented intentional drift from `BackgroundCanvas`.
 - **HeadingDivider.tsx** — White decorative SVG divider with fade gradients. Responsive via `useElementWidth()`.
-- **BackgroundSquiggle.tsx** — Decorative SVG squiggle (viewBox 1800×1350, 6 paths). Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. **Currently used only by the homepage `JourneySection`** as a narrow inline SVG (~150px column, centered, `preserveAspectRatio="none"`). **NOT used on Daily Hub** — squiggles were removed from all Daily Hub tabs in Wave 5 because they competed with the new HorizonGlow atmospheric layer.
-- **SongPickSection.tsx** — Centered single-column layout: "Today's" (GRADIENT_TEXT_STYLE) + "Song Pick" (white) heading stacked vertically with equal-width treatment via tracking adjustment, Spotify 352px iframe centered below, `max-w-2xl` container. No glass card wrapper, no music icon, no HeadingDivider. No GlowBackground (transparent — sits over the Daily Hub HorizonGlow layer).
+- **BackgroundSquiggle.tsx** — Decorative SVG squiggle (viewBox 1800×1350, 6 paths). Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. **Currently used only by the homepage `JourneySection`** as a narrow inline SVG (~150px column, centered, `preserveAspectRatio="none"`). **NOT used on Daily Hub** — squiggles were removed from all Daily Hub tabs in Wave 5 because they competed with the atmospheric layer (now `BackgroundCanvas` post-Visual-Rollout).
+- **BackgroundCanvas.tsx** (Visual Rollout Spec 1A — `components/ui/BackgroundCanvas.tsx`) — Canonical inner-page atmospheric layer. Renders the 5-stop multi-bloom CANVAS_BACKGROUND gradient on a `min-h-screen overflow-hidden` root with `data-testid="background-canvas"`. Used by every inner page except Settings, Insights, and Music (documented intentional drift). See "BackgroundCanvas Atmospheric Layer (Visual Rollout Spec 1A → site-wide)" below for the full pages-using list and the canonical gradient string.
+- **SongPickSection.tsx** — Centered single-column layout: "Today's" (GRADIENT_TEXT_STYLE) + "Song Pick" (white) heading stacked vertically with equal-width treatment via tracking adjustment, Spotify 352px iframe centered below, `max-w-2xl` container. No glass card wrapper, no music icon, no HeadingDivider. No GlowBackground (transparent — sits over the Daily Hub `BackgroundCanvas` atmospheric layer post-Visual-Rollout Spec 1A).
 - **HeroSection.tsx** — Landing page hero: dark purple gradient, typewriter input, quiz teaser link. UNTOUCHED by homepage redesign.
 - **JourneySection.tsx** — 7-step vertical timeline with numbered circles, gradient keyword text, inline narrow squiggle SVG, glow orbs. Steps link to feature routes.
 - **StartingPointQuiz.tsx** — 5-question quiz inside a frosted glass container (`rounded-3xl`), gradient progress bar. `id="quiz"` for scroll target. Only appears on the landing page (removed from Daily Hub in Round 3 redesign).
@@ -242,13 +243,13 @@ The reader's settings drawer also includes BB-41's notification permission entry
 
 ### Homepage Components (`components/homepage/`)
 
-> These patterns apply to the homepage. **Daily Hub uses a different background architecture (HorizonGlow at the page level instead of per-section GlowBackground).** See "Daily Hub Visual Architecture" section below for the Daily Hub-specific patterns.
+> These patterns apply to the homepage. **Inner pages (Daily Hub, Bible Landing, MyBible, Local Support, Grow, Ask, RegisterPage, etc.) use a different background architecture (`BackgroundCanvas` at the page root, post-Visual-Rollout Spec 1A — replacing the prior HorizonGlow on Daily Hub).** See "BackgroundCanvas Atmospheric Layer (Visual Rollout Spec 1A → site-wide)" section below for the inner-page architecture.
 
 Shared building blocks for the landing page, created during the Round 3 homepage redesign (HP-1 through HP-15):
 
 - **SectionHeading.tsx** — 2-line heading: smaller white `topLine` + larger purple gradient `bottomLine`. Backward-compatible single `heading` prop. See "Round 3 Visual Patterns" for sizing.
-- **GlowBackground.tsx** — Atmospheric glow wrapper with variants: `center`, `left`, `right`, `split`, `fullPage`, `none`. Glow orb opacity at 0.25-0.50 range. Includes `glowOpacityMultiplier` prop (added in Spec T) for per-instance opacity scaling. The `fullPage` variant (Register Round 2) distributes 5 orbs across 5%/30%/55%/75%/92% of the scroll length for seam-free long-scroll pages. **Currently used by:** homepage sections + `/register`. **NOT used by Daily Hub** (replaced by HorizonGlow).
-- **FrostedCard.tsx** — Glass card: `bg-white/[0.06] backdrop-blur-sm border border-white/[0.12] rounded-2xl` with dual box-shadow. Optional `onClick` adds hover elevation. Used by both homepage and Daily Hub. See "FrostedCard Tier System" below for content tier guidance.
+- **GlowBackground.tsx** — Atmospheric glow wrapper with variants: `center`, `left`, `right`, `split`, `fullPage`, `none`. Glow orb opacity at 0.25-0.50 range. Includes `glowOpacityMultiplier` prop (added in Spec T) for per-instance opacity scaling. The `fullPage` variant distributes 5 orbs across 5%/30%/55%/75%/92% of the scroll length for seam-free long-scroll pages. **Currently used by:** homepage sections only. **NOT used by inner pages** (replaced by `BackgroundCanvas` post-Visual-Rollout Spec 1A — `/register` was migrated as part of the rollout).
+- **FrostedCard.tsx** — Glass card: `bg-white/[0.07] backdrop-blur-sm border border-white/[0.12] rounded-3xl` with dual box-shadow (post-Visual-Rollout values — earlier `bg-white/[0.06]` + `rounded-2xl` are drift). Variant API: `accent | default | subdued`. Eyebrow API: `eyebrow` + `eyebrowColor`. Optional `onClick` adds hover elevation, but for navigable cards prefer the `<Link> + FrostedCard` group-hover pattern (cross-surface card pattern, Spec 3) where Link handles navigation. See "FrostedCard Tier System" below for content tier guidance.
 - **StatsBar.tsx** — 6 animated counters (scroll-triggered via `useAnimatedCounter`). 50 Devotionals, 10 Reading Plans, 24 Ambient Sounds, 6 Meditation Types, 5 Seasonal Challenges, 8 Worship Playlists.
 - **DashboardPreview.tsx** — "See How You're Growing" section with 6 locked preview cards + "Create a Free Account" CTA.
 - **DashboardPreviewCard.tsx** — Locked preview card: blurred mockup on top, clear icon + title + description below. Each icon has a unique accent color.
@@ -263,12 +264,12 @@ Shared building blocks for the landing page, created during the Round 3 homepage
 - **PrayTabContent.tsx** — Pray tab content. Plain `<div>` wrapper with `mx-auto max-w-2xl px-4 py-10 sm:py-14` (no GlowBackground, no BackgroundSquiggle — these were removed in Spec Y). Renders `PrayerInput`, crisis banner, mock prayer generation, `KaraokeText`, action buttons, `GuidedPrayerSection`, cross-tab CTAs.
 - **JournalTabContent.tsx** — Journal tab content. Plain `<div>` wrapper with same padding pattern. Renders `JournalInput` (Guided/Free Write toggle, prompt card, draft auto-save, crisis banner, saved entries, AI reflection). No GlowBackground, no BackgroundSquiggle.
 - **MeditateTabContent.tsx** — Meditate tab content. Plain `<div>` wrapper. Renders 6 auth-gated FrostedCard meditation cards, completion checkmarks, all-6-complete celebration banner, and the Spec Z verse banner when arriving from devotional with verse params. No heading. No GlowBackground, no BackgroundSquiggle.
-- **DevotionalTabContent.tsx** — Devotional tab content. Plain `<div>` wrapper. No heading. Renders date navigation, devotional title, passage (Tier 2 scripture callout), reflection body (Tier 1 FrostedCard), saint quote (Tier 1 FrostedCard, positioned BELOW reflection body per Wave 5), reflection question card with embedded "Journal about this question" CTA (Spec O), authentic Pray flow CTA (Spec P). No GlowBackground (replaced by Daily Hub HorizonGlow). Theme tags removed (Wave 5).
+- **DevotionalTabContent.tsx** — Devotional tab content. Plain `<div>` wrapper. No heading. Renders date navigation, devotional title, passage (Tier 2 scripture callout), reflection body (Tier 1 FrostedCard), saint quote (Tier 1 FrostedCard, positioned BELOW reflection body per Wave 5), reflection question card with embedded "Journal about this question" CTA (Spec O), authentic Pray flow CTA (Spec P). No GlowBackground (transparent — sits over the Daily Hub `BackgroundCanvas` atmospheric layer post-Visual-Rollout Spec 1A). Theme tags removed (Wave 5).
 - **PrayerInput.tsx** — Pray tab textarea with 3 starter chips (`<Button variant="subtle" size="sm">`), `rows={8} min-h-[200px] max-h-[500px] resize-y`, **violet textarea glow** (DailyHub 1B), draft auto-save (1s debounce, `wr_prayer_draft` key), draft saved indicator, "Help Me Pray" `<Button variant="gradient" size="lg">` showstopper.
 - **JournalInput.tsx** — Journal tab input with mode toggle (Guided/Free Write — DailyHub 1A-style violet active pill), prompt card (Inter sans, NOT italic, white text, leading-relaxed — stays rolls-own scripture-callout idiom), draft auto-save (`wr_journal_draft` key), **violet textarea glow** (DailyHub 1B), voice mic (`<Button variant="subtle" size="sm">`), "Save Entry" `<Button variant="gradient" size="lg">` showstopper. Mounts `DevotionalPreviewPanel` at the top when arriving from devotional context.
 - **DevotionalPreviewPanel.tsx** (Spec X) — Sticky collapsible inline preview panel. Pinned at `top-2 z-30` so it follows the user as they scroll. Collapsed state: small pill showing "TODAY'S DEVOTIONAL" label + title + reference + chevron. Expanded state: smooth max-height animation (300ms `decelerate`) revealing the passage, reflection question (callout), reflection body, and quote with internal scroll capped at `max-h-[50vh]`. Includes an `X` close button next to the chevron (Wave 6) for dismissing the panel. Mounted in JournalInput AND PrayerInput when `prayContext?.from === 'devotional' && devotionalSnapshot && !contextDismissed`.
 - **DailyAmbientPillFAB.tsx** (Wave 7) — Sticky bottom-right floating action button wrapping `AmbientSoundPill`. Mounted on the DailyHub root only (not on meditation activity sub-pages, which have their own transport controls). Auto-hides when `state.drawerOpen === true` (chat-widget pattern). Uses `pointer-events-none` outer + `pointer-events-auto` inner so empty space around the pill remains clickable. Includes `env(safe-area-inset-*)` for iOS notch / Android nav bar respect.
-- **HorizonGlow.tsx** (Spec Y) — Daily Hub-only atmospheric glow layer. Renders 5 large soft purple/lavender glow blobs at strategic vertical percentages (5%, 15%, 35%, 60%, 85%) of the page body. Each glow is `position: absolute` with percentage `top`/`left`, large `width`/`height` (300-900px), heavy `filter: blur(100-120px)`, and centered via `transform: translate(-50%, -50%)`. **Final tuned opacity values (low intensity for readability):** Glow 1: 0.32, Glow 2: 0.28, Glow 3: 0.35, Glow 4: 0.30, Glow 5: 0.28. Mounted on the DailyHub root. **Do not use on other pages** without explicit reconsideration — the layer is scoped to the Daily Hub controlled experience.
+- **HorizonGlow.tsx** (Spec Y) — **(Orphaned legacy as of Visual Rollout Spec 1A — pending cleanup, do not import from new code.)** Daily Hub-only atmospheric glow layer. Renders 5 large soft purple/lavender glow blobs at strategic vertical percentages (5%, 15%, 35%, 60%, 85%) of the page body. Each glow is `position: absolute` with percentage `top`/`left`, large `width`/`height` (300-900px), heavy `filter: blur(100-120px)`, and centered via `transform: translate(-50%, -50%)`. **Final tuned opacity values (low intensity for readability):** Glow 1: 0.32, Glow 2: 0.28, Glow 3: 0.35, Glow 4: 0.30, Glow 5: 0.28. Was mounted on the DailyHub root pre-Spec-1A; superseded by `BackgroundCanvas`. Filed for cleanup in `_plans/reconciliation/discoveries.md` D2.
 - **AmbientSoundPill.tsx** — Pill-shaped button showing current ambient sound state. **Both idle and active states open the AudioDrawer right-side flyout** (Wave 7 unified the behavior — previously idle state used an inline expanding dropdown). When clicked, dispatches `OPEN_DRAWER` / `CLOSE_DRAWER` to AudioProvider. Used inside `DailyAmbientPillFAB` on the Daily Hub.
 - **GuidedPrayerSection.tsx** — Pray tab section displaying 8 guided prayer sessions (5/10/15 min). Cards use `min-h-[260px]` (Wave 6) with no `line-clamp` on descriptions so full session descriptions render. 4-column × 2-row grid on desktop, 2-column on tablet, horizontal carousel with snap on mobile.
 - **GuidedPrayerPlayer.tsx** — Audio-guided prayer playback UI with TTS narration and silence intervals.
@@ -303,7 +304,7 @@ The BibleReader was rebuilt during the Bible wave (BB-0 through BB-29) and exten
 - **ReflectPanel.tsx** (BB-31) — AI-generated personal reflection prompts for any verse range. Same model and cache as ExplainPanel. Reflections are first-person prompts, not interpretations.
 - **NotificationPermissionPrompt.tsx** (BB-41) — Contextual non-modal card that appears at the bottom of the BibleReader after the user completes a reading session. Asks "Want a daily verse to keep this rhythm going?" with Enable / Maybe later buttons. Fires at most once per user (tracked via `wr_notification_prompt_dismissed`). Only fires on the second reading session of the day, not the first.
 - **Reactive stores (Bible wave + Phase 0.5):**
-  - **Pattern A (subscription via standalone hook, `useSyncExternalStore`):** `useMemorizationStore` (`hooks/bible/useMemorizationStore.ts` over `lib/memorize/store.ts`), `useStreakStore` (`hooks/bible/useStreakStore.ts` over `lib/bible/streakStore.ts`), `usePrayerReactions` (`hooks/usePrayerReactions.ts` over `lib/prayer-wall/reactionsStore.ts`).
+  - **Pattern A (subscription via standalone hook, `useSyncExternalStore`):** `useMemorizationStore` (`hooks/bible/useMemorizationStore.ts` over `lib/memorize/store.ts`), `useStreakStore` (`hooks/bible/useStreakStore.ts` over `lib/bible/streakStore.ts`), `usePrayerReactions` (`hooks/usePrayerReactions.ts` over `lib/prayer-wall/reactionsStore.ts`), `useBibleProgress` (`hooks/useBibleProgress.ts` — Visual Rollout Spec 8B converted this from a CRUD-style hook to a reactive store; module and hook live in the same file with cross-tab `storage` event sync).
   - **Pattern B (inline subscription via `subscribe()` in a `useEffect`):** `highlightStore` (`lib/bible/highlightStore.ts`), `bookmarkStore` (`lib/bible/bookmarkStore.ts`), `noteStore` (`lib/bible/notes/store.ts`), `journalStore` (`lib/bible/journalStore.ts`), `chapterVisitStore` (`lib/heatmap/chapterVisitStore.ts`), `plansStore` (`lib/bible/plansStore.ts`). No standalone hook — consumers wire `useState` + `useEffect` + `subscribe()` themselves.
   - Echo dismissal persistence was deferred — `useEcho` (session-scoped) is the only echo-related hook; `useEchoStore` does NOT exist. See `11b-local-storage-keys-bible.md` § "Note on BB-46 echoes".
   - Components consuming any of these **MUST subscribe** (Pattern A automatic via the hook; Pattern B requires the explicit `subscribe()` call). See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the BB-45 anti-pattern.
@@ -393,6 +394,7 @@ Bible-wave stores use two subscription patterns. **Components consuming these st
 **Standalone hooks (Pattern A — `useSyncExternalStore`):**
 
 - **useMemorizationStore()** (BB-45) — Returns the current array of memorization cards. Hook at `hooks/bible/useMemorizationStore.ts`.
+- **useBibleProgress()** (Visual Rollout Spec 8B) — Returns `{ progress, markChapterRead, getBookProgress, isChapterRead, justCompletedBook, clearJustCompletedBook, getCompletedBookCount }`. Hook + reactive store live in the same file at `hooks/useBibleProgress.ts`. Cross-tab `storage` event listener invalidates the cache and notifies subscribers when another tab writes to `wr_bible_progress`. `markChapterRead` is no longer auth-gated post-Spec-8B.
 - **useStreakStore()** (BB-17) — Returns `{ streak, atRisk }`. Hook at `hooks/bible/useStreakStore.ts`.
 
 **Inline subscription stores (Pattern B — `subscribe()` + `useState` + `useEffect`):**
@@ -542,7 +544,7 @@ This pattern is canonical for any feature where users invest emotional/time effo
 
 ### Reactive Store Pattern (BB-7 onward)
 
-Bible-wave personal-layer features use reactive stores instead of plain CRUD services. Two subscription patterns coexist: Pattern A (subscription via standalone hook with `useSyncExternalStore` — `useMemorizationStore`, `useStreakStore`, `usePrayerReactions`) and Pattern B (inline `useState` + `useEffect` + `subscribe()` — highlights, bookmarks, notes, journals, chapter visits, plans). Both patterns are correct. **Storing a snapshot in `useState` without calling the store's `subscribe()` function is the BB-45 anti-pattern and ships as a silent correctness bug.** See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the full pattern documentation.
+Bible-wave personal-layer features use reactive stores instead of plain CRUD services. Two subscription patterns coexist: Pattern A (subscription via standalone hook with `useSyncExternalStore` — `useMemorizationStore`, `useStreakStore`, `usePrayerReactions`, `useBibleProgress` post-Visual-Rollout Spec 8B) and Pattern B (inline `useState` + `useEffect` + `subscribe()` — highlights, bookmarks, notes, journals, chapter visits, plans). Both patterns are correct. **Storing a snapshot in `useState` without calling the store's `subscribe()` function is the BB-45 anti-pattern and ships as a silent correctness bug.** See `11b-local-storage-keys-bible.md` § "Reactive Store Consumption" for the full pattern documentation.
 
 ---
 
@@ -565,6 +567,10 @@ Global `AudioProvider` wraps the app (between `AuthModalProvider` and `Routes` i
 
 Music tabs: dark `#0f0a1e` (`bg-dashboard-dark`) background with frosted glass cards (`bg-white/[0.06] border border-white/10 rounded-xl`) and white text. AudioDrawer/AudioPill/overlays: dark-themed (`rgba(15,10,30,0.85)` with white text). Consistent with the rest of the dark-theme app.
 
+**Music is documented intentional drift.** Visual Rollout Spec 11A migrated Music's tab chrome to canonical patterns (Button variants, FrostedCard tier system, muted-white active-state, border opacity unification, etc.) but **deliberately did NOT migrate the atmospheric layer to `BackgroundCanvas`.** Music preserves its rolls-own atmospheric approach because the audio engine + the four contexts (`AudioProvider`, `audioReducer`, `AudioContext`, `AudioEngineService`) form a load-bearing cluster decoupled from the chrome layer; touching the chrome's atmospheric layer without first reconciling against this cluster risks regressing audio behavior.
+
+**Hard rule (cite Decision 24 from Music direction): No future spec migrates Music chrome to `BackgroundCanvas`, `FrostedCard`, or any other canonical atmospheric primitive without first reconciling against the AudioProvider / audioReducer / AudioContext cluster integrity (Decision 24).** This is not a soft preference — Spec 11A's preservation of the rolls-own atmospheric layer was deliberate, and reverting that decision requires explicit Decision 24 reconciliation in the spec body, not an incidental refactor.
+
 Previously listed music re-enable components (`TimeOfDaySection`, `PersonalizationSection`, `RecentlyAddedSection`, `ResumePrompt`, `MusicHint`, `LofiCrossReference`, `AmbientSearchBar`, `AmbientFilterBar`) and hooks (`useMusicHints`, `useTimeOfDayRecommendations`, `useSpotifyAutoPause`) have all been deleted from the codebase. The `WorshipPlaylistsTab.tsx` `useSpotifyAutoPause` commented-out import was removed in Spec 11A.
 
 ### Key Audio Components
@@ -585,9 +591,9 @@ Placeholder silent MP3s in `public/audio/` (gitignored). Subdirectories: `ambien
 
 ---
 
-## Round 3 Visual Patterns (Homepage + Daily Hub)
+## Round 3 Visual Patterns (Homepage + Daily Hub + Visual Rollout)
 
-These patterns were established during the GitHub-inspired homepage redesign (HP-1 through HP-15) and the Daily Hub Round 3 redesign (Specs 1-Z). They apply site-wide when building or redesigning pages with dark backgrounds — though the Daily Hub uses its own background architecture (HorizonGlow) instead of per-section GlowBackground.
+These patterns were established during the GitHub-inspired homepage redesign (HP-1 through HP-15), the Daily Hub Round 3 redesign (Specs 1-Z), and extended by the Round 3 Visual Rollout (2026-04-30 → 2026-05-07, 26 specs). They apply site-wide when building or redesigning pages with dark backgrounds. The Visual Rollout introduced `BackgroundCanvas` (replacing the prior HorizonGlow as the canonical inner-page atmospheric layer), the FrostedCard tier system (`accent` / `default` / `subdued` with `rounded-3xl`), Button `variant="gradient"` and `variant="subtle"`, the muted-white active-state for selectable pills, the `text-violet-300` text-button on dark, the Tonal Icon Pattern, and border opacity unification (`border-white/[0.12]`).
 
 ### Section Heading — 2-Line Treatment
 
@@ -599,9 +605,11 @@ Use `SectionHeading` component from `src/components/homepage/SectionHeading.tsx`
 - `mt-1` between lines (tight coupling)
 - Props: `topLine`, `bottomLine`, `tagline?`, `align?`
 
+**Used by these surfaces (Visual Rollout consolidated this verbatim):** Daily Hub headings, Local Support hero, Grow hero, Ask hero, Settings hero, Insights hero, Music hero, RoutinesPage hero, RegisterPage hero, FinalCTA, DashboardPreview, DifferentiatorSection, StartingPointQuiz. Spec 13 promoted the homepage to the same verbatim treatment.
+
 ### Glow Backgrounds — Homepage Only
 
-Radial glow orbs positioned behind content. Used by homepage sections via `GlowBackground` component. **Daily Hub does NOT use this** — see "Daily Hub Visual Architecture" below.
+Radial glow orbs positioned behind content. Used by homepage sections via `GlowBackground` component. **Inner pages do NOT use this** — they use `BackgroundCanvas` (see "BackgroundCanvas Atmospheric Layer" below). Settings and Insights stay on `bg-dashboard-dark + ATMOSPHERIC_HERO_BG` as documented intentional drift. Music preserves rolls-own atmospheric layers for audio engine integrity.
 
 **Opacity ranges (center of radial gradient):**
 
@@ -625,40 +633,121 @@ Two-stop gradient (center → mid → transparent) produces a richer glow pool t
 
 **`glowOpacityMultiplier` prop:** Added in Spec T. Allows per-instance opacity scaling for content that needs more readability protection. Multiplies all orb opacities in the chosen variant. Currently used by: nothing on Daily Hub (Daily Hub no longer uses GlowBackground), available for future homepage use.
 
-### Daily Hub Visual Architecture (Spec Y + Wave 7)
+### BackgroundCanvas Atmospheric Layer (Visual Rollout Spec 1A → site-wide)
 
-The Daily Hub uses a different background architecture than the homepage. Instead of per-section `GlowBackground` orbs, the entire Daily Hub root has:
+`BackgroundCanvas` is the canonical inner-page atmospheric layer post-Visual-Rollout. Lives at `frontend/src/components/ui/BackgroundCanvas.tsx`. It renders a 5-stop multi-bloom radial-and-linear gradient on a `min-h-screen overflow-hidden` root with `data-testid="background-canvas"`, positioning content via `relative z-10` so children sit above the gradient.
 
-1. **Single root background:** `bg-hero-bg` on the DailyHub root div, with `relative min-h-screen overflow-hidden` so atmospheric layers can be positioned absolutely without affecting content layout
-2. **HorizonGlow layer:** `<HorizonGlow />` mounted as a direct child of the root, before all content. Renders 5 large soft purple/lavender glow blobs at strategic vertical positions (5%, 15%, 35%, 60%, 85%) of the page body, creating a "looking out into space" atmospheric effect. Final tuned opacity values: 0.32 / 0.28 / 0.35 / 0.30 / 0.28 (low intensity to preserve text readability).
-3. **Transparent tab content:** All tab content components (DevotionalTabContent, PrayTabContent, JournalTabContent, MeditateTabContent) and SongPickSection use plain `<div>` wrappers with `mx-auto max-w-2xl px-4 py-10 sm:py-14` — no `bg-*`, no GlowBackground wrapper. The HorizonGlow shows through.
-4. **Content z-index:** All content sections (hero, tab bar, tab panels, Song Pick) get `relative z-10` so they sit above the HorizonGlow layer.
-5. **DailyAmbientPillFAB:** Sticky bottom-right floating button mounted as the last child of the DailyHub root.
+**Canonical CANVAS_BACKGROUND constant** (5-stop gradient — copy verbatim into any new BackgroundCanvas-equivalent surface, do not invent your own):
+
+```
+linear-gradient(
+  135deg,
+  radial-gradient(ellipse at 15% 8%, rgba(139, 92, 246, 0.32) 0%, transparent 45%),  /* top-left violet bloom */
+  radial-gradient(ellipse at 85% 35%, rgba(139, 92, 246, 0.26) 0%, transparent 50%), /* mid-right violet */
+  radial-gradient(ellipse at 12% 78%, rgba(139, 92, 246, 0.30) 0%, transparent 55%), /* bottom-left violet */
+  radial-gradient(ellipse at 50% 50%, rgba(13, 6, 32, 0.55) 0%, transparent 70%),    /* dark center vignette */
+  linear-gradient(135deg, #08051a 0%, #0d0620 50%, #08051a 100%)                     /* diagonal base */
+)
+```
+
+(The exact rgba/percentage values live in `BackgroundCanvas.tsx` — if this rule and that file disagree, the file wins; update this rule and the recon report.)
+
+**Pages using `<BackgroundCanvas>`** (post-Visual-Rollout): DailyHub, BibleLanding, MyBiblePage, BiblePlanDetail, BiblePlanDay, PlanBrowserPage, ReadingPlanDetail, ChallengeDetail, GrowPage, LocalSupportPage (Churches, Counselors, CelebrateRecovery), AskPage, RegisterPage, CreatePlanFlow.
+
+**Documented intentional drift** (these pages do NOT use BackgroundCanvas):
+
+- **Settings + Insights:** Stay on `bg-dashboard-dark + ATMOSPHERIC_HERO_BG` (Direction Decision per Visual Rollout Spec 10A). The Insights `InsightsDataContext` provider (Spec 10B) is an Insights-specific data-read pattern — NOT promoted to canonical reusable template; if a second consumer adopts it in a future spec, revisit promotion.
+- **Music (Spec 11A):** Preserves rolls-own atmospheric layers. **Hard rule: no future spec migrates Music chrome to `BackgroundCanvas`, `FrostedCard`, or any other canonical atmospheric primitive without first reconciling against the AudioProvider / audioReducer / AudioContext cluster integrity (Decision 24 from Music direction).** The audio engine + the four contexts form a load-bearing cluster decoupled from chrome; touching the chrome without that reconciliation risks regressing audio behavior.
+- **BibleReader:** Uses `ReaderChrome` and the reader-only theme variants (midnight / parchment / sepia) — its own immersive layout, documented elsewhere in this file.
+
+**Daily Hub-specific structure (Visual Rollout Spec 1A — what was Spec Y + Wave 7):**
+
+The DailyHub root post-Spec-1A wraps content in `<BackgroundCanvas>` directly (no separate `<HorizonGlow />` layer). Tab content components (DevotionalTabContent, PrayTabContent, JournalTabContent, MeditateTabContent) and SongPickSection use plain `<div>` wrappers with `mx-auto max-w-2xl px-4 py-10 sm:py-14` — no `bg-*`, no GlowBackground wrapper. The BackgroundCanvas gradient shows through. All content sections get `relative z-10` so they sit above the gradient. The `DailyAmbientPillFAB` sticky bottom-right floating button mounts as the last child of the DailyHub root.
+
+**HorizonGlow.tsx is orphaned legacy as of Spec 1A.** The component still exists in `frontend/src/components/daily/HorizonGlow.tsx` along with its test file but has zero production consumers. A future cleanup spec will remove it (filed in `_plans/reconciliation/discoveries.md` D2). Do not import HorizonGlow from new code.
 
 **StarField was experimented with but removed.** A Spec Y component called `StarField.tsx` (110+ small white dots scattered across the page) was built and tested, but the visual effect read as "dust on screen" rather than "stars in space." It has been deleted. Do not re-add stars without explicit reconsideration.
 
-**Other pages remain untouched.** GlowBackground.tsx still exists and is used by the homepage. The HorizonGlow pattern is scoped to the Daily Hub only.
+**GlowBackground remains active on the homepage only.** GlowBackground.tsx still exists and is used by the homepage. The BackgroundCanvas pattern is the canonical inner-page atmospheric layer; GlowBackground is the canonical per-homepage-section atmospheric primitive.
 
 ### Frosted Glass Cards (FrostedCard Component)
 
 `FrostedCard` component (`src/components/homepage/FrostedCard.tsx`):
 
-- Background: `bg-white/[0.06]` with `backdrop-blur-sm`
-- Border: `border border-white/[0.12]` — visible, not invisible
+- Background: `bg-white/[0.07]` with `backdrop-blur-sm` (post-Visual-Rollout — earlier `bg-white/[0.06]` is drift)
+- Border: `border border-white/[0.12]` — visible, not invisible (Visual Rollout border-opacity unification — `border-white/10` is drift)
 - Shadow: `shadow-[0_0_25px_rgba(139,92,246,0.06),0_4px_20px_rgba(0,0,0,0.3)]`
-- Radius: `rounded-2xl`, Padding: `p-6`
-- Hover (when interactive): `bg-white/[0.09] border-white/[0.18]` with intensified shadows
+- Radius: `rounded-3xl` (post-Visual-Rollout — earlier `rounded-2xl` is drift), Padding: `p-6`
+- Hover (when interactive): `bg-white/[0.10] border-white/[0.18]` with intensified shadows
 
-#### FrostedCard Tier System (Spec T)
+#### FrostedCard Tier System (Spec T + Visual Rollout)
 
-The Daily Hub devotional uses a content tier system to prioritize reading-heavy elements:
+The Daily Hub devotional and inner pages use a content tier system to prioritize reading-heavy elements. Variant API: `accent | default | subdued`. Eyebrow API: `eyebrow` + `eyebrowColor`.
 
-- **Tier 1 (primary reading content):** Standard FrostedCard with `text-white`, `leading-[1.75]` to `leading-[1.8]`, font sizing `text-[17px] sm:text-lg`. Reflection body uses `variant="accent"` with eyebrow ("Today's reflection") + violet leading dot — DailyHub 2 promoted this card to centerpiece tier. Saint quote uses `variant="default"` for a quieter supporting voice. Italic styling removed from reading prose for legibility (kept on the saint quote because short quoted commentary reads well in italic).
-- **Tier 2 (scripture callout):** `rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-3` (or `px-5 py-6 sm:px-7 sm:py-7` for content-heavy callouts) — a left-border accent treatment originally introduced for the devotional passage and extended in DailyHub 2 to the reflection question. Both callouts share the same class string for visual unification across the tab. Lighter than a full FrostedCard but still distinct from body prose.
+- **Tier 1 (`variant="accent"`, primary reading content):** Surface `bg-violet-500/[0.08]` (post-Visual-Rollout — earlier `[0.04]` is drift), border `border-violet-400/70` (post-Visual-Rollout — earlier `/45` is drift), `text-white`, `leading-[1.75]` to `leading-[1.8]`, font sizing `text-[17px] sm:text-lg`. Reflection body uses this variant with eyebrow ("Today's reflection") + violet leading dot — DailyHub 2 promoted this card to centerpiece tier. Italic styling removed from reading prose for legibility.
+- **Tier `variant="default"`** (general content): Surface `bg-white/[0.07]`, border `border-white/[0.12]`, `rounded-3xl`. Saint quote uses this variant for a quieter supporting voice (italic kept on the saint quote because short quoted commentary reads well in italic).
+- **Tier 2 (rolls-own scripture callout):** `rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-4 py-3` (or `px-5 py-6 sm:px-7 sm:py-7` for content-heavy callouts) — a left-border accent treatment originally introduced for the devotional passage and extended in DailyHub 2 to the reflection question. Both callouts share the same class string for visual unification across the tab. Lighter than a full FrostedCard but still distinct from body prose.
+- **`variant="subdued"`** (Visual Rollout Specs 1, 6B): Reduced surface opacity for sub-content panels. `bg-white/[0.05]` with the same border + radius. Use for secondary panels nested inside a larger Tier 1 or default card.
 
-**Eyebrow distinction (DailyHub 2):** Tier 1 (FrostedCard accent variant) and Tier 2 (rolls-own callout) both support an uppercase tracked eyebrow above the inner content, but they render the eyebrow differently. Tier 1 — when used with `<FrostedCard variant="accent" eyebrow="...">` — renders the eyebrow as a violet leading dot (`bg-violet-400`) followed by the label (`text-violet-300 font-semibold tracking-[0.15em]`). The dot is the visual signature of the most prominent tier. Tier 2 — when used as a rolls-own `<div>` with an inline eyebrow paragraph — renders ONLY the label (`text-white/50 font-medium tracking-[0.15em]`) with NO leading dot. The left-stripe accent (`border-l-4 border-l-primary/60`) is the Tier 2 signature; adding a dot would double up on accent. Apply the dot to Tier 1 eyebrows only.
+**Eyebrow distinction (DailyHub 2):** Tier 1 (`<FrostedCard variant="accent">`) and Tier 2 (rolls-own callout) both support an uppercase tracked eyebrow above the inner content, but they render the eyebrow differently. Tier 1 — when used with `<FrostedCard variant="accent" eyebrow="..." eyebrowColor="violet">` — renders the eyebrow as a violet leading dot (`bg-violet-400`) followed by the label (`text-violet-300 font-semibold tracking-[0.15em]`). The dot is the visual signature of the most prominent tier. Tier 2 — when used as a rolls-own `<div>` with an inline eyebrow paragraph — renders ONLY the label (`text-white/50 font-medium tracking-[0.15em]`) with NO leading dot. The left-stripe accent (`border-l-4 border-l-primary/60`) is the Tier 2 signature; adding a dot would double up on accent. Apply the dot to Tier 1 eyebrows only.
 
 This tier system is canonical for any future feature with mixed content density (reading content + accent callouts).
+
+#### Cross-surface card pattern (Visual Rollout Spec 3)
+
+Navigable cards use the `<Link> + FrostedCard` group-hover pattern: outer `<Link className="block group focus-visible:outline-none focus-visible:ring-2 ring-white/50 rounded-3xl">` with inner `<FrostedCard variant="default" as="article" className="group-hover:bg-white/[0.10] group-hover:shadow-frosted-hover group-hover:-translate-y-0.5">`. **FrostedCard does NOT receive `onClick`; the Link handles navigation.** This is the canonical for EchoCard, VersePromptCard, PlanBrowseCard, ListingCard, and similar navigable cards.
+
+### Button Component Variants (Visual Rollout)
+
+The `Button` component supports several variants. Use the right one for the surface and emotional weight.
+
+- `variant="primary"` — legacy `bg-primary` solid; **deprecated for new code on dark surfaces.** Use `variant="subtle"` or `variant="gradient"` instead.
+- `variant="secondary"` — legacy.
+- `variant="outline"` — legacy.
+- `variant="ghost"` — `text-white/80 hover:text-white hover:bg-white/5` on dark surfaces (Spec 6, "make-it-right"). Older `text-primary hover:bg-primary/5` is deprecated.
+- `variant="light"` — light pill, used pre-rollout.
+- `variant="gradient"` — violet gradient pill (`from-violet-400 to-violet-300`, `text-black` post-iteration-1 — earlier `text-violet-900` is deprecated). Used for emotional-peak CTAs ("Help Me Pray", "Save Entry", "Generate"). Canonical `size="lg"`.
+- `variant="subtle"` — frosted pill (`rounded-full bg-white/[0.07] border border-white/[0.12] text-white backdrop-blur-sm hover:bg-white/[0.12] hover:border-white/[0.20] hover:shadow-subtle-button-hover hover:-translate-y-0.5 gap-2 font-medium min-h-[44px]`). **Default secondary CTA on dark surfaces post-Visual-Rollout** — replaces most `bg-primary` solid usage (Spec 4A counted 12+ instances migrated).
+- `variant="alertdialog"` — added in Spec 10A. Used in destructive confirmations. See "AlertDialog Pattern" below.
+- `asChild` prop — Button polymorphic via `cloneElement` so it can wrap a `<Link>` while preserving styling.
+
+### Active-State and Selection Patterns (Spec 10A canonical)
+
+- **Muted-white isolated pill** (canonical for `RadioPillGroup`, settings tabs, tonal-pill TimeRange selector): `bg-white/15 text-white border border-white/30`.
+- **Muted-white active foreground** (canonical for active foreground without border, e.g., active sidebar item): `bg-white/15 text-white`.
+- **Pill+halo tab bar** (canonical for tabbed views — DailyHub, Music, Local Support, Grow): outer `flex w-full rounded-full border border-white/[0.08] bg-white/[0.07] p-1 backdrop-blur-md`; active tab `bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]`.
+- **Selected card ring** (canonical for selectable cards): `ring-violet-400/60`. The pre-rollout `ring-primary` is deprecated.
+
+### Text-Button Pattern (Spec 10A WCAG AA fix)
+
+- Canonical text-button color on dark surfaces: `text-violet-300 hover:text-violet-200`.
+- Pre-rollout `text-primary` and `text-primary-lt` are **deprecated for text-buttons on dark backgrounds** (fail WCAG 4.5:1 floor on `bg-hero-bg`).
+- Spec 10A's audit migrated all known instances.
+
+### Tonal Icon Pattern (Dashboard widgets — Spec 4B)
+
+Per-widget header icon color taxonomy (Lucide icon stroke color via Tailwind text-color class, applied via `DashboardWidgetGrid.tsx` icon prop):
+
+- `text-pink-300` — gratitude family
+- `text-sky-300` — insight/data family
+- `text-violet-300` — default/spiritual family
+- `text-emerald-300` — positive/success family
+- `text-amber-100` / `text-amber-300` — recap/seasonal family
+- `text-yellow-300` — achievement family
+
+**Severity-tonal split for status indicators:** `text-emerald-300` / `text-red-300` / `text-amber-300`. Replaces `text-success` / `text-danger` / `text-warning` which referenced the old palette and are now deprecated.
+
+### Border Opacity Unification (Visual Rollout)
+
+All decorative card and chrome borders on dark surfaces use **`border-white/[0.12]`** (NOT `border-white/10`). This was unified across the audio cluster (Spec 11A) and applies app-wide. Tighter (`border-white/[0.18]`) acceptable on hover-emphasis. Looser (`border-white/[0.08]`) acceptable for pill tabs' outer border.
+
+### AlertDialog Pattern (Spec 10A / 11B canonical)
+
+Destructive confirmations (DeleteAccountModal, DeleteRoutineDialog, DeletePrayerDialog, etc.) use:
+
+- `<Button variant="alertdialog">` for the destructive action (semantic discipline — not a generic primary button).
+- `AlertTriangle` icon (Lucide) in the heading row.
+- Muted destructive treatment: `bg-red-950/30 border border-red-400/30 text-red-100 hover:bg-red-900/40` — saturated `bg-red-700` / `bg-red-800` is deprecated.
 
 ### White Pill CTA Patterns
 
@@ -682,6 +771,10 @@ Used by: "Get Started — It's Free" on FinalCTA, "Help Me Pray" on PrayerInput,
 
 **Use Pattern 1 for inline/secondary CTAs and Pattern 2 for the primary action of a screen.**
 
+**Verbatim only — drift is a regression.** Visual Rollout Specs 7 and 13 reconciled CTAs across DashboardPreview, FinalCTA, RegisterPage, PrayerInput, and JournalInput to the canonical class strings above. Any new white-pill CTA must use the verbatim string. In particular, Pattern 2 uses `text-hero-bg` (NOT `text-primary` — Spec 7 reconciliation; using `text-primary` reverts to a violet-on-white text color that doesn't match the canonical hero-bg dark text on white pill).
+
+**Used by these surfaces (cross-reference for impact assessment):** DashboardPreview, FinalCTA, RegisterPage, PrayerInput "Help Me Pray", JournalInput "Save Entry", AI Generate flows, Devotional "Journal about this question" / "Pray about today's reading" / "Meditate on this passage". Changes to the canonical strings ripple across all of these.
+
 ### Locked Preview Card Pattern
 
 For showing auth-gated features to logged-out visitors:
@@ -698,7 +791,7 @@ Between every major homepage section:
 <div className="border-t border-white/[0.08] max-w-6xl mx-auto" />
 ```
 
-Content-width, not full-viewport. Subtle but visible. Daily Hub does NOT use these (the HorizonGlow continuous layer makes section boundaries invisible by design).
+Content-width, not full-viewport. Subtle but visible. Daily Hub does NOT use these (the BackgroundCanvas continuous layer makes section boundaries invisible by design).
 
 ### Journey Section Squiggles
 
@@ -823,21 +916,24 @@ Update the audit date when running the BB-35 protocol or any future accessibilit
 
 ## Deprecated Patterns (Do Not Use on New Code)
 
-The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible wave work. Do not introduce them into new components:
+The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible wave / Visual Rollout work. Do not introduce them into new components:
 
 | Deprecated Pattern                                              | Replacement                                                                             |
 | --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `Caveat` font on headings                                       | `GRADIENT_TEXT_STYLE` (white-to-purple gradient)                                        |
-| `BackgroundSquiggle` on Daily Hub                               | None — Daily Hub uses HorizonGlow only. Squiggles remain on homepage JourneySection.    |
-| `GlowBackground` per Daily Hub section                          | HorizonGlow at Daily Hub root                                                           |
-| `animate-glow-pulse` on textareas                               | Violet textarea glow (Daily Hub Round 4 / DailyHub 1B) — see "Textarea Glow Pattern"    |
+| `Caveat` font on headings outside wordmark/RouteLoadingFallback | `GRADIENT_TEXT_STYLE` (white-to-purple gradient)                                        |
+| `BackgroundSquiggle` on Daily Hub                               | None — Daily Hub uses BackgroundCanvas. Squiggles remain on homepage JourneySection.    |
+| `GlowBackground` per Daily Hub section                          | `BackgroundCanvas` at Daily Hub root (Visual Rollout Spec 1A)                           |
+| `HorizonGlow` on Daily Hub or any inner page                    | `BackgroundCanvas` (Visual Rollout Spec 1A — HorizonGlow.tsx is orphaned legacy)        |
+| `GlowBackground` on inner pages (non-homepage)                  | `BackgroundCanvas` (Visual Rollout)                                                     |
+| `animate-glow-pulse` on textareas                               | Violet textarea glow (DailyHub 1B) — see "Textarea Glow Pattern"                        |
 | Inline expanding dropdown panel for AmbientSoundPill idle state | Open AudioDrawer right-side flyout in both states                                       |
 | `font-serif italic` on Journal prompts                          | `font-sans` Inter, no italic, white text                                                |
 | Side-by-side SongPickSection layout                             | Centered single-column with equal-width heading lines                                   |
 | "What's On Your Heart/Mind/Spirit?" headings on Daily Hub tabs  | No headings — content speaks for itself                                                 |
 | Devotional theme tag pills                                      | Removed; theme is still passed via cross-feature CTAs but not displayed                 |
-| Cyan/purple textarea glow border                                | Violet textarea glow (Daily Hub Round 4 / DailyHub 1B) — see "Textarea Glow Pattern"    |
-| White border with white glow shadow on Pray/Journal textareas   | Violet textarea glow (Daily Hub Round 4 / DailyHub 1B) — see "Textarea Glow Pattern"    |
+| Cyan/purple textarea glow border                                | Violet textarea glow (DailyHub 1B) — see "Textarea Glow Pattern"                        |
+| White border with white glow shadow on Pray/Journal textareas   | Violet textarea glow (DailyHub 1B) — see "Textarea Glow Pattern"                        |
+| `font-serif italic text-white/60` hero subtitles                | Removed; hero typography is `text-white` Inter sans only                                |
 | `line-clamp-3` on guided prayer card descriptions               | `min-h-[260px]` with no clamp                                                           |
 | Hardcoded `200ms`/`cubic-bezier(...)` in component CSS          | Import canonical tokens from `frontend/src/constants/animation.ts` (BB-33)              |
 | Spring easings on modals/toasts/drawers                         | `standard`, `decelerate`, or `accelerate` from `constants/animation.ts` (BB-33)         |
@@ -846,6 +942,31 @@ The following patterns have been replaced by Round 3 / Daily Hub Round 3 / Bible
 | Custom empty state components per feature                       | `FeatureEmptyState` — the canonical empty state primitive (BB-34)                       |
 | Welcome modals that gate content for new visitors               | `FirstRunWelcome` — informational layer, never a gate, suppressed on deep links (BB-34) |
 | Mocking the entire reactive store in tests                      | Use real store + mutate from outside the component to verify subscription (BB-45)       |
+| `border-l-4 border-l-primary/60` accent stripe (general use)    | Reserved for Tier 2 scripture callout; general accent is all-around violet border       |
+| `bg-white/[0.04]` default tier surface                          | `bg-white/[0.07]` (Visual Rollout)                                                      |
+| `bg-white/[0.02]` subdued tier surface                          | `bg-white/[0.05]` via `<FrostedCard variant="subdued">` (Visual Rollout)                |
+| `bg-violet-500/[0.04]` accent tier surface                      | `bg-violet-500/[0.08]` (Visual Rollout)                                                 |
+| `border-violet-400/45` accent tier border                       | `border-violet-400/70` (Visual Rollout)                                                 |
+| `rounded-2xl` as default `FrostedCard` radius                   | `rounded-3xl` (Visual Rollout)                                                          |
+| `border-white/10` decorative borders                            | `border-white/[0.12]` (Visual Rollout border-opacity unification)                       |
+| `bg-primary` solid CTAs on dark surfaces                        | `<Button variant="subtle">` (default secondary) or `variant="gradient"` (emotional peak)|
+| `bg-primary/80` overlay surfaces on dark                        | Use violet-tinted frosted treatment instead (`bg-violet-500/[0.08]` etc.)               |
+| `border-primary/40` AudioPill borders                           | `border-white/[0.12]` (border-opacity unification, Spec 11A)                            |
+| `text-primary` text-button on dark surfaces                     | `text-violet-300 hover:text-violet-200` (Spec 10A WCAG AA fix)                          |
+| `text-primary-lt` text-button on dark surfaces                  | `text-violet-300 hover:text-violet-200` (Spec 10A)                                      |
+| `text-success` / `text-danger` / `text-warning` CSS variables   | `text-emerald-300` / `text-red-300` / `text-amber-300` (Visual Rollout severity refresh)|
+| `text-violet-900` on `<Button variant="gradient">`              | `text-black` (post-iteration-1 of Visual Rollout)                                       |
+| `ring-primary` selected-card ring                               | `ring-violet-400/60` (Visual Rollout)                                                   |
+| Inline duplicate `ATMOSPHERIC_HERO_BG` strings                  | Import the constant from PageHero (Visual Rollout Specs 8C / 6A consolidated)           |
+| Light dropdowns on dark surfaces                                | Dark frosted dropdowns matching FrostedCard treatment                                   |
+| AuthModal trailing-period subtitles                             | Sentence-case subtitles without trailing period (Visual Rollout copy refresh)           |
+| Saturated `bg-red-700` / `bg-red-800` destructive               | Muted `bg-red-950/30 border-red-400/30 text-red-100` (AlertDialog Pattern)              |
+| Rolls-own `rounded-2xl border-white/10 bg-white/5 backdrop-blur-sm` cards | `<FrostedCard>` with `rounded-3xl border-white/[0.12] bg-white/[0.07]` (Visual Rollout)|
+| `STOP_ROUTINE` action name in audio reducer                     | `END_ROUTINE` (canonical post-Spec-11A)                                                 |
+| Layout `transparentNav: false` as default                       | `transparentNav: true` is the default post-Spec-12; opaque is defensive fallback only   |
+| `bg-dashboard-dark` on RouteLoadingFallback                     | RouteLoadingFallback uses BackgroundCanvas-equivalent treatment (Visual Rollout)        |
+| `aria-pressed` on radio-style answer options                    | `role="radio"` + `aria-checked` (semantic correction)                                   |
+| Pill+halo tab using `bg-primary` solid active                   | `bg-violet-500/[0.13] border-violet-400/45 + violet halo shadow` (Visual Rollout)       |
 
 ---
 
@@ -884,7 +1005,7 @@ The prior 4-tier framing (inline-retry / fallback-alternative / toast / silent) 
 3. **Standalone spinner — `<LoadingSpinner>`.** Use only where a skeleton is infeasible (tiny inline indicator, modal content while fetching, button interior). Has `role="status"` and a sr-only label ("Loading" default, override for specific contexts like "Saving your prayer"). Never use a standalone spinner when a skeleton would work.
 
 **Error?**
-1. **Render crash in a subtree** → wrap in an error boundary. `ErrorBoundary` for generic subtrees, `RouteErrorBoundary` for top-level routes (wraps a `Layout`), `ChunkErrorBoundary` for dynamic-import failures only (propagates non-chunk errors to the outer boundary). Error-boundary *functional enhancements* (Sentry integration, retry logic) are Spec 16.2b's territory; this section governs copy + a11y only.
+1. **Render crash in a subtree** → wrap in an error boundary. `ErrorBoundary` for generic subtrees, `RouteErrorBoundary` for top-level routes (wraps a `Layout`), `ChunkErrorBoundary` for dynamic-import failures only (propagates non-chunk errors to the outer boundary). Error-boundary *functional enhancements* (Sentry integration, retry logic) are Spec 16.2b's territory; this section governs copy + a11y only. **Visual Rollout Spec 12 added canonical chrome for `RouteErrorBoundary` and `ChunkErrorBoundary`:** FrostedCard tier 1 (`variant="accent"`) wrap, `role="alert"`, lucide `RefreshCw` icon in the heading row, white-pill primary CTA (Pattern 2 — "Try Again" / "Reload"), `GRADIENT_TEXT_STYLE` heading, optional secondary "Go Home" button as `<Button variant="subtle">`. Use this canonical chrome for any new error-boundary fallback.
 2. **Form submission failed (form-level)** → `<FormError>` above the form. Defaults to `severity="error"` with `role="alert"` + `aria-live="assertive"`. Use `severity="warning"` (`role="alert"` + `aria-live="polite"`) for non-critical warnings, `severity="info"` (`role="status"` + `aria-live="polite"`) for passive notices. Caller supplies the message via children — the component is structure + a11y, not copy.
 3. **Per-field validation** → `<FormField error="…">`. The field-level `error` prop wires `aria-invalid="true"`, links the message via `aria-describedby`, and renders `role="alert"` on the error paragraph. Focus-move-to-invalid-field on submission failure is the consuming form's responsibility (see Accessibility Checklist below).
 4. **Chart failed to render** → `<ChartFallback>` inside `<ErrorBoundary fallback={…}>`. Used by the 4 Insights charts today. Component has `role="status"` + `aria-live="polite"` (not `assertive` — a fallback is a lost-content state, not an interrupt).
