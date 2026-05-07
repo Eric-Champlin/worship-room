@@ -70,10 +70,6 @@ vi.mock('@/services/storage-service', () => ({
   },
 }))
 
-vi.mock('@/hooks/useElementWidth', () => ({
-  useElementWidth: () => ({ ref: { current: null }, width: 300 }),
-}))
-
 // ── Test data ──────────────────────────────────────────────────────────
 
 const USER_ROUTINE = {
@@ -182,10 +178,10 @@ describe('RoutinesPage', () => {
     expect(screen.queryByText('Delete')).not.toBeInTheDocument()
   })
 
-  it('shows "Build your path to peaceful sleep" subtitle', () => {
+  it('shows "End your day in stillness." subtitle', () => {
     renderPage()
     expect(
-      screen.getByText(/Build your path to peaceful sleep/i),
+      screen.getByText(/End your day in stillness\./i),
     ).toBeInTheDocument()
   })
 
@@ -207,13 +203,13 @@ describe('RoutinesPage', () => {
 
   it('subtitle does not have font-serif class', () => {
     renderPage()
-    const subtitle = screen.getByText(/Build your path to peaceful sleep/i)
+    const subtitle = screen.getByText(/End your day in stillness\./i)
     expect(subtitle.className).not.toContain('font-serif')
   })
 
   it('subtitle does not have italic class', () => {
     renderPage()
-    const subtitle = screen.getByText(/Build your path to peaceful sleep/i)
+    const subtitle = screen.getByText(/End your day in stillness\./i)
     expect(subtitle.className).not.toContain('italic')
   })
 
@@ -358,5 +354,91 @@ describe('RoutinesPage', () => {
       const deleteOrder = vi.mocked(storageService.deleteRoutine).mock.invocationCallOrder[0]
       expect(endOrder).toBeLessThan(deleteOrder)
     })
+  })
+
+  // ── Patch 1: HeadingDivider removal ──────────────────────────────────
+
+  it('hero does not render a HeadingDivider SVG', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { name: /Bedtime Routines/i })
+    const heroSection = heading.closest('section')
+    // HeadingDivider's signature: SVG with linearGradient defs + <circle> dots.
+    // (Lucide icons like ArrowLeft also use SVG/viewBox but are path-only, no
+    // gradients or circles.)
+    const dividerSvgs = Array.from(
+      heroSection?.querySelectorAll('svg') ?? [],
+    ).filter(
+      (svg) =>
+        svg.querySelector('linearGradient') !== null &&
+        svg.querySelector('circle') !== null,
+    )
+    expect(dividerSvgs.length).toBe(0)
+  })
+
+  // ── Patch 2: conditional empty-state hint copy ───────────────────────
+
+  it('hint copy renders when user has zero saved routines', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([])
+    renderPage()
+    expect(
+      screen.getByText('Tap a template to start, or create your own.'),
+    ).toBeInTheDocument()
+  })
+
+  it('hint copy is hidden when user has 1+ saved routines', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    expect(
+      screen.queryByText('Tap a template to start, or create your own.'),
+    ).not.toBeInTheDocument()
+  })
+
+  // ── Patch 3: hero back-navigation link to /music ─────────────────────
+
+  it('hero renders a "Music" back-nav link to /music', () => {
+    renderPage()
+    const heading = screen.getByRole('heading', { name: /Bedtime Routines/i })
+    const heroSection = heading.closest('section')!
+    const link = within(heroSection).getByRole('link', { name: /Music/i })
+    expect(link).toHaveAttribute('href', '/music')
+    expect(link.className).toContain('text-white/50')
+    expect(link.className).toContain('hover:text-white/70')
+  })
+
+  // ── Patch 6: section eyebrows toggle on user-routines presence ───────
+
+  it('renders no section eyebrows when user has zero saved routines', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([])
+    renderPage()
+    expect(
+      screen.queryByRole('heading', { level: 2, name: /^Templates$/ }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { level: 2, name: /^Your routines$/ }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders both section eyebrows when user has 1+ saved routines', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    expect(
+      screen.getByRole('heading', { level: 2, name: /^Templates$/ }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: /^Your routines$/ }),
+    ).toBeInTheDocument()
+  })
+
+  it('section eyebrows use canonical class chrome', () => {
+    vi.mocked(storageService.getRoutines).mockReturnValue([USER_ROUTINE])
+    renderPage()
+    const templatesEyebrow = screen.getByRole('heading', {
+      level: 2,
+      name: /^Templates$/,
+    })
+    expect(templatesEyebrow.className).toContain('text-xs')
+    expect(templatesEyebrow.className).toContain('text-white/60')
+    expect(templatesEyebrow.className).toContain('uppercase')
+    expect(templatesEyebrow.className).toContain('tracking-wider')
   })
 })

@@ -4,8 +4,7 @@ export const ROUTINE_TEMPLATES: RoutineDefinition[] = [
   {
     id: 'template-evening-peace',
     name: 'Evening Peace',
-    description:
-      'Ease into rest with Still Waters and the calming words of Psalm 23.',
+    description: 'Ease into rest with Still Waters and the calming words of Psalm 23.',
     isTemplate: true,
     steps: [
       {

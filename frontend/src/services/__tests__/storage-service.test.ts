@@ -335,6 +335,37 @@ describe('LocalStorageService', () => {
       expect(routines[0].name).toBe('Renamed')
       expect(routines[0].updatedAt).not.toBe(ROUTINE.updatedAt)
     })
+
+    it('getRoutines filters out malformed routine entries', () => {
+      service.setAuthState(true)
+      const malformed = { id: 'bad-1', name: 'Missing fields' }
+      const valid = { ...ROUTINE, id: 'good-1' }
+      localStorage.setItem('wr_routines', JSON.stringify([malformed, valid]))
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+      const routines = service.getRoutines()
+      expect(routines).toHaveLength(1)
+      expect(routines[0].id).toBe('good-1')
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('Filtered 1 malformed routine'),
+      )
+
+      warn.mockRestore()
+    })
+
+    it('getRoutines returns [] when wr_routines holds invalid JSON', () => {
+      service.setAuthState(true)
+      localStorage.setItem('wr_routines', '{not valid json')
+
+      expect(service.getRoutines()).toEqual([])
+    })
+
+    it('getRoutines returns [] when wr_routines holds a non-array value', () => {
+      service.setAuthState(true)
+      localStorage.setItem('wr_routines', JSON.stringify({ not: 'an array' }))
+
+      expect(service.getRoutines()).toEqual([])
+    })
   })
 
   // ── QuotaExceededError ────────────────────────────────────────────

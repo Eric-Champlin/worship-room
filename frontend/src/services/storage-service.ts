@@ -103,6 +103,18 @@ function fromBase64Url(str: string): string {
   return atob(base64)
 }
 
+function isValidRoutine(value: unknown): value is RoutineDefinition {
+  if (typeof value !== 'object' || value === null) return false
+  const r = value as Record<string, unknown>
+  return (
+    typeof r.id === 'string' &&
+    typeof r.name === 'string' &&
+    Array.isArray(r.steps) &&
+    typeof r.sleepTimer === 'object' &&
+    r.sleepTimer !== null
+  )
+}
+
 // ── localStorage Implementation ──────────────────────────────────────
 export class LocalStorageService implements StorageService {
   private _isAuthenticated = false
@@ -259,7 +271,15 @@ export class LocalStorageService implements StorageService {
   // ── Routines ────────────────────────────────────────────────────
   getRoutines(): RoutineDefinition[] {
     if (!this._isAuthenticated) return []
-    return readJSON<RoutineDefinition[]>(KEYS.routines, [])
+    const raw = readJSON<unknown>(KEYS.routines, [])
+    if (!Array.isArray(raw)) return []
+    const valid = (raw as unknown[]).filter(isValidRoutine)
+    if (valid.length !== raw.length) {
+      console.warn(
+        `[storageService] Filtered ${raw.length - valid.length} malformed routine(s) from wr_routines`,
+      )
+    }
+    return valid
   }
 
   saveRoutine(routine: RoutineDefinition): void {
