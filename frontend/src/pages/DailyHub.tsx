@@ -3,6 +3,7 @@ import { useSearchParams, useLocation } from 'react-router-dom'
 import { Heart, PenLine, Wind, BookOpen, Check } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
+import { CinematicHeroBackground } from '@/components/CinematicHeroBackground'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { SiteFooter } from '@/components/SiteFooter'
 import { SongPickSection } from '@/components/SongPickSection'
@@ -71,8 +72,7 @@ function DailyHubContent() {
   const { tab: activeTab, setTab } = useDailyHubTab()
 
   const { user, isAuthenticated } = useAuth()
-  const { isPrayComplete, isJournalComplete, isMeditateComplete } =
-    useCompletionTracking()
+  const { isPrayComplete, isJournalComplete, isMeditateComplete } = useCompletionTracking()
 
   const [prayContext, setPrayContext] = useState<PrayContext | null>(null)
 
@@ -82,7 +82,9 @@ function DailyHubContent() {
       const reads: string[] = JSON.parse(localStorage.getItem('wr_devotional_reads') || '[]')
       const todayStr = new Date().toLocaleDateString('en-CA')
       return reads.includes(todayStr)
-    } catch (_e) { return false }
+    } catch (_e) {
+      return false
+    }
   })
 
   const handleDevotionalComplete = useCallback(() => {
@@ -114,10 +116,9 @@ function DailyHubContent() {
   useEffect(() => {
     const sentinel = sentinelRef.current
     if (!sentinel) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsSticky(!entry.isIntersecting),
-      { threshold: 0 },
-    )
+    const observer = new IntersectionObserver(([entry]) => setIsSticky(!entry.isIntersecting), {
+      threshold: 0,
+    })
     observer.observe(sentinel)
     return () => observer.disconnect()
   }, [])
@@ -127,7 +128,7 @@ function DailyHubContent() {
       setPrayContext(null)
       setTab(tab)
     },
-    [setTab],
+    [setTab]
   )
 
   const handleSwitchToJournal = useCallback(
@@ -135,7 +136,7 @@ function DailyHubContent() {
       setPrayContext({ from: 'pray', topic })
       setTab('journal')
     },
-    [setTab],
+    [setTab]
   )
 
   const handleSwitchToDevotionalJournal = useCallback(
@@ -143,7 +144,7 @@ function DailyHubContent() {
       setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
       setTab('journal')
     },
-    [setTab],
+    [setTab]
   )
 
   const handleSwitchToDevotionalPray = useCallback(
@@ -151,7 +152,7 @@ function DailyHubContent() {
       setPrayContext({ from: 'devotional', topic, customPrompt, devotionalSnapshot: snapshot })
       setTab('pray')
     },
-    [setTab],
+    [setTab]
   )
 
   const greeting = getGreeting()
@@ -167,8 +168,7 @@ function DailyHubContent() {
   // Screen-reader announcement for auth redirects from meditation sub-pages
   const [srMessage, setSrMessage] = useState('')
   useEffect(() => {
-    const msg = (location.state as { authRedirectMessage?: string } | null)
-      ?.authRedirectMessage
+    const msg = (location.state as { authRedirectMessage?: string } | null)?.authRedirectMessage
     if (msg) {
       setSrMessage('')
       requestAnimationFrame(() => setSrMessage(msg))
@@ -207,7 +207,7 @@ function DailyHubContent() {
         tabButtonRefs.current[nextIndex]?.focus()
       }
     },
-    [switchTab],
+    [switchTab]
   )
 
   return (
@@ -219,11 +219,12 @@ function DailyHubContent() {
         {/* Hero Section — Greeting + Content Cards */}
         <section
           aria-labelledby="daily-hub-heading"
-          className="relative z-10 flex w-full flex-col items-center px-4 pt-36 pb-6 text-center antialiased sm:pt-40 sm:pb-8 lg:pt-44"
+          className="relative z-10 flex min-h-[30vh] w-full flex-col items-center justify-center px-4 pb-12 pt-[145px] text-center antialiased"
         >
+          <CinematicHeroBackground />
           <h1
             id="daily-hub-heading"
-            className="mb-1 text-4xl font-bold leading-[1.15] pb-2 sm:text-5xl lg:text-6xl"
+            className="relative z-10 mb-1 pb-2 text-4xl font-bold leading-[1.15] sm:text-5xl lg:text-6xl"
             style={GRADIENT_TEXT_STYLE}
           >
             {displayName}
@@ -237,7 +238,7 @@ function DailyHubContent() {
         <div
           className={cn(
             'relative sticky top-0 z-40 backdrop-blur-md transition-shadow motion-reduce:transition-none',
-            isSticky && 'shadow-md shadow-black/20',
+            isSticky && 'shadow-md shadow-black/20'
           )}
         >
           <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
@@ -255,7 +256,9 @@ function DailyHubContent() {
                 return (
                   <button
                     key={tab.id}
-                    ref={(el) => { tabButtonRefs.current[index] = el }}
+                    ref={(el) => {
+                      tabButtonRefs.current[index] = el
+                    }}
                     type="button"
                     role="tab"
                     id={`tab-${tab.id}`}
@@ -265,10 +268,10 @@ function DailyHubContent() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg sm:text-base active:scale-[0.98]',
+                      'flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-full text-sm font-medium transition-all duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-hero-bg active:scale-[0.98] motion-reduce:transition-none sm:text-base',
                       isActive
-                        ? 'bg-violet-500/[0.13] border border-violet-400/45 text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
-                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
+                        ? 'border border-violet-400/45 bg-violet-500/[0.13] text-white shadow-[0_0_20px_rgba(139,92,246,0.18)]'
+                        : 'border border-transparent text-white/50 hover:bg-white/[0.04] hover:text-white/80'
                     )}
                   >
                     <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
@@ -276,10 +279,7 @@ function DailyHubContent() {
                     <span className="sr-only min-[400px]:hidden">{tab.label}</span>
                     {isAuthenticated && isComplete && (
                       <>
-                        <Check
-                          className="h-4 w-4 text-success"
-                          aria-hidden="true"
-                        />
+                        <Check className="h-4 w-4 text-success" aria-hidden="true" />
                         <span className="sr-only">, completed today</span>
                       </>
                     )}
@@ -356,7 +356,6 @@ function DailyHubContent() {
         <div className="relative z-10">
           <SongPickSection />
         </div>
-
       </main>
 
       <div className="relative z-10">
@@ -380,8 +379,6 @@ function DailyHubContent() {
 
 // Loading state: use DailyHubSkeleton
 export function DailyHub() {
-  useRoutePreload([
-    () => import('@/pages/BibleLanding'),
-  ])
+  useRoutePreload([() => import('@/pages/BibleLanding')])
   return <DailyHubContent />
 }

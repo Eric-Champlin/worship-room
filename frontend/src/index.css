@@ -331,3 +331,67 @@
     opacity: 0;
   }
 }
+
+/* Cinematic hero atmospheric — directional light drift */
+@keyframes cinematic-light-drift {
+  0%,
+  100% {
+    background-position: 12% 8%;
+  }
+  50% {
+    background-position: 15% 11%;
+  }
+}
+
+.cinematic-light-beam {
+  background: radial-gradient(
+    circle at 12% 8%,
+    rgba(255, 230, 200, 0.3) 0%,
+    rgba(255, 215, 175, 0.2) 8%,
+    rgba(255, 200, 150, 0.1) 18%,
+    rgba(255, 185, 130, 0.04) 35%,
+    transparent 50%
+  );
+  background-size: 200% 200%;
+  animation: cinematic-light-drift 60s ease-in-out infinite;
+}
+
+/* Star twinkle */
+@keyframes cinematic-star-twinkle {
+  0%,
+  100% {
+    opacity: var(--star-opacity, 0.8);
+  }
+  50% {
+    opacity: calc(var(--star-opacity, 0.8) * 0.5);
+  }
+}
+
+.cinematic-star-twinkle {
+  animation: cinematic-star-twinkle var(--twinkle-duration, 5s) ease-in-out infinite;
+  animation-delay: var(--twinkle-delay, 0s);
+}
+
+/* Cross-glint pulse */
+@keyframes cinematic-glint-pulse {
+  0%,
+  100% {
+    opacity: var(--glint-opacity, 0.7);
+  }
+  50% {
+    opacity: calc(var(--glint-opacity, 0.7) * 1.15);
+  }
+}
+
+.cinematic-glint-pulse {
+  animation: cinematic-glint-pulse var(--pulse-duration, 10s) ease-in-out infinite;
+  animation-delay: var(--pulse-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-light-beam,
+  .cinematic-star-twinkle,
+  .cinematic-glint-pulse {
+    animation: none !important;
+  }
+}
