@@ -4564,6 +4564,8 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 
 **Phase rename note (2026-05-07 reconciliation):** This phase was previously titled "Visual Migration to Round 2 Brand." The Round 3 Visual Rollout (2026-04-30 → 2026-05-07, 26 specs) migrated **every page except Prayer Wall** to the canonical post-rollout patterns. Phase 5 now delivers Prayer Wall only. The renamed title reflects that scope. Spec body text below was written before the Visual Rollout shipped — it references some patterns that have evolved since (e.g., HorizonGlow → BackgroundCanvas, `rounded-2xl` → `rounded-3xl`, white-glow textarea → violet-glow). The body refresh happens at `/spec-forums 5.1` extraction time when each spec is pulled into a standalone `_specs/` file. The post-rollout canonical patterns are catalogued in Spec 5.0 below.
 
+**Spec 14 partial fold-in (2026-05-07 — Cinematic Hero Rollout):** Spec 14 ("Cinematic Hero Rollout") was a parallel Round-3 follow-on that rolled the cinematic atmospheric layer onto every cinematic-mounting page (`/bible`, `/local-support/*`, `/ask`, `/grow`, `/prayer-wall`, `/music`) and folded four Phase 5 items in along the way: **PrayerWallHero migration, `font-script` "Wall" cleanup, `font-serif italic` subtitle cleanup, and BackgroundCanvas promotion on `/prayer-wall` are all SHIPPED via Spec 14.** Spec 5.2 (BackgroundCanvas at Prayer Wall Root) is therefore CLOSED. Spec 5.5 (Deprecated Pattern Purge) is partial-shipped — only the PrayerWallHero typography portion landed in Spec 14; the broader purge across PrayerCard, CommentsSection, InlineComposer, etc. remains in Phase 5 scope. **Remaining Phase 5 scope:** PrayerCard FrostedCard migration (5.1), 2-line heading treatment (5.3), animation token migration (5.4), the rest of the deprecated pattern purge (5.5), Redis Cache Foundation (5.6). See spec-14 plan + execution log: `_plans/2026-05-07-spec-14-cinematic-hero-rollout.md`.
+
 **What this phase accomplishes:** All Prayer Wall components render with the canonical `<FrostedCard>` component (variant `accent` for emphasis cards, `default` for general content, `subdued` for nested panels — all `rounded-3xl`); `<BackgroundCanvas>` appears at the page root (replacing any reliance on the legacy HorizonGlow); page hero uses `<SectionHeading topLine bottomLine />` from `homepage/SectionHeading.tsx`; all animations import from `frontend/src/constants/animation.ts`; the post-rollout deprecated-pattern list (see `09-design-system.md` § "Deprecated Patterns") is purged from the prayer-wall codebase; font sizes and line heights match the design-system standards; `<Button variant="subtle">` replaces `bg-primary` solid CTAs on dark surfaces; `text-violet-300` replaces `text-primary` text-buttons; `border-white/[0.12]` replaces `border-white/10` decorative borders.
 
 **Sequencing notes:** Spec 5.0 (Architecture Context Refresh) is the orientation prelude — read it before extracting any other Phase 5 spec. Specs 5.1 and 5.2 are the highest-impact visual changes. Spec 5.5 is the verification sweep with the expanded post-rollout deprecation list.
@@ -4634,12 +4636,13 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 - [ ] Visual regression tests pass (Playwright screenshots)
 - [ ] All existing component tests pass
 
-### Spec 5.2 — BackgroundCanvas at Prayer Wall Root
+### Spec 5.2 — BackgroundCanvas at Prayer Wall Root — **SHIPPED VIA SPEC 14 (2026-05-07)**
 
 - **ID:** `round3-phase05-spec02-background-canvas`
 - **Size:** S
 - **Risk:** Low
-- **Prerequisites:** 5.1
+- **Prerequisites:** 5.1 (no longer blocking — see Status note)
+- **Status:** ✅ **CLOSED — Shipped in Spec 14 — Cinematic Hero Rollout (2026-05-07).** The PrayerWall.tsx outer wrapper was migrated from `<div className="...bg-dashboard-dark...">` to `<BackgroundCanvas className="flex min-h-screen flex-col overflow-x-hidden font-sans">` in Spec 14 Step 6. PrayerWallDashboard, PrayerDetail, and PrayerWallProfile are sub-routes (not landing pages) and remain in their pre-Spec-14 state — the rest of Phase 5 (Spec 5.5 deprecated pattern purge specifically) covers their visual migration. The original spec body below is preserved for historical context but is no longer actionable for `/prayer-wall` itself.
 - **Goal:** Add the canonical `<BackgroundCanvas>` 5-stop atmospheric layer at the Prayer Wall page root, matching the Daily Hub / Bible Landing / Local Support / Grow / Ask treatment post-Visual-Rollout Spec 1A. **Note (2026-05-07 reconciliation):** Original spec body referenced `HorizonGlow`, which is now orphaned legacy. The `Approach`, `Files to modify`, and `Acceptance criteria` below predate the rollout — they will be refreshed at `/spec-forums 5.2` extraction time per Spec 5.0's reconciliation note. The opacity-range concern in the body ("0.25-0.50") is moot for `BackgroundCanvas` (it has its own gradient stops) — that paragraph is dropped at extraction.
 
 **Approach:** Wrap `PrayerWall.tsx`, `PrayerWallDashboard.tsx`, `PrayerDetail.tsx`, `PrayerWallProfile.tsx` in `<HorizonGlow>` (the existing component from the Daily Hub era). Verify glow opacity is in the 0.25-0.50 range (per the corrected glow opacity standard). Remove any existing per-section `GlowBackground` instances on Prayer Wall (deprecated per `09-design-system.md`).
@@ -4702,12 +4705,13 @@ The `POST /api/v1/posts/{id}/reactions` endpoint MUST accept `{ reaction_type: '
 - [ ] Lighthouse Performance score on Prayer Wall pages still 90+
 - [ ] `prefers-reduced-motion` still respected throughout
 
-### Spec 5.5 — Deprecated Pattern Purge and Visual Audit
+### Spec 5.5 — Deprecated Pattern Purge and Visual Audit — **PARTIAL-SHIPPED VIA SPEC 14 (2026-05-07)**
 
 - **ID:** `round3-phase05-spec05-deprecated-pattern-purge`
 - **Size:** M
 - **Risk:** Low
 - **Prerequisites:** 5.4
+- **Status:** ⬜ **PARTIAL — `font-script` "Wall" cleanup and `font-serif italic` subtitle cleanup on `PrayerWallHero.tsx` SHIPPED via Spec 14 Step 7 (2026-05-07).** The broader sweep across PrayerCard, CommentsSection, InlineComposer, QuestionOfTheDay, ComposerChooser, AuthModal, ReportDialog, DeletePrayerDialog, MarkAsAnsweredForm, SaveToPrayersForm, ShareDropdown, and any remaining Prayer Wall files remains in scope and is the focus of this spec when extracted.
 - **Goal:** Final sweep removing every deprecated pattern listed in `09-design-system.md` § Deprecated Patterns from Prayer Wall files. Visual audit confirms parity with the Round 2 standard.
 
 **Approach:** Open `09-design-system.md` § Deprecated Patterns and grep for each pattern name in `frontend/src/components/prayer-wall/`. Replace with the documented current pattern. Run Playwright visual regression tests against every Prayer Wall page on mobile, tablet, and desktop. Manual visual audit by Eric — open Daily Hub and Prayer Wall side by side and confirm they feel like the same app.

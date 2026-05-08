@@ -7,6 +7,7 @@ import { AlertCircle, Heart, LayoutDashboard, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
@@ -627,7 +628,7 @@ function PrayerWallContent() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-dashboard-dark font-sans">
+    <BackgroundCanvas className="flex min-h-screen flex-col overflow-x-hidden font-sans">
       <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
       <Navbar transparent />
       <PrayerWallHero
@@ -852,7 +853,7 @@ function PrayerWallContent() {
           onDismiss={composerTooltip.dismiss}
         />
       )}
-    </div>
+    </BackgroundCanvas>
   )
 }
 

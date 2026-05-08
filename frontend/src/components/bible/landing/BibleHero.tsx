@@ -1,12 +1,14 @@
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
+import { CinematicHeroBackground } from '@/components/CinematicHeroBackground'
 
 export function BibleHero() {
   return (
     <section
       aria-labelledby="bible-hero-heading"
-      className="relative flex w-full flex-col items-center px-4 pt-28 pb-12 text-center antialiased sm:pt-32 sm:pb-14 lg:pt-32"
+      className="relative flex w-full flex-col items-center px-4 pt-[145px] pb-12 text-center antialiased"
     >
-      <h1 id="bible-hero-heading" className="px-1 sm:px-2">
+      <CinematicHeroBackground />
+      <h1 id="bible-hero-heading" className="relative z-10 px-1 sm:px-2">
         <span className="block text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
           Your
         </span>

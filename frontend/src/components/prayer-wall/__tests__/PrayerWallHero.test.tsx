@@ -32,11 +32,38 @@ describe('PrayerWallHero', () => {
     expect(heading.style.backgroundImage).toContain('linear-gradient')
   })
 
-  it('accent word "Wall" renders in font-script span', () => {
+  it('does NOT use font-script (Spec 14 cleanup — Caveat reserved for wordmark + RouteLoadingFallback)', () => {
     render(<PrayerWallHero />)
     const heading = screen.getByRole('heading', { name: 'Prayer Wall' })
-    const scriptSpan = heading.querySelector('.font-script')
-    expect(scriptSpan).toBeInTheDocument()
-    expect(scriptSpan?.textContent).toBe('Wall')
+    expect(heading.querySelector('.font-script')).toBeNull()
+    // Heading text is the literal string "Prayer Wall" with no <span> child
+    expect(heading.textContent).toBe('Prayer Wall')
+    expect(heading.childElementCount).toBe(0)
+  })
+
+  it('subtitle does NOT use font-serif italic (Spec 14 cleanup — canonical hero subtitle treatment)', () => {
+    render(<PrayerWallHero />)
+    const subtitle = screen.getByText("You're not alone.")
+    expect(subtitle.className).not.toContain('font-serif')
+    expect(subtitle.className).not.toContain('italic')
+    expect(subtitle.className).toContain('text-white')
+    expect(subtitle.className).not.toContain('text-white/60')
+  })
+
+  it('mounts CinematicHeroBackground as first child (Spec 14)', () => {
+    const { container } = render(<PrayerWallHero />)
+    const cinematic = container.querySelector('[data-testid="cinematic-hero-background"]')
+    expect(cinematic).toBeInTheDocument()
+    const section = container.querySelector('section[aria-labelledby="prayer-wall-heading"]')
+    expect(section?.firstElementChild).toBe(cinematic)
+  })
+
+  it('uses navbar-compensated padding pt-[145px] pb-12 (no responsive modifiers)', () => {
+    const { container } = render(<PrayerWallHero />)
+    const section = container.querySelector('section[aria-labelledby="prayer-wall-heading"]')
+    expect(section?.className).toContain('pt-[145px]')
+    expect(section?.className).toContain('pb-12')
+    expect(section?.className).not.toContain('sm:pt-36')
+    expect(section?.className).not.toContain('lg:pt-40')
   })
 })

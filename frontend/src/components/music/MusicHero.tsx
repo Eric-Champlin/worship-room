@@ -1,30 +1,33 @@
-import type { ReactNode } from 'react'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
 import { CinematicHeroBackground } from '@/components/CinematicHeroBackground'
 
-interface PrayerWallHeroProps {
-  /** CTA button rendered below the subtitle */
-  action?: ReactNode
+interface MusicHeroProps {
+  /** Defaults to 'Music'. */
+  title?: string
+  /** Defaults to canonical Music subtitle. */
+  subtitle?: string
 }
 
-export function PrayerWallHero({ action }: PrayerWallHeroProps) {
+export function MusicHero({
+  title = 'Music',
+  subtitle = "Worship, rest, and find peace in God's presence.",
+}: MusicHeroProps = {}) {
   return (
     <section
-      aria-labelledby="prayer-wall-heading"
+      aria-labelledby="page-hero-heading"
       className="relative flex w-full flex-col items-center px-4 pt-[145px] pb-12 text-center antialiased"
     >
       <CinematicHeroBackground />
       <h1
-        id="prayer-wall-heading"
+        id="page-hero-heading"
         className="relative z-10 mb-3 px-1 sm:px-2 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl pb-2"
         style={GRADIENT_TEXT_STYLE}
       >
-        Prayer Wall
+        {title}
       </h1>
       <p className="relative z-10 mx-auto max-w-xl text-base leading-relaxed text-white sm:text-lg">
-        You&apos;re not alone.
+        {subtitle}
       </p>
-      {action && <div className="relative z-10 mt-6">{action}</div>}
     </section>
   )
 }

@@ -434,7 +434,7 @@ Moderate (heading + short subtitle).
 - **Major:** No BackgroundCanvas. `/music` is one of three documented intentional-drift pages that does NOT use BackgroundCanvas (Settings + Insights + Music — see `09-design-system.md` § "BackgroundCanvas Atmospheric Layer" → "Documented intentional drift").
 - **Hard rule from `09-design-system.md` § Daily Hub Visual Architecture and § BackgroundCanvas:** "No future spec migrates Music chrome to `BackgroundCanvas`, `FrostedCard`, or any other canonical atmospheric primitive without first reconciling against the AudioProvider / audioReducer / AudioContext cluster integrity (Decision 24 from Music direction)."
 - This means rolling the cinematic onto /music CANNOT come with "promote BackgroundCanvas to page root" as a side effect. The cinematic would need to be self-contained (paint solid base + fade to that solid) for /music to work — see G.1.
-- /music also uses the `PageHero` shared component, which also powers `/routines` (RoutinesPage uses PageHero — see App.tsx:261). Touching PageHero ripples to multiple surfaces.
+- /music also uses the `PageHero` shared component, which also powers `/music/routines` (RoutinesPage uses PageHero — see App.tsx:261). Touching PageHero ripples to multiple surfaces.
 
 ### 5.6 Recommended mount approach
 
@@ -543,7 +543,7 @@ The cinematic's mask-image fade-to-transparent works seamlessly on /daily becaus
 - `/music` — no BackgroundCanvas anywhere; documented intentional drift + Decision 24 audio-cluster preservation rule (Section 5)
 - `/prayer-wall` — no BackgroundCanvas; ATMOSPHERIC_HERO_BG hero (Section 6)
 - `/settings`, `/insights` — out of scope (utility pages)
-- `/routines` — out of scope (uses PageHero shared with /music)
+- `/music/routines` — out of scope (uses PageHero shared with /music)
 
 **Surfaced options for non-canvas pages (no decision):**
 

@@ -277,21 +277,21 @@ describe('GrowPage', () => {
     expect(document.getElementById('tabpanel-challenges')).toBeInTheDocument()
   })
 
-  // --- Spec 6A Step 1: BackgroundCanvas wrap ---
+  // --- Spec 14: BackgroundCanvas at root (promoted from body-only in Spec 6A) ---
 
-  it('renders BackgroundCanvas wrapping below-hero content', () => {
+  it('renders BackgroundCanvas wrapping the entire page including hero (Spec 14)', () => {
     const { container } = renderPage()
-    // BackgroundCanvas signature: relative + min-h-screen + overflow-hidden
-    const canvas = container.querySelector('.relative.min-h-screen.overflow-hidden')
+    // Spec 14 Step 4 promoted BackgroundCanvas from wrapping below-hero content only
+    // to wrapping the entire page contents at the root.
+    const canvas = container.querySelector('[data-testid="background-canvas"]')
     expect(canvas).toBeInTheDocument()
-    // BackgroundCanvas should contain the sticky tab bar wrapper and tabpanels
+    // BackgroundCanvas now contains the hero, sticky tab bar wrapper, AND tabpanels
+    const heroSection = container.querySelector('section[aria-labelledby="grow-heading"]')
+    expect(heroSection).toBeInTheDocument()
+    expect(canvas?.contains(heroSection)).toBe(true)
     expect(canvas?.querySelector('[role="tablist"]')).toBeInTheDocument()
     expect(canvas?.querySelector('#tabpanel-plans')).toBeInTheDocument()
     expect(canvas?.querySelector('#tabpanel-challenges')).toBeInTheDocument()
-    // Hero section should NOT be inside BackgroundCanvas
-    const heroSection = container.querySelector('section[aria-labelledby="grow-heading"]')
-    expect(heroSection).toBeInTheDocument()
-    expect(canvas?.contains(heroSection)).toBe(false)
   })
 
   // --- Spec 6A Step 2: Hero subtitle plain prose ---

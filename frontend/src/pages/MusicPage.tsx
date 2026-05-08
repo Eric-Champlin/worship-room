@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Moon, Music, Wind } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
-import { PageHero } from '@/components/PageHero'
 import { SiteFooter } from '@/components/SiteFooter'
+import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
+import { MusicHero } from '@/components/music/MusicHero'
 import { AmbientBrowser } from '@/components/audio/AmbientBrowser'
 import { useAudioDispatch, useAudioEngine } from '@/components/audio/AudioProvider'
 import { SleepBrowse } from '@/components/audio/SleepBrowse'
@@ -167,16 +168,13 @@ export function MusicPage() {
   )
 
   return (
-    <div className="flex min-h-screen flex-col bg-dashboard-dark font-sans">
+    <BackgroundCanvas className="flex min-h-screen flex-col font-sans">
       <SEO {...MUSIC_METADATA} jsonLd={musicBreadcrumbs} />
       <Navbar transparent />
 
       <main id="main-content">
         {/* Hero */}
-        <PageHero
-          title="Music"
-          subtitle="Worship, rest, and find peace in God's presence."
-        />
+        <MusicHero />
 
         {/* Sentinel for sticky tab bar shadow */}
         <div ref={sentinelRef} aria-hidden="true" />
@@ -214,7 +212,7 @@ export function MusicPage() {
                     onClick={() => switchTab(tab.id)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={cn(
-                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f0a1e] sm:text-base active:scale-[0.98]',
+                      'flex flex-1 items-center justify-center gap-2 rounded-full min-h-[44px] text-sm font-medium transition-all motion-reduce:transition-none duration-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-[#08051a] sm:text-base active:scale-[0.98]',
                       isActive
                         ? 'bg-white/15 border border-white/[0.15] text-white shadow-[0_0_12px_rgba(139,92,246,0.15)]'
                         : 'text-white/50 hover:text-white/80 hover:bg-white/[0.04] border border-transparent',
@@ -288,6 +286,6 @@ export function MusicPage() {
           onDismiss={tabBarTooltip.dismiss}
         />
       )}
-    </div>
+    </BackgroundCanvas>
   )
 }

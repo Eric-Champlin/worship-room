@@ -49,19 +49,30 @@ describe('BibleHero', () => {
     expect(container.querySelector('.font-script')).toBeNull()
   })
 
-  it('uses BB-53 balanced clearance padding pt-28 pb-12 sm:pt-32 sm:pb-14 lg:pt-32', () => {
+  it('uses Spec 14 cinematic-hero navbar-compensated padding pt-[145px] pb-12 (no responsive modifiers)', () => {
     render(<BibleHero />)
     const heading = screen.getByRole('heading', { level: 1 })
     const section = heading.closest('section')
-    expect(section?.className).toContain('pt-28')
+    expect(section?.className).toContain('pt-[145px]')
     expect(section?.className).toContain('pb-12')
-    expect(section?.className).toContain('sm:pt-32')
-    expect(section?.className).toContain('sm:pb-14')
-    expect(section?.className).toContain('lg:pt-32')
+    // Responsive padding modifiers removed — navbar height is constant across breakpoints
+    expect(section?.className).not.toContain('sm:pt-32')
+    expect(section?.className).not.toContain('sm:pb-14')
+    expect(section?.className).not.toContain('lg:pt-32')
     // Pre-BB-53 padding removed (imbalanced 2.47:1 ratio)
     expect(section?.className).not.toContain('pt-36')
     expect(section?.className).not.toContain('sm:pt-40')
     expect(section?.className).not.toContain('lg:pt-44')
+    // Pre-Spec-14 padding removed
+    expect(section?.className).not.toContain('pt-28')
+  })
+
+  it('mounts CinematicHeroBackground as first child (Spec 14)', () => {
+    const { container } = render(<BibleHero />)
+    const cinematic = container.querySelector('[data-testid="cinematic-hero-background"]')
+    expect(cinematic).toBeInTheDocument()
+    const section = container.querySelector('section[aria-labelledby="bible-hero-heading"]')
+    expect(section?.firstElementChild).toBe(cinematic)
   })
 
   it('has no inline background style (no ATMOSPHERIC_HERO_BG)', () => {

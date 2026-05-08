@@ -5,6 +5,7 @@ import { OfflineNotice } from '@/components/pwa/OfflineNotice'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
 import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
+import { CinematicHeroBackground } from '@/components/CinematicHeroBackground'
 import { CrisisBanner } from '@/components/daily/CrisisBanner'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { UserQuestionBubble } from '@/components/ask/UserQuestionBubble'
@@ -256,16 +257,17 @@ export function AskPage() {
       <BackgroundCanvas>
         <section
           aria-labelledby="ask-hero-heading"
-          className="px-4 pt-32 pb-10 text-center sm:px-6 sm:pt-40 sm:pb-12"
+          className="relative flex w-full flex-col items-center px-4 pt-[145px] pb-12 text-center antialiased"
         >
+          <CinematicHeroBackground />
           <h1
             id="ask-hero-heading"
-            className="pb-2 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl animate-gradient-shift"
+            className="relative z-10 pb-2 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl animate-gradient-shift"
             style={GRADIENT_TEXT_STYLE}
           >
             Ask God&apos;s Word
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-base text-white sm:text-lg">
+          <p className="relative z-10 mx-auto mt-6 max-w-xl text-base text-white sm:text-lg">
             Bring your questions. Find wisdom in Scripture.
           </p>
         </section>

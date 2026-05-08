@@ -141,11 +141,22 @@ describe('DailyHub', () => {
       expect(heading).toBeInTheDocument()
     })
 
-    it('hero bottom padding is pb-6 sm:pb-8', () => {
+    it('hero bottom padding is pb-12', () => {
       renderPage()
       const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
-      expect(hero.className).toContain('pb-6')
-      expect(hero.className).toContain('sm:pb-8')
+      expect(hero.className).toContain('pb-12')
+    })
+
+    it('hero has navbar-compensated top padding pt-[145px]', () => {
+      renderPage()
+      const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+      expect(hero.className).toContain('pt-[145px]')
+    })
+
+    it('hero contains the cinematic atmospheric background', () => {
+      renderPage()
+      const hero = document.querySelector('[aria-labelledby="daily-hub-heading"]')!
+      expect(hero.querySelector('[data-testid="cinematic-hero-background"]')).toBeInTheDocument()
     })
 
     it('hero has no SharePanel', () => {

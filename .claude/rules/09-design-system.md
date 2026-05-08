@@ -226,7 +226,7 @@ The reader's settings drawer also includes BB-41's notification permission entry
 
 ### Design System Components
 
-- **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. Used by Prayer Wall, Local Support pages. **Exports `ATMOSPHERIC_HERO_BG` constant** (Visual Rollout Specs 8C / 6A consolidated this) for pages that use the atmospheric hero background without the full PageHero component — Settings and Insights consume the constant directly as part of their documented intentional drift from `BackgroundCanvas`.
+- **PageHero.tsx** — Purple gradient header with title, subtitle, optional `HeadingDivider`. **Post-Spec-14**: only `/music/routines` (RoutinesPage) consumes the rolls-own PageHero pattern verbatim. Prayer Wall uses its own dedicated `PrayerWallHero` (cinematic — Spec 14). Local Support uses its own dedicated `LocalSupportHero` (cinematic — Spec 14). Music uses its own dedicated `MusicHero` (cinematic — Spec 14). **Exports `ATMOSPHERIC_HERO_BG` constant** (Visual Rollout Specs 8C / 6A consolidated this) for pages that use the atmospheric hero background without the full PageHero component — Settings, Insights, and `/music/routines` consume the constant directly as part of their documented intentional drift from `BackgroundCanvas`.
 - **HeadingDivider.tsx** — White decorative SVG divider with fade gradients. Responsive via `useElementWidth()`.
 - **BackgroundSquiggle.tsx** — Decorative SVG squiggle (viewBox 1800×1350, 6 paths). Exported `SQUIGGLE_MASK_STYLE` for consistent fade mask. **Currently used only by the homepage `JourneySection`** as a narrow inline SVG (~150px column, centered, `preserveAspectRatio="none"`). **NOT used on Daily Hub** — squiggles were removed from all Daily Hub tabs in Wave 5 because they competed with the atmospheric layer (now `BackgroundCanvas` post-Visual-Rollout).
 - **BackgroundCanvas.tsx** (Visual Rollout Spec 1A — `components/ui/BackgroundCanvas.tsx`) — Canonical inner-page atmospheric layer. Renders the 5-stop multi-bloom CANVAS_BACKGROUND gradient on a `min-h-screen overflow-hidden` root with `data-testid="background-canvas"`. Used by every inner page except Settings, Insights, and Music (documented intentional drift). See "BackgroundCanvas Atmospheric Layer (Visual Rollout Spec 1A → site-wide)" below for the full pages-using list and the canonical gradient string.
@@ -609,7 +609,7 @@ Use `SectionHeading` component from `src/components/homepage/SectionHeading.tsx`
 
 ### Glow Backgrounds — Homepage Only
 
-Radial glow orbs positioned behind content. Used by homepage sections via `GlowBackground` component. **Inner pages do NOT use this** — they use `BackgroundCanvas` (see "BackgroundCanvas Atmospheric Layer" below). Settings and Insights stay on `bg-dashboard-dark + ATMOSPHERIC_HERO_BG` as documented intentional drift. Music preserves rolls-own atmospheric layers for audio engine integrity.
+Radial glow orbs positioned behind content. Used by homepage sections via `GlowBackground` component. **Inner pages do NOT use this** — they use `BackgroundCanvas` (see "BackgroundCanvas Atmospheric Layer" below). Settings, Insights, and `/music/routines` stay on `bg-dashboard-dark + ATMOSPHERIC_HERO_BG` as documented intentional drift. Music joined the canonical pattern post-Spec-14 (Decision 24 reconciled to Outcome A — see "BackgroundCanvas Atmospheric Layer" and "Cinematic Hero Pattern" sections below).
 
 **Opacity ranges (center of radial gradient):**
 
@@ -652,12 +652,13 @@ linear-gradient(
 
 (The exact rgba/percentage values live in `BackgroundCanvas.tsx` — if this rule and that file disagree, the file wins; update this rule and the recon report.)
 
-**Pages using `<BackgroundCanvas>`** (post-Visual-Rollout): DailyHub, BibleLanding, MyBiblePage, BiblePlanDetail, BiblePlanDay, PlanBrowserPage, ReadingPlanDetail, ChallengeDetail, GrowPage, LocalSupportPage (Churches, Counselors, CelebrateRecovery), AskPage, RegisterPage, CreatePlanFlow.
+**Pages using `<BackgroundCanvas>`** (post-Spec-14): DailyHub, BibleLanding, MyBiblePage, BiblePlanDetail, BiblePlanDay, PlanBrowserPage, ReadingPlanDetail, ChallengeDetail, GrowPage (entire page wrap — Spec 14 promoted from body-only), LocalSupportPage (Churches, Counselors, CelebrateRecovery), AskPage, RegisterPage, CreatePlanFlow, **PrayerWall (Spec 14 promoted from `bg-dashboard-dark` outer wrapper, `overflow-x-hidden` preserved)**, **MusicPage (Spec 14 — Decision 24 reconciled to Outcome A)**.
 
 **Documented intentional drift** (these pages do NOT use BackgroundCanvas):
 
 - **Settings + Insights:** Stay on `bg-dashboard-dark + ATMOSPHERIC_HERO_BG` (Direction Decision per Visual Rollout Spec 10A). The Insights `InsightsDataContext` provider (Spec 10B) is an Insights-specific data-read pattern — NOT promoted to canonical reusable template; if a second consumer adopts it in a future spec, revisit promotion.
-- **Music (Spec 11A):** Preserves rolls-own atmospheric layers. **Hard rule: no future spec migrates Music chrome to `BackgroundCanvas`, `FrostedCard`, or any other canonical atmospheric primitive without first reconciling against the AudioProvider / audioReducer / AudioContext cluster integrity (Decision 24 from Music direction).** The audio engine + the four contexts form a load-bearing cluster decoupled from chrome; touching the chrome without that reconciliation risks regressing audio behavior.
+- **`/music/routines` (RoutinesPage):** Stays on rolls-own hero (`aria-labelledby="routines-heading"`) with `ATMOSPHERIC_HERO_BG` inline style. **Spec 14 explicitly out-of-scope** — the RoutinesPage hero structure differs from the shared PageHero (rolls its own implementation rather than consuming the component) and was deliberately preserved during the cinematic rollout.
+- **Music joined the canonical pattern post-Spec-14.** Decision 24 was investigated as a read-only gate in Spec 14 Step 0 and reconciled to **Outcome A — Decoupled**: `AudioProvider` mounts at `App.tsx` L204 above the `<Routes>` block (i.e., above `MusicPage` in the React tree); `audioReducer` reads only audio-only state (14 fields: activeSounds, foregroundContent, masterVolume, foregroundBackgroundBalance, isPlaying, sleepTimer, activeRoutine, pillVisible, drawerOpen, currentSceneName, currentSceneId, foregroundEndedCounter, readingContext, pausedByBibleAudio); `AudioEngineService` imports only `AUDIO_CONFIG` (zero chrome refs); `AudioDrawer` mounts inside `AudioProvider`, not `MusicPage`. Grep of `frontend/src/components/audio/` for `bg-dashboard-dark`/`ATMOSPHERIC_HERO_BG`/`HorizonGlow`/`BackgroundCanvas`/`transparentNav`/`navbar` returned zero matches. The audio cluster is load-bearing and remains tightly decoupled from the chrome layer — Spec 14's chrome migration to `BackgroundCanvas + MusicHero (cinematic)` was safe. Future Music chrome work should re-verify against this baseline before introducing changes that affect the page wrapper structure.
 - **BibleReader:** Uses `ReaderChrome` and the reader-only theme variants (midnight / parchment / sepia) — its own immersive layout, documented elsewhere in this file.
 
 **Daily Hub-specific structure (Visual Rollout Spec 1A — what was Spec Y + Wave 7):**
@@ -669,6 +670,39 @@ The DailyHub root post-Spec-1A wraps content in `<BackgroundCanvas>` directly (n
 **StarField was experimented with but removed.** A Spec Y component called `StarField.tsx` (110+ small white dots scattered across the page) was built and tested, but the visual effect read as "dust on screen" rather than "stars in space." It has been deleted. Do not re-add stars without explicit reconsideration.
 
 **GlowBackground remains active on the homepage only.** GlowBackground.tsx still exists and is used by the homepage. The BackgroundCanvas pattern is the canonical inner-page atmospheric layer; GlowBackground is the canonical per-homepage-section atmospheric primitive.
+
+### Cinematic Hero Pattern (Spec 14 — Cinematic Hero Rollout)
+
+`CinematicHeroBackground` (`frontend/src/components/CinematicHeroBackground.tsx`) is the canonical hero atmospheric layer for inner-page heroes. Originally introduced on `/daily` (DailyHub) and rolled out site-wide in Spec 14 (2026-05-07).
+
+**Component:** zero-prop, `memo`-wrapped, deterministic (seeded LCG — no `Math.random()` at render time, no hydration drift). 8 direct children rendered as 3 `<div>` + 5 `<svg>` in source order: solid base (div, Layer 0) → nebula tint (div, Layer 1) → far stars (svg, Layer 2) → mid stars (svg, Layer 3) → bright stars with halos (svg, Layer 4) → cross-glints (svg, Layer 5) → warm directional beam (div, Layer 6) → film grain (svg, Layer 7). Outer wrapper carries `data-testid="cinematic-hero-background"` for test selectors.
+
+**Mask-fade-to-transparent architecture:** the outer wrapper extends 200px past parent height (`calc(100% + 200px)`) and applies a `mask-image: linear-gradient(to bottom, black 0%, black 35%, rgba(0,0,0,0.85) 55%, rgba(0,0,0,0.50) 72%, rgba(0,0,0,0.20) 88%, transparent 100%)` (mirrored to `WebkitMaskImage`). This enables seam-free composition with whatever atmospheric paints below the parent `<section>` — by design that atmospheric is `BackgroundCanvas` at the page root.
+
+**Composition contract — REPEATED on every cinematic-mounting page (drift is a regression):**
+
+1. `<Navbar transparent />` (or `<Layout transparentNav>` for AskPage) is the outer chrome.
+2. `<BackgroundCanvas>` wraps the entire page contents at the root.
+3. Hero `<section>` carries `position: relative` (anchors the absolutely-positioned cinematic).
+4. Hero `<section>` uses `pt-[145px] pb-12` constant padding — 97px navbar + 48px visible top compensation. **NO responsive modifiers** (e.g., `sm:pt-32`); navbar height does not change with viewport.
+5. `<CinematicHeroBackground />` is the FIRST child of the hero `<section>`.
+6. All hero content children (`<h1>`, `<p>`, action wrapper, extraContent wrapper) carry `relative z-10` so they stack above the absolute cinematic.
+
+**Pages using the cinematic pattern (post-Spec-14):** `/daily` (canonical reference — `DailyHub.tsx`), `/bible` (`BibleHero.tsx`), `/local-support/{churches,counselors,celebrate-recovery}` (`LocalSupportHero.tsx`), `/ask` (inline in `AskPage.tsx`), `/grow` (inline in `GrowPage.tsx`), `/prayer-wall` (`PrayerWallHero.tsx`), `/music` (`MusicHero.tsx` — Decision 24 reconciled).
+
+**Pages NOT using (intentional drift):** `/settings`, `/insights` (PageHero + ATMOSPHERIC_HERO_BG per Spec 10A), `/music/routines` (rolls-own hero with `aria-labelledby="routines-heading"` + ATMOSPHERIC_HERO_BG — Spec 14 out of scope), BibleReader (ReaderChrome), Music sub-routes, Prayer Wall sub-routes (sub-pages, not landing pages).
+
+**Reduced-motion behavior:** the global `*` rule in `frontend/src/styles/animations.css` plus the component-specific `animation: none !important` overrides in `frontend/src/index.css` L391–397 stop all cinematic animations when `prefers-reduced-motion: reduce` is set. The static atmospheric (stars, warm beam gradient, nebula tint, film grain) remains visible.
+
+**Mobile behavior:** SVG starfields render via `viewBox="0 0 1920 1080"` + `preserveAspectRatio="xMidYMid slice"`. The visible center ~1300 source-pixels render on a 375px viewport, density per square pixel comparable to desktop. No horizontal scroll at any breakpoint.
+
+**Performance:** ~660 SVG circles + 1 turbulence filter + 4 CSS animations. `React.memo`-wrapped with deterministic seeded LCG (`createSeededRandom`) — per-mount cost only. Memo'd, so navigating between Daily Hub tabs does not re-mount the component.
+
+**Sticky tab/filter bar coexistence:** sticky bars on cinematic-mounting pages (`/grow` `z-40`, `/prayer-wall` `z-30`, `/music` `z-40`) live BELOW the cinematic. The mask-fade-to-transparent reaches `transparent 100%` at its base, so layers below the mask's terminal point don't paint and the cinematic does NOT visually overlap the sticky bars. Do not change `z-index` values to "fix" perceived overlap — the mask handles it.
+
+**API stability:** the component is **zero-prop** and stays that way unless an explicit follow-up spec changes the contract. Do NOT introduce `bgColor`, `extensionPx`, `maskFadeStart`, `enableWarmBeam`, or any other prop. The ONLY modification permitted to the component file in the Spec 14 rollout was adding `data-testid="cinematic-hero-background"` to the outer wrapper.
+
+**Accessibility:** the outer wrapper carries `aria-hidden="true"` and `pointer-events-none`. Screen readers skip it; mouse/touch events pass through to the underlying content. These are non-negotiable — removing either is a regression.
 
 ### Frosted Glass Cards (FrostedCard Component)
 

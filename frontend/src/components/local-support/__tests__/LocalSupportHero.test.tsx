@@ -66,9 +66,11 @@ describe('LocalSupportHero', () => {
         subtitle="Sub"
       />,
     )
-    // heading + subtitle — no extra wrappers
+    // Spec 14 added CinematicHeroBackground as first child of every cinematic-mounting hero.
+    // Children when no extraContent/action: cinematic + heading + subtitle = 3.
     const section = container.querySelector('section')!
-    expect(section.children).toHaveLength(2)
+    expect(section.children).toHaveLength(3)
+    expect(section.firstElementChild?.getAttribute('data-testid')).toBe('cinematic-hero-background')
   })
 
   it('renders title with centered spacing for gradient text rendering', () => {

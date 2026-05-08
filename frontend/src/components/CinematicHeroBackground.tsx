@@ -152,6 +152,7 @@ export const CinematicHeroBackground = memo(function CinematicHeroBackground() {
   return (
     <div
       aria-hidden="true"
+      data-testid="cinematic-hero-background"
       className="pointer-events-none absolute inset-x-0 top-0 overflow-hidden"
       style={{
         height: 'calc(100% + 200px)',
