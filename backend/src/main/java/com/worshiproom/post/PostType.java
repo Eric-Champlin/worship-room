@@ -28,4 +28,12 @@ public enum PostType {
         }
         throw new IllegalArgumentException("Unknown PostType value: " + value);
     }
+
+    public static boolean isValid(String value) {
+        if (value == null) return false;
+        for (PostType t : values()) {
+            if (t.value.equals(value)) return true;
+        }
+        return false;
+    }
 }

@@ -1,4 +1,10 @@
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { PostType } from '@/constants/post-types'
+
+// Spec 3.10 type, moved to constants/post-types.ts in Spec 4.1.
+// Re-exported here for backward compatibility — existing imports of
+// `PostType` from `@/types/prayer-wall` continue to resolve unchanged.
+export type { PostType }
 
 export interface PrayerWallUser {
   id: string
@@ -41,14 +47,6 @@ export interface PrayerRequest {
   // - moderationStatus — server pre-filters; UI assumes 'approved'
   // - visibility — deferred until Phase 8 friend visibility
 }
-
-/** Spec 3.10 — discriminator for the unified posts table (Decision 4). */
-export type PostType =
-  | 'prayer_request'
-  | 'testimony'
-  | 'question'
-  | 'discussion'
-  | 'encouragement'
 
 export interface PrayerComment {
   id: string

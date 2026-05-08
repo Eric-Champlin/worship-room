@@ -91,7 +91,7 @@ After 5.6 ships: 1.5g.
 | 46  | 2.5.4  | Frontend Friends Dual-Write                       | L    | Medium | ✅     |
 | 47  | 2.5.4b | Social Interactions & Milestone Events Dual-Write | M    | Medium | ✅     |
 | 48  | 2.5.5  | Phase 2.5 Cutover                                 | S    | Medium | ✅     |
-| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ⬜     |
+| 49  | 2.5.6  | Block User Feature                                | M    | Medium | ✅     |
 | 50  | 2.5.7  | Mute User Feature                                 | S    | Low    | ✅     |
 
 > **2.5.6 verification (2026-04-28 audit):** Despite earlier ✅, no `com.worshiproom.block/` package exists, no `UserBlock*` Java code, and no `user_blocks` Liquibase changeset. Spec 2.5.7 Mute (the sibling spec) DID ship — `user_mutes` table at changeset 013, `MutesService`, `useMutes` hook all exist. Block remains unimplemented; reverted to ⬜.
@@ -117,7 +117,7 @@ After 5.6 ships: 1.5g.
 
 | #   | Spec     | Title                                                     | Size | Risk   | Status |
 | --- | -------- | --------------------------------------------------------- | ---- | ------ | ------ |
-| 63  | 4.1      | Post Type Foundation (Frontend Types + Backend Enum Sync) | M    | Low    | ⬜     |
+| 63  | 4.1      | Post Type Foundation (Frontend Types + Backend Enum Sync) | M    | Low    | ✅     |
 | 64  | 4.2      | Prayer Request Polish                                     | M    | Low    | ⬜     |
 | 65  | 4.3      | Testimony Post Type                                       | L    | Medium | ⬜     |
 | 66  | 4.4      | Question Post Type                                        | L    | Medium | ⬜     |
@@ -141,21 +141,21 @@ prevents a wasted deploy attempt.
 >
 > **Spec 14 partial fold-in (2026-05-07 — Cinematic Hero Rollout):** Spec 14 rolled the cinematic atmospheric onto every cinematic-mounting page (`/bible`, `/local-support/*`, `/ask`, `/grow`, `/prayer-wall`, `/music`) and folded four Phase 5 items in along the way: PrayerWallHero migration ✅, `font-script` "Wall" cleanup ✅, `font-serif italic` subtitle cleanup ✅, BackgroundCanvas promotion on `/prayer-wall` ✅ (Spec 5.2 shipped). Remaining Phase 5 scope: PrayerCard FrostedCard migration (5.1), 2-line heading treatment (5.3), animation token migration (5.4), the rest of the deprecated pattern purge (5.5 — only the PrayerWallHero typography portion done), Redis (5.6). See spec-14 plan + execution log: `_plans/2026-05-07-spec-14-cinematic-hero-rollout.md`.
 
-| #    | Spec | Title                                                                                   | Size | Risk   | Status |
-| ---- | ---- | --------------------------------------------------------------------------------------- | ---- | ------ | ------ |
-| 72.5 | 5.0  | Architecture Context Refresh (stub)                                                     | XS   | None   | ⬜     |
-| 73   | 5.1  | FrostedCard Migration                                                                   | L    | Medium | ⬜     |
-| 74   | 5.2  | BackgroundCanvas at Prayer Wall Root                                                    | S    | Low    | ✅ (shipped via Spec 14 Step 6) |
-| 75   | 5.3  | 2-Line Heading Treatment                                                                | M    | Low    | ⬜     |
-| 76   | 5.4  | Animation Token Migration (BB-33 Compliance)                                            | M    | Low    | ⬜     |
-| 77   | 5.5  | Deprecated Pattern Purge and Visual Audit (PrayerWallHero typography portion shipped via Spec 14 Step 7) | M    | Low    | ⬜ (partial) |
-| 78   | 5.6  | Redis Cache Foundation                                                                  | M    | Medium | ⬜     |
+| #    | Spec | Title                                                                                                    | Size | Risk   | Status                          |
+| ---- | ---- | -------------------------------------------------------------------------------------------------------- | ---- | ------ | ------------------------------- |
+| 72.5 | 5.0  | Architecture Context Refresh (stub)                                                                      | XS   | None   | ⬜                              |
+| 73   | 5.1  | FrostedCard Migration                                                                                    | L    | Medium | ⬜                              |
+| 74   | 5.2  | BackgroundCanvas at Prayer Wall Root                                                                     | S    | Low    | ✅ (shipped via Spec 14 Step 6) |
+| 75   | 5.3  | 2-Line Heading Treatment                                                                                 | M    | Low    | ⬜                              |
+| 76   | 5.4  | Animation Token Migration (BB-33 Compliance)                                                             | M    | Low    | ⬜                              |
+| 77   | 5.5  | Deprecated Pattern Purge and Visual Audit (PrayerWallHero typography portion shipped via Spec 14 Step 7) | M    | Low    | ⬜ (partial)                    |
+| 78   | 5.6  | Redis Cache Foundation                                                                                   | M    | Medium | ⬜                              |
 
 ### Spec 14 — Cinematic Hero Rollout (parallel Round 3 follow-on, 2026-05-07)
 
-| Spec | Title                                                                                   | Size | Risk | Status |
-| ---- | --------------------------------------------------------------------------------------- | ---- | ---- | ------ |
-| 14   | Cinematic Hero Rollout (`/bible`, `/local-support/*`, `/ask`, `/grow`, `/prayer-wall`, `/music`) + PrayerWallHero Phase-5 fold-in + DailyHub test backfill + CinematicHeroBackground component test + 09-design-system.md Cinematic Hero Pattern subsection + Decision 24 reconciliation (Outcome A — audio cluster decoupled) | XL | Med | ✅ (Eric's manual /music audio smoke pending before merge) |
+| Spec | Title                                                                                                                                                                                                                                                                                                                          | Size | Risk | Status                                                     |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | ---- | ---------------------------------------------------------- |
+| 14   | Cinematic Hero Rollout (`/bible`, `/local-support/*`, `/ask`, `/grow`, `/prayer-wall`, `/music`) + PrayerWallHero Phase-5 fold-in + DailyHub test backfill + CinematicHeroBackground component test + 09-design-system.md Cinematic Hero Pattern subsection + Decision 24 reconciliation (Outcome A — audio cluster decoupled) | XL   | Med  | ✅ (Eric's manual /music audio smoke pending before merge) |
 
 ## Phase 6 — Engagement Features (14 specs)
 
