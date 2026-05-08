@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import type { PrayerComment } from '@/types/prayer-wall'
+import type { PostType } from '@/constants/post-types'
 import { CommentItem } from './CommentItem'
 import { CommentInput } from './CommentInput'
 import { useAuthModal } from './AuthModalProvider'
@@ -19,6 +20,16 @@ interface CommentsSectionProps {
     idempotencyKey?: string
   ) => boolean | Promise<boolean>
   prayerContent?: string
+  /** Spec 4.4 — passed through to CommentItem so question posts surface the helped marker. */
+  postType: PostType
+  /**
+   * Spec 4.4 — passed through to CommentItem so the post-author-only conditional
+   * fires correctly. Nullable to mirror `PrayerRequest.userId` on anonymous posts
+   * (the author conditional in CommentItem hides the button when null).
+   */
+  postAuthorId: string | null
+  /** Spec 4.4 — passed through to CommentItem so question post authors can resolve a comment. */
+  onResolve?: (commentId: string) => void
 }
 
 export function CommentsSection({
@@ -28,6 +39,9 @@ export function CommentsSection({
   totalCount,
   onSubmitComment,
   prayerContent = '',
+  postType,
+  postAuthorId,
+  onResolve,
 }: CommentsSectionProps) {
   const authModal = useAuthModal()
   const [replyTo, setReplyTo] = useState('')
@@ -48,7 +62,14 @@ export function CommentsSection({
     >
       <div className="mt-3 border-t border-white/10 pt-3">
         {visibleComments.map((comment) => (
-          <CommentItem key={comment.id} comment={comment} onReply={handleReply} />
+          <CommentItem
+            key={comment.id}
+            comment={comment}
+            postType={postType}
+            postAuthorId={postAuthorId}
+            onReply={handleReply}
+            onResolve={onResolve}
+          />
         ))}
 
         {totalCount > MAX_VISIBLE_COMMENTS && (

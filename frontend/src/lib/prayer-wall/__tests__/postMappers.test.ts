@@ -43,6 +43,7 @@ function buildPostDto(overrides: Partial<PostDto> = {}): PostDto {
       displayName: 'Sarah',
       avatarUrl: 'https://i.pravatar.cc/150?u=sarah',
     },
+    questionResolvedCommentId: null,
     ...overrides,
   }
 }
@@ -153,6 +154,45 @@ describe('postDtoToPrayerRequest', () => {
   })
 })
 
+describe('postDtoToPrayerRequest — Spec 4.4 question fields', () => {
+  it('plumbs questionResolvedCommentId when present', () => {
+    const dto = buildPostDto({
+      postType: 'question',
+      category: null,
+      questionResolvedCommentId: 'comment-helpful-1',
+    })
+    const result = postDtoToPrayerRequest(dto)
+    expect(result.questionResolvedCommentId).toBe('comment-helpful-1')
+  })
+
+  it('omits questionResolvedCommentId when null on the DTO', () => {
+    const dto = buildPostDto({
+      postType: 'question',
+      category: null,
+      questionResolvedCommentId: null,
+    })
+    const result = postDtoToPrayerRequest(dto)
+    expect(result.questionResolvedCommentId).toBeUndefined()
+  })
+})
+
+describe('commentDtoToPrayerComment — Spec 4.4 question fields', () => {
+  it('plumbs parentCommentId, isHelpful, and replies when present', () => {
+    const reply = buildCommentDto({ id: 'reply-1', content: 'reply content' })
+    const dto = buildCommentDto({
+      parentCommentId: 'parent-comment-id',
+      isHelpful: true,
+      replies: [reply],
+    })
+    const result = commentDtoToPrayerComment(dto)
+    expect(result.parentCommentId).toBe('parent-comment-id')
+    expect(result.isHelpful).toBe(true)
+    expect(result.replies).toHaveLength(1)
+    expect(result.replies?.[0].id).toBe('reply-1')
+    expect(result.replies?.[0].content).toBe('reply content')
+  })
+})
+
 describe('mapPostDtos — array integrity (cross-author leakage prevention)', () => {
   it('preserves per-DTO author identity across an array of 5 distinct authors', () => {
     const dtos: PostDto[] = [
@@ -205,10 +245,15 @@ describe('commentDtoToPrayerComment', () => {
       authorAvatarUrl: null,
       content: 'Praying with you.',
       createdAt: '2026-04-29T11:00:00Z',
+      // Spec 4.4 — buildCommentDto default isHelpful=false; the mapper now
+      // plumbs the boolean through (parentCommentId stays absent because the
+      // builder's default is null, replies stays absent because the builder's
+      // default is []).
+      isHelpful: false,
     })
   })
 
-  it('drops parentCommentId, isHelpful, replies, crisisFlag, moderationStatus, updatedAt', () => {
+  it('drops crisisFlag, moderationStatus, updatedAt (Spec 4.4 plumbs parentCommentId/isHelpful/replies)', () => {
     const dto = buildCommentDto({
       parentCommentId: 'parent-comment-id',
       isHelpful: true,
@@ -217,9 +262,12 @@ describe('commentDtoToPrayerComment', () => {
       moderationStatus: 'flagged',
     })
     const result = commentDtoToPrayerComment(dto)
-    expect(result).not.toHaveProperty('parentCommentId')
-    expect(result).not.toHaveProperty('isHelpful')
-    expect(result).not.toHaveProperty('replies')
+    // Spec 4.4 — these fields are now plumbed through the mapper.
+    expect(result.parentCommentId).toBe('parent-comment-id')
+    expect(result.isHelpful).toBe(true)
+    expect(result.replies).toHaveLength(1)
+    expect(result.replies?.[0].id).toBe('reply-1')
+    // Still dropped (no consumer in current PrayerComment shape).
     expect(result).not.toHaveProperty('crisisFlag')
     expect(result).not.toHaveProperty('moderationStatus')
     expect(result).not.toHaveProperty('updatedAt')

@@ -74,7 +74,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(23);
+        assertThat(rows).hasSize(24);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -570,7 +570,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             "ORDER BY ordinal_position"
         );
 
-        assertThat(columns).hasSize(26);
+        assertThat(columns).hasSize(27);
         assertThat(columns).extracting("column_name")
             .containsExactly(
                 "id", "user_id", "post_type", "content", "category", "is_anonymous",
@@ -578,7 +578,8 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                 "visibility", "is_answered", "answered_text", "answered_at",
                 "moderation_status", "crisis_flag", "is_deleted", "deleted_at",
                 "praying_count", "candle_count", "comment_count", "bookmark_count",
-                "report_count", "created_at", "updated_at", "last_activity_at"
+                "report_count", "created_at", "updated_at", "last_activity_at",
+                "question_resolved_comment_id"
             );
 
         Map<String, Object> idColumn = columns.stream()

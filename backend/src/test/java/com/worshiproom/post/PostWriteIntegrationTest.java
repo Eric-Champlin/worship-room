@@ -676,4 +676,142 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("FORBIDDEN"));
     }
+
+    // =====================================================================
+    // PATCH /api/v1/posts/{id}/resolve (Spec 4.4)
+    // =====================================================================
+
+    private UUID seedQuestionPost(UUID userId) {
+        UUID id = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, visibility, moderation_status,
+                                   is_deleted, is_anonymous)
+                VALUES (?, ?, 'question', 'What does this verse mean?', 'public', 'approved',
+                        false, false)
+                """,
+                id, userId);
+        return id;
+    }
+
+    private UUID seedComment(UUID postId, UUID userId, boolean isDeleted) {
+        UUID id = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO post_comments (id, post_id, user_id, content, is_helpful, is_deleted, deleted_at, moderation_status, crisis_flag)
+                VALUES (?, ?, ?, 'helpful answer', false, ?, ?, 'approved', false)
+                """,
+                id, postId, userId, isDeleted, isDeleted ? java.time.OffsetDateTime.now() : null);
+        return id;
+    }
+
+    @Test
+    void resolveQuestion_asAuthor_returns200WithUpdatedPostDto() throws Exception {
+        UUID postId = seedQuestionPost(alice.getId());
+        UUID commentId = seedComment(postId, bob.getId(), false);
+
+        mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"commentId\": \"" + commentId + "\" }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.questionResolvedCommentId").value(commentId.toString()))
+                .andExpect(jsonPath("$.data.updatedAt").exists())
+                .andExpect(jsonPath("$.data.postType").value("question"));
+
+        // DB-level verification: comment is_helpful flag set, post pointer set.
+        Boolean isHelpful = jdbc.queryForObject(
+                "SELECT is_helpful FROM post_comments WHERE id = ?",
+                Boolean.class, commentId);
+        assertThat(isHelpful).isTrue();
+    }
+
+    @Test
+    void resolveQuestion_asNonAuthor_returns403() throws Exception {
+        UUID postId = seedQuestionPost(alice.getId());
+        UUID commentId = seedComment(postId, bob.getId(), false);
+
+        mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                        .header("Authorization", "Bearer " + bobJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"commentId\": \"" + commentId + "\" }"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("FORBIDDEN"));
+    }
+
+    @Test
+    void resolveQuestion_unauthenticated_returns401() throws Exception {
+        UUID postId = seedQuestionPost(alice.getId());
+        UUID commentId = seedComment(postId, bob.getId(), false);
+
+        mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"commentId\": \"" + commentId + "\" }"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void resolveQuestion_onPrayerRequestPost_returns400_INVALID_POST_TYPE_FOR_RESOLVE() throws Exception {
+        UUID postId = seedPostDirect(alice.getId()); // prayer_request
+        UUID commentId = seedComment(postId, bob.getId(), false);
+
+        mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"commentId\": \"" + commentId + "\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_POST_TYPE_FOR_RESOLVE"));
+    }
+
+    @Test
+    void resolveQuestion_withCommentFromDifferentPost_returns400_COMMENT_POST_MISMATCH() throws Exception {
+        UUID postA = seedQuestionPost(alice.getId());
+        UUID postB = seedQuestionPost(alice.getId());
+        UUID commentOnB = seedComment(postB, bob.getId(), false);
+
+        mvc.perform(patch("/api/v1/posts/" + postA + "/resolve")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"commentId\": \"" + commentOnB + "\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMENT_POST_MISMATCH"));
+    }
+
+    @Test
+    void resolveQuestion_onSoftDeletedComment_returns404_COMMENT_NOT_FOUND() throws Exception {
+        UUID postId = seedQuestionPost(alice.getId());
+        UUID commentId = seedComment(postId, bob.getId(), true); // soft-deleted
+
+        mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"commentId\": \"" + commentId + "\" }"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("COMMENT_NOT_FOUND"));
+    }
+
+    @Test
+    void resolveQuestion_after_30_calls_returns429_with_RetryAfter_header() throws Exception {
+        UUID postId = seedQuestionPost(alice.getId());
+        UUID commentId = seedComment(postId, bob.getId(), false);
+        String body = "{ \"commentId\": \"" + commentId + "\" }";
+
+        // 30 successful calls; the 1st sets helpful, the next 29 are idempotent
+        // (same comment) but each STILL consumes a rate-limit token (rate limit
+        // runs BEFORE the idempotency check per Step 6).
+        for (int i = 0; i < 30; i++) {
+            mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                            .header("Authorization", "Bearer " + aliceJwt)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isOk());
+        }
+
+        // 31st call exhausts the bucket.
+        mvc.perform(patch("/api/v1/posts/" + postId + "/resolve")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.code").value("RATE_LIMITED"));
+    }
 }

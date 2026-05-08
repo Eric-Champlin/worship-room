@@ -539,12 +539,25 @@ function DashboardContent() {
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
                     />
+                    {/*
+                      Spec 4.4 — `onResolve` intentionally NOT passed here.
+                      Dashboard renders comments via `getMockComments()` (or `[]`
+                      when flag-on), with no local comment state to mutate
+                      optimistically. Wiring resolve without local state would
+                      mark the comment helpful on the backend but leave the UI
+                      stale until reload, which feels broken. Authors resolve
+                      from /prayer-wall or /prayer-wall/:id today; lifting this
+                      gap requires Dashboard to own its own comment state.
+                      Tracked in `_plans/post-wave-followups.md` §31.
+                    */}
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
                       comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
+                      postType={prayer.postType}
+                      postAuthorId={prayer.userId}
                     />
                     {!prayer.isAnswered && (
                       <div className="mt-3 flex items-center gap-4 border-t border-white/10 pt-3">
@@ -642,12 +655,15 @@ function DashboardContent() {
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
                     />
+                    {/* Bookmarks tab — viewing others' prayers; never the post author here. */}
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
                       comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
+                      postType={prayer.postType}
+                      postAuthorId={prayer.userId}
                     />
                   </PrayerCard>
                 ))
@@ -677,12 +693,15 @@ function DashboardContent() {
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
                     />
+                    {/* Reactions tab — viewing others' prayers; never the post author here. */}
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
                       comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
+                      postType={prayer.postType}
+                      postAuthorId={prayer.userId}
                     />
                   </PrayerCard>
                 ))

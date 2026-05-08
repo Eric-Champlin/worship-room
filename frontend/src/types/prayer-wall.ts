@@ -45,6 +45,9 @@ export interface PrayerRequest {
   updatedAt?: string
   scriptureReference?: string
   scriptureText?: string
+  // --- Spec 4.4 — UUID of the comment marked as "Most helpful" by the question
+  // author. Set only on resolved question posts; null/undefined otherwise.
+  questionResolvedCommentId?: string
   // --- Intentionally NOT exposed:
   // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
   // - moderationStatus — server pre-filters; UI assumes 'approved'
@@ -59,6 +62,13 @@ export interface PrayerComment {
   authorAvatarUrl: string | null
   content: string // may contain @mentions like "@Sarah"
   createdAt: string
+  // --- Spec 4.4 — backend has been returning these since Phase 3; frontend now
+  // consumes them. parentCommentId enables threading (deferred MPD-3).
+  // isHelpful drives the inline ResolvedBadge on question post comments.
+  // replies plumbs through nested children even though MVP renders flat.
+  parentCommentId?: string
+  isHelpful?: boolean
+  replies?: PrayerComment[]
 }
 
 export interface PrayerReaction {

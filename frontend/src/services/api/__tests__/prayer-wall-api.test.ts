@@ -56,6 +56,7 @@ function buildPostDto(overrides: Partial<PostDto> = {}): PostDto {
     updatedAt: '2026-04-29T10:00:00Z',
     lastActivityAt: '2026-04-29T10:00:00Z',
     author: { id: 'u1', displayName: 'Sarah', avatarUrl: null },
+    questionResolvedCommentId: null,
     ...overrides,
   }
 }
@@ -386,6 +387,7 @@ import {
   createPost,
   updatePost,
   deletePost,
+  resolveQuestion,
   toggleReaction,
   removeReaction,
   addBookmark,
@@ -597,6 +599,64 @@ describe('deletePost', () => {
       new ApiError('NOT_FOUND', 404, 'missing', null),
     )
     await expect(deletePost('p1')).rejects.toMatchObject({ status: 404 })
+  })
+})
+
+// --- resolveQuestion (Spec 4.4) ---
+
+describe('prayerWallApi.resolveQuestion (Spec 4.4)', () => {
+  it('issues PATCH /api/v1/posts/{id}/resolve with the correct path', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(
+      buildPostDto({
+        id: 'p1',
+        postType: 'question',
+        category: null,
+        questionResolvedCommentId: 'comment-helpful-1',
+      }),
+    )
+    await resolveQuestion('p1', 'comment-helpful-1')
+    expect(apiFetch).toHaveBeenCalledWith(
+      '/api/v1/posts/p1/resolve',
+      expect.objectContaining({ method: 'PATCH' }),
+    )
+  })
+
+  it('includes commentId in the body', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(
+      buildPostDto({
+        id: 'p1',
+        postType: 'question',
+        category: null,
+        questionResolvedCommentId: 'comment-helpful-1',
+      }),
+    )
+    await resolveQuestion('p1', 'comment-helpful-1')
+    const callArgs = vi.mocked(apiFetch).mock.calls.at(-1)
+    expect(callArgs?.[1]?.body).toBe(
+      JSON.stringify({ commentId: 'comment-helpful-1' }),
+    )
+  })
+
+  it('returns updated PrayerRequest with questionResolvedCommentId via mapper', async () => {
+    vi.mocked(apiFetch).mockResolvedValueOnce(
+      buildPostDto({
+        id: 'p1',
+        postType: 'question',
+        category: null,
+        questionResolvedCommentId: 'comment-helpful-1',
+      }),
+    )
+    const result = await resolveQuestion('p1', 'comment-helpful-1')
+    expect(result.id).toBe('p1')
+    expect(result.postType).toBe('question')
+    expect(result.questionResolvedCommentId).toBe('comment-helpful-1')
+  })
+
+  it('throws AnonymousWriteAttemptError when not authenticated', async () => {
+    setNoToken()
+    await expect(resolveQuestion('p1', 'c1')).rejects.toBeInstanceOf(
+      AnonymousWriteAttemptError,
+    )
   })
 })
 

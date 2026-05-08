@@ -10,6 +10,10 @@ import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostListMeta;
 import com.worshiproom.post.dto.PostListResponse;
 import com.worshiproom.post.dto.UpdatePostRequest;
+import com.worshiproom.post.comment.CommentNotForThisPostException;
+import com.worshiproom.post.comment.PostComment;
+import com.worshiproom.post.comment.PostCommentNotFoundException;
+import com.worshiproom.post.comment.PostCommentRepository;
 import com.worshiproom.safety.ContentType;
 import com.worshiproom.safety.CrisisDetectedEvent;
 import com.worshiproom.safety.CrisisResources;
@@ -65,6 +69,8 @@ public class PostService {
     private final PostsRateLimitConfig config;
     private final PolicyFactory htmlSanitizerPolicy;
     private final EntityManager entityManager;
+    private final PostCommentRepository commentRepository;
+    private final ResolveRateLimitService resolveRateLimitService;
 
     public PostService(PostRepository postRepository,
                        PostMapper postMapper,
@@ -77,7 +83,9 @@ public class PostService {
                        ApplicationEventPublisher eventPublisher,
                        PostsRateLimitConfig config,
                        PolicyFactory htmlSanitizerPolicy,
-                       EntityManager entityManager) {
+                       EntityManager entityManager,
+                       PostCommentRepository commentRepository,
+                       ResolveRateLimitService resolveRateLimitService) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.userResolverService = userResolverService;
@@ -90,6 +98,8 @@ public class PostService {
         this.config = config;
         this.htmlSanitizerPolicy = htmlSanitizerPolicy;
         this.entityManager = entityManager;
+        this.commentRepository = commentRepository;
+        this.resolveRateLimitService = resolveRateLimitService;
     }
 
     public PostListResponse listFeed(
@@ -465,6 +475,85 @@ public class PostService {
 
         log.info("postDeleted postId={} userId={} deletedBy={} requestId={}",
                 postId, post.getUserId(), principal.userId(), requestId);
+    }
+
+    /**
+     * Spec 4.4 — Mark a comment as the helpful answer to a question post.
+     *
+     * <p>Author-only (NO admin override per Plan-Time Divergence #1, brief W6).
+     * Atomic move: if a different comment was previously helpful, that comment's
+     * {@code is_helpful} clears in the same transaction as the new comment's
+     * {@code is_helpful} sets. Idempotent — re-marking the same already-helpful
+     * comment is a no-op (no DB write, no {@code updated_at} bump).
+     *
+     * <p>Throws — {@link PostNotFoundException} for missing/soft-deleted post,
+     * {@link PostNotAQuestionException} for non-question post, {@link PostForbiddenException}
+     * when caller is not the author, {@link PostCommentNotFoundException} for
+     * missing/soft-deleted comment, {@link CommentNotForThisPostException} when
+     * the comment exists but belongs to a different post, {@link PostsRateLimitException}
+     * on rate-limit exhaustion (30/hour per user).
+     */
+    @Transactional
+    public PostDto resolveQuestion(UUID postId, UUID commentId, UUID currentUserId, String requestId) {
+        // Step 1: rate-limit (per-user, 30/hour). Throws PostsRateLimitException → 429.
+        resolveRateLimitService.checkAndConsume(currentUserId);
+
+        // Step 2: load post (live only — soft-deleted → 404).
+        Post post = postRepository.findByIdAndIsDeletedFalse(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        // Step 3: post type gate.
+        if (post.getPostType() != PostType.QUESTION) {
+            throw new PostNotAQuestionException();
+        }
+
+        // Step 4: ownership gate (strict author-only — NO admin override per Plan-Time Divergence #1).
+        if (!post.getUserId().equals(currentUserId)) {
+            throw new PostForbiddenException();
+        }
+
+        // Step 5: load + validate comment (must belong to this post AND not be soft-deleted).
+        PostComment newComment = commentRepository
+                .findByIdAndPostIdAndIsDeletedFalse(commentId, postId)
+                .orElseGet(() -> {
+                    // Distinguish "wrong post" from "doesn't exist" for cleaner error responses.
+                    if (commentRepository.findByIdAndIsDeletedFalse(commentId).isPresent()) {
+                        throw new CommentNotForThisPostException();
+                    }
+                    throw new PostCommentNotFoundException();
+                });
+
+        // Step 6: idempotency check (D9). Same comment already helpful → no-op (no DB write,
+        // no updated_at bump).
+        UUID priorResolvedId = post.getQuestionResolvedCommentId();
+        if (newComment.isHelpful() && commentId.equals(priorResolvedId)) {
+            log.info("questionResolveIdempotent postId={} userId={} commentId={} requestId={}",
+                    postId, currentUserId, commentId, requestId);
+            return postMapper.toDto(post);
+        }
+
+        // Step 7: atomic move (D10) — within @Transactional, single rollback boundary.
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        if (priorResolvedId != null && !priorResolvedId.equals(commentId)) {
+            commentRepository.findByIdAndIsDeletedFalse(priorResolvedId).ifPresent(old -> {
+                old.setHelpful(false);
+                old.setUpdatedAt(now);
+                commentRepository.save(old);
+            });
+        }
+
+        newComment.setHelpful(true);
+        newComment.setUpdatedAt(now);
+        commentRepository.save(newComment);
+
+        post.setQuestionResolvedCommentId(commentId);
+        post.setUpdatedAt(now);
+        Post saved = postRepository.save(post);
+
+        log.info("questionResolved postId={} userId={} commentId={} priorResolvedId={} requestId={}",
+                postId, currentUserId, commentId, priorResolvedId, requestId);
+
+        return postMapper.toDto(saved);
     }
 
     private static boolean isVisibilityUpgrade(PostVisibility from, PostVisibility to) {

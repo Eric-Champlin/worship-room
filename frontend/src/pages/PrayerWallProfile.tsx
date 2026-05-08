@@ -368,12 +368,23 @@ function PrayerWallProfileContent() {
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
                     />
+                    {/*
+                      Spec 4.4 — `onResolve` intentionally NOT passed here.
+                      A profile shows another user's posts (the viewer is not
+                      the author), so the "This helped" button conditional in
+                      CommentItem hides the button anyway. If a viewer ever lands
+                      on their own profile, they should resolve via PrayerDetail
+                      or the main feed where local comment state powers the
+                      optimistic update. See `_plans/post-wave-followups.md` §31.
+                    */}
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
                       comments={flagOn ? [] : getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
+                      postType={prayer.postType}
+                      postAuthorId={prayer.userId}
                     />
                   </PrayerCard>
                 ))
@@ -428,12 +439,15 @@ function PrayerWallProfileContent() {
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
                     />
+                    {/* Reactions tab — viewing others' prayers; never the post author here. */}
                     <CommentsSection
                       prayerId={prayer.id}
                       isOpen={openComments.has(prayer.id)}
                       comments={getMockComments(prayer.id)}
                       totalCount={prayer.commentCount}
                       onSubmitComment={handleSubmitComment}
+                      postType={prayer.postType}
+                      postAuthorId={prayer.userId}
                     />
                   </PrayerCard>
                 ))

@@ -33,5 +33,6 @@ public record PostDto(
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
         OffsetDateTime lastActivityAt,
-        AuthorDto author
+        AuthorDto author,
+        UUID questionResolvedCommentId
 ) {}

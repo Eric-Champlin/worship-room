@@ -156,6 +156,37 @@ class PostMapperTest extends AbstractDataJpaTest {
     }
 
     @Test
+    void toDto_questionResolvedCommentId_isNullByDefault() {
+        Post post = seedPost(author.getId(), false);
+        PostDto dto = postMapper.toDto(post);
+        assertThat(dto.questionResolvedCommentId()).isNull();
+    }
+
+    @Test
+    void toDto_populatesQuestionResolvedCommentId() {
+        // Seed a post then assign the resolved comment pointer directly. We
+        // bypass the FK by passing a UUID that does not need to reference a
+        // real comment for this serialization test (the foreign key is checked
+        // at flush time, not when a managed entity's field is set, so we use
+        // a JDBC update to write the value and re-load).
+        Post post = seedPost(author.getId(), false);
+        UUID commentId = UUID.randomUUID();
+        // Insert a sham comment row to satisfy the FK
+        UUID userId = author.getId();
+        jdbc.update("""
+                INSERT INTO post_comments (id, post_id, user_id, content)
+                VALUES (?, ?, ?, 'comment for resolved test')
+                """, commentId, post.getId(), userId);
+        jdbc.update(
+                "UPDATE posts SET question_resolved_comment_id = ? WHERE id = ?",
+                commentId, post.getId());
+        entityManager.clear();
+        Post reloaded = entityManager.find(Post.class, post.getId());
+        PostDto dto = postMapper.toDto(reloaded);
+        assertThat(dto.questionResolvedCommentId()).isEqualTo(commentId);
+    }
+
+    @Test
     void serializeAnonymousAuthorDto_idFieldIsPresentWithNullValue() throws Exception {
         // The class-level @JsonInclude(ALWAYS) on AuthorDto must override the
         // global default-property-inclusion=non_null so id renders as "id":null

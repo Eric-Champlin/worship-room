@@ -66,7 +66,7 @@ const PRAYERS_PER_PAGE = 20
 const successToastByType: Record<PostType, string> = {
   prayer_request: 'Your prayer is on the wall. Others can now lift it up.',
   testimony: 'Your testimony is on the wall. Others can rejoice with you.',
-  question: 'Your prayer is on the wall. Others can now lift it up.',
+  question: 'Your question is on the wall. Others can weigh in.',
   discussion: 'Your prayer is on the wall. Others can now lift it up.',
   encouragement: 'Your prayer is on the wall. Others can now lift it up.',
 }
@@ -74,7 +74,7 @@ const successToastByType: Record<PostType, string> = {
 const authModalCtaByType: Record<PostType, string> = {
   prayer_request: 'Sign in to share a prayer request',
   testimony: 'Sign in to share a testimony',
-  question: 'Sign in to share a prayer request',
+  question: 'Sign in to ask a question',
   discussion: 'Sign in to share a prayer request',
   encouragement: 'Sign in to share a prayer request',
 }
@@ -652,6 +652,65 @@ function PrayerWallContent() {
     [isAuthenticated, showToast, user, recordActivity, openAuthModal, fetchedComments]
   )
 
+  /**
+   * Spec 4.4 — Mark a comment helpful on a question post (post-author-only at the
+   * UI level; backend enforces strictly). Optimistic update with exact-state
+   * rollback (W15) — captures the prior `questionResolvedCommentId` BEFORE
+   * mutating, restores that exact value on backend failure (NOT all-set-to-false).
+   */
+  const handleResolve = useCallback(
+    async (postId: string, commentId: string): Promise<void> => {
+      if (!isAuthenticated) {
+        openAuthModal?.('Sign in to mark a comment as helpful')
+        return
+      }
+
+      // Capture prior state for rollback.
+      const targetPrayer = prayers.find((p) => p.id === postId)
+      const previousHelpfulCommentId = targetPrayer?.questionResolvedCommentId
+
+      const applyOptimistic = (newHelpfulId: string | undefined) => {
+        setPrayers((prev) =>
+          prev.map((p) =>
+            p.id === postId ? { ...p, questionResolvedCommentId: newHelpfulId } : p,
+          ),
+        )
+        const updateComments = (prev: Record<string, PrayerComment[]>) => {
+          const list = prev[postId] ?? []
+          return {
+            ...prev,
+            [postId]: list.map((c) => ({ ...c, isHelpful: c.id === newHelpfulId })),
+          }
+        }
+        setLocalComments(updateComments)
+        setFetchedComments(updateComments)
+      }
+
+      applyOptimistic(commentId)
+
+      if (!isBackendPrayerWallEnabled()) {
+        // Flag-off — optimistic update is the entire change. No backend call.
+        return
+      }
+
+      try {
+        await prayerWallApi.resolveQuestion(postId, commentId)
+      } catch (err) {
+        // Rollback to the EXACT prior state, not all-set-to-false (W15).
+        applyOptimistic(previousHelpfulCommentId)
+        if (err instanceof AnonymousWriteAttemptError) {
+          openAuthModal?.('Sign in to mark a comment as helpful')
+        } else if (err instanceof ApiError) {
+          const descriptor = mapApiErrorToToast(err)
+          if (descriptor.message) showToast(descriptor.message)
+        } else {
+          showToast('Could not mark as helpful. Try again.')
+        }
+      }
+    },
+    [isAuthenticated, openAuthModal, prayers, showToast],
+  )
+
   return (
     <BackgroundCanvas className="flex min-h-screen flex-col overflow-x-hidden font-sans">
       <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
@@ -747,7 +806,13 @@ function PrayerWallContent() {
             <InlineComposer
               isOpen={composerOpen}
               onClose={() => setComposerOpen(false)}
-              postType={searchParams.get('debug-post-type') === 'testimony' ? 'testimony' : 'prayer_request'}
+              postType={
+                searchParams.get('debug-post-type') === 'testimony'
+                  ? 'testimony'
+                  : searchParams.get('debug-post-type') === 'question'
+                    ? 'question'
+                    : 'prayer_request'
+              }
               onSubmit={handleComposerSubmit}
             />
 
@@ -816,6 +881,9 @@ function PrayerWallContent() {
                         totalCount={prayer.commentCount}
                         onSubmitComment={handleSubmitComment}
                         prayerContent={prayer.content}
+                        postType={prayer.postType}
+                        postAuthorId={prayer.userId}
+                        onResolve={(commentId) => handleResolve(prayer.id, commentId)}
                       />
                     </PrayerCard>
                   </div>

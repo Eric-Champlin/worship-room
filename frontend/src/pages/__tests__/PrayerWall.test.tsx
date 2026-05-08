@@ -248,3 +248,73 @@ describe('PrayerWall — Spec 4.3 testimony composer', () => {
     ).toBeInTheDocument()
   })
 })
+
+// =====================================================================
+// Spec 4.4 — question composer per-type behavior
+// =====================================================================
+
+describe('PrayerWall — Spec 4.4 question composer', () => {
+  it('?debug-post-type=question opens composer in question mode', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Sarah' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?debug-post-type=question')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    expect(screen.getByText('Ask a question')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /submit question/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('successful question submit (mock branch) shows question-specific success toast', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Sarah' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?debug-post-type=question')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    await user.type(
+      screen.getByLabelText('Question'),
+      'What does this verse mean for someone in my situation?',
+    )
+    await user.click(screen.getByRole('button', { name: /submit question/i }))
+    expect(
+      await screen.findByText('Your question is on the wall. Others can weigh in.'),
+    ).toBeInTheDocument()
+  })
+
+  it('unauthenticated question submit surfaces question-specific auth modal CTA', async () => {
+    // Logged out — submitting a question opens the AuthModal with question CTA copy.
+    // (Opening the composer alone does NOT auth-gate; the gate fires on submit
+    // via handleComposerSubmit.)
+    authState.current = { user: null, isAuthenticated: false }
+    const user = userEvent.setup()
+    const { container } = renderPage('/prayer-wall?debug-post-type=question')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    // Surface DOM snapshot if subsequent queries fail.
+    void container
+    await user.type(
+      screen.getByLabelText('Question'),
+      'What does this verse mean for someone in my situation?',
+    )
+    // Use queryAll to bypass aria-hidden/inert filtering — the composer button
+    // can be hidden behind a route-level filter when the composer is in the
+    // closed state's lingering inert wrapper. The composer trigger only toggles
+    // visibility of the panel; the panel renders both when open and closed.
+    const submitBtn = screen.queryByRole('button', { name: /submit question/i })
+      ?? screen.getAllByRole('button', { hidden: true }).find(
+        (b) => /submit question/i.test(b.textContent ?? ''),
+      )
+    if (!submitBtn) throw new Error('Submit Question button not found in DOM')
+    await user.click(submitBtn)
+    expect(
+      await screen.findByText('Sign in to ask a question'),
+    ).toBeInTheDocument()
+  })
+})

@@ -7,6 +7,7 @@ import com.worshiproom.post.dto.CreatePostRequest;
 import com.worshiproom.post.dto.CreatePostResponse;
 import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostListResponse;
+import com.worshiproom.post.dto.ResolveQuestionRequest;
 import com.worshiproom.post.dto.UpdatePostRequest;
 import com.worshiproom.post.engagement.BookmarkWriteService;
 import com.worshiproom.post.engagement.EngagementService;
@@ -199,6 +200,26 @@ public class PostController {
 
         postService.deletePost(id, principal, requestId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Spec 4.4 — Mark a comment as the helpful answer to a question post.
+     * Author-only (no admin override). Atomic move + idempotent. Rate-limited
+     * to 30/hour per user via {@link ResolveRateLimitService}.
+     */
+    @PatchMapping("/posts/{id}/resolve")
+    public ResponseEntity<ProxyResponse<PostDto>> resolveQuestion(
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @PathVariable UUID id,
+            @Valid @RequestBody ResolveQuestionRequest request
+    ) {
+        UUID currentUserId = principal.userId();
+        String requestId = MDC.get("requestId");
+        log.info("Question resolve requested userId={} postId={} commentId={}",
+                currentUserId, id, request.commentId());
+
+        PostDto dto = postService.resolveQuestion(id, request.commentId(), currentUserId, requestId);
+        return ResponseEntity.ok(ProxyResponse.of(dto, requestId));
     }
 
     // ─── Spec 3.7 — Reactions write paths ─────────────────────────────────────

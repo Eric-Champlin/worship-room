@@ -45,10 +45,14 @@ export const POST_TYPE_LIMITS: Record<PostType, PostTypeLimit> = {
     visibleAt: TESTIMONY_POST_VISIBLE_AT,
   },
   question: {
-    max: PRAYER_POST_MAX_LENGTH,
-    warningAt: 800,
-    dangerAt: 960,
-    visibleAt: 500,
+    // Spec 4.4 — Question max stays at 2000 (NOT testimony's 5000) per MPD-5.
+    // Questions are vulnerability-adjacent ("I'm doubting…") so the limit is
+    // intentionally below testimony but above prayer_request to allow space
+    // for nuance.
+    max: 2000,
+    warningAt: 1600,
+    dangerAt: 1900,
+    visibleAt: 1000,
   },
   discussion: {
     max: PRAYER_POST_MAX_LENGTH,

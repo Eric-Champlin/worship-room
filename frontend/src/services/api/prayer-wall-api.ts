@@ -431,6 +431,34 @@ export async function deletePost(id: string): Promise<void> {
   })
 }
 
+/**
+ * PATCH /api/v1/posts/{id}/resolve — Spec 4.4.
+ *
+ * Author-only. Marks a comment as the helpful answer to a question post.
+ * Server-side rate limit is 30/hour per user. Server enforces:
+ *  - post must exist and be of type `question` (else 400 INVALID_POST_TYPE_FOR_RESOLVE)
+ *  - caller must be the post author (else 403 FORBIDDEN — no admin override)
+ *  - comment must belong to the post and not be soft-deleted
+ *
+ * Returns the updated PrayerRequest with `questionResolvedCommentId` populated.
+ * Idempotent on the server — re-marking the same comment helpful returns 200
+ * with no DB write or `updated_at` bump.
+ */
+export async function resolveQuestion(
+  postId: string,
+  commentId: string,
+): Promise<PrayerRequest> {
+  assertCanWrite('resolveQuestion')
+  const dto = await apiFetch<PostDto>(
+    `/api/v1/posts/${encodeURIComponent(postId)}/resolve`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ commentId }),
+    },
+  )
+  return postDtoToPrayerRequest(dto)
+}
+
 // --- REACTION WRITES ---
 
 /**

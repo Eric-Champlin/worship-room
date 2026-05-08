@@ -53,13 +53,13 @@ describe('post-types — backend drift', () => {
 })
 
 describe('post-types — feature flags', () => {
-  it('prayer_request and testimony are enabled', () => {
+  it('prayer_request, testimony, and question are enabled', () => {
     expect(getPostType('prayer_request').enabled).toBe(true)
     expect(getPostType('testimony').enabled).toBe(true)
+    expect(getPostType('question').enabled).toBe(true)
   })
 
-  it('question, discussion, encouragement are disabled', () => {
-    expect(getPostType('question').enabled).toBe(false)
+  it('discussion and encouragement are disabled', () => {
     expect(getPostType('discussion').enabled).toBe(false)
     expect(getPostType('encouragement').enabled).toBe(false)
   })

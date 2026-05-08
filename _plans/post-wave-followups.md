@@ -560,3 +560,40 @@ Filed: 2026-05-08 (Spec 4.3 plan).
 
 ---
 
+
+
+## 30. Threaded comment rendering (filed by Spec 4.4)
+
+Backend has shipped full comment threading since Phase 3 (`parent_comment_id` column on `post_comments`, nested `replies` tree in `CommentDto`). Frontend renders flat. Spec 4.4 adopted the type changes (`PrayerComment` now consumes `parentCommentId`, `isHelpful`, `replies`; `commentDtoToPrayerComment` plumbs all three through the mapper) but does NOT render hierarchical UI. The data flows through; the rendering stays a flat list.
+
+**Implementation outline (when ready):**
+
+- Build a recursive `<CommentTree>` component that walks `comment.replies` and renders each level indented (max depth 3 per accessibility heuristics).
+- Add "See N replies" toggles for collapsed sub-trees.
+- Update `CommentInput` to accept an optional `parentCommentId` parameter (currently only `@`-mentions).
+- Audit accessibility: nested `role="article"` structures, screen-reader navigation, focus management.
+- Mobile: indent depth becomes more constrained — possibly cap at 2 levels.
+
+**Priority:** MEDIUM. Backend is ready; frontend rendering is a polish item. The Reply button's `@`-mention behavior is functional for 80% of conversational use cases, so threading is genuinely a quality-of-life upgrade, not a correctness fix.
+
+Filed: 2026-05-08 (Spec 4.4 plan).
+
+---
+
+## 31. "This helped" resolve from Dashboard / Profile author surfaces (filed by Spec 4.4)
+
+Spec 4.4 wires the "This helped" button on `/prayer-wall` (PrayerWall.tsx) and `/prayer-wall/:id` (PrayerDetail.tsx) — the two surfaces that maintain local comment state and can drive an optimistic update + exact-state rollback. The button is intentionally NOT rendered on `/prayer-wall/dashboard` ("My Prayers" tab) or `/prayer-wall/user/:id` (the viewer's own profile) because those surfaces read comments synchronously from `getMockComments()` (or `[]` when flag-on) with no React state to mutate. Wiring `onResolve` without local comment state would mark the comment helpful on the backend but leave the badge stale until the user reloads — a worse UX than not surfacing the button at all.
+
+Realistically, the post author lands on Dashboard's "My Prayers" tab to see their own questions; from there they currently have to navigate to the prayer's detail page to mark a helpful comment. That extra hop is the cost of this deferral.
+
+**Implementation outline (when ready):**
+
+- Lift comment state into `DashboardContent` (and `PrayerWallProfileContent`) per tab. Mirror the `localComments` / `fetchedComments` pattern in `PrayerWall.tsx`, or — cleaner — extract a `useCommentState(prayerIds[])` hook so both pages can share it.
+- Wire a `handleResolve(prayerId, commentId)` callback at the page level that updates both the prayer's `questionResolvedCommentId` and the comment list's `isHelpful` flag, mirroring the PrayerWall.tsx implementation (capture `previousHelpfulCommentId` BEFORE mutating, exact-state rollback on backend failure per W15).
+- Pass `onResolve={(commentId) => handleResolve(prayer.id, commentId)}` into `<CommentsSection>` on the "My Prayers" tab specifically. The Bookmarks/Reactions tabs and the public Profile do NOT need it (the viewer is never the author there, so the button stays hidden by the existing CommentItem conditional).
+- Remove the "Spec 4.4 — `onResolve` intentionally NOT passed here" inline comments in `PrayerWallDashboard.tsx` and `PrayerWallProfile.tsx` once wired.
+
+**Priority:** LOW–MEDIUM. The current path (navigate to PrayerDetail to resolve) is mildly inconvenient but correct; the question-author flow still works end-to-end. Lift the comment-state refactor when the next reason to touch Dashboard's tab internals comes up, then add this on the same branch.
+
+Filed: 2026-05-08 (Spec 4.4 plan).
+

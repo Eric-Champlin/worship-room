@@ -101,7 +101,8 @@ public class PostMapper {
                 p.getCreatedAt(),
                 p.getUpdatedAt(),
                 p.getLastActivityAt(),
-                author
+                author,
+                p.getQuestionResolvedCommentId()
         );
     }
 }

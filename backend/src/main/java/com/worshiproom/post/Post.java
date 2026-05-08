@@ -96,6 +96,9 @@ public class Post {
     @Column(name = "last_activity_at", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime lastActivityAt;
 
+    @Column(name = "question_resolved_comment_id")
+    private UUID questionResolvedCommentId;
+
     protected Post() {}
 
     public UUID getId() { return id; }
@@ -124,6 +127,7 @@ public class Post {
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public OffsetDateTime getLastActivityAt() { return lastActivityAt; }
+    public UUID getQuestionResolvedCommentId() { return questionResolvedCommentId; }
 
     public void setAnsweredAt(OffsetDateTime answeredAt) { this.answeredAt = answeredAt; }
     public void setAnsweredText(String answeredText) { this.answeredText = answeredText; }
@@ -149,6 +153,9 @@ public class Post {
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
     public void setUserId(UUID userId) { this.userId = userId; }
     public void setVisibility(PostVisibility visibility) { this.visibility = visibility; }
+    public void setQuestionResolvedCommentId(UUID questionResolvedCommentId) {
+        this.questionResolvedCommentId = questionResolvedCommentId;
+    }
 
     @Override
     public boolean equals(Object o) {

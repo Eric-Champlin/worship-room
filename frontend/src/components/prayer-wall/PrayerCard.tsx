@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { HandHelping, Sparkles } from 'lucide-react'
+import { HandHelping, HelpCircle, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerCategory } from '@/constants/prayer-categories'
@@ -22,7 +22,7 @@ const TRUNCATE_LENGTH = 150
 const POST_TYPE_ICONS: Record<PostType, LucideIcon> = {
   prayer_request: HandHelping,
   testimony: Sparkles, // 4.3 — was HandHelping placeholder
-  question: HandHelping, // placeholder until 4.4
+  question: HelpCircle, // 4.4 — was HandHelping placeholder
   discussion: HandHelping, // placeholder until 4.5
   encouragement: HandHelping, // placeholder until 4.6
 }
@@ -73,8 +73,9 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     switch (prayer.postType) {
       case 'testimony':
         return 'rounded-xl border border-amber-200/10 bg-amber-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-      case 'prayer_request':
       case 'question':
+        return 'rounded-xl border border-cyan-200/10 bg-cyan-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
+      case 'prayer_request':
       case 'discussion':
       case 'encouragement':
       default:
@@ -86,8 +87,9 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     switch (prayer.postType) {
       case 'testimony':
         return `Testimony by ${prayer.authorName}`
-      case 'prayer_request':
       case 'question':
+        return `Question by ${prayer.authorName}`
+      case 'prayer_request':
       case 'discussion':
       case 'encouragement':
       default:

@@ -28,7 +28,7 @@ export const POST_TYPES = [
     pluralLabel: 'Questions',
     icon: 'HelpCircle',
     description: 'Ask the community for wisdom or perspective.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'discussion',

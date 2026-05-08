@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 4.4 — Question Post Type. Adds question_resolved_comment_id
+       to posts so a question's author can mark exactly one comment as the helpful
+       answer (PATCH /api/v1/posts/{id}/resolve). FK ON DELETE SET NULL: when the
+       resolved comment is HARD-deleted (admin physical-delete in a future
+       moderation feature) the pointer clears and the post returns to unresolved
+       state. Soft-delete (is_deleted=true) is application-level and does not
+       trigger this FK; the pointer survives. is_helpful and parent_comment_id
+       on post_comments already shipped via changeset 015 — DO NOT recreate. -->
+  <changeSet id="2026-05-08-001-add-posts-question-resolved-comment-id" author="worship-room">
+
+    <addColumn tableName="posts">
+      <column name="question_resolved_comment_id" type="UUID">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+
+    <addForeignKeyConstraint
+      baseTableName="posts"
+      baseColumnNames="question_resolved_comment_id"
+      constraintName="fk_posts_question_resolved_comment"
+      referencedTableName="post_comments"
+      referencedColumnNames="id"
+      onDelete="SET NULL"/>
+
+    <rollback>
+      <dropForeignKeyConstraint baseTableName="posts" constraintName="fk_posts_question_resolved_comment"/>
+      <dropColumn tableName="posts" columnName="question_resolved_comment_id"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

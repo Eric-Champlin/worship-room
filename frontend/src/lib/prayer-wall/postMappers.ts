@@ -87,6 +87,9 @@ export function postDtoToPrayerRequest(dto: PostDto): PrayerRequest {
   if (dto.scriptureText !== null && dto.scriptureText !== undefined) {
     result.scriptureText = dto.scriptureText
   }
+  if (dto.questionResolvedCommentId !== null && dto.questionResolvedCommentId !== undefined) {
+    result.questionResolvedCommentId = dto.questionResolvedCommentId
+  }
   return result
 }
 
@@ -117,7 +120,7 @@ export function mapPostDtos(dtos: PostDto[]): PrayerRequest[] {
  *     introduces threading)
  */
 export function commentDtoToPrayerComment(dto: CommentDto): PrayerComment {
-  return {
+  const result: PrayerComment = {
     id: dto.id,
     prayerId: dto.postId,
     userId: dto.author.id ?? '',
@@ -126,6 +129,20 @@ export function commentDtoToPrayerComment(dto: CommentDto): PrayerComment {
     content: dto.content,
     createdAt: dto.createdAt,
   }
+  // Spec 4.4 — plumb the previously-dropped backend fields. Only populated when
+  // the backend supplies them (defensive null/undefined check). MPD-3 keeps
+  // visual threading deferred — the mapper plumbs the data so the type matches
+  // the API contract; rendering stays flat until the threading follow-up ships.
+  if (dto.parentCommentId !== null && dto.parentCommentId !== undefined) {
+    result.parentCommentId = dto.parentCommentId
+  }
+  if (typeof dto.isHelpful === 'boolean') {
+    result.isHelpful = dto.isHelpful
+  }
+  if (Array.isArray(dto.replies) && dto.replies.length > 0) {
+    result.replies = dto.replies.map(commentDtoToPrayerComment)
+  }
+  return result
 }
 
 /** Array form of commentDtoToPrayerComment (preserves order). */

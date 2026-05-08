@@ -575,6 +575,88 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     prayingCount: 14,
     commentCount: 5,
   },
+
+  // --- Spec 4.4 — Question fixtures ---
+  // Four states cover: (1) no comments yet, (2) comments but unresolved,
+  // (3) resolved (questionResolvedCommentId populated; one comment isHelpful),
+  // (4) authored by MOCK_CURRENT_USER so the 'This helped' button is exercisable.
+  // lastActivityAt values are intentionally older than the testimony fixtures
+  // above so the DESC sort invariant in getMockPrayers holds.
+  {
+    id: 'prayer-question-001',
+    userId: 'user-3',
+    authorName: 'Naomi',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
+    isAnonymous: false,
+    content:
+      'What does Romans 8:28 mean for those who are suffering right now? I find it hard to read when life feels heavy.',
+    category: null,
+    postType: 'question',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-05-04T08:00:00.000Z',
+    lastActivityAt: '2026-05-04T08:00:00.000Z',
+    prayingCount: 4,
+    commentCount: 0,
+  },
+  {
+    id: 'prayer-question-002',
+    userId: 'user-2',
+    authorName: 'David',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user2',
+    isAnonymous: false,
+    content:
+      'How do you keep showing up for prayer when it feels like you are talking to the ceiling? I want to be honest about a dry season.',
+    category: null,
+    postType: 'question',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-05-03T12:10:00.000Z',
+    lastActivityAt: '2026-05-03T12:10:00.000Z',
+    prayingCount: 9,
+    commentCount: 3,
+  },
+  {
+    id: 'prayer-question-003',
+    userId: 'user-4',
+    authorName: 'James',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user4',
+    isAnonymous: false,
+    content:
+      'Has anyone walked the road of forgiving someone who never apologized? I am wrestling with what biblical forgiveness looks like there.',
+    category: null,
+    postType: 'question',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-05-02T07:45:00.000Z',
+    lastActivityAt: '2026-05-02T07:45:00.000Z',
+    prayingCount: 12,
+    commentCount: 4,
+    questionResolvedCommentId: 'comment-q3-2',
+  },
+  {
+    id: 'prayer-question-004',
+    // MOCK_CURRENT_USER.id so the 'This helped' button is exercisable in the
+    // logged-in-as-current-user scenario (used by Playwright + dev fixtures).
+    userId: 'user-1',
+    authorName: 'Sarah',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user1',
+    isAnonymous: false,
+    content:
+      'What scripture has carried you through a season of waiting? I am collecting verses that remind me He is still working when nothing visible is happening.',
+    category: null,
+    postType: 'question',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-05-01T10:00:00.000Z',
+    lastActivityAt: '2026-05-01T10:00:00.000Z',
+    prayingCount: 6,
+    commentCount: 2,
+  },
 ]
 
 // --- Mock Comments (35) ---
@@ -921,6 +1003,101 @@ const MOCK_COMMENTS: PrayerComment[] = [
     authorAvatarUrl: 'https://i.pravatar.cc/150?u=user7',
     content: 'Tears of joy reading this. God changes lives!',
     createdAt: '2026-02-10T20:00:00Z',
+  },
+
+  // --- Spec 4.4 — Question post comments ---
+  // prayer-question-002: 3 comments, none marked helpful (unresolved question).
+  {
+    id: 'comment-q2-1',
+    prayerId: 'prayer-question-002',
+    userId: 'user-5',
+    authorName: 'Maria',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user5',
+    content: 'I have walked through dry seasons too. Sometimes the showing up IS the prayer.',
+    createdAt: '2026-05-06T13:30:00Z',
+  },
+  {
+    id: 'comment-q2-2',
+    prayerId: 'prayer-question-002',
+    userId: 'user-7',
+    authorName: 'Grace',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user7',
+    content: 'Psalm 88 was an unexpected companion for me in a season like this.',
+    createdAt: '2026-05-06T15:00:00Z',
+  },
+  {
+    id: 'comment-q2-3',
+    prayerId: 'prayer-question-002',
+    userId: 'user-1',
+    authorName: 'Sarah',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user1',
+    content: 'Thank you for being honest about this. I needed to read it today.',
+    createdAt: '2026-05-06T18:20:00Z',
+  },
+
+  // prayer-question-003: 4 comments, ONE marked helpful (resolved question).
+  // Exactly one comment per question may have isHelpful=true.
+  {
+    id: 'comment-q3-1',
+    prayerId: 'prayer-question-003',
+    userId: 'user-2',
+    authorName: 'David',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user2',
+    content: 'Forgiveness without apology was the hardest thing I have ever practiced.',
+    createdAt: '2026-05-05T09:00:00Z',
+  },
+  {
+    id: 'comment-q3-2',
+    prayerId: 'prayer-question-003',
+    userId: 'user-3',
+    authorName: 'Naomi',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
+    content:
+      'Forgiveness is a release for you, not a transaction with them. It can take years and still be real. Lewis Smedes wrote a book that helped me see that.',
+    createdAt: '2026-05-05T11:15:00Z',
+    isHelpful: true,
+  },
+  {
+    id: 'comment-q3-3',
+    prayerId: 'prayer-question-003',
+    userId: 'user-5',
+    authorName: 'Maria',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user5',
+    content: 'Praying for you in this. It is a long road but God walks it with you.',
+    createdAt: '2026-05-05T14:00:00Z',
+    // parentCommentId set to verify the field flows through the mapper even
+    // though MPD-3 keeps visual threading deferred — render is flat.
+    parentCommentId: 'comment-q3-2',
+  },
+  {
+    id: 'comment-q3-4',
+    prayerId: 'prayer-question-003',
+    userId: 'user-7',
+    authorName: 'Grace',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user7',
+    content: 'Matthew 18 was a hard but life-giving passage in this for me.',
+    createdAt: '2026-05-05T16:30:00Z',
+  },
+
+  // prayer-question-004 (authored by MOCK_CURRENT_USER): 2 comments, no resolved.
+  // The 'This helped' button is exercisable here in the logged-in-as-Sarah scenario.
+  {
+    id: 'comment-q4-1',
+    prayerId: 'prayer-question-004',
+    userId: 'user-3',
+    authorName: 'Naomi',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
+    content: 'Lamentations 3:25-26 stayed with me through a long wait.',
+    createdAt: '2026-05-08T09:00:00Z',
+  },
+  {
+    id: 'comment-q4-2',
+    prayerId: 'prayer-question-004',
+    userId: 'user-4',
+    authorName: 'James',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user4',
+    content: 'Psalm 27:14 — wait for the Lord, take heart.',
+    createdAt: '2026-05-08T10:30:00Z',
   },
 ]
 

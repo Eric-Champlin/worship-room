@@ -21,6 +21,9 @@ import type { PostType } from '@/constants/post-types'
 
 interface ComposerCopy {
   header: string
+  /** Spec 4.4 — short subline rendered below the header. Currently set only
+   * on `question` to soften the framing ("Other believers can share…"). */
+  subline?: string
   placeholder: string
   ariaLabel: string
   submitButton: string
@@ -59,13 +62,14 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     minHeight: '180px',
   },
   question: {
-    header: 'Share a Prayer Request',
-    placeholder: "What's on your heart?",
-    ariaLabel: 'Prayer request',
-    submitButton: 'Submit Prayer Request',
-    footerNote: 'Your prayer will be shared with the community. Be kind and respectful.',
-    showCategoryFieldset: true,
-    showChallengeCheckbox: true,
+    header: 'Ask a question',
+    subline: 'Other believers can share their experience or scripture they have leaned on.',
+    placeholder: 'What are you wondering about?',
+    ariaLabel: 'Question',
+    submitButton: 'Submit Question',
+    footerNote: 'Your question will be shared with the community. Be kind and respectful.',
+    showCategoryFieldset: false,
+    showChallengeCheckbox: false,
     showAttributionNudge: false,
     minHeight: '120px',
   },
@@ -260,7 +264,17 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       {...(!isOpen && { inert: '' as unknown as string })}
     >
       <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm sm:p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">{copy.header}</h2>
+        <h2
+          className={cn(
+            'text-lg font-semibold text-white',
+            copy.subline ? 'mb-1' : 'mb-4',
+          )}
+        >
+          {copy.header}
+        </h2>
+        {copy.subline && (
+          <p className="mb-4 text-sm text-white/60">{copy.subline}</p>
+        )}
 
         {!isOnline && (
           <OfflineMessage

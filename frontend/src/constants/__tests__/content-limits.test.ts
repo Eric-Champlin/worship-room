@@ -58,3 +58,19 @@ describe('content-limits — POST_TYPE_LIMITS map', () => {
     }
   })
 })
+
+describe('content-limits — question (Spec 4.4)', () => {
+  it('question limits are 2000/1600/1900/1000 (no 5000-char expansion)', () => {
+    expect(POST_TYPE_LIMITS.question.max).toBe(2000)
+    expect(POST_TYPE_LIMITS.question.warningAt).toBe(1600)
+    expect(POST_TYPE_LIMITS.question.dangerAt).toBe(1900)
+    expect(POST_TYPE_LIMITS.question.visibleAt).toBe(1000)
+  })
+
+  it('question thresholds are ordered: visibleAt < warningAt < dangerAt < max', () => {
+    const q = POST_TYPE_LIMITS.question
+    expect(q.visibleAt).toBeLessThan(q.warningAt)
+    expect(q.warningAt).toBeLessThan(q.dangerAt)
+    expect(q.dangerAt).toBeLessThan(q.max)
+  })
+})

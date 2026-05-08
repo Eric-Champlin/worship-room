@@ -237,3 +237,67 @@ describe('PrayerCard — Spec 4.3 testimony chrome', () => {
     expect(articles[1].querySelector('svg.lucide-sparkles')).toBeInTheDocument()
   })
 })
+
+const QUESTION_PRAYER: PrayerRequest = {
+  ...SHORT_PRAYER,
+  id: 'prayer-question',
+  authorName: 'Sarah',
+  postType: 'question',
+  category: null,
+  content: 'What does Romans 8:28 mean for those who are suffering right now?',
+}
+
+describe('PrayerCard — Spec 4.4 question chrome', () => {
+  it('renders question chrome classes when postType is question', () => {
+    renderCard(QUESTION_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('bg-cyan-500/[0.04]')
+    expect(article.className).toContain('border-cyan-200/10')
+  })
+
+  it('does not render question chrome classes when postType is prayer_request', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).not.toContain('cyan')
+  })
+
+  it('does not render question chrome classes when postType is testimony', () => {
+    renderCard(TESTIMONY_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).not.toContain('cyan')
+  })
+
+  it('renders HelpCircle icon for question posts', () => {
+    renderCard(QUESTION_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const icon = header.querySelector('svg[aria-hidden="true"]')
+    expect(icon).toBeInTheDocument()
+    // lucide-react renders the icon's kebab-case name as a class for HelpCircle.
+    // The Lucide v0.x naming policy uses 'lucide-help-circle' (or the alias
+    // 'lucide-circle-help'). Accept either to insulate the test from minor
+    // upstream rename swings.
+    const className = icon!.getAttribute('class') ?? ''
+    expect(/lucide-(help-circle|circle-help)/.test(className)).toBe(true)
+  })
+
+  it('aria-label says "Question by {authorName}" for question posts', () => {
+    renderCard(QUESTION_PRAYER, {})
+    expect(screen.getByLabelText('Question by Sarah')).toBe(screen.getByRole('article'))
+  })
+
+  it('mixed feed renders correct chrome and icon for prayer_request, testimony, and question', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={SHORT_PRAYER} />
+        <PrayerCard prayer={TESTIMONY_PRAYER} />
+        <PrayerCard prayer={QUESTION_PRAYER} />
+      </MemoryRouter>,
+    )
+    const articles = screen.getAllByRole('article')
+    expect(articles).toHaveLength(3)
+    expect(articles[0].className).toContain('bg-white/[0.06]')
+    expect(articles[1].className).toContain('bg-amber-500/[0.04]')
+    expect(articles[2].className).toContain('bg-cyan-500/[0.04]')
+  })
+})

@@ -1685,6 +1685,65 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/posts/{id}/resolve:
+    patch:
+      tags: [Posts]
+      summary: Mark a comment as the helpful answer to a question post (Spec 4.4)
+      description: |
+        Author-only. Sets `posts.question_resolved_comment_id` to the given
+        commentId AND `post_comments.is_helpful = true`. If a different comment
+        was previously helpful, that comment's `is_helpful` is cleared in the
+        same transaction (atomic move). Idempotent when re-marking the same
+        comment helpful (no DB write, no `updated_at` bump).
+
+        Errors:
+        - 400 INVALID_POST_TYPE_FOR_RESOLVE — post is not of type `question`
+        - 400 COMMENT_POST_MISMATCH — comment belongs to a different post
+        - 400 INVALID_INPUT — commentId missing or not a UUID
+        - 401 UNAUTHORIZED — no JWT or invalid JWT
+        - 403 FORBIDDEN — caller is not the post author (no admin override)
+        - 404 NOT_FOUND — post does not exist or is soft-deleted
+        - 404 COMMENT_NOT_FOUND — comment does not exist or is soft-deleted
+        - 429 RATE_LIMITED — 30 resolves/hour per user; includes Retry-After
+      operationId: resolveQuestion
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResolveQuestionRequest' }
+      responses:
+        '200':
+          description: Question resolved (or idempotent re-mark of same comment).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PostDto' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Not the post author (admin override is NOT honored on resolve).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/users/{username}/posts:
     get:
       tags: [Posts]
@@ -3481,6 +3540,14 @@ components:
         updatedAt: { type: string, format: date-time }
         lastActivityAt: { type: string, format: date-time }
         author: { $ref: '#/components/schemas/AuthorDto' }
+        questionResolvedCommentId:
+          type: string
+          format: uuid
+          nullable: true
+          description: |
+            UUID of the comment marked as "Most helpful" by the question's
+            author. Only set on question posts; null on all other post types
+            and on unresolved questions. (Spec 4.4)
 
     PostListMeta:
       description: Pagination metadata for the post list endpoints.
@@ -3594,6 +3661,20 @@ components:
         qotdId: { type: string, maxLength: 50 }
         scriptureReference: { type: string, maxLength: 100 }
         scriptureText: { type: string, maxLength: 2000 }
+
+    ResolveQuestionRequest:
+      description: |
+        Request body for PATCH /api/v1/posts/{id}/resolve (Spec 4.4). Marks
+        the given comment as the helpful answer to a question post. Author-
+        only; the path post must be of type `question`; the comment must
+        belong to the path post and not be soft-deleted.
+      type: object
+      required: [commentId]
+      properties:
+        commentId:
+          type: string
+          format: uuid
+          description: ID of the comment to mark as "Most helpful" on this question.
 
     CreatePostResponse:
       description: |

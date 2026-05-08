@@ -172,6 +172,56 @@ function PrayerDetailContent() {
     setReplyTo(`@${authorName} `)
   }, [])
 
+  /**
+   * Spec 4.4 — Mark a comment helpful on a question post. PrayerDetail-scoped
+   * version of the PrayerWall handler — same optimistic update + exact-state
+   * rollback pattern (W15). Captures `previousHelpfulCommentId` BEFORE the
+   * mutation, restores that exact value on backend failure.
+   */
+  const handleResolve = useCallback(
+    async (commentId: string): Promise<void> => {
+      if (!user) {
+        authModal?.openAuthModal('Sign in to mark a comment as helpful')
+        return
+      }
+      if (!prayer) return
+
+      const previousHelpfulCommentId = prayer.questionResolvedCommentId
+
+      const applyOptimistic = (newHelpfulId: string | undefined) => {
+        setPrayer((prev) =>
+          prev ? { ...prev, questionResolvedCommentId: newHelpfulId } : prev,
+        )
+        setComments((prev) =>
+          prev.map((c) => ({ ...c, isHelpful: c.id === newHelpfulId })),
+        )
+      }
+      applyOptimistic(commentId)
+
+      if (!isBackendPrayerWallEnabled()) {
+        return
+      }
+
+      try {
+        await prayerWallApi.resolveQuestion(prayer.id, commentId)
+      } catch (err) {
+        applyOptimistic(previousHelpfulCommentId)
+        // Mirror PrayerWall.tsx — token expiry between the upfront `if (!user)`
+        // check and the PATCH would otherwise fall through to the generic toast,
+        // hiding the real (recoverable) failure mode.
+        if (err instanceof AnonymousWriteAttemptError) {
+          authModal?.openAuthModal('Sign in to mark a comment as helpful')
+        } else if (err instanceof ApiError) {
+          const descriptor = mapApiErrorToToast(err)
+          if (descriptor.message) showToast(descriptor.message)
+        } else {
+          showToast('Could not mark as helpful. Try again.')
+        }
+      }
+    },
+    [user, prayer, authModal, showToast],
+  )
+
   const handleMarkAnswered = useCallback(
     async (praiseText: string) => {
       if (!isBackendPrayerWallEnabled()) {
@@ -332,7 +382,14 @@ function PrayerDetailContent() {
           <div className="mt-3 border-t border-white/10 pt-3">
             {comments.length > 0 ? (
               comments.map((comment) => (
-                <CommentItem key={comment.id} comment={comment} onReply={handleReply} />
+                <CommentItem
+                  key={comment.id}
+                  comment={comment}
+                  postType={prayer.postType}
+                  postAuthorId={prayer.userId}
+                  onReply={handleReply}
+                  onResolve={handleResolve}
+                />
               ))
             ) : (
               <p className="py-2 text-sm text-white/50">

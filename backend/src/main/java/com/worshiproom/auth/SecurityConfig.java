@@ -80,6 +80,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/reports").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/comments/*/reports").authenticated()
 
+                // Spec 4.4 — PATCH /api/v1/posts/{id}/resolve (mark helpful comment)
+                // requires authentication. Author-only enforcement happens in PostService.
+                // Same first-match-wins rule + nested-path pattern as Spec 3.7 — the
+                // parent /api/v1/posts/* PATCH rule above does NOT match this nested
+                // path (AntPathMatcher segment semantics).
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/posts/*/resolve").authenticated()
+
                 // Spec 1.10f — POST /api/v1/users/me/legal/accept requires authentication.
                 // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins.
                 .requestMatchers(HttpMethod.POST, "/api/v1/users/me/legal/accept").authenticated()

@@ -53,6 +53,8 @@ function renderSection(overrides?: {
         totalCount={overrides?.totalCount ?? mockComments.length}
         onSubmitComment={vi.fn()}
         prayerContent={overrides?.prayerContent}
+        postType="prayer_request"
+        postAuthorId="post-author-1"
       />
     </MemoryRouter>,
   )

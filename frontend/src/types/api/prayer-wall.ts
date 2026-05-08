@@ -88,6 +88,8 @@ export interface PostDto {
   updatedAt: string
   lastActivityAt: string
   author: AuthorDto
+  /** Spec 4.4 — UUID of the comment marked as "Most helpful" by the question's author. Null on non-question posts and unresolved questions. */
+  questionResolvedCommentId: string | null
 }
 
 export interface PostListMeta {
@@ -254,4 +256,9 @@ export interface CreateCommentRequest {
 
 export interface UpdateCommentRequest {
   content: string
+}
+
+export interface ResolveQuestionRequest {
+  /** UUID of the comment to mark as "Most helpful" on a question post. */
+  commentId: string
 }

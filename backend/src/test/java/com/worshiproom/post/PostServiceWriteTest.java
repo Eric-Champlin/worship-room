@@ -1,15 +1,23 @@
 package com.worshiproom.post;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.worshiproom.activity.ActivityService;
 import com.worshiproom.activity.ActivityType;
 import com.worshiproom.activity.dto.ActivityRequest;
 import com.worshiproom.auth.AuthenticatedUser;
+import com.worshiproom.post.comment.CommentNotForThisPostException;
+import com.worshiproom.post.comment.PostComment;
+import com.worshiproom.post.comment.PostCommentNotFoundException;
 import com.worshiproom.post.dto.AuthorDto;
 import com.worshiproom.post.dto.CreatePostRequest;
 import com.worshiproom.post.dto.CreatePostResponse;
 import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.UpdatePostRequest;
 import com.worshiproom.user.UserRepository;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +61,8 @@ class PostServiceWriteTest {
     @Mock private PostsIdempotencyService idempotencyService;
     @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private EntityManager entityManager;
+    @Mock private com.worshiproom.post.comment.PostCommentRepository commentRepository;
+    @Mock private ResolveRateLimitService resolveRateLimitService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -65,7 +75,7 @@ class PostServiceWriteTest {
                 postRepository, postMapper, userResolverService,
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
-                htmlSanitizerPolicy, entityManager);
+                htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService);
     }
 
     private CreatePostRequest sampleRequest() {
@@ -97,7 +107,8 @@ class PostServiceWriteTest {
                 "public", false, null, null, "approved", false,
                 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
-                new AuthorDto(UUID.randomUUID(), "Test User", null)
+                new AuthorDto(UUID.randomUUID(), "Test User", null),
+                null
         );
     }
 
@@ -476,5 +487,299 @@ class PostServiceWriteTest {
         verify(rateLimitService, never()).checkAndConsume(any(UUID.class));
         verify(postRepository, never()).save(any(Post.class));
         verify(activityService, never()).recordActivity(any(), any());
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Spec 4.4 — resolveQuestion tests
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /** Build a PostComment in-memory; uses application-set id, post-id, user-id. */
+    private PostComment seedComment(UUID id, UUID postId, UUID userId, boolean helpful) {
+        PostComment comment = new PostComment();
+        comment.setId(id);
+        comment.setPostId(postId);
+        comment.setUserId(userId);
+        comment.setContent("comment content");
+        comment.setHelpful(helpful);
+        comment.setDeleted(false);
+        comment.setModerationStatus(ModerationStatus.APPROVED);
+        comment.setCrisisFlag(false);
+        return comment;
+    }
+
+    private PostDto sampleResolvedDto(UUID postId, UUID resolvedCommentId) {
+        return new PostDto(
+                postId, "question", "what does this verse mean?", null,
+                false, null, null, null, null,
+                "public", false, null, null, "approved", false,
+                0, 0, 0, 0,
+                OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
+                new AuthorDto(UUID.randomUUID(), "Asker", null),
+                resolvedCommentId
+        );
+    }
+
+    @Test
+    void resolveQuestion_first_resolution_sets_post_pointer_and_comment_helpful() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        PostComment comment = seedComment(commentId, postId, UUID.randomUUID(), false);
+
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.of(comment));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(postMapper.toDto(any(Post.class))).thenReturn(sampleResolvedDto(postId, commentId));
+
+        PostDto dto = postService.resolveQuestion(postId, commentId, authorId, "rid");
+
+        assertThat(dto.questionResolvedCommentId()).isEqualTo(commentId);
+        assertThat(question.getQuestionResolvedCommentId()).isEqualTo(commentId);
+        assertThat(comment.isHelpful()).isTrue();
+        verify(commentRepository).save(comment);
+        verify(postRepository).save(question);
+    }
+
+    @Test
+    void resolveQuestion_idempotent_when_marking_already_helpful_comment() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        question.setQuestionResolvedCommentId(commentId);
+        PostComment comment = seedComment(commentId, postId, UUID.randomUUID(), true);
+
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.of(comment));
+        when(postMapper.toDto(any(Post.class))).thenReturn(sampleResolvedDto(postId, commentId));
+
+        postService.resolveQuestion(postId, commentId, authorId, "rid");
+
+        // No DB writes on idempotent path.
+        verify(commentRepository, never()).save(any(PostComment.class));
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void resolveQuestion_atomic_move_marks_new_unmarks_old() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID oldCommentId = UUID.randomUUID();
+        UUID newCommentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        question.setQuestionResolvedCommentId(oldCommentId);
+        PostComment oldComment = seedComment(oldCommentId, postId, UUID.randomUUID(), true);
+        PostComment newComment = seedComment(newCommentId, postId, UUID.randomUUID(), false);
+
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(newCommentId, postId)).thenReturn(Optional.of(newComment));
+        when(commentRepository.findByIdAndIsDeletedFalse(oldCommentId)).thenReturn(Optional.of(oldComment));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(postMapper.toDto(any(Post.class))).thenReturn(sampleResolvedDto(postId, newCommentId));
+
+        postService.resolveQuestion(postId, newCommentId, authorId, "rid");
+
+        assertThat(oldComment.isHelpful()).isFalse();
+        assertThat(newComment.isHelpful()).isTrue();
+        assertThat(question.getQuestionResolvedCommentId()).isEqualTo(newCommentId);
+        verify(commentRepository).save(oldComment);
+        verify(commentRepository).save(newComment);
+    }
+
+    @Test
+    void resolveQuestion_throws_PostNotAQuestionException_for_prayer_request() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post post = existingPost(postId, authorId, PostType.PRAYER_REQUEST);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(post));
+
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, commentId, authorId, "rid"))
+                .isInstanceOf(PostNotAQuestionException.class)
+                .hasMessageContaining("non-question");
+    }
+
+    @Test
+    void resolveQuestion_throws_PostNotAQuestionException_for_testimony() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post post = existingPost(postId, authorId, PostType.TESTIMONY);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(post));
+
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, commentId, authorId, "rid"))
+                .isInstanceOf(PostNotAQuestionException.class);
+    }
+
+    @Test
+    void resolveQuestion_throws_PostForbiddenException_when_not_author() {
+        UUID authorId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+
+        // Even if otherUserId is admin (the second arg to AuthenticatedUser),
+        // resolveQuestion enforces strict author-only — admin cannot override
+        // (Plan-Time Divergence #1, brief W6).
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, commentId, otherUserId, "rid"))
+                .isInstanceOf(PostForbiddenException.class);
+    }
+
+    @Test
+    void resolveQuestion_throws_PostNotFoundException_when_post_soft_deleted() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, commentId, authorId, "rid"))
+                .isInstanceOf(PostNotFoundException.class);
+    }
+
+    @Test
+    void resolveQuestion_throws_PostCommentNotFoundException_when_comment_soft_deleted() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.empty());
+        when(commentRepository.findByIdAndIsDeletedFalse(commentId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, commentId, authorId, "rid"))
+                .isInstanceOf(PostCommentNotFoundException.class);
+    }
+
+    @Test
+    void resolveQuestion_throws_CommentNotForThisPostException_when_comment_belongs_to_different_post() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID otherPostId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        // Comment exists but lives on a DIFFERENT post.
+        PostComment commentOnOtherPost = seedComment(commentId, otherPostId, UUID.randomUUID(), false);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.empty());
+        when(commentRepository.findByIdAndIsDeletedFalse(commentId)).thenReturn(Optional.of(commentOnOtherPost));
+
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, commentId, authorId, "rid"))
+                .isInstanceOf(CommentNotForThisPostException.class)
+                .hasMessageContaining("does not belong");
+    }
+
+    @Test
+    void resolveQuestion_rolls_back_on_save_failure() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID oldCommentId = UUID.randomUUID();
+        UUID newCommentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        question.setQuestionResolvedCommentId(oldCommentId);
+        PostComment oldComment = seedComment(oldCommentId, postId, UUID.randomUUID(), true);
+        PostComment newComment = seedComment(newCommentId, postId, UUID.randomUUID(), false);
+
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(newCommentId, postId)).thenReturn(Optional.of(newComment));
+        when(commentRepository.findByIdAndIsDeletedFalse(oldCommentId)).thenReturn(Optional.of(oldComment));
+        // Mock postRepository.save to throw — Spring's @Transactional rolls back.
+        when(postRepository.save(any(Post.class))).thenThrow(new RuntimeException("DB write failed"));
+
+        assertThatThrownBy(() -> postService.resolveQuestion(postId, newCommentId, authorId, "rid"))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("DB write failed");
+
+        // The in-memory mutations were applied on the entities (Mockito does
+        // not roll those back), but the SQL-level rollback IS what @Transactional
+        // guarantees in production. The unit-level proof here is that the
+        // exception escaped and the post.save call was attempted (verifying that
+        // the @Transactional boundary covers postRepository.save). The
+        // integration test is the actual proof that DB state rolls back.
+        verify(postRepository).save(question);
+    }
+
+    @Test
+    void resolveQuestion_logs_ids_only_no_content() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        question.setContent("DO NOT LOG THIS SENSITIVE CONTENT");
+        PostComment comment = seedComment(commentId, postId, UUID.randomUUID(), false);
+        comment.setContent("DO NOT LOG THIS COMMENT TEXT");
+
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.of(comment));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(postMapper.toDto(any(Post.class))).thenReturn(sampleResolvedDto(postId, commentId));
+
+        // Attach a list appender to the PostService logger to capture log events.
+        Logger postServiceLogger = (Logger) LoggerFactory.getLogger(PostService.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        postServiceLogger.addAppender(appender);
+        try {
+            postService.resolveQuestion(postId, commentId, authorId, "rid-42");
+        } finally {
+            postServiceLogger.detachAppender(appender);
+        }
+
+        boolean foundResolveLog = false;
+        for (ILoggingEvent event : appender.list) {
+            if (event.getLevel() != Level.INFO) continue;
+            String formatted = event.getFormattedMessage();
+            if (formatted.contains("questionResolved")) {
+                foundResolveLog = true;
+                assertThat(formatted).contains(postId.toString());
+                assertThat(formatted).contains(authorId.toString());
+                assertThat(formatted).contains(commentId.toString());
+                assertThat(formatted).contains("rid-42");
+                // PII rule — no user content in logs.
+                assertThat(formatted).doesNotContain("DO NOT LOG THIS SENSITIVE CONTENT");
+                assertThat(formatted).doesNotContain("DO NOT LOG THIS COMMENT TEXT");
+            }
+        }
+        assertThat(foundResolveLog).isTrue();
+    }
+
+    @Test
+    void resolveQuestion_does_not_emit_activity_per_MPD_1() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        PostComment comment = seedComment(commentId, postId, UUID.randomUUID(), false);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.of(comment));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(postMapper.toDto(any(Post.class))).thenReturn(sampleResolvedDto(postId, commentId));
+
+        postService.resolveQuestion(postId, commentId, authorId, "rid");
+
+        // Resolve is metadata curation, not activity. No activity events emitted.
+        verify(activityService, never()).recordActivity(any(UUID.class), any(ActivityRequest.class));
+    }
+
+    @Test
+    void resolveQuestion_response_dto_has_non_null_updatedAt_and_questionResolvedCommentId() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        UUID commentId = UUID.randomUUID();
+        Post question = existingPost(postId, authorId, PostType.QUESTION);
+        PostComment comment = seedComment(commentId, postId, UUID.randomUUID(), false);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(question));
+        when(commentRepository.findByIdAndPostIdAndIsDeletedFalse(commentId, postId)).thenReturn(Optional.of(comment));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(postMapper.toDto(any(Post.class))).thenReturn(sampleResolvedDto(postId, commentId));
+
+        PostDto dto = postService.resolveQuestion(postId, commentId, authorId, "rid");
+
+        // L1-cache trap regression guard (Phase 3 Addendum item 2).
+        assertThat(dto.updatedAt()).isNotNull();
+        assertThat(dto.questionResolvedCommentId()).isNotNull();
+        assertThat(dto.questionResolvedCommentId()).isEqualTo(commentId);
     }
 }

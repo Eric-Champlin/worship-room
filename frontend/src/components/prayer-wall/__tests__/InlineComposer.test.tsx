@@ -449,3 +449,96 @@ describe('InlineComposer — Spec 4.3 testimony', () => {
     ).toBeInTheDocument()
   })
 })
+
+// =====================================================================
+// Spec 4.4 — question composer per-type copy + behavior
+// =====================================================================
+
+function renderQuestionComposer(overrides?: {
+  onSubmit?: Parameters<typeof renderComposer>[0] extends infer T
+    ? T extends { onSubmit?: infer S }
+      ? S
+      : never
+    : never
+}) {
+  return render(
+    <MemoryRouter>
+      <InlineComposer
+        isOpen
+        onClose={vi.fn()}
+        postType="question"
+        onSubmit={overrides?.onSubmit ?? vi.fn().mockResolvedValue(true)}
+      />
+    </MemoryRouter>,
+  )
+}
+
+describe('InlineComposer — Spec 4.4 question variant', () => {
+  it('renders question header copy', () => {
+    renderQuestionComposer()
+    expect(screen.getByText('Ask a question')).toBeInTheDocument()
+  })
+
+  it('renders question subline below header', () => {
+    renderQuestionComposer()
+    expect(
+      screen.getByText(
+        'Other believers can share their experience or scripture they have leaned on.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('does NOT render subline for testimony', () => {
+    renderTestimonyComposer()
+    expect(
+      screen.queryByText(
+        'Other believers can share their experience or scripture they have leaned on.',
+      ),
+    ).not.toBeInTheDocument()
+  })
+
+  it('does NOT render subline for prayer_request', () => {
+    renderComposer()
+    expect(
+      screen.queryByText(
+        'Other believers can share their experience or scripture they have leaned on.',
+      ),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders question placeholder', () => {
+    renderQuestionComposer()
+    expect(
+      screen.getByPlaceholderText('What are you wondering about?'),
+    ).toBeInTheDocument()
+  })
+
+  it('textarea maxLength is 2000 for question', () => {
+    renderQuestionComposer()
+    expect(screen.getByLabelText('Question')).toHaveAttribute('maxLength', '2000')
+  })
+
+  it('category fieldset is hidden for question', () => {
+    renderQuestionComposer()
+    expect(
+      screen.queryByRole('radiogroup', { name: /prayer category/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('challenge prayer checkbox is hidden for question', () => {
+    renderQuestionComposer()
+    expect(screen.queryByLabelText(/challenge/i)).not.toBeInTheDocument()
+  })
+
+  it('attribution nudge does NOT render for question', () => {
+    renderQuestionComposer()
+    expect(screen.queryByText(/Testimonies often mean more/)).not.toBeInTheDocument()
+  })
+
+  it('submit button label is "Submit Question"', () => {
+    renderQuestionComposer()
+    expect(
+      screen.getByRole('button', { name: /submit question/i }),
+    ).toBeInTheDocument()
+  })
+})
