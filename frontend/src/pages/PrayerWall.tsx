@@ -56,6 +56,7 @@ const prayerWallBreadcrumbs = {
 }
 import { getChallenge } from '@/data/challenges'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
+import type { PostType } from '@/constants/post-types'
 
 const PRAYERS_PER_PAGE = 20
 
@@ -288,7 +289,8 @@ function PrayerWallContent() {
       isAnonymous: boolean,
       category: PrayerCategory,
       challengeId?: string,
-      idempotencyKey?: string
+      idempotencyKey?: string,
+      postType: PostType = 'prayer_request'
     ): Promise<boolean> => {
       if (!isAuthenticated) {
         openAuthModal?.('Sign in to share a prayer request')
@@ -303,6 +305,7 @@ function PrayerWallContent() {
           isAnonymous,
           content,
           category,
+          postType,
           challengeId,
           isAnswered: false,
           answeredText: null,
@@ -329,7 +332,7 @@ function PrayerWallContent() {
       try {
         const created = await prayerWallApi.createPost(
           {
-            postType: 'prayer_request',
+            postType,
             content,
             category,
             isAnonymous,
@@ -404,6 +407,7 @@ function PrayerWallContent() {
           isAnonymous: false,
           content,
           category: 'discussion',
+          postType: 'discussion',
           qotdId: todaysQuestion.id,
           isAnswered: false,
           answeredText: null,

@@ -83,6 +83,7 @@ describe('InlineComposer — challenge integration', () => {
       'health',
       'pray40-lenten-journey',
       expect.any(String),
+      'prayer_request',
     )
   })
 
@@ -98,7 +99,14 @@ describe('InlineComposer — challenge integration', () => {
     fireEvent.click(screen.getByText('Health'))
     fireEvent.click(screen.getByText('Submit Prayer Request'))
 
-    expect(onSubmit).toHaveBeenCalledWith('Test', false, 'health', undefined, expect.any(String))
+    expect(onSubmit).toHaveBeenCalledWith(
+      'Test',
+      false,
+      'health',
+      undefined,
+      expect.any(String),
+      'prayer_request',
+    )
   })
 
   it('checkbox has accessible label association', () => {
@@ -203,6 +211,7 @@ describe('PrayerCard — challenge badge', () => {
     isAnonymous: false,
     content: 'Please pray for me',
     category: 'health',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,

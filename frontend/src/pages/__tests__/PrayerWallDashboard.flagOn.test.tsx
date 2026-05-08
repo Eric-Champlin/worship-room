@@ -67,6 +67,7 @@ function makePost(overrides: Partial<PrayerRequest> = {}): PrayerRequest {
     isAnonymous: false,
     content: 'Some prayer body text here',
     category: 'health',
+    postType: 'prayer_request',
     challengeId: null,
     isAnswered: false,
     answeredText: null,

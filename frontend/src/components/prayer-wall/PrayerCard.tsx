@@ -1,6 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { HandHelping } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { PostType } from '@/constants/post-types'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerRequest } from '@/types/prayer-wall'
 import { getChallenge } from '@/data/challenges'
@@ -15,6 +18,19 @@ const PulseContext = createContext<(() => void) | null>(null)
 export function usePrayerCardPulse() { return useContext(PulseContext) }
 
 const TRUNCATE_LENGTH = 150
+
+const POST_TYPE_ICONS: Record<PostType, LucideIcon> = {
+  prayer_request: HandHelping,
+  testimony: HandHelping, // placeholder until 4.3 — see _plans/post-1.10-followups.md
+  question: HandHelping, // placeholder until 4.4
+  discussion: HandHelping, // placeholder until 4.5
+  encouragement: HandHelping, // placeholder until 4.6
+}
+
+function TypeMarker({ postType }: { postType: PostType }) {
+  const Icon = POST_TYPE_ICONS[postType]
+  return <Icon className="h-3.5 w-3.5 text-white/40" aria-hidden="true" />
+}
 
 interface PrayerCardProps {
   prayer: PrayerRequest
@@ -101,12 +117,15 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
             </span>
           )}
           <span className="text-white/40"> &mdash; </span>
-          <time
-            dateTime={prayer.createdAt}
-            className="text-sm text-white/60"
-          >
-            {formatFullDate(prayer.createdAt)}
-          </time>
+          <span className="inline-flex items-center gap-1.5">
+            <TypeMarker postType={prayer.postType} />
+            <time
+              dateTime={prayer.createdAt}
+              className="text-sm text-white/60"
+            >
+              {formatFullDate(prayer.createdAt)}
+            </time>
+          </span>
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <CategoryBadge
               category={prayer.category}

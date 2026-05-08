@@ -17,6 +17,7 @@ const mockPrayer: PrayerRequest = {
   isAnonymous: false,
   content: 'Test prayer',
   category: 'health',
+  postType: 'prayer_request',
   isAnswered: false,
   answeredText: null,
   answeredAt: null,

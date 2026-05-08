@@ -17,26 +17,39 @@ import { OfflineMessage } from '@/components/pwa/OfflineMessage'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { getChallenge } from '@/data/challenges'
 import { useRovingTabindex } from '@/hooks/useRovingTabindex'
+import type { PostType } from '@/constants/post-types'
 
 interface InlineComposerProps {
   isOpen: boolean
   onClose: () => void
   /**
+   * Post type for the composer. Defaults to 'prayer_request' so existing
+   * call sites (Phase 4.2 — single composer instance) work without change.
+   * Phase 4.7 Composer Chooser will pass other values for testimony/
+   * question/discussion/encouragement variants.
+   */
+  postType?: PostType
+  /**
    * Submit handler. Return `true` on successful create (composer resets);
    * return `false` to keep the current content and idempotency key so a
    * retry of the SAME content reuses the SAME key (W5 + Spec 3.5 backend
    * dedup contract).
+   *
+   * Phase 4.2 added `postType` as the 6th argument with default
+   * `'prayer_request'` propagated from the prop. Existing handlers that
+   * accept fewer args continue to work via TypeScript optional-arg rules.
    */
   onSubmit: (
     content: string,
     isAnonymous: boolean,
     category: PrayerCategory,
     challengeId?: string,
-    idempotencyKey?: string
+    idempotencyKey?: string,
+    postType?: PostType
   ) => boolean | Promise<boolean>
 }
 
-export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProps) {
+export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', onSubmit }: InlineComposerProps) {
   const { isOnline } = useOnlineStatus()
   const [searchParams] = useSearchParams()
   const [content, setContent] = useState('')
@@ -109,7 +122,8 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
         isAnonymous,
         selectedCategory,
         isChallengePrayer && activeChallenge ? activeChallenge.id : undefined,
-        idempotencyKey
+        idempotencyKey,
+        postType
       )
       if (!success) return
       setContent('')
@@ -136,6 +150,7 @@ export function InlineComposer({ isOpen, onClose, onSubmit }: InlineComposerProp
     isChallengePrayer,
     activeChallenge,
     idempotencyKey,
+    postType,
   ])
 
   const handleCancel = useCallback(() => {

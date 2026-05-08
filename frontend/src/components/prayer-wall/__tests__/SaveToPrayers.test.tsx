@@ -26,6 +26,7 @@ const mockPrayer: PrayerRequest = {
   isAnonymous: false,
   content: 'Please pray for my recovery from surgery. I am feeling anxious and need strength to get through this difficult time.',
   category: 'health',
+  postType: 'prayer_request',
   isAnswered: false,
   answeredText: null,
   answeredAt: null,

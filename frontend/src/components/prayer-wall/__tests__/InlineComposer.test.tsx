@@ -88,7 +88,7 @@ describe('InlineComposer', () => {
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health', undefined, expect.any(String))
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health', undefined, expect.any(String), 'prayer_request')
   })
 
   it('submit with anonymous checked', async () => {
@@ -99,7 +99,7 @@ describe('InlineComposer', () => {
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByLabelText('Post anonymously'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health', undefined, expect.any(String))
+    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health', undefined, expect.any(String), 'prayer_request')
   })
 
   // Category-specific tests
@@ -189,6 +189,56 @@ describe('InlineComposer', () => {
     const fieldset = screen.getByRole('group')
     expect(fieldset).toHaveAttribute('aria-invalid', 'true')
     expect(fieldset).toHaveAttribute('aria-describedby', 'composer-category-error')
+  })
+
+  it('passes postType="prayer_request" to onSubmit by default when prop is omitted', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Submit Prayer Request'))
+    expect(onSubmit).toHaveBeenCalled()
+    const args = onSubmit.mock.calls[0]
+    expect(args[5]).toBe('prayer_request')
+  })
+
+  it('passes the postType prop value to onSubmit when set explicitly', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="testimony"
+          onSubmit={onSubmit}
+        />
+      </MemoryRouter>,
+    )
+    await user.type(screen.getByLabelText('Prayer request'), 'My testimony')
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Submit Prayer Request'))
+    expect(onSubmit).toHaveBeenCalled()
+    const args = onSubmit.mock.calls[0]
+    expect(args[5]).toBe('testimony')
+  })
+
+  it('calls onSubmit with arguments in canonical order: content, isAnonymous, category, challengeId, idempotencyKey, postType', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Prayer request'), 'Order test')
+    await user.click(screen.getByText('Gratitude'))
+    await user.click(screen.getByText('Submit Prayer Request'))
+    expect(onSubmit).toHaveBeenCalled()
+    const [content, isAnonymous, category, challengeId, idempotencyKey, postType] = onSubmit.mock.calls[0]
+    expect(typeof content).toBe('string')
+    expect(typeof isAnonymous).toBe('boolean')
+    expect(typeof category).toBe('string')
+    expect(challengeId === undefined || typeof challengeId === 'string').toBe(true)
+    expect(typeof idempotencyKey).toBe('string')
+    expect(postType).toBe('prayer_request')
   })
 })
 

@@ -33,10 +33,11 @@ export interface PrayerRequest {
   prayingCount: number
   commentCount: number
 
-  // --- Spec 3.10 (D5) — optional Phase 3.7+ fields. Mapper passes through
-  // when present; older call sites that don't read them are unaffected.
-  // Phase 4.1 (Post Type Foundation) will make `postType` required.
-  postType?: PostType
+  // --- Spec 3.10 (D5) — Phase 3.7+ fields. `postType` is required (flipped
+  // in Phase 4.2 — Prayer Request Polish); the remaining fields are optional
+  // and the mapper passes them through when present, so older call sites
+  // that don't read them are unaffected.
+  postType: PostType
   candleCount?: number
   bookmarkCount?: number
   updatedAt?: string

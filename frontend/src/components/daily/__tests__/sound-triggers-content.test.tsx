@@ -97,6 +97,7 @@ describe('Sound Triggers — Content Features', () => {
       isAnonymous: false,
       content: 'Test prayer',
       category: 'praise' as const,
+      postType: 'prayer_request',
       isAnswered: false,
       answeredText: null,
       answeredAt: null,

@@ -107,6 +107,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'For me, it has been spending just 10 minutes every morning before I check my phone. Even on busy days, that quiet time sets the tone for everything else. It does not have to be long — just consistent.',
     category: 'discussion',
+    postType: 'prayer_request',
     qotdId: todaysQuestionId,
     isAnswered: false,
     answeredText: null,
@@ -125,6 +126,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'After 30 years of ministry, I can honestly say the thing that has helped me the most is journaling my prayers. When I look back at old journals, I see how faithful God has been even when I could not see it in the moment.',
     category: 'discussion',
+    postType: 'prayer_request',
     qotdId: todaysQuestionId,
     isAnswered: false,
     answeredText: null,
@@ -143,6 +145,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Listening to worship music during my commute has been a game changer. It turns a stressful drive into a time of praise and prayer. Highly recommend it!',
     category: 'discussion',
+    postType: 'prayer_request',
     qotdId: todaysQuestionId,
     isAnswered: false,
     answeredText: null,
@@ -162,6 +165,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Struggling with anxiety that won\'t let go. Please pray for peace in my mind.',
     category: 'mental-health',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -179,6 +183,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Going through depression and finding it hard to get out of bed. Prayers for strength and hope.',
     category: 'mental-health',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -196,6 +201,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Burnout from work and life is overwhelming. Please pray for rest and clarity.',
     category: 'mental-health',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -214,6 +220,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Please pray for my mother who was just diagnosed with cancer. She starts chemo next week and we are all scared but trusting in God. She has been the rock of our family for 40 years and I cannot imagine life without her strength and love. We need a miracle.',
     category: 'health',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -231,6 +238,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Our church is going through a difficult transition with our lead pastor retiring. Please pray for unity, wisdom for the elders, and that God would send the right person to shepherd our congregation.',
     category: 'other',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -248,6 +256,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'I am struggling with addiction and feel so alone. I know God can help me but I keep falling. Please pray that I find the strength to reach out for help and that God would surround me with people who care.',
     category: 'health',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -264,6 +273,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content: 'Pray for my finals this week. Trusting God with the results.',
     category: 'work',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -281,6 +291,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Praise God! After two years of infertility, my daughter and her husband are expecting their first child! Thank you to everyone who prayed with us. God is faithful.',
     category: 'praise',
+    postType: 'prayer_request',
     isAnswered: true,
     answeredText:
       'We prayed for two years and God answered in His perfect timing. Baby is due in July. Our family is overjoyed and so grateful for this community.',
@@ -299,6 +310,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'One of my students lost their parent this week. Please pray for comfort and peace for the whole family. They need to know they are not alone.',
     category: 'grief',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -315,6 +327,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content: 'Starting a new job Monday. Nervous but grateful.',
     category: 'work',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -332,6 +345,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'My husband lost his job last month and we are struggling to make ends meet. We have three young children and the bills are piling up. I am trying to trust God but the anxiety is overwhelming. Please pray for provision and for my husband to find work soon. We need doors to open.',
     category: 'family',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -349,6 +363,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Feeling disconnected from God lately. Please pray that I can find my way back. I used to feel His presence so strongly and now everything feels quiet.',
     category: 'other',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -366,6 +381,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Thank you, Lord, for another beautiful day with my grandchildren. Praying for all the grandparents out there raising little ones. You are not forgotten.',
     category: 'gratitude',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -382,6 +398,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: true,
     content: 'Pray for my marriage. We need God to intervene.',
     category: 'relationships',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -399,6 +416,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'God answered! My son got accepted into his dream college with a full scholarship. We have been praying about this for over a year. God is so good!',
     category: 'praise',
+    postType: 'prayer_request',
     isAnswered: true,
     answeredText:
       'After months of waiting and praying, the acceptance letter came today. Full ride. We are in tears. Thank you to everyone who lifted us up.',
@@ -417,6 +435,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Please lift up our worship team. We have a big Easter service coming up and we want every note to glorify God. Pray for unity and anointing.',
     category: 'work',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -433,6 +452,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     isAnonymous: false,
     content: 'Grateful for this community. You all lift me up.',
     category: 'gratitude',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -450,6 +470,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'My roommate is going through a really hard time and I do not know how to help. She is not a believer but she is open to prayer. Please pray that God opens her heart and that I can be the friend she needs right now without being pushy.',
     category: 'relationships',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -467,6 +488,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'UPDATE: My husband got a job offer today! It is even better than his last position. God provided exactly when we needed it most. Thank you all for praying with us!',
     category: 'family',
+    postType: 'prayer_request',
     isAnswered: true,
     answeredText:
       'Three weeks of uncertainty and God came through. Better pay, better hours, closer to home. He truly works all things for good.',
@@ -485,6 +507,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Pray for the persecuted church around the world. So many believers are suffering for their faith. May God strengthen them and protect them.',
     category: 'other',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
@@ -502,6 +525,7 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     content:
       'Just got baptized last Sunday! Best decision of my life. Thank you to this community for helping me find my way to faith. I never thought I would be here but God had other plans.',
     category: 'gratitude',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,

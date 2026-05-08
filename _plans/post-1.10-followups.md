@@ -499,3 +499,18 @@ Captured: 2026-04-30 during Spec 3.12 cutover.
 Revisit: when Phase 4 personal-activity surfaces are in scope.
 
 ---
+
+## 26. Phase 4 per-type icon updates (filed by Spec 4.2)
+
+`POST_TYPE_ICONS` in `frontend/src/components/prayer-wall/PrayerCard.tsx` was introduced in Spec 4.2 with placeholders for the 4 non-prayer_request types — all currently map to `HandHelping`. Each downstream spec replaces its placeholder with the canonical icon from `POST_TYPES` (constants/post-types.ts):
+
+- Spec 4.3 (Testimony) — replace `testimony: HandHelping` with `testimony: Sparkles`
+- Spec 4.4 (Question) — replace `question: HandHelping` with `question: HelpCircle`
+- Spec 4.5 (Devotional Discussion) — replace `discussion: HandHelping` with `discussion: MessagesSquare`
+- Spec 4.6 (Encouragement) — replace `encouragement: HandHelping` with `encouragement: Heart`
+
+When all four are replaced, this followup is closed. The TypeMarker render helper itself does not change.
+
+Filed: 2026-05-08 (Spec 4.2 plan).
+
+---

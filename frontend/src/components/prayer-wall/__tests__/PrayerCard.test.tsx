@@ -14,6 +14,7 @@ const SHORT_PRAYER: PrayerRequest = {
   isAnonymous: false,
   content: 'Please pray for my family.',
   category: 'family',
+  postType: 'prayer_request',
   isAnswered: false,
   answeredText: null,
   answeredAt: null,
@@ -130,5 +131,34 @@ describe('PrayerCard', () => {
     renderCard(SHORT_PRAYER, {})
     const badge = screen.getByText('Family')
     expect(badge.tagName).toBe('SPAN')
+  })
+
+  it('renders TypeMarker icon next to the timestamp for prayer_request post type', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const decorativeSvg = header.querySelector('svg[aria-hidden="true"]')
+    expect(decorativeSvg).toBeInTheDocument()
+    expect(decorativeSvg).toHaveClass('lucide-hand-helping')
+  })
+
+  it('TypeMarker icon is decorative (aria-hidden) and uses canonical sizing', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const icon = header.querySelector('svg[aria-hidden="true"]')!
+    expect(icon).toHaveAttribute('aria-hidden', 'true')
+    expect(icon).toHaveClass('h-3.5', 'w-3.5', 'text-white/40')
+  })
+
+  it('header preserves author + em-dash + time element layout (regression)', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    expect(header).toHaveTextContent(SHORT_PRAYER.authorName)
+    expect(header.textContent).toContain('—')
+    const time = header.querySelector('time')!
+    expect(time).toBeInTheDocument()
+    expect(time).toHaveAttribute('dateTime', SHORT_PRAYER.createdAt)
   })
 })

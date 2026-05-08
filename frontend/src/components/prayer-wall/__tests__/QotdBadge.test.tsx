@@ -14,6 +14,7 @@ function basePrayer(overrides: Partial<PrayerRequest> = {}): PrayerRequest {
     isAnonymous: false,
     content: 'Test prayer content',
     category: 'other',
+    postType: 'prayer_request',
     isAnswered: false,
     answeredText: null,
     answeredAt: null,
