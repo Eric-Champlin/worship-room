@@ -26,7 +26,7 @@ public record CreatePostRequest(
         String postType,
 
         @NotBlank
-        @Size(max = 2000)
+        @Size(max = 5000)
         String content,
 
         @Pattern(regexp = "^(health|mental-health|family|work|grief|gratitude|praise|relationships|other|discussion)$",

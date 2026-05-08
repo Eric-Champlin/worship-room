@@ -190,6 +190,90 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
         assertThat(json.get("data").get("lastActivityAt").isNull()).isFalse();
     }
 
+    // =====================================================================
+    // Spec 4.3 — per-type content length boundaries
+    // =====================================================================
+
+    @Test
+    void createPost_testimony5000Chars_returns201() throws Exception {
+        String content = "a".repeat(5000);
+        String body = """
+                {
+                  "postType": "testimony",
+                  "content": "%s"
+                }
+                """.formatted(content);
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.postType").value("testimony"))
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.hasLength(5000)));
+    }
+
+    @Test
+    void createPost_testimony5001Chars_returns400ViaJSR303() throws Exception {
+        String content = "a".repeat(5001);
+        String body = """
+                {
+                  "postType": "testimony",
+                  "content": "%s"
+                }
+                """.formatted(content);
+        // JSR-303 @Size(max=5000) on CreatePostRequest.content rejects before
+        // PostService runs. PostValidationExceptionHandler maps to INVALID_INPUT.
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+    }
+
+    /**
+     * W15 regression: a 4500-char prayer_request bypasses JSR-303 (under the
+     * raised 5000 ceiling) and hits the per-type service-layer enforcement which
+     * caps prayer_request at 2000. The error must come from ContentTooLongException
+     * with the parameterized "2000 character limit" message.
+     */
+    @Test
+    void createPost_prayerRequest4500Chars_returns400ViaServiceLayer_with2000Limit() throws Exception {
+        String content = "a".repeat(4500);
+        String body = """
+                {
+                  "postType": "prayer_request",
+                  "content": "%s",
+                  "category": "health"
+                }
+                """.formatted(content);
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("2000 character limit")));
+    }
+
+    @Test
+    void createPost_prayerRequest2000Chars_returns201() throws Exception {
+        String content = "a".repeat(2000);
+        String body = """
+                {
+                  "postType": "prayer_request",
+                  "content": "%s",
+                  "category": "health"
+                }
+                """.formatted(content);
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.hasLength(2000)));
+    }
+
     @Test
     void createPost_qotdReferencesExisting_succeeds() throws Exception {
         String body = """

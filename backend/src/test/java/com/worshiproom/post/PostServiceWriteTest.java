@@ -3,10 +3,12 @@ package com.worshiproom.post;
 import com.worshiproom.activity.ActivityService;
 import com.worshiproom.activity.ActivityType;
 import com.worshiproom.activity.dto.ActivityRequest;
+import com.worshiproom.auth.AuthenticatedUser;
 import com.worshiproom.post.dto.AuthorDto;
 import com.worshiproom.post.dto.CreatePostRequest;
 import com.worshiproom.post.dto.CreatePostResponse;
 import com.worshiproom.post.dto.PostDto;
+import com.worshiproom.post.dto.UpdatePostRequest;
 import com.worshiproom.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -273,6 +275,191 @@ class PostServiceWriteTest {
         // Per Divergence 7: real author UUID stored even when anonymous.
         assertThat(captor.getValue().getUserId()).isEqualTo(authorId);
         assertThat(captor.getValue().isAnonymous()).isTrue();
+    }
+
+    // =====================================================================
+    // Spec 4.3 — per-type content length enforcement (testimony 5000, others 2000)
+    // =====================================================================
+
+    private CreatePostRequest testimonyRequestWithContent(String content) {
+        return new CreatePostRequest(
+                "testimony", content, null, false, "public",
+                null, null, null, null
+        );
+    }
+
+    private CreatePostRequest prayerRequestWithContent(String content) {
+        return new CreatePostRequest(
+                "prayer_request", content, "family", false, "public",
+                null, null, null, null
+        );
+    }
+
+    @Test
+    void createPost_testimony_5000Chars_succeeds() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+        String content = "a".repeat(5000);
+
+        CreatePostResponse response = postService.createPost(
+                authorId, testimonyRequestWithContent(content), null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getPostType()).isEqualTo(PostType.TESTIMONY);
+        assertThat(captor.getValue().getContent()).hasSize(5000);
+    }
+
+    @Test
+    void createPost_testimony_5001Chars_throwsContentTooLongException_with5000InMessage() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        String content = "a".repeat(5001);
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, testimonyRequestWithContent(content), null, "rid"))
+                .isInstanceOf(ContentTooLongException.class)
+                .hasMessageContaining("5000 character limit");
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_prayerRequest_2000Chars_succeeds() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+        String content = "a".repeat(2000);
+
+        CreatePostResponse response = postService.createPost(
+                authorId, prayerRequestWithContent(content), null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getContent()).hasSize(2000);
+    }
+
+    @Test
+    void createPost_prayerRequest_2001Chars_throwsContentTooLongException_with2000InMessage() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        String content = "a".repeat(2001);
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, prayerRequestWithContent(content), null, "rid"))
+                .isInstanceOf(ContentTooLongException.class)
+                .hasMessageContaining("2000 character limit");
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    /**
+     * W15 regression: JSR-303 ceiling raised to 5000 leaves the service layer
+     * as the active gate for prayer_request. A 4500-char prayer_request bypasses
+     * JSR (under 5000) and hits the service layer where the per-type 2000 cap
+     * rejects it. Service-level call here bypasses the JSR layer entirely and
+     * proves the service-layer enforcement is correct.
+     */
+    @Test
+    void createPost_prayerRequest_4500Chars_throwsAtServiceLayer_with2000InMessage() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        String content = "a".repeat(4500);
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, prayerRequestWithContent(content), null, "rid"))
+                .isInstanceOf(ContentTooLongException.class)
+                .hasMessageContaining("2000 character limit");
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_testimony_doesNotRequireCategory() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+        // testimony with null category — should not throw MissingCategoryException
+        CreatePostRequest req = new CreatePostRequest(
+                "testimony", "Praise God for healing.", null, false, "public",
+                null, null, null, null
+        );
+
+        CreatePostResponse response = postService.createPost(authorId, req, null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        verify(postRepository).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_testimony_recordsPRAYER_WALL_activity_notTestimonyPosted() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        postService.createPost(authorId, testimonyRequestWithContent("Praise God."), null, "rid");
+
+        // MPD-3: testimony emits PRAYER_WALL activity, NOT TESTIMONY_POSTED.
+        // TESTIMONY_POSTED is deferred to a future spec (post-1.10-followups §27).
+        ArgumentCaptor<ActivityRequest> captor = ArgumentCaptor.forClass(ActivityRequest.class);
+        verify(activityService).recordActivity(eq(authorId), captor.capture());
+        assertThat(captor.getValue().activityType()).isEqualTo(ActivityType.PRAYER_WALL);
+    }
+
+    private Post existingPost(UUID id, UUID userId, PostType postType) {
+        Post post = new Post();
+        post.setId(id);
+        post.setUserId(userId);
+        post.setPostType(postType);
+        post.setContent("original content");
+        post.setCategory(postType == PostType.PRAYER_REQUEST ? "family" : null);
+        post.setVisibility(PostVisibility.PUBLIC);
+        post.setModerationStatus(ModerationStatus.APPROVED);
+        post.setAnonymous(false);
+        post.setDeleted(false);
+        post.setAnswered(false);
+        post.setCrisisFlag(false);
+        // createdAt is DB-managed (insertable=false) — no setter. Set via reflection
+        // so post.getCreatedAt() returns non-null in the edit-window check.
+        try {
+            java.lang.reflect.Field createdAt = Post.class.getDeclaredField("createdAt");
+            createdAt.setAccessible(true);
+            createdAt.set(post, OffsetDateTime.now());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+        return post;
+    }
+
+    @Test
+    void updatePost_testimonyContent_5001Chars_throwsContentTooLongException_with5000InMessage() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.TESTIMONY);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                "a".repeat(5001), null, null, null, null, null, null, null, null);
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        assertThatThrownBy(() -> postService.updatePost(postId, principal, req, "rid"))
+                .isInstanceOf(ContentTooLongException.class)
+                .hasMessageContaining("5000 character limit");
+    }
+
+    @Test
+    void updatePost_prayerRequestContent_2001Chars_throwsContentTooLongException_with2000InMessage() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.PRAYER_REQUEST);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                "a".repeat(2001), null, null, null, null, null, null, null, null);
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        assertThatThrownBy(() -> postService.updatePost(postId, principal, req, "rid"))
+                .isInstanceOf(ContentTooLongException.class)
+                .hasMessageContaining("2000 character limit");
     }
 
     @Test

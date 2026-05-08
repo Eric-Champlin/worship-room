@@ -60,6 +60,25 @@ import type { PostType } from '@/constants/post-types'
 
 const PRAYERS_PER_PAGE = 20
 
+// Spec 4.3 — per-type lookup maps for success-toast and auth-modal CTA copy.
+// Other 4 types currently default to prayer_request strings; 4.4–4.6 will tune.
+// Module-level so they're stable across renders and don't require useCallback deps.
+const successToastByType: Record<PostType, string> = {
+  prayer_request: 'Your prayer is on the wall. Others can now lift it up.',
+  testimony: 'Your testimony is on the wall. Others can rejoice with you.',
+  question: 'Your prayer is on the wall. Others can now lift it up.',
+  discussion: 'Your prayer is on the wall. Others can now lift it up.',
+  encouragement: 'Your prayer is on the wall. Others can now lift it up.',
+}
+
+const authModalCtaByType: Record<PostType, string> = {
+  prayer_request: 'Sign in to share a prayer request',
+  testimony: 'Sign in to share a testimony',
+  question: 'Sign in to share a prayer request',
+  discussion: 'Sign in to share a prayer request',
+  encouragement: 'Sign in to share a prayer request',
+}
+
 function PrayerWallContent() {
   const { isAuthenticated, user } = useAuth()
   const { showToast, showCelebrationToast } = useToast()
@@ -152,7 +171,9 @@ function PrayerWallContent() {
   const categoryCounts = useMemo(() => {
     const counts = {} as Record<PrayerCategory, number>
     for (const cat of PRAYER_CATEGORIES) counts[cat] = 0
-    for (const p of allPrayers) counts[p.category]++
+    for (const p of allPrayers) {
+      if (p.category) counts[p.category]++
+    }
     return counts
   }, [allPrayers])
 
@@ -287,13 +308,13 @@ function PrayerWallContent() {
     async (
       content: string,
       isAnonymous: boolean,
-      category: PrayerCategory,
+      category: PrayerCategory | null,
       challengeId?: string,
       idempotencyKey?: string,
       postType: PostType = 'prayer_request'
     ): Promise<boolean> => {
       if (!isAuthenticated) {
-        openAuthModal?.('Sign in to share a prayer request')
+        openAuthModal?.(authModalCtaByType[postType])
         return false
       }
       if (!isBackendPrayerWallEnabled()) {
@@ -326,7 +347,7 @@ function PrayerWallContent() {
             prayerWallPosts: badgeData.activityCounts.prayerWallPosts + 1,
           },
         })
-        showToast('Your prayer is on the wall. Others can now lift it up.')
+        showToast(successToastByType[postType])
         return true
       }
       try {
@@ -351,11 +372,11 @@ function PrayerWallContent() {
             prayerWallPosts: badgeData.activityCounts.prayerWallPosts + 1,
           },
         })
-        showToast('Your prayer is on the wall. Others can now lift it up.')
+        showToast(successToastByType[postType])
         return true
       } catch (err) {
         if (err instanceof AnonymousWriteAttemptError) {
-          openAuthModal?.('Sign in to share a prayer request')
+          openAuthModal?.(authModalCtaByType[postType])
         } else if (err instanceof ApiError) {
           const descriptor = mapApiErrorToToast(err)
           if (descriptor.message) showToast(descriptor.message)
@@ -719,9 +740,14 @@ function PrayerWallContent() {
         ) : (
           <>
             {/* Inline Composer */}
+            {/* REMOVE-IN-4.7: ?debug-post-type query param shim. The production
+                entry-point for testimony composer is Spec 4.7's Composer Chooser;
+                until that ships, this shim enables /verify-with-playwright to
+                exercise the testimony variant via URL. */}
             <InlineComposer
               isOpen={composerOpen}
               onClose={() => setComposerOpen(false)}
+              postType={searchParams.get('debug-post-type') === 'testimony' ? 'testimony' : 'prayer_request'}
               onSubmit={handleComposerSubmit}
             />
 
@@ -767,7 +793,7 @@ function PrayerWallContent() {
                       />
                       <SaveToPrayersForm
                         prayerContent={prayer.content}
-                        prayerCategory={prayer.category}
+                        prayerCategory={prayer.category ?? undefined}
                         prayerId={prayer.id}
                         isOpen={saveFormOpen === prayer.id}
                         onSaved={() => {

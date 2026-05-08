@@ -1,11 +1,13 @@
 import { CATEGORY_LABELS, type PrayerCategory } from '@/constants/prayer-categories'
 
 interface CategoryBadgeProps {
-  category: PrayerCategory
+  // Spec 4.3 — testimony posts pass null; renders nothing in that case.
+  category: PrayerCategory | null
   onClick?: (category: PrayerCategory) => void
 }
 
 export function CategoryBadge({ category, onClick }: CategoryBadgeProps) {
+  if (category === null) return null
   const label = CATEGORY_LABELS[category]
 
   if (onClick) {

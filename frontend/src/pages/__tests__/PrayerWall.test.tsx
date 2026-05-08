@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -6,9 +6,23 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerWall } from '../PrayerWall'
 
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null, isAuthenticated: false, login: vi.fn(), logout: vi.fn() }),
+// Spec 4.3 — make useAuth mock dynamic so individual tests can override
+// whether the user is authenticated.
+const authState = vi.hoisted(() => ({
+  current: { user: null as { id: string; name: string } | null, isAuthenticated: false },
 }))
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: authState.current.user,
+    isAuthenticated: authState.current.isAuthenticated,
+    login: vi.fn(),
+    logout: vi.fn(),
+  }),
+}))
+
+beforeEach(() => {
+  authState.current = { user: null, isAuthenticated: false }
+})
 
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
@@ -152,6 +166,85 @@ describe('PrayerWall empty states', () => {
     expect(screen.getByText('This space is for you')).toBeInTheDocument()
     expect(
       screen.getByText("Share what's on your heart, or simply pray for others."),
+    ).toBeInTheDocument()
+  })
+})
+
+// =====================================================================
+// Spec 4.3 — testimony composer per-type behavior
+// =====================================================================
+
+describe('PrayerWall — Spec 4.3 testimony composer', () => {
+  it('?debug-post-type=testimony query param opens composer in testimony mode', async () => {
+    // Logged-in: hero button opens the composer (logged-out goes to auth modal directly).
+    authState.current = {
+      user: { id: 'u-test', name: 'Test User' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?debug-post-type=testimony')
+    // Click the inline-composer-trigger "Share a Prayer Request" hero button.
+    // There are multiple elements with this text on the page; the hero button is
+    // the only `<button>` (others are headings/links).
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    // Composer renders with testimony header (per Spec 4.3).
+    expect(screen.getByText('Share a testimony')).toBeInTheDocument()
+    expect(screen.getByLabelText('Testimony')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /submit testimony/i })).toBeInTheDocument()
+  })
+
+  it('default (no query param) opens composer in prayer_request mode (no regression)', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Test User' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    // Composer renders with prayer_request label, NOT testimony.
+    expect(screen.queryByText('Share a testimony')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Prayer request')).toBeInTheDocument()
+  })
+
+  it('successful testimony submit (mock branch) shows testimony-specific success toast', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Sarah' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?debug-post-type=testimony')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    await user.type(
+      screen.getByLabelText('Testimony'),
+      'Praise God for healing my friend.',
+    )
+    await user.click(screen.getByRole('button', { name: /submit testimony/i }))
+    // Spec 4.3 testimony-specific toast copy
+    expect(
+      await screen.findByText('Your testimony is on the wall. Others can rejoice with you.'),
+    ).toBeInTheDocument()
+  })
+
+  it('successful prayer_request submit (mock branch) shows prayer-specific toast (no regression)', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Sarah' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    await user.type(screen.getByLabelText('Prayer request'), 'Please pray for my family.')
+    // Pick category — composer fieldset's Health pill is the second match
+    // (filter bar also has a Health pill); use a more specific selector.
+    const radioGroup = screen.getByRole('radiogroup', { name: /prayer category/i })
+    await userEvent.setup().click(within(radioGroup).getByRole('radio', { name: 'Health' }))
+    await user.click(screen.getByRole('button', { name: /submit prayer request/i }))
+    expect(
+      await screen.findByText('Your prayer is on the wall. Others can now lift it up.'),
     ).toBeInTheDocument()
   })
 })

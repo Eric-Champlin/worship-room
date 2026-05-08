@@ -22,7 +22,9 @@ export interface PrayerRequest {
   authorAvatarUrl: string | null
   isAnonymous: boolean
   content: string
-  category: PrayerCategory
+  // Spec 4.3 — testimony posts have category: null (no prayer-category for testimonies).
+  // Other post types still set a category. Render-time consumers must guard for null.
+  category: PrayerCategory | null
   challengeId?: string
   qotdId?: string
   isAnswered: boolean

@@ -189,11 +189,12 @@ public class PostService {
         if (sanitizedContent.isEmpty()) {
             throw new EmptyContentException();
         }
-        if (sanitizedContent.length() > 2000) {
-            // After sanitization, the post-strip content may still be over 2000 if
-            // the user pasted hand-crafted HTML that survived the policy (unlikely
-            // but possible). Re-validate.
-            throw new ContentTooLongException();
+        int maxLength = maxContentLengthFor(postType);
+        if (sanitizedContent.length() > maxLength) {
+            // After sanitization, the post-strip content may still be over the
+            // per-type ceiling if the user pasted hand-crafted HTML that survived
+            // the policy (unlikely but possible). Re-validate.
+            throw new ContentTooLongException(maxLength);
         }
         String sanitizedScriptureText = scriptureTextPresent
                 ? htmlSanitizerPolicy.sanitize(request.scriptureText()).trim()
@@ -348,7 +349,8 @@ public class PostService {
                 : null;
         if (wantsContentEdit) {
             if (sanitizedContent.isEmpty()) throw new EmptyContentException();
-            if (sanitizedContent.length() > 2000) throw new ContentTooLongException();
+            int maxLength = maxContentLengthFor(post.getPostType());
+            if (sanitizedContent.length() > maxLength) throw new ContentTooLongException(maxLength);
         }
         String sanitizedAnsweredText = wantsAnsweredTextEdit
                 ? htmlSanitizerPolicy.sanitize(request.answeredText()).trim()
@@ -477,6 +479,13 @@ public class PostService {
             case PRIVATE -> 0;
             case FRIENDS -> 1;
             case PUBLIC -> 2;
+        };
+    }
+
+    private static int maxContentLengthFor(PostType postType) {
+        return switch (postType) {
+            case TESTIMONY -> 5000;
+            case PRAYER_REQUEST, QUESTION, DISCUSSION, ENCOURAGEMENT -> 2000;
         };
     }
 

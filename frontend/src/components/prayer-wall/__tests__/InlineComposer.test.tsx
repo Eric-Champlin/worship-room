@@ -216,9 +216,10 @@ describe('InlineComposer', () => {
         />
       </MemoryRouter>,
     )
-    await user.type(screen.getByLabelText('Prayer request'), 'My testimony')
-    await user.click(screen.getByText('Health'))
-    await user.click(screen.getByText('Submit Prayer Request'))
+    // Spec 4.3: testimony composer uses "Testimony" textarea label, hides
+    // the category fieldset, and has a "Submit Testimony" submit button.
+    await user.type(screen.getByLabelText('Testimony'), 'My testimony')
+    await user.click(screen.getByText('Submit Testimony'))
     expect(onSubmit).toHaveBeenCalled()
     const args = onSubmit.mock.calls[0]
     expect(args[5]).toBe('testimony')
@@ -323,5 +324,128 @@ describe('InlineComposer — accessibility', () => {
     const error = screen.getByText('Please choose a category')
     expect(error).toBeInTheDocument()
     expect(error).toHaveAttribute('role', 'alert')
+  })
+})
+
+// =====================================================================
+// Spec 4.3 — testimony composer per-type copy + behavior
+// =====================================================================
+
+function renderTestimonyComposer(overrides?: {
+  onSubmit?: Parameters<typeof renderComposer>[0] extends infer T
+    ? T extends { onSubmit?: infer S }
+      ? S
+      : never
+    : never
+}) {
+  return render(
+    <MemoryRouter>
+      <InlineComposer
+        isOpen
+        onClose={vi.fn()}
+        postType="testimony"
+        onSubmit={overrides?.onSubmit ?? vi.fn().mockResolvedValue(true)}
+      />
+    </MemoryRouter>,
+  )
+}
+
+describe('InlineComposer — Spec 4.3 testimony', () => {
+  it('renders testimony header copy when postType is testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.getByText('Share a testimony')).toBeInTheDocument()
+  })
+
+  it('renders testimony placeholder when postType is testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.getByPlaceholderText('What has God done?')).toBeInTheDocument()
+  })
+
+  it('textarea aria-label is "Testimony" for testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.getByLabelText('Testimony')).toBeInTheDocument()
+  })
+
+  it('textarea maxLength is 5000 for testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.getByLabelText('Testimony')).toHaveAttribute('maxLength', '5000')
+  })
+
+  it('textarea maxLength is 1000 for prayer_request (frontend asymmetry preserved per MPD-2)', () => {
+    renderComposer()
+    expect(screen.getByLabelText('Prayer request')).toHaveAttribute('maxLength', '1000')
+  })
+
+  it('textarea minHeight is 180px for testimony', () => {
+    renderTestimonyComposer()
+    const textarea = screen.getByLabelText('Testimony')
+    expect((textarea as HTMLTextAreaElement).style.minHeight).toBe('180px')
+  })
+
+  it('textarea minHeight is 120px for prayer_request', () => {
+    renderComposer()
+    const textarea = screen.getByLabelText('Prayer request')
+    expect((textarea as HTMLTextAreaElement).style.minHeight).toBe('120px')
+  })
+
+  it('attribution nudge renders for testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.getByText(/Testimonies often mean more/)).toBeInTheDocument()
+  })
+
+  it('attribution nudge does NOT render for prayer_request', () => {
+    renderComposer()
+    expect(screen.queryByText(/Testimonies often mean more/)).not.toBeInTheDocument()
+  })
+
+  it('category fieldset is hidden for testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.queryByRole('radiogroup', { name: /prayer category/i })).not.toBeInTheDocument()
+  })
+
+  it('category fieldset is visible for prayer_request', () => {
+    renderComposer()
+    expect(screen.getByRole('radiogroup', { name: /prayer category/i })).toBeInTheDocument()
+  })
+
+  it('submit handler receives postType=testimony', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderTestimonyComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Testimony'), 'Praise God for healing.')
+    await user.click(screen.getByRole('button', { name: /submit testimony/i }))
+    expect(onSubmit).toHaveBeenCalled()
+    const args = onSubmit.mock.calls[0]
+    expect(args[5]).toBe('testimony')
+  })
+
+  it('submit button label is "Submit Testimony" for testimony', () => {
+    renderTestimonyComposer()
+    expect(screen.getByRole('button', { name: /submit testimony/i })).toBeInTheDocument()
+  })
+
+  it('submit handler bypasses category-required guard for testimony (no category needed)', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderTestimonyComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Testimony'), 'My testimony content.')
+    await user.click(screen.getByRole('button', { name: /submit testimony/i }))
+    // onSubmit IS called — the missing category does NOT block testimony submission.
+    expect(onSubmit).toHaveBeenCalled()
+    expect(screen.queryByText('Please choose a category')).not.toBeInTheDocument()
+  })
+
+  it('crisis keyword detection STILL fires for testimony (R3 — crisis safety preserved)', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderTestimonyComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Testimony'), 'I want to kill myself')
+    await user.click(screen.getByRole('button', { name: /submit testimony/i }))
+    // Crisis block intercepts the submit; onSubmit should NOT be called.
+    expect(onSubmit).not.toHaveBeenCalled()
+    // Crisis resources are surfaced.
+    expect(
+      screen.getByText(/sounds like you may be going through a difficult time/i),
+    ).toBeInTheDocument()
   })
 })

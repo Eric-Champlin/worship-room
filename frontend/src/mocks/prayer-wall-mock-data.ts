@@ -534,6 +534,47 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     prayingCount: 72,
     commentCount: 11,
   },
+  // --- Spec 4.3 — Testimony Posts (2) ---
+  // Testimony posts have category: null (no prayer-category for testimonies)
+  // and postType: 'testimony' so the PrayerCard renders the amber chrome and
+  // Sparkles icon. Mixed-feed verification depends on at least one of each
+  // attribution style (named + anonymous).
+  {
+    id: 'prayer-testimony-001',
+    userId: 'user-1',
+    authorName: 'Sarah',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user1',
+    isAnonymous: false,
+    content:
+      'My family prayed for healing for my mom for almost two years. The doctors found the lump shrank to nothing on her last scan. Praise God — He hears.',
+    category: null,
+    postType: 'testimony',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-05-05T14:23:00.000Z',
+    lastActivityAt: '2026-05-05T14:23:00.000Z',
+    prayingCount: 8,
+    commentCount: 3,
+  },
+  {
+    id: 'prayer-testimony-002',
+    userId: 'user-3',
+    authorName: 'Anonymous',
+    authorAvatarUrl: null,
+    isAnonymous: true,
+    content:
+      'I was about to give up on my marriage last year. Through a single conversation with a friend who quoted Ephesians 4:32 to me, God turned everything around. We are stronger now than we have ever been.',
+    category: null,
+    postType: 'testimony',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-05-04T09:15:00.000Z',
+    lastActivityAt: '2026-05-04T09:15:00.000Z',
+    prayingCount: 14,
+    commentCount: 5,
+  },
 ]
 
 // --- Mock Comments (35) ---

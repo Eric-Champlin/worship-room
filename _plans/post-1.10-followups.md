@@ -514,3 +514,49 @@ When all four are replaced, this followup is closed. The TypeMarker render helpe
 Filed: 2026-05-08 (Spec 4.2 plan).
 
 ---
+
+## 27. Testimony activity bonus (filed by Spec 4.3)
+
+Master plan body for 4.3 specified a new ActivityType `testimony_posted` with +50% faith point reward over `prayer_request`. Deferred from 4.3 to avoid cross-cutting activity engine changes (frontend ActivityType union, DailyActivities boolean, ACTIVITY_POINTS, ACTIVITY_DISPLAY_NAMES, ACTIVITY_CHECKLIST_NAMES, ALL_ACTIVITY_TYPES, MAX_DAILY_BASE_POINTS recalc, backend ActivityType.java + PointValues.java + dual-write parity). Should ship as part of Phase 5 (or earlier dedicated spec) when the activity engine is the focus.
+
+**Implementation outline (when ready):**
+
+- Backend: add `ActivityType.TESTIMONY_POSTED` with wireValue `'testimonyPosted'`; add `PointValues.POINTS` entry for it (suggested 22 = 15 × 1.5 rounded down, or 23 = round-up — designer's call).
+- Frontend: extend ActivityType union; extend DailyActivities interface; extend ACTIVITY_POINTS / ACTIVITY_DISPLAY_NAMES / ACTIVITY_CHECKLIST_NAMES / ALL_ACTIVITY_TYPES; recalc MAX_DAILY_BASE_POINTS (165 → 187 if testimonyPosted=22) and MAX_DAILY_POINTS.
+- PostService: branch on postType — emit `TESTIMONY_POSTED` for testimony, keep `PRAYER_WALL` for other types.
+- Backfill: existing DailyActivities rows have no testimonyPosted field — handle as missing-key = false.
+- Tests: every activity engine snapshot test will need updating.
+
+**Priority:** LOW. The post type is fully usable without the bonus. The bonus is a reward-system tuning that adds polish but is not behaviorally load-bearing.
+
+Filed: 2026-05-08 (Spec 4.3 plan).
+
+---
+
+## 28. Testimony composer scripture-pair selector (filed by Spec 4.3)
+
+Spec 4.3 ships testimony with no scripture-pair selector. The PrayerRequest type already carries optional `scriptureReference` and `scriptureText` fields, which testimony posts simply leave undefined. Spec 4.5 (Devotional Discussion) introduces the scripture-pair selector UX. After 4.5 ships and the pattern stabilizes, port it to the testimony composer.
+
+**Priority:** LOW. Testimonies are usable without scripture. This is a "when something better is available, use it" enhancement.
+
+Filed: 2026-05-08 (Spec 4.3 plan).
+
+---
+
+## 29. Per-type reaction labels for posts ("Amen" for testimony, etc.) (filed by Spec 4.3)
+
+Master plan body for 4.3 specified that reactions on testimony cards should be labeled "Amen" instead of "Praying". Deferred from 4.3 because per-type reaction labels are an architectural call (single button with per-type label vs per-type reactions with separate counts that don't share storage) and 4.3 should not litigate that without dedicated focus. Phase 6 (Engagement Features) is the natural home; sequence after 4.6 ships so the chrome/composer scaffolding for all 5 post types is in place before the reaction system gets its own pass.
+
+**Implementation considerations (when ready):**
+
+- Decide: single reaction button with per-type label (cheaper) vs per-type reactions with separate `posts.amen_count` columns (more flexible).
+- If single-button: branch InteractionBar.tsx aria-label and floater text on `prayer.postType`. `prayingCount` storage stays unified.
+- If per-type: schema change adds per-type counters; backend reaction service routes by post_type → counter column.
+- Either path requires updating ShareDropdown title (currently hardcoded "Prayer Request").
+
+**Priority:** LOW–MEDIUM. The HandHelping reaction button + "Praying" aria-label is theologically coherent for testimony (intercession alongside thanksgiving). The Amen label is polish, not correctness.
+
+Filed: 2026-05-08 (Spec 4.3 plan).
+
+---
+

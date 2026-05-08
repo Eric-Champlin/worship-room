@@ -8,6 +8,9 @@
  * (the OpenAPI spec at backend/src/main/resources/openapi.yaml also
  * declares the enum at lines ~1496/3455/3548 and must be hand-synced
  * separately until a codegen pipeline ships).
+ *
+ * Spec 4.3 enabled the testimony post type. Spec 4.4 will enable question;
+ * Spec 4.5 will enable discussion; Spec 4.6 will enable encouragement.
  */
 import { describe, it, expect } from 'vitest'
 import {
@@ -50,12 +53,12 @@ describe('post-types — backend drift', () => {
 })
 
 describe('post-types — feature flags', () => {
-  it('prayer_request is enabled', () => {
+  it('prayer_request and testimony are enabled', () => {
     expect(getPostType('prayer_request').enabled).toBe(true)
+    expect(getPostType('testimony').enabled).toBe(true)
   })
 
-  it('testimony, question, discussion, encouragement are disabled', () => {
-    expect(getPostType('testimony').enabled).toBe(false)
+  it('question, discussion, encouragement are disabled', () => {
     expect(getPostType('question').enabled).toBe(false)
     expect(getPostType('discussion').enabled).toBe(false)
     expect(getPostType('encouragement').enabled).toBe(false)

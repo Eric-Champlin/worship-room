@@ -119,7 +119,7 @@ After 5.6 ships: 1.5g.
 | --- | -------- | --------------------------------------------------------- | ---- | ------ | ------ |
 | 63  | 4.1      | Post Type Foundation (Frontend Types + Backend Enum Sync) | M    | Low    | ✅     |
 | 64  | 4.2      | Prayer Request Polish                                     | M    | Low    | ✅     |
-| 65  | 4.3      | Testimony Post Type                                       | L    | Medium | ⬜     |
+| 65  | 4.3      | Testimony Post Type                                       | L    | Medium | ✅     |
 | 66  | 4.4      | Question Post Type                                        | L    | Medium | ⬜     |
 | 67  | 4.5      | Devotional Discussion Post Type                           | M    | Medium | ⬜     |
 | 68  | 4.6      | Encouragement Post Type                                   | M    | Medium | ⬜     |

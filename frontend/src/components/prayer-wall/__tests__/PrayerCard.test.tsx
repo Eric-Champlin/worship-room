@@ -162,3 +162,78 @@ describe('PrayerCard', () => {
     expect(time).toHaveAttribute('dateTime', SHORT_PRAYER.createdAt)
   })
 })
+
+// =====================================================================
+// Spec 4.3 — testimony post-type chrome and icon
+// =====================================================================
+
+const TESTIMONY_PRAYER: PrayerRequest = {
+  ...SHORT_PRAYER,
+  id: 'prayer-testimony',
+  authorName: 'Sarah',
+  postType: 'testimony',
+  category: null,
+  content: 'My family prayed for healing for my mom for almost two years. Praise God — He hears.',
+}
+
+describe('PrayerCard — Spec 4.3 testimony chrome', () => {
+  it('renders testimony chrome classes when postType is testimony', () => {
+    renderCard(TESTIMONY_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('bg-amber-500/[0.04]')
+    expect(article.className).toContain('border-amber-200/10')
+  })
+
+  it('renders default chrome classes when postType is prayer_request', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('bg-white/[0.06]')
+    expect(article.className).toContain('border-white/10')
+    expect(article.className).not.toContain('amber')
+  })
+
+  it('renders Sparkles icon for testimony posts', () => {
+    renderCard(TESTIMONY_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const icon = header.querySelector('svg[aria-hidden="true"]')
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveClass('lucide-sparkles')
+  })
+
+  it('renders HandHelping icon for prayer_request posts', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const icon = header.querySelector('svg[aria-hidden="true"]')
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveClass('lucide-hand-helping')
+  })
+
+  it('aria-label is "Testimony by {authorName}" for testimony posts', () => {
+    renderCard(TESTIMONY_PRAYER, {})
+    expect(screen.getByLabelText('Testimony by Sarah')).toBe(screen.getByRole('article'))
+  })
+
+  it('aria-label is "Prayer by {authorName}" for prayer_request posts', () => {
+    renderCard(SHORT_PRAYER, {})
+    expect(screen.getByLabelText('Prayer by Sarah')).toBe(screen.getByRole('article'))
+  })
+
+  it('mixed feed renders correct chrome and icon for each type', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={SHORT_PRAYER} />
+        <PrayerCard prayer={TESTIMONY_PRAYER} />
+      </MemoryRouter>,
+    )
+    const articles = screen.getAllByRole('article')
+    expect(articles).toHaveLength(2)
+    // First card: prayer_request (white chrome)
+    expect(articles[0].className).toContain('bg-white/[0.06]')
+    expect(articles[0].querySelector('svg.lucide-hand-helping')).toBeInTheDocument()
+    // Second card: testimony (amber chrome)
+    expect(articles[1].className).toContain('bg-amber-500/[0.04]')
+    expect(articles[1].querySelector('svg.lucide-sparkles')).toBeInTheDocument()
+  })
+})

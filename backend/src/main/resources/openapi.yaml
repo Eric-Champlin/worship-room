@@ -3548,7 +3548,7 @@ components:
           enum: [prayer_request, testimony, question, discussion, encouragement]
         content:
           type: string
-          maxLength: 2000
+          maxLength: 5000
         category:
           type: string
           enum: [health, mental-health, family, work, grief, gratitude, praise, relationships, other, discussion]
@@ -3581,7 +3581,7 @@ components:
       description: Request body for PATCH /api/v1/posts/{id} (Spec 3.5). All fields optional.
       type: object
       properties:
-        content: { type: string, maxLength: 2000 }
+        content: { type: string, maxLength: 5000 }
         category:
           type: string
           enum: [health, mental-health, family, work, grief, gratitude, praise, relationships, other, discussion]

@@ -20,7 +20,7 @@ export const POST_TYPES = [
     pluralLabel: 'Testimonies',
     icon: 'Sparkles',
     description: 'Share what God has done in your life.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'question',
