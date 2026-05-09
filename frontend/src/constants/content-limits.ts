@@ -55,10 +55,13 @@ export const POST_TYPE_LIMITS: Record<PostType, PostTypeLimit> = {
     visibleAt: 1000,
   },
   discussion: {
-    max: PRAYER_POST_MAX_LENGTH,
-    warningAt: 800,
-    dangerAt: 960,
-    visibleAt: 500,
+    // Spec 4.5 — Discussion max matches question (2000) per D4. Discussions are
+    // multi-paragraph reflections on a passage or topic and need more room than
+    // a prayer_request, but stay below testimony's 5000.
+    max: 2000,
+    warningAt: 1600,
+    dangerAt: 1900,
+    visibleAt: 1000,
   },
   encouragement: {
     max: PRAYER_POST_MAX_LENGTH, // 4.6 will lower this to 280

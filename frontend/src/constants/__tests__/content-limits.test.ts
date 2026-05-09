@@ -74,3 +74,19 @@ describe('content-limits — question (Spec 4.4)', () => {
     expect(q.dangerAt).toBeLessThan(q.max)
   })
 })
+
+describe('content-limits — discussion (Spec 4.5)', () => {
+  it('discussion limits match question (2000/1600/1900/1000) per D4', () => {
+    expect(POST_TYPE_LIMITS.discussion.max).toBe(2000)
+    expect(POST_TYPE_LIMITS.discussion.warningAt).toBe(1600)
+    expect(POST_TYPE_LIMITS.discussion.dangerAt).toBe(1900)
+    expect(POST_TYPE_LIMITS.discussion.visibleAt).toBe(1000)
+  })
+
+  it('discussion thresholds are ordered: visibleAt < warningAt < dangerAt < max', () => {
+    const d = POST_TYPE_LIMITS.discussion
+    expect(d.visibleAt).toBeLessThan(d.warningAt)
+    expect(d.warningAt).toBeLessThan(d.dangerAt)
+    expect(d.dangerAt).toBeLessThan(d.max)
+  })
+})

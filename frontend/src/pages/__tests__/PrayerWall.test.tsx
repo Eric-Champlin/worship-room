@@ -318,3 +318,51 @@ describe('PrayerWall — Spec 4.4 question composer', () => {
     ).toBeInTheDocument()
   })
 })
+
+// =====================================================================
+// Spec 4.5 — discussion composer per-type behavior
+// =====================================================================
+
+describe('PrayerWall — Spec 4.5 discussion composer', () => {
+  it('successful discussion submit (mock branch) shows discussion-specific toast', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Sarah' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?debug-post-type=discussion')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    await user.type(
+      screen.getByLabelText('Discussion'),
+      'How do you stay disciplined in prayer?',
+    )
+    await user.click(screen.getByRole('button', { name: /start discussion/i }))
+    expect(
+      await screen.findByText(
+        'Your discussion is on the wall. Others can think it through with you.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('unauthenticated discussion submit surfaces discussion-specific auth modal CTA', async () => {
+    authState.current = { user: null, isAuthenticated: false }
+    const user = userEvent.setup()
+    const { container } = renderPage('/prayer-wall?debug-post-type=discussion')
+    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
+    await user.click(triggerBtn)
+    void container
+    await user.type(
+      screen.getByLabelText('Discussion'),
+      'How do you stay disciplined in prayer?',
+    )
+    const submitBtn =
+      screen.queryByRole('button', { name: /start discussion/i }) ??
+      screen
+        .getAllByRole('button', { hidden: true })
+        .find((b) => /start discussion/i.test(b.textContent ?? ''))
+    if (!submitBtn) throw new Error('Start Discussion button not found in DOM')
+    await user.click(submitBtn)
+    expect(await screen.findByText('Sign in to start a discussion')).toBeInTheDocument()
+  })
+})

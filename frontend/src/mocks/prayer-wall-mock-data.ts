@@ -155,6 +155,71 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     prayingCount: 3,
     commentCount: 0,
   },
+  // --- Discussion Posts (Spec 4.5) ---
+  // Manual discussion WITH scripture pair (Romans 8:28).
+  // Verse text matches frontend/src/data/bible/web/romans.json verbatim.
+  {
+    id: 'prayer-discussion-with-scripture',
+    userId: 'user-3',
+    authorName: 'Emily',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
+    isAnonymous: false,
+    content:
+      'Been sitting with Romans 8:28 this week. The "all things" feels both comforting and challenging — what does it mean to trust that in the middle of grief?',
+    category: 'discussion',
+    postType: 'discussion',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-03-21T07:00:00Z',
+    lastActivityAt: '2026-03-21T11:00:00Z',
+    prayingCount: 0,
+    commentCount: 7,
+    scriptureReference: 'Romans 8:28',
+    scriptureText:
+      'We know that all things work together for good for those who love God, for those who are called according to his purpose.',
+  },
+  // Manual discussion WITHOUT scripture (no chip rendered).
+  {
+    id: 'prayer-discussion-no-scripture',
+    userId: 'user-9',
+    authorName: 'Maria',
+    authorAvatarUrl: null,
+    isAnonymous: false,
+    content:
+      'How do you all stay disciplined in prayer through busy seasons? Looking for honest reflections, not platitudes.',
+    category: 'discussion',
+    postType: 'discussion',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-03-20T14:30:00Z',
+    lastActivityAt: '2026-03-21T09:15:00Z',
+    prayingCount: 0,
+    commentCount: 4,
+  },
+  // QOTD-response discussion fixture (postType: 'discussion' specifically — the
+  // 3 entries above use postType: 'prayer_request' from Phase 3 and are kept
+  // as-is per Spec 4.5 plan guardrail).
+  {
+    id: 'prayer-qotd-discussion',
+    userId: 'user-8',
+    authorName: 'Daniel',
+    authorAvatarUrl: null,
+    isAnonymous: false,
+    content:
+      'For me, prayer comes alive when I treat it as a conversation rather than a checklist. Curious what others have found makes their prayer life feel less like an obligation.',
+    category: 'discussion',
+    postType: 'discussion',
+    qotdId: todaysQuestionId,
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: '2026-03-20T11:00:00Z',
+    lastActivityAt: '2026-03-20T13:00:00Z',
+    prayingCount: 0,
+    commentCount: 2,
+  },
   // --- Mental Health Prayers ---
   {
     id: 'prayer-19',

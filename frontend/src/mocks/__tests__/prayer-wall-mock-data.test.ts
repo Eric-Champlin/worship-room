@@ -10,13 +10,14 @@ import {
 } from '../prayer-wall-mock-data'
 
 describe('getMockPrayers', () => {
-  it('returns 30 prayers (18 regular + 3 QOTD + 3 mental-health + 2 testimony + 4 question)', () => {
+  it('returns 33 prayers (18 regular + 3 QOTD + 3 mental-health + 2 testimony + 4 question + 3 discussion)', () => {
     // Pre-Spec-4.4 baseline was 26 (24 + 2 Spec 4.3 testimonies); the test was
-    // never updated for testimonies and was failing on disk. Spec 4.4 adds 4
-    // question fixtures (one with no comments, one unresolved, one resolved,
-    // one authored by MOCK_CURRENT_USER) bringing the total to 30.
+    // never updated for testimonies and was failing on disk. Spec 4.4 added 4
+    // question fixtures bringing the total to 30. Spec 4.5 adds 3 discussion
+    // fixtures (manual w/ scripture, manual w/o scripture, QOTD-discussion)
+    // bringing the total to 33.
     const prayers = getMockPrayers()
-    expect(prayers).toHaveLength(30)
+    expect(prayers).toHaveLength(33)
   })
 
   it.skip('prayers are sorted by lastActivityAt DESC', () => {
@@ -143,5 +144,27 @@ describe('getMockUserByName', () => {
   it('returns undefined for unknown name', () => {
     const user = getMockUserByName('nobody')
     expect(user).toBeUndefined()
+  })
+})
+
+describe('Spec 4.5 — discussion fixtures', () => {
+  it('contains manual discussion fixtures with and without scripture, plus a QOTD-discussion', () => {
+    const prayers = getMockPrayers()
+    const discussions = prayers.filter((p) => p.postType === 'discussion')
+    // 3 discussion fixtures added by Spec 4.5
+    expect(discussions.length).toBeGreaterThanOrEqual(3)
+
+    const withScripture = discussions.find((p) => p.scriptureReference)
+    expect(withScripture).toBeDefined()
+    expect(withScripture!.scriptureReference).toBe('Romans 8:28')
+    expect(withScripture!.scriptureText).toMatch(/all things work together for good/)
+
+    const withoutScripture = discussions.find(
+      (p) => !p.scriptureReference && !p.qotdId,
+    )
+    expect(withoutScripture).toBeDefined()
+
+    const qotdDiscussion = discussions.find((p) => p.qotdId)
+    expect(qotdDiscussion).toBeDefined()
   })
 })

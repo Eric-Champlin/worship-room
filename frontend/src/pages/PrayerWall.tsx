@@ -67,7 +67,7 @@ const successToastByType: Record<PostType, string> = {
   prayer_request: 'Your prayer is on the wall. Others can now lift it up.',
   testimony: 'Your testimony is on the wall. Others can rejoice with you.',
   question: 'Your question is on the wall. Others can weigh in.',
-  discussion: 'Your prayer is on the wall. Others can now lift it up.',
+  discussion: 'Your discussion is on the wall. Others can think it through with you.',
   encouragement: 'Your prayer is on the wall. Others can now lift it up.',
 }
 
@@ -75,7 +75,7 @@ const authModalCtaByType: Record<PostType, string> = {
   prayer_request: 'Sign in to share a prayer request',
   testimony: 'Sign in to share a testimony',
   question: 'Sign in to ask a question',
-  discussion: 'Sign in to share a prayer request',
+  discussion: 'Sign in to start a discussion',
   encouragement: 'Sign in to share a prayer request',
 }
 
@@ -311,7 +311,9 @@ function PrayerWallContent() {
       category: PrayerCategory | null,
       challengeId?: string,
       idempotencyKey?: string,
-      postType: PostType = 'prayer_request'
+      postType: PostType = 'prayer_request',
+      scriptureReference?: string | null,
+      scriptureText?: string | null,
     ): Promise<boolean> => {
       if (!isAuthenticated) {
         openAuthModal?.(authModalCtaByType[postType])
@@ -335,6 +337,11 @@ function PrayerWallContent() {
           lastActivityAt: new Date().toISOString(),
           prayingCount: 0,
           commentCount: 0,
+          // Spec 4.5 — persist scripture pair on the mock object so the
+          // ScriptureChip renders for newly-posted discussions in flag-off mode.
+          ...(scriptureReference && scriptureText
+            ? { scriptureReference, scriptureText }
+            : {}),
         }
         setPrayers((prev) => [newPrayer, ...prev])
         setComposerOpen(false)
@@ -358,6 +365,12 @@ function PrayerWallContent() {
             category,
             isAnonymous,
             challengeId: challengeId ?? null,
+            // Spec 4.5 — thread scripture pair through to backend. Backend's
+            // PostService validates that both are present or both are null
+            // (InvalidScripturePairException). InlineComposer's onChange
+            // contract guarantees this invariant.
+            scriptureReference: scriptureReference ?? null,
+            scriptureText: scriptureText ?? null,
           },
           idempotencyKey
         )
@@ -811,7 +824,9 @@ function PrayerWallContent() {
                   ? 'testimony'
                   : searchParams.get('debug-post-type') === 'question'
                     ? 'question'
-                    : 'prayer_request'
+                    : searchParams.get('debug-post-type') === 'discussion'
+                      ? 'discussion'
+                      : 'prayer_request'
               }
               onSubmit={handleComposerSubmit}
             />

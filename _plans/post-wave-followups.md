@@ -597,3 +597,30 @@ Realistically, the post author lands on Dashboard's "My Prayers" tab to see thei
 
 Filed: 2026-05-08 (Spec 4.4 plan).
 
+
+---
+
+## 32. Per-type expiry rules — DEFERRED to Phase 6 (filed by Spec 4.5)
+
+**Filed by:** Spec 4.5 (2026-05-08)
+**Owner:** Phase 6 expiry spec (TBD spec ID)
+**Reason for deferral:** `posts` table has no `expires_at` column. Phase 3 did not ship per-type expiry. Phase 6 owns the mechanic. MPD-2 / W2 / R20 of Spec 4.5 forbid adding `expires_at` in 4.5.
+
+When Phase 6 ships, add an `expires_at` column to `posts` (Liquibase changeset) and populate at create time per the table below. Add a daily expiry-sweep job. Update `PostListService` to filter by `expires_at > NOW() OR expires_at IS NULL`.
+
+| Post type | Default expiry from `last_activity_at` | Notes |
+| --- | --- | --- |
+| prayer_request | none (evergreen) | Stays until soft-deleted |
+| testimony | none (evergreen) | Celebrations don't expire |
+| question | none until resolved (resolves stay evergreen forever) | Per Spec 4.4 |
+| discussion | 3 days | Per Spec 4.5 master plan body |
+| encouragement | 24 hours, non-extendable | Per Spec 4.6 master plan body |
+
+**Implementation notes for Phase 6:**
+
+- For QUESTION: when `is_resolved = true` is set, clear `expires_at` (NULL). When unresolved (`is_resolved = false`), set `expires_at = last_activity_at + INTERVAL 'X days'` (TBD).
+- For DISCUSSION: set on every comment/edit such that `expires_at = last_activity_at + INTERVAL '3 days'` so the post stays alive while there is active conversation.
+- For ENCOURAGEMENT: set ONCE at create time as `created_at + INTERVAL '24 hours'`. Non-extendable means subsequent comments/edits do NOT push `expires_at` forward.
+- Frontend filtering: `PostList` queries should exclude expired posts by default; admin views may opt in to seeing expired posts via a filter param.
+
+**Priority:** MEDIUM. The Phase 4 post-type wave establishes the type taxonomy; expiry is the next reasonable layer once all 5 types ship and the team can decide a consistent sweep cadence.

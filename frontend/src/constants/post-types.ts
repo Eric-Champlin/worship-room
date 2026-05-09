@@ -36,7 +36,7 @@ export const POST_TYPES = [
     pluralLabel: 'Discussions',
     icon: 'MessagesSquare',
     description: 'Open a thread on a passage or topic worth exploring.',
-    enabled: false,
+    enabled: true,
   },
   {
     id: 'encouragement',

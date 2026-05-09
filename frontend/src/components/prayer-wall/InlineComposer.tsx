@@ -18,6 +18,7 @@ import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { getChallenge } from '@/data/challenges'
 import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 import type { PostType } from '@/constants/post-types'
+import { ScriptureReferenceInput } from './ScriptureReferenceInput'
 
 interface ComposerCopy {
   header: string
@@ -31,6 +32,10 @@ interface ComposerCopy {
   showCategoryFieldset: boolean
   showChallengeCheckbox: boolean
   showAttributionNudge: boolean
+  /** Spec 4.5 — when true, render <ScriptureReferenceInput> below the textarea.
+   *  Currently set only on `discussion`. The field is OPTIONAL — composer submits
+   *  successfully whether or not the user fills it in. */
+  showScriptureReferenceField?: boolean
   minHeight: string
 }
 
@@ -74,15 +79,16 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     minHeight: '120px',
   },
   discussion: {
-    header: 'Share a Prayer Request',
-    placeholder: "What's on your heart?",
-    ariaLabel: 'Prayer request',
-    submitButton: 'Submit Prayer Request',
-    footerNote: 'Your prayer will be shared with the community. Be kind and respectful.',
-    showCategoryFieldset: true,
-    showChallengeCheckbox: true,
+    header: 'Start a discussion',
+    placeholder: 'What scripture or topic do you want to think through with others?',
+    ariaLabel: 'Discussion',
+    submitButton: 'Start Discussion',
+    footerNote: 'Your discussion will be shared with the community. Be kind and respectful.',
+    showCategoryFieldset: false,
+    showChallengeCheckbox: false,
     showAttributionNudge: false,
-    minHeight: '120px',
+    showScriptureReferenceField: true,
+    minHeight: '160px', // D17 — between prayer_request 120 and testimony 180
   },
   encouragement: {
     header: 'Share a Prayer Request',
@@ -123,7 +129,12 @@ interface InlineComposerProps {
     category: PrayerCategory | null,
     challengeId?: string,
     idempotencyKey?: string,
-    postType?: PostType
+    postType?: PostType,
+    // Spec 4.5 — optional scripture pair. Composer guarantees both null or
+    // both set (via ScriptureReferenceInput's onChange contract). Only populated
+    // for postType === 'discussion' in 4.5; future post types may opt in.
+    scriptureReference?: string | null,
+    scriptureText?: string | null,
   ) => boolean | Promise<boolean>
 }
 
@@ -138,6 +149,29 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
   const [showCategoryError, setShowCategoryError] = useState(false)
   const [crisisDetected, setCrisisDetected] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // Spec 4.5 — scripture pair from <ScriptureReferenceInput>. Both null when
+  // empty, invalid, or chapter-only; both set when a verse-level reference
+  // resolved successfully. `scriptureFieldHasError` blocks submit on invalid
+  // input (D12) — empty/chapter-only/valid all leave it `false`.
+  const [scriptureRef, setScriptureRef] = useState<string | null>(null)
+  const [scriptureText, setScriptureText] = useState<string | null>(null)
+  const [scriptureFieldHasError, setScriptureFieldHasError] = useState(false)
+  // Spec 4.5 — InlineComposer hides via aria-hidden/inert (line 310-311) rather
+  // than unmounting on close, so child components retain their internal state
+  // across open/close cycles. ScriptureReferenceInput is uncontrolled (owns its
+  // own rawInput); without a forced remount, a previously-typed reference would
+  // persist visually after submit/cancel while the parent's scriptureRef has
+  // already been cleared, leading to a silent state desync where the next
+  // submit ships with no scripture pair despite the user seeing one in the
+  // field. Bumping this key on success/cancel discards the stale child instance.
+  const [scriptureResetKey, setScriptureResetKey] = useState(0)
+  const handleScriptureChange = useCallback(
+    (ref: string | null, text: string | null) => {
+      setScriptureRef(ref)
+      setScriptureText(text)
+    },
+    [],
+  )
   // Idempotency key: regenerate whenever the content changes so a fresh
   // post gets a fresh key, but a retry of the SAME content reuses the SAME
   // key (W5 + backend dedup).
@@ -191,19 +225,31 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       setShowCategoryError(true)
       return
     }
+    // D12 — submit is disabled at the button level when scripture is invalid;
+    // this is a defensive check in case the user activates submit via keyboard.
+    if (scriptureFieldHasError) return
     if (containsCrisisKeyword(content)) {
       setCrisisDetected(true)
       return
     }
     setIsSubmitting(true)
     try {
+      // D15 — discussion auto-fills category since the fieldset is hidden.
+      // Backend's PostController VALID_CATEGORIES already accepts 'discussion'
+      // (Phase 3 added it for QOTD).
+      const effectiveCategory: PrayerCategory | null =
+        postType === 'discussion'
+          ? ('discussion' as PrayerCategory)
+          : selectedCategory
       const success = await onSubmit(
         content.trim(),
         isAnonymous,
-        selectedCategory,
+        effectiveCategory,
         isChallengePrayer && activeChallenge ? activeChallenge.id : undefined,
         idempotencyKey,
-        postType
+        postType,
+        scriptureRef,
+        scriptureText,
       )
       if (!success) return
       setContent('')
@@ -212,6 +258,10 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       setIsChallengePrayer(false)
       setShowCategoryError(false)
       setCrisisDetected(false)
+      setScriptureRef(null)
+      setScriptureText(null)
+      setScriptureFieldHasError(false)
+      setScriptureResetKey((k) => k + 1)
       // Generate a fresh idempotency key for the next prayer.
       setIdempotencyKey(
         typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
@@ -231,6 +281,10 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     activeChallenge,
     idempotencyKey,
     postType,
+    copy.showCategoryFieldset,
+    scriptureRef,
+    scriptureText,
+    scriptureFieldHasError,
   ])
 
   const handleCancel = useCallback(() => {
@@ -239,6 +293,10 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     setSelectedCategory(null)
     setIsChallengePrayer(false)
     setShowCategoryError(false)
+    setScriptureRef(null)
+    setScriptureText(null)
+    setScriptureFieldHasError(false)
+    setScriptureResetKey((k) => k + 1)
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
@@ -296,6 +354,14 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
           aria-invalid={content.length > limits.max ? 'true' : undefined}
           aria-describedby="composer-char-count"
         />
+
+        {copy.showScriptureReferenceField && (
+          <ScriptureReferenceInput
+            key={scriptureResetKey}
+            onChange={handleScriptureChange}
+            onValidityChange={setScriptureFieldHasError}
+          />
+        )}
 
         {copy.showChallengeCheckbox && activeChallenge && (
           <label
@@ -398,9 +464,19 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
           <Button
             type="button"
             variant="primary"
-            disabled={!isOnline || !content.trim() || content.length > limits.max}
+            disabled={
+              !isOnline ||
+              !content.trim() ||
+              content.length > limits.max ||
+              scriptureFieldHasError
+            }
             onClick={handleSubmit}
             isLoading={isSubmitting}
+            title={
+              scriptureFieldHasError
+                ? 'Fix the scripture reference or clear the field to continue.'
+                : undefined
+            }
           >
             {copy.submitButton}
           </Button>

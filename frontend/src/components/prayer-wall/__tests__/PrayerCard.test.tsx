@@ -301,3 +301,88 @@ describe('PrayerCard — Spec 4.4 question chrome', () => {
     expect(articles[2].className).toContain('bg-cyan-500/[0.04]')
   })
 })
+
+const DISCUSSION_PRAYER: PrayerRequest = {
+  ...SHORT_PRAYER,
+  id: 'prayer-discussion',
+  authorName: 'Maria',
+  postType: 'discussion',
+  category: 'discussion',
+  content: 'How do you all stay disciplined in prayer through busy seasons?',
+}
+
+const DISCUSSION_WITH_SCRIPTURE: PrayerRequest = {
+  ...DISCUSSION_PRAYER,
+  id: 'prayer-discussion-scripture',
+  scriptureReference: 'Romans 8:28',
+  // WEB Romans 8:28 verbatim — matches data/bible/web/romans.json and the
+  // prayer-wall-mock-data fixture. Earlier "And we know that…" text was an
+  // ESV/KJV-flavored carry-over from the plan's illustrative snippet.
+  scriptureText:
+    'We know that all things work together for good for those who love God, for those who are called according to his purpose.',
+}
+
+describe('PrayerCard — Spec 4.5 discussion chrome', () => {
+  it('discussion postType applies violet chrome classes', () => {
+    renderCard(DISCUSSION_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('bg-violet-500/[0.04]')
+    expect(article.className).toContain('border-violet-200/10')
+  })
+
+  it('non-discussion postTypes do NOT apply violet chrome', () => {
+    for (const prayer of [SHORT_PRAYER, TESTIMONY_PRAYER, QUESTION_PRAYER]) {
+      const { container, unmount } = render(
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PrayerCard prayer={prayer} />
+        </MemoryRouter>,
+      )
+      expect(container.querySelector('article')?.className).not.toContain(
+        'bg-violet-500/[0.04]',
+      )
+      unmount()
+    }
+  })
+
+  it('renders MessagesSquare icon for discussion posts', () => {
+    renderCard(DISCUSSION_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const icon = header.querySelector('svg[aria-hidden="true"]')
+    expect(icon).toBeInTheDocument()
+    // Lucide adds a `lucide-messages-square` class to the rendered SVG.
+    const className = icon!.getAttribute('class') ?? ''
+    expect(/lucide-messages-square/.test(className)).toBe(true)
+  })
+
+  it('aria-label says "Discussion by {authorName}" for discussion posts', () => {
+    renderCard(DISCUSSION_PRAYER, {})
+    expect(screen.getByLabelText('Discussion by Maria')).toBe(
+      screen.getByRole('article'),
+    )
+  })
+
+  it('QotdBadge still renders on QOTD-tagged discussion (no regression)', () => {
+    const qotdDiscussion: PrayerRequest = {
+      ...DISCUSSION_PRAYER,
+      qotdId: 'qotd-2026-05-08',
+    }
+    renderCard(qotdDiscussion, {})
+    // QotdBadge renders the literal "Re: Question of the Day" pill
+    expect(screen.getByText(/Re: Question of the Day/i)).toBeInTheDocument()
+  })
+
+  it('ScriptureChip renders below content when scriptureReference is set', () => {
+    renderCard(DISCUSSION_WITH_SCRIPTURE, {})
+    expect(
+      screen.getByRole('link', { name: /Read Romans 8:28 in the Bible/ }),
+    ).toBeInTheDocument()
+  })
+
+  it('ScriptureChip does NOT render when scriptureReference is unset', () => {
+    renderCard(DISCUSSION_PRAYER, {})
+    expect(
+      screen.queryByRole('link', { name: /Read .* in the Bible/ }),
+    ).not.toBeInTheDocument()
+  })
+})

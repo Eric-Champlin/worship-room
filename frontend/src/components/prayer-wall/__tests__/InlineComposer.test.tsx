@@ -88,7 +88,16 @@ describe('InlineComposer', () => {
     await user.type(screen.getByLabelText('Prayer request'), 'My prayer')
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', false, 'health', undefined, expect.any(String), 'prayer_request')
+    expect(onSubmit).toHaveBeenCalledWith(
+      'My prayer',
+      false,
+      'health',
+      undefined,
+      expect.any(String),
+      'prayer_request',
+      null,
+      null,
+    )
   })
 
   it('submit with anonymous checked', async () => {
@@ -99,7 +108,16 @@ describe('InlineComposer', () => {
     await user.click(screen.getByText('Health'))
     await user.click(screen.getByLabelText('Post anonymously'))
     await user.click(screen.getByText('Submit Prayer Request'))
-    expect(onSubmit).toHaveBeenCalledWith('My prayer', true, 'health', undefined, expect.any(String), 'prayer_request')
+    expect(onSubmit).toHaveBeenCalledWith(
+      'My prayer',
+      true,
+      'health',
+      undefined,
+      expect.any(String),
+      'prayer_request',
+      null,
+      null,
+    )
   })
 
   // Category-specific tests
@@ -540,5 +558,245 @@ describe('InlineComposer — Spec 4.4 question variant', () => {
     expect(
       screen.getByRole('button', { name: /submit question/i }),
     ).toBeInTheDocument()
+  })
+})
+
+// =====================================================================
+// Spec 4.5 — discussion composer per-type copy + scripture integration
+// =====================================================================
+
+vi.mock('@/data/bible', () => ({
+  loadChapterWeb: vi.fn(),
+}))
+
+import { loadChapterWeb } from '@/data/bible'
+import { waitFor } from '@testing-library/react'
+
+function renderDiscussionComposer(overrides?: {
+  onSubmit?: Parameters<typeof renderComposer>[0] extends infer T
+    ? T extends { onSubmit?: infer S }
+      ? S
+      : never
+    : never
+}) {
+  return render(
+    <MemoryRouter>
+      <InlineComposer
+        isOpen
+        onClose={vi.fn()}
+        postType="discussion"
+        onSubmit={overrides?.onSubmit ?? vi.fn().mockResolvedValue(true)}
+      />
+    </MemoryRouter>,
+  )
+}
+
+describe('InlineComposer — Spec 4.5 discussion variant', () => {
+  it('renders discussion header copy', () => {
+    renderDiscussionComposer()
+    expect(screen.getByText('Start a discussion')).toBeInTheDocument()
+  })
+
+  it('renders discussion placeholder', () => {
+    renderDiscussionComposer()
+    expect(
+      screen.getByPlaceholderText(
+        'What scripture or topic do you want to think through with others?',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('submit button label is "Start Discussion"', () => {
+    renderDiscussionComposer()
+    expect(
+      screen.getByRole('button', { name: /start discussion/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('ScriptureReferenceInput renders for discussion postType', () => {
+    renderDiscussionComposer()
+    expect(
+      screen.getByLabelText(/Scripture reference \(optional\)/),
+    ).toBeInTheDocument()
+  })
+
+  it('ScriptureReferenceInput does NOT render for prayer_request, testimony, question', () => {
+    const { unmount: unmount1 } = renderComposer()
+    expect(
+      screen.queryByLabelText(/Scripture reference \(optional\)/),
+    ).not.toBeInTheDocument()
+    unmount1()
+
+    const { unmount: unmount2 } = renderTestimonyComposer()
+    expect(
+      screen.queryByLabelText(/Scripture reference \(optional\)/),
+    ).not.toBeInTheDocument()
+    unmount2()
+
+    const { unmount: unmount3 } = renderQuestionComposer()
+    expect(
+      screen.queryByLabelText(/Scripture reference \(optional\)/),
+    ).not.toBeInTheDocument()
+    unmount3()
+  })
+
+  it('discussion submit auto-fills category="discussion" (D15)', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue(null as never)
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const user = userEvent.setup()
+    renderDiscussionComposer({ onSubmit })
+    await user.type(
+      screen.getByLabelText('Discussion'),
+      'What does Romans 8:28 mean?',
+    )
+    await user.click(screen.getByRole('button', { name: /start discussion/i }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    // 3rd positional arg is `category`
+    expect(onSubmit.mock.calls[0][2]).toBe('discussion')
+  })
+
+  it('discussion submit payload includes scripture pair when valid', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'And we know that all things work together for good...',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const user = userEvent.setup()
+    renderDiscussionComposer({ onSubmit })
+    await user.type(
+      screen.getByLabelText('Discussion'),
+      "What's this passage about?",
+    )
+    await user.type(screen.getByLabelText(/Scripture reference/), 'Romans 8:28')
+    // Wait for debounced lookup + verse-text preview
+    await waitFor(
+      () =>
+        expect(
+          screen.getByText(/And we know that all things work together for good/),
+        ).toBeInTheDocument(),
+      { timeout: 1500 },
+    )
+    await user.click(screen.getByRole('button', { name: /start discussion/i }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    const args = onSubmit.mock.calls[0]
+    expect(args[6]).toBe('Romans 8:28')
+    expect(args[7]).toBe('And we know that all things work together for good...')
+  })
+
+  it('discussion submit payload excludes scripture pair when empty', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const user = userEvent.setup()
+    renderDiscussionComposer({ onSubmit })
+    await user.type(
+      screen.getByLabelText('Discussion'),
+      'No scripture this time.',
+    )
+    await user.click(screen.getByRole('button', { name: /start discussion/i }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    const args = onSubmit.mock.calls[0]
+    expect(args[6]).toBeNull()
+    expect(args[7]).toBeNull()
+  })
+
+  it('discussion submit DISABLED when scripture is invalid (D12)', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const user = userEvent.setup()
+    renderDiscussionComposer({ onSubmit })
+    await user.type(
+      screen.getByLabelText('Discussion'),
+      'Trying to discuss something.',
+    )
+    await user.type(screen.getByLabelText(/Scripture reference/), 'Foo 99:99')
+    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+    expect(
+      screen.getByRole('button', { name: /start discussion/i }),
+    ).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: /start discussion/i }))
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  // Regression: InlineComposer hides on close (aria-hidden/inert) rather than
+  // unmounting, so ScriptureReferenceInput's uncontrolled `rawInput` would
+  // persist across submit/cancel cycles without a forced remount. Both tests
+  // verify the parent's `scriptureResetKey` bump causes the child to remount
+  // with empty internal state, keeping the visible field in sync with the
+  // parent's cleared scriptureRef/scriptureText.
+  it('scripture field clears after successful submit (no stale state on next compose)', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'We know that all things work together for good for those who love God, for those who are called according to his purpose.',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const user = userEvent.setup()
+    renderDiscussionComposer({ onSubmit })
+    await user.type(screen.getByLabelText('Discussion'), 'A first discussion.')
+    const scriptureInput = screen.getByLabelText(/Scripture reference/)
+    await user.type(scriptureInput, 'Romans 8:28')
+    await waitFor(
+      () =>
+        expect(
+          screen.getByText(/all things work together for good/),
+        ).toBeInTheDocument(),
+      { timeout: 1500 },
+    )
+
+    await user.click(screen.getByRole('button', { name: /start discussion/i }))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+
+    // Child remount via `key` bump means a fresh input element is in the DOM.
+    // Re-query — the prior element reference is detached.
+    expect(
+      (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+    ).toBe('')
+    expect(
+      screen.queryByText(/all things work together for good/),
+    ).not.toBeInTheDocument()
+  })
+
+  it('scripture field clears after cancel (no stale state on reopen)', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'We know that all things work together for good for those who love God, for those who are called according to his purpose.',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const user = userEvent.setup()
+    renderDiscussionComposer()
+    await user.type(screen.getByLabelText(/Scripture reference/), 'Romans 8:28')
+    await waitFor(
+      () =>
+        expect(
+          screen.getByText(/all things work together for good/),
+        ).toBeInTheDocument(),
+      { timeout: 1500 },
+    )
+
+    await user.click(screen.getByRole('button', { name: /Cancel/i }))
+
+    expect(
+      (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+    ).toBe('')
+    expect(
+      screen.queryByText(/all things work together for good/),
+    ).not.toBeInTheDocument()
   })
 })
