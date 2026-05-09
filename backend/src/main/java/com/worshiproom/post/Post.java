@@ -99,6 +99,16 @@ public class Post {
     @Column(name = "question_resolved_comment_id")
     private UUID questionResolvedCommentId;
 
+    // Spec 4.6b — image attachment for testimony / question posts.
+    // image_url stores the LOGICAL storage key base ("posts/{postId}"); presigned-GET
+    // URLs are built at PostMapper serialization time (never persisted). Both columns
+    // remain null when the post has no image.
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+
+    @Column(name = "image_alt_text", length = 500)
+    private String imageAltText;
+
     protected Post() {}
 
     public UUID getId() { return id; }
@@ -128,6 +138,8 @@ public class Post {
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public OffsetDateTime getLastActivityAt() { return lastActivityAt; }
     public UUID getQuestionResolvedCommentId() { return questionResolvedCommentId; }
+    public String getImageUrl() { return imageUrl; }
+    public String getImageAltText() { return imageAltText; }
 
     public void setAnsweredAt(OffsetDateTime answeredAt) { this.answeredAt = answeredAt; }
     public void setAnsweredText(String answeredText) { this.answeredText = answeredText; }
@@ -156,6 +168,8 @@ public class Post {
     public void setQuestionResolvedCommentId(UUID questionResolvedCommentId) {
         this.questionResolvedCommentId = questionResolvedCommentId;
     }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setImageAltText(String imageAltText) { this.imageAltText = imageAltText; }
 
     @Override
     public boolean equals(Object o) {

@@ -628,3 +628,81 @@ When Phase 6 ships, add an `expires_at` column to `posts` (Liquibase changeset) 
 **Priority:** MEDIUM. The Phase 4 post-type wave establishes the type taxonomy; expiry is the next reasonable layer once all 5 types ship and the team can decide a consistent sweep cadence.
 
 **Update (4.6, 2026-05-09):** Encouragement's 24-hour expiry shipped via `PostSpecifications.notExpired()` Specification factory (no `expires_at` column, no background job — query-side SQL math at `listFeed()` and `listAuthorPosts()` only; `getById()` deliberately bypasses the filter so bookmarks resolve). Remaining work: a general per-type expiry table for question / discussion if Phase 6 chooses to add expiry to those types. The composition sites stay the same; replace `notExpired()` with `notExpiredPerType()` reading from the table.
+
+---
+
+## 33. Multi-image upload — DEFERRED (filed by Spec 4.6b)
+
+**Filed by:** Spec 4.6b (2026-05-09)
+**Owner:** Phase 6+ enhancement spec (TBD ID)
+**Reason for deferral:** 4.6b ships single-image upload only — one image per testimony or question. Multi-image support (carousel of 2–5 images per post) was considered but deferred to keep the MVP scope tight. The schema change (single `image_url` column) is forward-compatible: a future multi-image spec can either pivot the column to a JSONB array or add a `post_images` join table.
+
+**Acceptance criteria for the future spec:**
+
+- Up to 5 images per testimony or question (cap configurable)
+- Carousel UI with swipe / arrow navigation
+- Each image has its own alt text (a11y mandate persists)
+- Total upload byte budget: spec to decide whether each image gets its own 5 MB cap or whether the post gets a 5 MB total
+- Lightbox supports navigating between images via arrow keys / swipe
+- Order is user-controlled (drag-to-reorder in composer)
+
+**Priority:** LOW. The single-image MVP covers the most common case and most user feedback would push for richer text first.
+
+---
+
+## 34. HEIC server-side conversion — DEFERRED (filed by Spec 4.6b)
+
+**Filed by:** Spec 4.6b (2026-05-09)
+**Owner:** Phase 6+ enhancement spec (TBD ID)
+**Reason for deferral:** 4.6b rejects HEIC at the extension check (client-side) and at the decode step (server-side via ImageIO without libheif). The user-facing copy explains the workaround ("Open the Photos app, share the image, and choose JPEG"). Server-side HEIC conversion would require adding `libheif` to the backend image processing toolchain, which is a significant native-dependency commitment.
+
+**Acceptance criteria for the future spec:**
+
+- Detect HEIC server-side and convert to JPEG transparently (user shouldn't see the workaround copy anymore)
+- Maintain image quality (HEIC → JPEG re-encode; preserve orientation, strip metadata)
+- Handle the decode-failure path gracefully (libheif handles most modern HEIC variants but not all)
+- Performance: HEIC decode is slower than JPEG; spec should benchmark and consider an async pipeline if uploads regularly exceed 2-3 seconds
+
+**Priority:** LOW. iPhone share-as-JPEG is a reasonable workaround; the friction is small.
+
+---
+
+## 35. Image lightbox accessibility deeper audit — DEFERRED (filed by Spec 4.6b)
+
+**Filed by:** Spec 4.6b (2026-05-09)
+**Owner:** Future a11y polish spec (TBD ID)
+**Reason for deferral:** 4.6b's `ImageLightbox` ships with the canonical accessibility foundation: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` pointing to the caption, `useFocusTrap` for keyboard management, 44×44 close button, alt text on the img element AND visible caption. What's deferred:
+
+**Possible future enhancements:**
+
+- Custom touch zoom controls (pinch-to-zoom on mobile is supported natively, but a custom zoom UI with explicit `+`/`−` buttons and a reset would help users with motor difficulties)
+- Screen-reader announcement when the lightbox opens ("Image: [alt text]")
+- Pan controls when zoomed in (currently relies on browser default behavior)
+- Zoom-state persistence across image navigation (when multi-image lands, see #33)
+
+**Priority:** LOW. The MVP meets WCAG 2.2 AA targets; the deferred enhancements are polish, not gaps.
+
+---
+
+## 36. E2E friction: Spec 1.10f Terms modal intercepts gated actions for simulated-auth users (filed by Spec 4.6b verification)
+
+**Filed by:** Spec 4.6b `/verify-with-playwright` run (2026-05-09)
+**Owner:** Next spec touching auth E2E infrastructure (likely Spec 1.5b/1.5d when SMTP unblocks, or a dedicated test-infra spec)
+
+**Observed:** Any Playwright test that simulates an authenticated user via `wr_auth_simulated=true` + `wr_user_name` + `wr_user_id` is blocked from interacting with gated UI (composer triggers, dashboard CTAs, etc.) by the `TermsUpdateModal` from `LegalVersionGate`. The simulated `AuthUser` is built with `termsVersion: null` and `privacyVersion: null` (`AuthContext.tsx` L116-117), so `LegalVersionGate.isStaleAcceptance` evaluates true once `useLegalVersions` resolves with a non-null canonical version, and the modal mounts as a `fixed inset-0 z-50` overlay that intercepts pointer events on every authenticated surface.
+
+**Workaround used during 4.6b verification:** `page.route('**/api/v1/legal/versions', (route) => route.abort())` in the Playwright spec, which keeps `versions` null in `useLegalVersions` → `isStaleAcceptance` returns false → modal never mounts. Cost: 6 spurious `net::ERR_FAILED` console messages per test run (test-harness noise, not application errors). This pattern works but is brittle: any future check that depends on a real legal-versions response will silently break.
+
+**Why this matters:** Forums Wave specs that ship gated authenticated UI (Phase 6 Verse-Finds-You, Phase 8 unified profile, Phase 10 admin surfaces) will all need `/verify-with-playwright` runs against the authenticated state. Each spec author will hit this same blocker and reinvent a workaround.
+
+**Possible fixes (pick one in the owning spec):**
+
+1. **Test-mode flag** — `import.meta.env.MODE === 'test'` (or a dedicated `VITE_E2E_BYPASS_TERMS_GATE`) short-circuits `LegalVersionGate.isStaleAcceptance` to false. Simple, no shape changes. Best if we want a single permanent E2E pathway.
+2. **Pre-accepted simulated user shape** — `AuthContext` reads `wr_user_terms_version` / `wr_user_privacy_version` from localStorage when building the simulated user; tests seed those keys to match the canonical versions. More flexible (lets us also test the modal flow itself) but requires AuthContext + 32 existing test files to coordinate.
+3. **Playwright fixture helper** — extract the `route.abort('**/api/v1/legal/versions')` + Terms-modal-dismissal pattern into a shared `e2e/fixtures/auth.ts` helper. Doesn't fix the underlying issue but standardizes the workaround so future spec authors don't reinvent it.
+
+**Recommendation:** Option 3 first (cheap, immediate, unblocks the next spec), with Option 1 as the eventual permanent solution once a Forums Wave spec has a reason to touch `LegalVersionGate` for other reasons (e.g., when Spec 1.5d email verification ships and the gate needs related work anyway).
+
+**Priority:** MEDIUM. Not blocking 4.6b — verification completed cleanly. Will block or slow every future authenticated E2E run if not addressed before Phase 6 specs land.
+
+**Caught during:** Spec 4.6b `/verify-with-playwright` execution against `forums-wave-continued` branch, 2026-05-09. 14/14 verification tests passed via the route-abort workaround documented above.

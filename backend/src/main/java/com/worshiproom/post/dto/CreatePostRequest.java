@@ -49,5 +49,19 @@ public record CreatePostRequest(
         String scriptureReference,               // nullable
 
         @Size(max = 2000)
-        String scriptureText                     // nullable
+        String scriptureText,                    // nullable
+
+        // Spec 4.6b — image upload claim. Cross-field rules in PostService.createPost:
+        //   1. If imageUploadId is set, postType MUST be testimony or question
+        //      (else IMAGE_NOT_ALLOWED_FOR_POST_TYPE)
+        //   2. If imageUploadId is set, imageAltText MUST be non-blank after sanitize
+        //      (else INVALID_ALT_TEXT)
+        //   3. UploadService.claimUpload validates the userId path segment matches
+        //      the authenticated user (else IMAGE_CLAIM_FAILED)
+        @Pattern(regexp = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+                 message = "imageUploadId must be a valid lowercase UUID")
+        String imageUploadId,                    // nullable
+
+        @Size(max = 500)
+        String imageAltText                      // nullable; required when imageUploadId is set
 ) {}

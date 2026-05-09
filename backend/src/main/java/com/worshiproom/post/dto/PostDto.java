@@ -34,5 +34,9 @@ public record PostDto(
         OffsetDateTime updatedAt,
         OffsetDateTime lastActivityAt,
         AuthorDto author,
-        UUID questionResolvedCommentId
+        UUID questionResolvedCommentId,
+        // Spec 4.6b — null when post has no image attached. Global Jackson
+        // default-property-inclusion=non_null drops the field from the wire format
+        // when null.
+        PostImageDto image
 ) {}

@@ -90,6 +90,15 @@ export function postDtoToPrayerRequest(dto: PostDto): PrayerRequest {
   if (dto.questionResolvedCommentId !== null && dto.questionResolvedCommentId !== undefined) {
     result.questionResolvedCommentId = dto.questionResolvedCommentId
   }
+  // Spec 4.6b — image attachment for testimony / question posts.
+  if (dto.image) {
+    result.image = {
+      full: dto.image.fullUrl,
+      medium: dto.image.mediumUrl,
+      thumb: dto.image.thumbUrl,
+      altText: dto.image.altText,
+    }
+  }
   return result
 }
 

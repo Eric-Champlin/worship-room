@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Spec 4.6b — add nullable image columns to the posts table.
+       image_url stores the LOGICAL key into the storage adapter (e.g.,
+       "posts/{postId}"); presigned-GET URLs are built at PostMapper
+       serialization time, never persisted. image_alt_text stores the
+       accessibility description (plain text, sanitized via htmlSanitizerPolicy
+       before persist; max 500 chars). Both columns nullable — only set when
+       the post has an image attached.
+
+       Zero-downtime: both columns nullable, no defaults to backfill, no
+       constraint changes. Rollback drops both columns. -->
+
+  <changeSet id="2026-05-09-001-add-posts-image-columns" author="worship-room">
+    <addColumn tableName="posts">
+      <column name="image_url" type="VARCHAR(500)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="image_alt_text" type="VARCHAR(500)">
+        <constraints nullable="true"/>
+      </column>
+    </addColumn>
+
+    <rollback>
+      <dropColumn tableName="posts" columnName="image_alt_text"/>
+      <dropColumn tableName="posts" columnName="image_url"/>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

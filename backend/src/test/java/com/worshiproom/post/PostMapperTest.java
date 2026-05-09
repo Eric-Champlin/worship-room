@@ -46,6 +46,23 @@ class PostMapperTest extends AbstractDataJpaTest {
             m.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
             return m;
         }
+
+        // Spec 4.6b — PostMapper now depends on ObjectStorageAdapter (for presigned-URL
+        // generation when post.imageUrl is set) and StorageProperties (for max-presign-hours
+        // TTL). The slice test mocks them to a no-op shape — none of the existing
+        // PostMapperTest cases set imageUrl, so generatePresignedUrl is never invoked. New
+        // image-specific PostMapper tests (Step 18) bring their own mocks.
+        @Bean
+        com.worshiproom.storage.ObjectStorageAdapter testObjectStorageAdapter() {
+            return org.mockito.Mockito.mock(com.worshiproom.storage.ObjectStorageAdapter.class);
+        }
+
+        @Bean
+        com.worshiproom.storage.StorageProperties testStorageProperties() {
+            com.worshiproom.storage.StorageProperties props = new com.worshiproom.storage.StorageProperties();
+            props.setMaxPresignHours(1);
+            return props;
+        }
     }
 
     @Autowired private PostMapper postMapper;
@@ -195,5 +212,79 @@ class PostMapperTest extends AbstractDataJpaTest {
         String json = objectMapper.writeValueAsString(anonymous);
         assertThat(json).contains("\"id\":null");
         assertThat(json).contains("\"displayName\":\"Anonymous\"");
+    }
+
+    // =====================================================================
+    // Spec 4.6b — image presigned-URL generation (3 tests)
+    // =====================================================================
+
+    @Autowired
+    private com.worshiproom.storage.ObjectStorageAdapter storageMock;
+    @Autowired
+    private com.worshiproom.storage.StorageProperties storageProps;
+
+    @Test
+    void toDto_with_image_url_set_includes_image_dto_with_three_presigned_urls() {
+        Post post = seedPost(author.getId(), false);
+        // Set image columns directly; entity already loaded via JdbcTemplate seed.
+        UUID postId = post.getId();
+        jdbc.update(
+                "UPDATE posts SET image_url = ?, image_alt_text = ? WHERE id = ?",
+                "posts/" + postId, "A descriptive alt text", postId);
+        entityManager.clear();
+        Post reloaded = entityManager.find(Post.class, postId);
+
+        org.mockito.Mockito.when(storageMock.generatePresignedUrl(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(java.time.Duration.class)))
+                .thenAnswer(inv -> "https://signed/" + inv.getArgument(0));
+
+        PostDto dto = postMapper.toDto(reloaded);
+
+        assertThat(dto.image()).isNotNull();
+        assertThat(dto.image().fullUrl()).isEqualTo("https://signed/posts/" + postId + "/full.jpg");
+        assertThat(dto.image().mediumUrl()).isEqualTo("https://signed/posts/" + postId + "/medium.jpg");
+        assertThat(dto.image().thumbUrl()).isEqualTo("https://signed/posts/" + postId + "/thumb.jpg");
+        assertThat(dto.image().altText()).isEqualTo("A descriptive alt text");
+    }
+
+    @Test
+    void toDto_without_image_url_returns_null_image() {
+        Post post = seedPost(author.getId(), false);
+        // image_url remains null per the seedPost INSERT — null is the default.
+
+        PostDto dto = postMapper.toDto(post);
+
+        // dto.image() is null AND post.imageUrl was null are sufficient verification.
+        // Verifying generatePresignedUrl was-not-called would be flaky here because the
+        // shared Spring-bean Mockito mock accumulates invocations across this test class's
+        // test methods.
+        assertThat(dto.image()).isNull();
+        assertThat(post.getImageUrl()).isNull();
+    }
+
+    @Test
+    void toDto_uses_configured_max_presign_hours_for_TTL() {
+        storageProps.setMaxPresignHours(3);
+        Post post = seedPost(author.getId(), false);
+        UUID postId = post.getId();
+        jdbc.update("UPDATE posts SET image_url = ?, image_alt_text = ? WHERE id = ?",
+                "posts/" + postId, "alt", postId);
+        entityManager.clear();
+        Post reloaded = entityManager.find(Post.class, postId);
+
+        org.mockito.ArgumentCaptor<java.time.Duration> durationCaptor =
+                org.mockito.ArgumentCaptor.forClass(java.time.Duration.class);
+        org.mockito.Mockito.when(storageMock.generatePresignedUrl(
+                org.mockito.ArgumentMatchers.anyString(), durationCaptor.capture()))
+                .thenReturn("https://signed");
+
+        postMapper.toDto(reloaded);
+
+        // Captured 3 times (one per rendition); all three should carry the configured TTL.
+        durationCaptor.getAllValues().forEach(d ->
+                assertThat(d).isEqualTo(java.time.Duration.ofHours(3)));
+        // Reset for other tests
+        storageProps.setMaxPresignHours(1);
     }
 }

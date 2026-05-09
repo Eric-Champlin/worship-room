@@ -63,6 +63,7 @@ class PostServiceWriteTest {
     @Mock private EntityManager entityManager;
     @Mock private com.worshiproom.post.comment.PostCommentRepository commentRepository;
     @Mock private ResolveRateLimitService resolveRateLimitService;
+    @Mock private com.worshiproom.upload.UploadService uploadService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -75,7 +76,8 @@ class PostServiceWriteTest {
                 postRepository, postMapper, userResolverService,
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
-                htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService);
+                htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
+                uploadService);
     }
 
     private CreatePostRequest sampleRequest() {
@@ -85,7 +87,8 @@ class PostServiceWriteTest {
                 "family",
                 false,
                 "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
     }
 
@@ -96,7 +99,8 @@ class PostServiceWriteTest {
                 "mental-health",
                 false,
                 "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
     }
 
@@ -108,6 +112,7 @@ class PostServiceWriteTest {
                 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test User", null),
+                null,
                 null
         );
     }
@@ -220,7 +225,8 @@ class PostServiceWriteTest {
 
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "Please pray.", "family", false, "public",
-                null, "qotd-nonexistent", null, null
+                null, "qotd-nonexistent", null, null,
+                null, null
         );
 
         assertThatThrownBy(() -> postService.createPost(authorId, req, null, "rid"))
@@ -236,7 +242,8 @@ class PostServiceWriteTest {
 
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "Please pray.", "family", false, "public",
-                null, null, "John 3:16", null
+                null, null, "John 3:16", null,
+                null, null
         );
 
         assertThatThrownBy(() -> postService.createPost(authorId, req, null, "rid"))
@@ -253,7 +260,8 @@ class PostServiceWriteTest {
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "<script>alert('x')</script>hello",
                 "family", false, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
 
         postService.createPost(authorId, req, null, "rid");
@@ -276,7 +284,8 @@ class PostServiceWriteTest {
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "anonymous prayer", "family",
                 true, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
 
         postService.createPost(authorId, req, null, "rid");
@@ -295,14 +304,16 @@ class PostServiceWriteTest {
     private CreatePostRequest testimonyRequestWithContent(String content) {
         return new CreatePostRequest(
                 "testimony", content, null, false, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
     }
 
     private CreatePostRequest prayerRequestWithContent(String content) {
         return new CreatePostRequest(
                 "prayer_request", content, "family", false, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
     }
 
@@ -393,7 +404,8 @@ class PostServiceWriteTest {
         // testimony with null category — should not throw MissingCategoryException
         CreatePostRequest req = new CreatePostRequest(
                 "testimony", "Praise God for healing.", null, false, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
 
         CreatePostResponse response = postService.createPost(authorId, req, null, "rid");
@@ -423,7 +435,8 @@ class PostServiceWriteTest {
     private CreatePostRequest encouragementRequest(String content, boolean anonymous) {
         return new CreatePostRequest(
                 "encouragement", content, "other", anonymous, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
     }
 
@@ -479,7 +492,8 @@ class PostServiceWriteTest {
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "anonymous prayer request", "family",
                 true, "public",
-                null, null, null, null
+                null, null, null, null,
+                null, null
         );
 
         CreatePostResponse response = postService.createPost(authorId, req, null, "rid");
@@ -589,7 +603,8 @@ class PostServiceWriteTest {
                 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Asker", null),
-                resolvedCommentId
+                resolvedCommentId,
+                null
         );
     }
 
@@ -855,5 +870,160 @@ class PostServiceWriteTest {
         assertThat(dto.updatedAt()).isNotNull();
         assertThat(dto.questionResolvedCommentId()).isNotNull();
         assertThat(dto.questionResolvedCommentId()).isEqualTo(commentId);
+    }
+
+    // =====================================================================
+    // Spec 4.6b — image-claim flow (8 tests)
+    // =====================================================================
+
+    private CreatePostRequest testimonyWithImage(String uploadId, String altText) {
+        return new CreatePostRequest(
+                "testimony", "God answered my prayer.", null, false, "public",
+                null, null, null, null,
+                uploadId, altText
+        );
+    }
+
+    private CreatePostRequest questionWithImage(String uploadId, String altText) {
+        return new CreatePostRequest(
+                "question", "What does this mean?", null, false, "public",
+                null, null, null, null,
+                uploadId, altText
+        );
+    }
+
+    private CreatePostRequest prayerWithImage(String uploadId, String altText) {
+        return new CreatePostRequest(
+                "prayer_request", "Please pray for me.", "family", false, "public",
+                null, null, null, null,
+                uploadId, altText
+        );
+    }
+
+    @Test
+    void createPost_with_imageUploadId_claims_pending_upload_and_sets_image_url() {
+        UUID authorId = UUID.randomUUID();
+        UUID uploadId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        wireDefaultMocks();
+        when(uploadService.claimUpload(eq(authorId), eq(uploadId), any(UUID.class)))
+                .thenAnswer(inv -> "posts/" + inv.getArgument(2));
+
+        CreatePostResponse response = postService.createPost(
+                authorId, testimonyWithImage(uploadId.toString(), "A photo of my family at church."),
+                null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository, times(2)).save(captor.capture()); // initial save + image_url update
+        Post finalSave = captor.getAllValues().get(1);
+        assertThat(finalSave.getImageUrl()).startsWith("posts/");
+        assertThat(finalSave.getImageAltText()).isEqualTo("A photo of my family at church.");
+    }
+
+    @Test
+    void createPost_with_imageUploadId_belonging_to_other_user_throws_ImageClaimFailedException() {
+        UUID authorId = UUID.randomUUID();
+        // Don't call wireDefaultMocks() — postMapper.toDto would be unused (throw fires first)
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(uploadService.claimUpload(any(UUID.class), any(UUID.class), any(UUID.class)))
+                .thenThrow(new com.worshiproom.post.ImageClaimFailedException());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId,
+                testimonyWithImage("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "valid alt text"),
+                null, "rid"))
+                .isInstanceOf(com.worshiproom.post.ImageClaimFailedException.class);
+    }
+
+    @Test
+    void createPost_with_imageUploadId_but_null_alt_text_throws_InvalidAltTextException() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId,
+                testimonyWithImage("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", null),
+                null, "rid"))
+                .isInstanceOf(com.worshiproom.post.InvalidAltTextException.class);
+        verify(uploadService, never()).claimUpload(any(), any(), any());
+    }
+
+    @Test
+    void createPost_with_imageUploadId_but_whitespace_alt_text_throws_InvalidAltTextException() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId,
+                testimonyWithImage("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "    \t  "),
+                null, "rid"))
+                .isInstanceOf(com.worshiproom.post.InvalidAltTextException.class);
+    }
+
+    @Test
+    void createPost_with_imageUploadId_on_prayer_request_throws_ImageNotAllowedForPostType() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId,
+                prayerWithImage("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "valid alt"),
+                null, "rid"))
+                .isInstanceOf(com.worshiproom.post.ImageNotAllowedForPostTypeException.class);
+        verify(uploadService, never()).claimUpload(any(), any(), any());
+    }
+
+    @Test
+    void createPost_with_imageUploadId_on_question_succeeds() {
+        UUID authorId = UUID.randomUUID();
+        UUID uploadId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        wireDefaultMocks();
+        when(uploadService.claimUpload(eq(authorId), eq(uploadId), any(UUID.class)))
+                .thenAnswer(inv -> "posts/" + inv.getArgument(2));
+
+        CreatePostResponse response = postService.createPost(
+                authorId, questionWithImage(uploadId.toString(), "Diagram of the verse layout"),
+                null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        verify(uploadService, times(1)).claimUpload(eq(authorId), eq(uploadId), any(UUID.class));
+    }
+
+    @Test
+    void createPost_without_imageUploadId_succeeds_with_null_image_url() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        postService.createPost(authorId, sampleRequest(), null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getImageUrl()).isNull();
+        assertThat(captor.getValue().getImageAltText()).isNull();
+        verify(uploadService, never()).claimUpload(any(), any(), any());
+    }
+
+    @Test
+    void createPost_alt_text_with_crisis_keyword_triggers_crisis_flag() {
+        // Spec 4.6b gate 6 — alt text crisis content must be detected even when
+        // post content is benign.
+        UUID authorId = UUID.randomUUID();
+        UUID uploadId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        wireDefaultMocks();
+        when(uploadService.claimUpload(any(UUID.class), any(UUID.class), any(UUID.class)))
+                .thenAnswer(inv -> "posts/" + inv.getArgument(2));
+
+        CreatePostResponse response = postService.createPost(
+                authorId,
+                testimonyWithImage(uploadId.toString(),
+                        "I am thinking about suicide and need help"),
+                null, "rid");
+
+        assertThat(response.crisisResources()).isNotNull();
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository, times(2)).save(captor.capture());
+        // Both saves should have crisisFlag=true since the entity is shared.
+        assertThat(captor.getAllValues().get(0).isCrisisFlag()).isTrue();
     }
 }

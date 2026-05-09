@@ -18,6 +18,7 @@ import com.worshiproom.safety.ContentType;
 import com.worshiproom.safety.CrisisDetectedEvent;
 import com.worshiproom.safety.CrisisResources;
 import com.worshiproom.safety.PostCrisisDetector;
+import com.worshiproom.upload.UploadService;
 import com.worshiproom.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.owasp.html.PolicyFactory;
@@ -71,6 +72,7 @@ public class PostService {
     private final EntityManager entityManager;
     private final PostCommentRepository commentRepository;
     private final ResolveRateLimitService resolveRateLimitService;
+    private final UploadService uploadService;
 
     public PostService(PostRepository postRepository,
                        PostMapper postMapper,
@@ -85,7 +87,8 @@ public class PostService {
                        PolicyFactory htmlSanitizerPolicy,
                        EntityManager entityManager,
                        PostCommentRepository commentRepository,
-                       ResolveRateLimitService resolveRateLimitService) {
+                       ResolveRateLimitService resolveRateLimitService,
+                       UploadService uploadService) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.userResolverService = userResolverService;
@@ -100,6 +103,7 @@ public class PostService {
         this.entityManager = entityManager;
         this.commentRepository = commentRepository;
         this.resolveRateLimitService = resolveRateLimitService;
+        this.uploadService = uploadService;
     }
 
     public PostListResponse listFeed(
@@ -218,8 +222,36 @@ public class PostService {
                 ? htmlSanitizerPolicy.sanitize(request.scriptureText()).trim()
                 : null;
 
-        // Step 6: crisis detection.
-        boolean crisisFlag = PostCrisisDetector.detectsCrisis(sanitizedContent);
+        // Step 5.5: image-claim cross-field validation (Spec 4.6b).
+        // Image is optional; when set, post type must be testimony or question, and
+        // alt text must be non-blank after sanitization. The claim itself (MOVE
+        // pending → claimed) happens after the post is saved (Step 7.5) so the
+        // claimed key can use the new postId.
+        String imageUploadIdRaw = request.imageUploadId();
+        UUID imageUploadId = null;
+        String sanitizedAltText = null;
+        if (imageUploadIdRaw != null) {
+            if (postType != PostType.TESTIMONY && postType != PostType.QUESTION) {
+                throw new ImageNotAllowedForPostTypeException(postTypeRaw);
+            }
+            String imageAltTextRaw = request.imageAltText();
+            if (imageAltTextRaw == null) {
+                throw new InvalidAltTextException();
+            }
+            sanitizedAltText = htmlSanitizerPolicy.sanitize(imageAltTextRaw).trim();
+            if (sanitizedAltText.isEmpty()) {
+                throw new InvalidAltTextException();
+            }
+            imageUploadId = UUID.fromString(imageUploadIdRaw); // safe — JSR-303 already validated lowercase UUID regex
+        }
+
+        // Step 6: crisis detection — runs over content + alt text concatenated so
+        // crisis-language carried in alt text is caught (Spec 4.6b gate 6). Single
+        // detector call; single AFTER_COMMIT event.
+        String detectionInput = sanitizedAltText != null
+                ? sanitizedContent + " " + sanitizedAltText
+                : sanitizedContent;
+        boolean crisisFlag = PostCrisisDetector.detectsCrisis(detectionInput);
 
         // Step 7: build entity and save.
         Post post = new Post();
@@ -248,6 +280,11 @@ public class PostService {
         post.setCommentCount(0);
         post.setBookmarkCount(0);
         post.setReportCount(0);
+        // Spec 4.6b — image_url is populated AFTER the post is saved (Step 7.5)
+        // because the claimed storage key uses the server-generated postId.
+        // image_alt_text can be set immediately — it's not derived from postId.
+        post.setImageUrl(null);
+        post.setImageAltText(sanitizedAltText);
         // created_at, updated_at, last_activity_at populate from DB DEFAULT NOW()
         // (entity columns have insertable=false; the DB-side DEFAULT fires).
 
@@ -268,6 +305,21 @@ public class PostService {
                 authorId,
                 new ActivityRequest(ActivityType.PRAYER_WALL, "prayer-wall-post", null)
         );
+
+        // Step 8.5: image-claim (Spec 4.6b D14). MOVE pending → posts/{postId}/.
+        // Runs inside the @Transactional boundary — if claim fails, the post insert
+        // rolls back and no orphan post row is committed. Placed AFTER activity
+        // recording so any activity-engine failure rolls the transaction back
+        // BEFORE the storage MOVE executes — minimising orphan-by-rollback at
+        // posts/{postId}/ since the cleanup task only sweeps posts/pending/.
+        // Storage operations themselves are NOT transactional, so a rare-case
+        // orphan can still occur if a step AFTER this one (idempotency cache
+        // write, response assembly) throws and rolls the transaction back.
+        if (imageUploadId != null) {
+            String claimedBase = uploadService.claimUpload(authorId, imageUploadId, saved.getId());
+            saved.setImageUrl(claimedBase);
+            postRepository.save(saved);
+        }
 
         // Step 9: response assembly.
         PostDto dto = postMapper.toDto(saved);

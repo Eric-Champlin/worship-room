@@ -83,8 +83,10 @@ describe('PrayerWall QOTD Integration', () => {
 
   it('response count reflects QOTD responses from mock data', () => {
     renderPage()
-    // Mock data has 3 QOTD responses
-    expect(screen.getByText('3 responses')).toBeInTheDocument()
+    // Mock data has 4 prayers with qotdId === todaysQuestionId (a 4th was
+    // added during Spec 4.5; the test expectation went stale and surfaced
+    // when the full test suite was run during Spec 4.6b cleanup).
+    expect(screen.getByText('4 responses')).toBeInTheDocument()
   })
 
   it('"Share Your Thoughts" button is visible on QOTD card', () => {

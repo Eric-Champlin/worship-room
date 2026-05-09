@@ -677,6 +677,13 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     lastActivityAt: '2026-05-05T14:23:00.000Z',
     prayingCount: 8,
     commentCount: 3,
+    // Spec 4.6b — testimony with image attachment for mixed-feed verification.
+    image: {
+      full: 'https://picsum.photos/seed/wr-testimony-001/1920/1280',
+      medium: 'https://picsum.photos/seed/wr-testimony-001/960/640',
+      thumb: 'https://picsum.photos/seed/wr-testimony-001/320/213',
+      altText: 'A photo from my mom\'s celebration after her clean scan.',
+    },
   },
   {
     id: 'prayer-testimony-002',
@@ -720,6 +727,13 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     lastActivityAt: '2026-05-04T08:00:00.000Z',
     prayingCount: 4,
     commentCount: 0,
+    // Spec 4.6b — question with image attachment for mixed-feed verification.
+    image: {
+      full: 'https://picsum.photos/seed/wr-question-001/1920/1280',
+      medium: 'https://picsum.photos/seed/wr-question-001/960/640',
+      thumb: 'https://picsum.photos/seed/wr-question-001/320/213',
+      altText: 'A photo of my open Bible turned to Romans 8.',
+    },
   },
   {
     id: 'prayer-question-002',

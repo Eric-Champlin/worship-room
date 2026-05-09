@@ -9,6 +9,7 @@ import type { PrayerRequest } from '@/types/prayer-wall'
 import { getChallenge } from '@/data/challenges'
 import { Avatar } from './Avatar'
 import { AnsweredBadge } from './AnsweredBadge'
+import { PostImage } from './PostImage'
 import { CategoryBadge } from './CategoryBadge'
 import { QotdBadge } from './QotdBadge'
 import { ScriptureChip } from './ScriptureChip'
@@ -38,9 +39,11 @@ interface PrayerCardProps {
   showFull?: boolean
   onCategoryClick?: (category: PrayerCategory) => void
   children?: ReactNode
+  /** Spec 4.6b — feed index. Indices < 5 load images eagerly; >= 5 load lazily. */
+  index?: number
 }
 
-export function PrayerCard({ prayer, showFull = false, onCategoryClick, children }: PrayerCardProps) {
+export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99 }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const articleRef = useRef<HTMLElement>(null)
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
@@ -199,6 +202,11 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
           <ScriptureChip reference={prayer.scriptureReference} />
         </div>
       )}
+
+      {/* Spec 4.6b — image attachment for testimony / question post types.
+          Renders whenever prayer.image is non-null; postType-agnostic by design
+          so future post types that gain images don't require touching PrayerCard. */}
+      {prayer.image && <PostImage image={prayer.image} index={index} />}
 
       {children}
 

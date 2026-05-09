@@ -20,6 +20,7 @@ import { getChallenge } from '@/data/challenges'
 import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 import type { PostType } from '@/constants/post-types'
 import { ScriptureReferenceInput } from './ScriptureReferenceInput'
+import { ImageUpload } from './ImageUpload'
 
 interface ComposerCopy {
   header: string
@@ -46,6 +47,11 @@ interface ComposerCopy {
   /** Spec 4.6 — auto-fills `category` at submit time, hiding the fieldset.
    *  Encouragement sets this to 'other'. Generalizes the discussion auto-fill. */
   submitsAsCategory?: PrayerCategory
+  /** Spec 4.6b — when true, render <ImageUpload> below the textarea.
+   *  Currently set on `testimony` and `question` only. */
+  showImageUpload?: boolean
+  /** Spec 4.6b — helper text below the "Add a photo" button. */
+  imageUploadHelperText?: string
   minHeight: string
 }
 
@@ -74,6 +80,9 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showCategoryFieldset: false,
     showChallengeCheckbox: false,
     showAttributionNudge: true,
+    // Spec 4.6b — testimony composer accepts an optional image attachment.
+    showImageUpload: true,
+    imageUploadHelperText: 'Add a photo if it tells the story.',
     minHeight: '180px',
   },
   question: {
@@ -86,6 +95,9 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showCategoryFieldset: false,
     showChallengeCheckbox: false,
     showAttributionNudge: false,
+    // Spec 4.6b — question composer accepts an optional image attachment.
+    showImageUpload: true,
+    imageUploadHelperText: 'A photo can help others understand your question.',
     minHeight: '120px',
   },
   discussion: {
@@ -149,6 +161,11 @@ interface InlineComposerProps {
     // for postType === 'discussion' in 4.5; future post types may opt in.
     scriptureReference?: string | null,
     scriptureText?: string | null,
+    // Spec 4.6b — optional image upload. When set, alt text is also non-blank
+    // (composer enforces submit-disabled when uploadId is set without alt text).
+    // Only populated for testimony / question post types.
+    imageUploadId?: string | null,
+    imageAltText?: string | null,
   ) => boolean | Promise<boolean>
 }
 
@@ -170,6 +187,12 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
   const [scriptureRef, setScriptureRef] = useState<string | null>(null)
   const [scriptureText, setScriptureText] = useState<string | null>(null)
   const [scriptureFieldHasError, setScriptureFieldHasError] = useState(false)
+  // Spec 4.6b — image upload state. uploadId is the server-generated UUID from
+  // the prayerWallApi.uploadImage call; imageAltText is the user-supplied alt
+  // text. Both are submitted on createPost; the backend MOVEs the pending
+  // upload into posts/{postId}/ as part of the same transaction.
+  const [imageUploadId, setImageUploadId] = useState<string | null>(null)
+  const [imageAltText, setImageAltText] = useState<string>('')
   // Spec 4.5 — InlineComposer hides via aria-hidden/inert (line 310-311) rather
   // than unmounting on close, so child components retain their internal state
   // across open/close cycles. ScriptureReferenceInput is uncontrolled (owns its
@@ -272,6 +295,8 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
         postType,
         scriptureRef,
         scriptureText,
+        imageUploadId,
+        imageUploadId ? imageAltText.trim() : null,
       )
       if (!success) return
       setContent('')
@@ -284,6 +309,8 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       setScriptureText(null)
       setScriptureFieldHasError(false)
       setScriptureResetKey((k) => k + 1)
+      setImageUploadId(null)
+      setImageAltText('')
       // Generate a fresh idempotency key for the next prayer.
       setIdempotencyKey(
         typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
@@ -308,6 +335,8 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     scriptureRef,
     scriptureText,
     scriptureFieldHasError,
+    imageUploadId,
+    imageAltText,
   ])
 
   const handleCancel = useCallback(() => {
@@ -320,6 +349,8 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     setScriptureText(null)
     setScriptureFieldHasError(false)
     setScriptureResetKey((k) => k + 1)
+    setImageUploadId(null)
+    setImageAltText('')
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
@@ -393,6 +424,20 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
             key={scriptureResetKey}
             onChange={handleScriptureChange}
             onValidityChange={setScriptureFieldHasError}
+          />
+        )}
+
+        {/* Spec 4.6b — image upload affordance for testimony / question composers. */}
+        {copy.showImageUpload && (
+          <ImageUpload
+            onUploadSuccess={(id) => setImageUploadId(id)}
+            onUploadRemoved={() => {
+              setImageUploadId(null)
+              setImageAltText('')
+            }}
+            altText={imageAltText}
+            onAltTextChange={setImageAltText}
+            helperText={copy.imageUploadHelperText}
           />
         )}
 
@@ -503,13 +548,17 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
               !isOnline ||
               !content.trim() ||
               content.length > limits.max ||
-              scriptureFieldHasError
+              scriptureFieldHasError ||
+              // Spec 4.6b — when an image is attached, alt text is required.
+              (imageUploadId !== null && imageAltText.trim().length === 0)
             }
             onClick={handleSubmit}
             isLoading={isSubmitting}
             title={
               scriptureFieldHasError
                 ? 'Fix the scripture reference or clear the field to continue.'
+                : imageUploadId !== null && imageAltText.trim().length === 0
+                ? 'Add a description of the image so screen readers can announce it.'
                 : undefined
             }
           >

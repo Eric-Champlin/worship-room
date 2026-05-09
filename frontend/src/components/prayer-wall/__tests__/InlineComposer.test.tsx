@@ -95,8 +95,10 @@ describe('InlineComposer', () => {
       undefined,
       expect.any(String),
       'prayer_request',
-      null,
-      null,
+      null, // scriptureReference
+      null, // scriptureText
+      null, // imageUploadId (Spec 4.6b)
+      null, // imageAltText (Spec 4.6b)
     )
   })
 
@@ -115,8 +117,10 @@ describe('InlineComposer', () => {
       undefined,
       expect.any(String),
       'prayer_request',
-      null,
-      null,
+      null, // scriptureReference
+      null, // scriptureText
+      null, // imageUploadId (Spec 4.6b)
+      null, // imageAltText (Spec 4.6b)
     )
   })
 
@@ -895,8 +899,105 @@ describe('InlineComposer — Spec 4.6 encouragement variant', () => {
       undefined,
       expect.any(String),
       'encouragement',
-      null,
-      null,
+      null, // scriptureReference
+      null, // scriptureText
+      null, // imageUploadId (Spec 4.6b)
+      null, // imageAltText (Spec 4.6b)
     )
+  })
+})
+
+// =====================================================================
+// Spec 4.6b — image upload affordance (testimony / question only)
+// =====================================================================
+
+vi.mock('@/services/api/prayer-wall-api', async () => {
+  const actual = await vi.importActual<typeof import('@/services/api/prayer-wall-api')>(
+    '@/services/api/prayer-wall-api',
+  )
+  return { ...actual, uploadImage: vi.fn() }
+})
+
+function renderWithPostType(
+  postType: 'prayer_request' | 'testimony' | 'question' | 'discussion' | 'encouragement',
+) {
+  return render(
+    <MemoryRouter>
+      <InlineComposer
+        isOpen
+        onClose={vi.fn()}
+        postType={postType}
+        onSubmit={vi.fn().mockResolvedValue(true)}
+      />
+    </MemoryRouter>,
+  )
+}
+
+describe('InlineComposer — Spec 4.6b image upload affordance', () => {
+  it('renders the "Add a photo" affordance for testimony composer', () => {
+    renderWithPostType('testimony')
+    expect(screen.getByRole('button', { name: /add a photo/i })).toBeInTheDocument()
+    // Helper text from composerCopyByType.testimony.imageUploadHelperText
+    expect(screen.getByText('Add a photo if it tells the story.')).toBeInTheDocument()
+  })
+
+  it('renders the "Add a photo" affordance for question composer', () => {
+    renderWithPostType('question')
+    expect(screen.getByRole('button', { name: /add a photo/i })).toBeInTheDocument()
+    expect(
+      screen.getByText('A photo can help others understand your question.'),
+    ).toBeInTheDocument()
+  })
+
+  it('does NOT render the affordance for prayer_request, discussion, or encouragement', () => {
+    const { unmount: u1 } = renderWithPostType('prayer_request')
+    expect(screen.queryByRole('button', { name: /add a photo/i })).not.toBeInTheDocument()
+    u1()
+
+    const { unmount: u2 } = renderWithPostType('discussion')
+    expect(screen.queryByRole('button', { name: /add a photo/i })).not.toBeInTheDocument()
+    u2()
+
+    renderWithPostType('encouragement')
+    expect(screen.queryByRole('button', { name: /add a photo/i })).not.toBeInTheDocument()
+  })
+
+  it('disables submit when an image is uploaded but alt text is empty (W9 / D7)', async () => {
+    const prayerWallApi = await import('@/services/api/prayer-wall-api')
+    const uploadImageMock = vi.mocked(prayerWallApi.uploadImage)
+    uploadImageMock.mockResolvedValue({
+      uploadId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      full: 'https://signed/full.jpg',
+      medium: 'https://signed/medium.jpg',
+      thumb: 'https://signed/thumb.jpg',
+    })
+
+    const user = userEvent.setup()
+    renderWithPostType('testimony')
+    await user.type(screen.getByLabelText('Testimony'), 'A real testimony body.')
+
+    // Submit is enabled at this point — no image attached, content is non-empty.
+    const submit = screen.getByRole('button', { name: /submit testimony/i })
+    expect(submit).not.toBeDisabled()
+
+    // Trigger an upload by selecting a file on the hidden file input.
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    await act(async () => {
+      const file = new File(['fake'], 'photo.jpg', { type: 'image/jpeg' })
+      Object.defineProperty(fileInput, 'files', { value: [file], configurable: true })
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+
+    // Alt text input appears once upload resolves. Submit must be disabled
+    // until alt text has at least one non-whitespace character (W28).
+    const altInput = await screen.findByPlaceholderText(/short description/i)
+    expect(submit).toBeDisabled()
+
+    await user.type(altInput, '   ')
+    expect(submit).toBeDisabled()
+
+    await user.clear(altInput)
+    await user.type(altInput, 'A photo of the answered prayer.')
+    expect(submit).not.toBeDisabled()
   })
 })

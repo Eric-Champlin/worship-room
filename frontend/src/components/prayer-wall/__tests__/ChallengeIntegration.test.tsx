@@ -84,6 +84,10 @@ describe('InlineComposer — challenge integration', () => {
       'pray40-lenten-journey',
       expect.any(String),
       'prayer_request',
+      null, // scriptureReference
+      null, // scriptureText
+      null, // imageUploadId (Spec 4.6b)
+      null, // imageAltText (Spec 4.6b)
     )
   })
 
@@ -106,6 +110,10 @@ describe('InlineComposer — challenge integration', () => {
       undefined,
       expect.any(String),
       'prayer_request',
+      null, // scriptureReference
+      null, // scriptureText
+      null, // imageUploadId (Spec 4.6b)
+      null, // imageAltText (Spec 4.6b)
     )
   })
 

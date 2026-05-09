@@ -15,6 +15,23 @@ export interface PrayerWallUser {
   joinedDate: string // ISO 8601
 }
 
+// Spec 4.6b — image attached to testimony / question posts. URLs are
+// presigned-GET, expire after STORAGE_MAX_PRESIGN_HOURS (1h default).
+export interface PostImage {
+  full: string
+  medium: string
+  thumb: string
+  altText: string
+}
+
+// Spec 4.6b — response shape for POST /api/v1/uploads/post-image.
+export interface UploadResponse {
+  uploadId: string
+  fullUrl: string
+  mediumUrl: string
+  thumbUrl: string
+}
+
 export interface PrayerRequest {
   id: string
   userId: string | null // null = anonymous
@@ -48,6 +65,10 @@ export interface PrayerRequest {
   // --- Spec 4.4 — UUID of the comment marked as "Most helpful" by the question
   // author. Set only on resolved question posts; null/undefined otherwise.
   questionResolvedCommentId?: string
+  // --- Spec 4.6b — image attachment for testimony / question posts.
+  // Undefined for posts without an image (the backend omits the `image` field
+  // entirely via Jackson `non_null` inclusion).
+  image?: PostImage
   // --- Intentionally NOT exposed:
   // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
   // - moderationStatus — server pre-filters; UI assumes 'approved'

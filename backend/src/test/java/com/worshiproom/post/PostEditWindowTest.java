@@ -47,6 +47,7 @@ class PostEditWindowTest {
     @Mock private EntityManager entityManager;
     @Mock private com.worshiproom.post.comment.PostCommentRepository commentRepository;
     @Mock private ResolveRateLimitService resolveRateLimitService;
+    @Mock private com.worshiproom.upload.UploadService uploadService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -59,7 +60,8 @@ class PostEditWindowTest {
                 postRepository, postMapper, userResolverService,
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
-                htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService);
+                htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
+                uploadService);
     }
 
     private static Post buildPost(UUID id, UUID userId, OffsetDateTime createdAt) {
@@ -89,6 +91,7 @@ class PostEditWindowTest {
                 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test", null),
+                null,
                 null
         );
         when(postMapper.toDto(any(Post.class))).thenReturn(dto);

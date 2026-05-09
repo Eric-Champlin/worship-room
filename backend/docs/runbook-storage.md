@@ -132,12 +132,55 @@ The adapter does not cache credentials beyond the lifetime of a single `S3Client
 
 ---
 
-## 8. Out of scope (for downstream consumer specs)
+## 8. Spec 4.6b — Post image conventions
+
+The first downstream consumer is Spec 4.6b: image uploads for testimony and question post types. This section documents the storage-layer conventions established by 4.6b. Code authority: `com.worshiproom.upload.UploadService`, `com.worshiproom.upload.PendingUploadCleanupTask`.
+
+### Storage key conventions
+
+Two key namespaces under `posts/`:
+
+- **Pending (un-claimed):** `posts/pending/{userId}/{uploadId}/{full|medium|thumb}.jpg`. Created by `POST /api/v1/uploads/post-image`. The `{userId}` segment is part of the key so cross-user claim attempts naturally fail (a different user's `userId` segment makes the key absent for the authenticated user — no separate ownership tracking needed).
+- **Claimed (attached to a post):** `posts/{postId}/{full|medium|thumb}.jpg`. Created by `UploadService.claimUpload(userId, uploadId, postId)` during `PostService.createPost`. MOVE = copy to claimed key + delete pending key. The MOVE happens inside the `@Transactional` boundary on the post insert, so a claim failure rolls back the post (transactional consistency on the post side; storage operations themselves are not transactional, so rare-case orphan-by-rollback is documented as an accepted limitation).
+
+### Three renditions per upload
+
+Every upload produces three JPEG renditions (Q=85):
+- `full.jpg` — 1920 long-edge (lightbox display)
+- `medium.jpg` — 960 long-edge (default in-feed display)
+- `thumb.jpg` — 320 long-edge (notifications, share cards)
+
+Long-edge resize via imgscalr; orientation applied BEFORE strip; ALL input metadata (EXIF, IPTC, XMP) discarded by the JPEG re-encode.
+
+### Cleanup task
+
+`PendingUploadCleanupTask` runs daily at 03:00 UTC (cron `0 0 3 * * ?`). Lists `posts/pending/` (capped at 1000 keys per pass) and deletes any object older than `worshiproom.uploads.pending-ttl-hours` (default 24h). The cleanup task ONLY sweeps `posts/pending/` — claimed images at `posts/{postId}/` are NEVER cleanup targets.
+
+### Upload-specific environment variables
+
+These are configured in `application.properties` and tunable in production via env vars:
+
+| Property | Default | Env var | Purpose |
+|---|---|---|---|
+| `worshiproom.uploads.max-size-bytes` | `5242880` (5 MB) | `WORSHIPROOM_UPLOADS_MAXSIZEBYTES` | Service-layer file-size cap (Spring's 10 MB multipart cap is the protocol-layer fallback) |
+| `worshiproom.uploads.max-dimension` | `4000` | `WORSHIPROOM_UPLOADS_MAXDIMENSION` | After-decode pixel-dimension cap (prevents OOM on huge pixel-count images) |
+| `worshiproom.uploads.pending-ttl-hours` | `24` | `WORSHIPROOM_UPLOADS_PENDINGTTLHOURS` | Cleanup window for unclaimed pendings |
+| `worshiproom.uploads.rate-limit.max-per-hour` | `10` | `WORSHIPROOM_UPLOADS_RATELIMIT_MAXPERHOUR` | Per-user upload rate limit |
+| `worshiproom.uploads.rate-limit.bucket-cache-size` | `10000` | `WORSHIPROOM_UPLOADS_RATELIMIT_BUCKETCACHESIZE` | Bounded Caffeine cache for per-user rate-limit buckets |
+| `worshiproom.uploads.cdn-base-url` | `""` | `WORSHIPROOM_UPLOADS_CDNBASEURL` | Reserved for future CDN routing (unused today; reads go via R2 presigned URLs) |
+
+### Operational note
+
+**No bucket public-read configuration is needed.** Reads happen via short-lived presigned-GET URLs (TTL = `worshiproom.storage.max-presign-hours`, default 1 hour). The R2 bucket can stay private. Per-URL TTL adds defense-in-depth — even if a URL leaks, it expires within the TTL window.
+
+---
+
+## 9. Out of scope (for downstream consumer specs)
 
 This runbook covers the adapter only. The following concerns belong to consumer specs:
 
 - **1.10c (Database backup):** Backup retention rotation, restore procedure, backup verification, encryption-at-rest of backups beyond R2's own.
-- **4.6b (Image uploads):** Image transformation pipeline, thumbnail generation, multipart-upload threshold tuning, MIME-type allowlist, image-size limits at the controller boundary.
+- **4.6b (Image uploads):** Image transformation pipeline, thumbnail generation, multipart-upload threshold tuning, MIME-type allowlist, image-size limits at the controller boundary. **Now shipped — see § 8 above for the canonical conventions.**
 - **6.7 (Testimony cards):** Generated-image storage path conventions, share-card lifecycle (regenerate vs. cache).
 - **10.11 (Account deletion):** Bulk-delete-by-prefix orchestration when a user is deleted; eventual consistency considerations.
 
@@ -145,7 +188,7 @@ If a question arises about any of these concerns and this runbook does not answe
 
 ---
 
-## 9. Code Boundary Reference
+## 10. Code Boundary Reference
 
 For a full read-the-code exploration, the storage package layout is:
 

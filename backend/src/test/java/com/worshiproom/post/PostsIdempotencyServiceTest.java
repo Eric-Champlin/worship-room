@@ -69,6 +69,7 @@ class PostsIdempotencyServiceTest {
                 "public", false, null, null, "approved", false,
                 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(), null,
+                null,
                 null
         );
         return new CreatePostResponse(dto, null, java.util.Map.of("requestId", "rid"));

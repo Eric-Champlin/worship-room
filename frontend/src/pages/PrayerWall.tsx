@@ -314,6 +314,9 @@ function PrayerWallContent() {
       postType: PostType = 'prayer_request',
       scriptureReference?: string | null,
       scriptureText?: string | null,
+      // Spec 4.6b — image-claim parameters. Both null when no image attached.
+      imageUploadId?: string | null,
+      imageAltText?: string | null,
     ): Promise<boolean> => {
       if (!isAuthenticated) {
         openAuthModal?.(authModalCtaByType[postType])
@@ -371,6 +374,12 @@ function PrayerWallContent() {
             // contract guarantees this invariant.
             scriptureReference: scriptureReference ?? null,
             scriptureText: scriptureText ?? null,
+            // Spec 4.6b — image-claim. Backend MOVEs the pending upload from
+            // posts/pending/{userId}/{uploadId}/ to posts/{postId}/ as part
+            // of the same transaction. InlineComposer guarantees imageAltText
+            // is non-blank when imageUploadId is set (submit-disabled rule).
+            imageUploadId: imageUploadId ?? null,
+            imageAltText: imageAltText ?? null,
           },
           idempotencyKey
         )
@@ -860,7 +869,7 @@ function PrayerWallContent() {
                     className={stagger.className}
                     style={stagger.style}
                   >
-                    <PrayerCard prayer={prayer} onCategoryClick={handleSelectCategory}>
+                    <PrayerCard prayer={prayer} index={index} onCategoryClick={handleSelectCategory}>
                       <InteractionBar
                         prayer={prayer}
                         reactions={reactions[prayer.id]}

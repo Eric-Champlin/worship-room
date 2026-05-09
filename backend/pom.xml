@@ -222,6 +222,27 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3-transfer-manager</artifactId>
         </dependency>
+
+        <!-- Image processing pipeline (Spec 4.6b — testimony/question image upload).
+             metadata-extractor reads EXIF orientation BEFORE the strip pass.
+             imgscalr does the long-edge resize math.
+             imageio-webp registers a TwelveMonkeys WebP ImageReaderSpi via SPI auto-discovery
+             so Java's ImageIO can decode WebP input (output is always re-encoded as JPEG Q=85). -->
+        <dependency>
+            <groupId>com.drewnoakes</groupId>
+            <artifactId>metadata-extractor</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.imgscalr</groupId>
+            <artifactId>imgscalr-lib</artifactId>
+            <version>4.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.twelvemonkeys.imageio</groupId>
+            <artifactId>imageio-webp</artifactId>
+            <version>3.10.1</version>
+        </dependency>
     </dependencies>
 
     <build>

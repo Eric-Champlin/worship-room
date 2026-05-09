@@ -44,6 +44,8 @@ tags:
     description: User mutes — feed-scoped, asymmetric, softer than block — Spec 2.5.7
   - name: Posts
     description: Prayer Wall posts (public feed, single post detail, author posts) — Spec 3.3
+  - name: Uploads
+    description: Image upload for testimony and question posts — Spec 4.6b
   - name: QOTD
     description: Question of the Day rotation endpoint — Spec 3.9
   - name: Dev / Storage
@@ -2408,6 +2410,101 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/uploads/post-image:
+    post:
+      tags: [Uploads]
+      summary: Upload an image for a testimony or question post
+      description: |
+        Authenticated multipart/form-data upload (Spec 4.6b). Returns a server-
+        generated `uploadId` plus three presigned-GET URLs (full / medium / thumb
+        renditions). The `uploadId` is then submitted in
+        `CreatePostRequest.imageUploadId` when creating the post; the backend
+        MOVEs the pending image into the post's permanent storage location at
+        that point.
+
+        Server-side processing: EXIF orientation applied to pixel data, ALL
+        metadata stripped (EXIF, IPTC, XMP), re-encoded as JPEG Q=85.
+
+        Validation:
+          - File size ≤ 5 MB (server-side; Spring multipart cap is 10 MB
+            protocol-layer fallback returning 413)
+          - Format determined by ImageIO decode (NOT Content-Type header) —
+            JPEG / PNG / WebP only; HEIC rejected with helpful copy
+          - Dimensions ≤ 4000×4000 (after decode)
+          - Authentication required
+
+        Rate limit: 10 uploads per hour per user. Returns 429 RATE_LIMITED
+        with `Retry-After` header.
+
+        Idempotency: clients may pass `Idempotency-Key`. Same key + same
+        bytes → cached response. Same key + different bytes → 422
+        IDEMPOTENCY_KEY_MISMATCH.
+      operationId: uploadPostImage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string, maxLength: 100 }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The image bytes (JPEG / PNG / WebP, ≤5 MB)
+      responses:
+        '200':
+          description: Upload succeeded — returns `uploadId` plus three presigned-GET URLs
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadResponse' }
+        '400':
+          description: |
+            Validation rejection. Possible codes:
+              - `INVALID_IMAGE_FORMAT` — HEIC, polyglot, or decode failure
+              - `IMAGE_TOO_LARGE` — file size > 5 MB
+              - `IMAGE_DIMENSIONS_TOO_LARGE` — width or height > 4000
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '413':
+          description: File exceeded Spring's 10 MB multipart cap (protocol-layer fallback)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '422':
+          description: Idempotency-Key reused with different file bytes
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Per-user rate limit exhausted (10/hour)
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the rate-limit bucket refills.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502':
+          description: Storage backend (R2 / MinIO) failure
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
   /api/v1/qotd/today:
     get:
       tags: [QOTD]
@@ -3559,6 +3656,61 @@ components:
             UUID of the comment marked as "Most helpful" by the question's
             author. Only set on question posts; null on all other post types
             and on unresolved questions. (Spec 4.4)
+        image:
+          allOf:
+            - $ref: '#/components/schemas/PostImage'
+          nullable: true
+          description: |
+            Image attached to the post (testimony / question post types only).
+            Null for posts without an image. URLs are presigned-GET, TTL =
+            STORAGE_MAX_PRESIGN_HOURS (1 hour default). (Spec 4.6b)
+
+    PostImage:
+      description: |
+        Nested image block in PostDto (Spec 4.6b). Three presigned-GET URLs
+        (full / medium / thumb) plus the alt text. URLs expire after
+        STORAGE_MAX_PRESIGN_HOURS (default 1h).
+      type: object
+      required: [fullUrl, mediumUrl, thumbUrl, altText]
+      properties:
+        fullUrl:
+          type: string
+          format: uri
+          description: 1920-long-edge JPEG (lightbox display)
+        mediumUrl:
+          type: string
+          format: uri
+          description: 960-long-edge JPEG (default card display)
+        thumbUrl:
+          type: string
+          format: uri
+          description: 320-long-edge JPEG (notifications, share cards)
+        altText:
+          type: string
+          maxLength: 500
+          description: Accessibility description for screen readers
+
+    UploadResponse:
+      description: Response shape for `POST /api/v1/uploads/post-image` (Spec 4.6b).
+      type: object
+      required: [uploadId, fullUrl, mediumUrl, thumbUrl]
+      properties:
+        uploadId:
+          type: string
+          format: uuid
+          description: Server-generated UUID identifying the pending upload
+        fullUrl:
+          type: string
+          format: uri
+          description: Presigned-GET URL for the full (1920) rendition
+        mediumUrl:
+          type: string
+          format: uri
+          description: Presigned-GET URL for the medium (960) rendition
+        thumbUrl:
+          type: string
+          format: uri
+          description: Presigned-GET URL for the thumb (320) rendition
 
     PostListMeta:
       description: Pagination metadata for the post list endpoints.
@@ -3654,6 +3806,24 @@ components:
           type: string
           maxLength: 2000
           nullable: true
+        imageUploadId:
+          type: string
+          format: uuid
+          nullable: true
+          description: |
+            UUID returned by `POST /api/v1/uploads/post-image`. When set, the
+            post must be testimony or question, and `imageAltText` must be
+            non-blank. Backend claims the pending upload (MOVE) into the
+            post's permanent storage location. (Spec 4.6b)
+        imageAltText:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: |
+            Required when `imageUploadId` is set. Plain text only; describes
+            the image for screen readers. Must be at least one non-whitespace
+            character (whitespace-only strings are rejected as
+            INVALID_ALT_TEXT). (Spec 4.6b)
 
     UpdatePostRequest:
       description: Request body for PATCH /api/v1/posts/{id} (Spec 3.5). All fields optional.

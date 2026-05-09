@@ -462,3 +462,71 @@ describe('PrayerCard — Spec 4.6 encouragement chrome', () => {
     expect(screen.queryByText('Anonymous')).not.toBeInTheDocument()
   })
 })
+
+// =====================================================================
+// Spec 4.6b — image attachment rendering
+// =====================================================================
+
+const TESTIMONY_WITH_IMAGE: PrayerRequest = {
+  ...SHORT_PRAYER,
+  id: 'prayer-with-image',
+  postType: 'testimony',
+  content: 'God answered my prayer in a beautiful way.',
+  image: {
+    full: 'https://signed/full.jpg',
+    medium: 'https://signed/medium.jpg',
+    thumb: 'https://signed/thumb.jpg',
+    altText: 'A photo of my mom on the day of her clean scan.',
+  },
+}
+
+const TESTIMONY_WITHOUT_IMAGE: PrayerRequest = {
+  ...SHORT_PRAYER,
+  id: 'prayer-without-image',
+  postType: 'testimony',
+  content: 'God answered my prayer in a beautiful way.',
+}
+
+describe('PrayerCard — Spec 4.6b image attachment', () => {
+  it('renders <PostImage> when prayer.image is set', () => {
+    renderCard(TESTIMONY_WITH_IMAGE, {})
+    // PostImage exposes a button with aria-label "Open image: <altText>"
+    expect(
+      screen.getByRole('button', { name: /open image: a photo of my mom/i }),
+    ).toBeInTheDocument()
+    // The medium rendition is the in-feed src.
+    const img = screen.getByAltText(TESTIMONY_WITH_IMAGE.image!.altText) as HTMLImageElement
+    expect(img.src).toContain('medium.jpg')
+  })
+
+  it('does NOT render <PostImage> when prayer.image is undefined', () => {
+    renderCard(TESTIMONY_WITHOUT_IMAGE, {})
+    expect(
+      screen.queryByRole('button', { name: /open image:/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders the image between content body and the InteractionBar slot', () => {
+    // The InteractionBar slot is filled by the `children` prop. The image
+    // must mount AFTER the content body and BEFORE children in the DOM.
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={TESTIMONY_WITH_IMAGE}>
+          <div data-testid="interaction-bar-slot">interaction bar</div>
+        </PrayerCard>
+      </MemoryRouter>,
+    )
+
+    const contentBody = screen.getByText(TESTIMONY_WITH_IMAGE.content)
+    const imageButton = screen.getByRole('button', { name: /open image:/i })
+    const slot = screen.getByTestId('interaction-bar-slot')
+
+    // DOCUMENT_POSITION_FOLLOWING (4) means the second node follows the first.
+    expect(contentBody.compareDocumentPosition(imageButton)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+    expect(imageButton.compareDocumentPosition(slot)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+  })
+})

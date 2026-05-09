@@ -64,6 +64,22 @@ export interface AuthorDto {
   avatarUrl: string | null
 }
 
+export interface PostImageDto {
+  /** Spec 4.6b — three presigned-GET URLs (TTL = STORAGE_MAX_PRESIGN_HOURS, default 1h). */
+  fullUrl: string
+  mediumUrl: string
+  thumbUrl: string
+  altText: string
+}
+
+export interface UploadResponseApi {
+  /** Spec 4.6b — server-generated UUID identifying the pending upload. */
+  uploadId: string
+  fullUrl: string
+  mediumUrl: string
+  thumbUrl: string
+}
+
 export interface PostDto {
   id: string
   postType: PostTypeApi
@@ -90,6 +106,8 @@ export interface PostDto {
   author: AuthorDto
   /** Spec 4.4 — UUID of the comment marked as "Most helpful" by the question's author. Null on non-question posts and unresolved questions. */
   questionResolvedCommentId: string | null
+  /** Spec 4.6b — image attached to the post (testimony / question only). Field is absent (undefined) when the post has no image — backend Jackson `non_null` inclusion drops the field from the wire format. */
+  image?: PostImageDto
 }
 
 export interface PostListMeta {
@@ -183,6 +201,10 @@ export interface CreatePostRequest {
   qotdId?: string | null
   scriptureReference?: string | null
   scriptureText?: string | null
+  /** Spec 4.6b — UUID returned by `POST /api/v1/uploads/post-image`. When set, postType must be `testimony` or `question`, and `imageAltText` must be non-blank after sanitization. */
+  imageUploadId?: string | null
+  /** Spec 4.6b — required when `imageUploadId` is set. Plain text only; describes the image for screen readers. */
+  imageAltText?: string | null
 }
 
 export interface CrisisResource {

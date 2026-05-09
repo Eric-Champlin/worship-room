@@ -35,6 +35,20 @@ public class PostExceptionHandler {
                 .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }
 
+    // Spec 4.6b — InvalidAltTextException and ImageClaimFailedException extend
+    // PostException and are caught by handlePost below via most-specific-handler
+    // dispatch. ImageNotAllowedForPostTypeException has its own handler so the
+    // rejected wireValue is logged for the audit trail.
+    @ExceptionHandler(ImageNotAllowedForPostTypeException.class)
+    public ResponseEntity<ProxyError> handleImageNotAllowed(ImageNotAllowedForPostTypeException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Image attempted on disallowed postType wireValue={} requestId={}",
+                ex.getWireValue(), requestId);
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+    }
+
     @ExceptionHandler(PostException.class)
     public ResponseEntity<ProxyError> handlePost(PostException ex) {
         var requestId = MDC.get("requestId");

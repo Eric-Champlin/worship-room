@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 vi.mock('@/lib/api-client', () => ({
   apiFetch: vi.fn(),
@@ -823,5 +823,102 @@ describe('deleteComment', () => {
     expect(apiFetch).toHaveBeenCalledWith('/api/v1/comments/c1', {
       method: 'DELETE',
     })
+  })
+})
+
+// =====================================================================
+// Spec 4.6b — uploadImage
+// =====================================================================
+
+import { uploadImage } from '../prayer-wall-api'
+
+describe('uploadImage — Spec 4.6b', () => {
+  const originalFetch = global.fetch
+
+  beforeEach(() => {
+    // Restore the default token mock (the assertCanWrite suite's setNoToken
+    // is one-shot via mockReturnValueOnce, but reset defensively).
+    vi.mocked(getStoredToken).mockReturnValue('test-token')
+  })
+
+  afterEach(() => {
+    global.fetch = originalFetch
+  })
+
+  it('POSTs multipart/form-data to /api/v1/uploads/post-image with the bearer token', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        uploadId: 'upload-uuid',
+        fullUrl: 'https://signed/full.jpg',
+        mediumUrl: 'https://signed/medium.jpg',
+        thumbUrl: 'https://signed/thumb.jpg',
+      }),
+    })
+    global.fetch = fetchMock as unknown as typeof fetch
+
+    const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
+    await uploadImage(file)
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(String(url)).toContain('/api/v1/uploads/post-image')
+    expect(init.method).toBe('POST')
+    expect(init.headers.Authorization).toBe('Bearer test-token')
+    expect(init.body).toBeInstanceOf(FormData)
+    expect((init.body as FormData).get('file')).toBe(file)
+  })
+
+  it('returns the parsed UploadResponse with uploadId and the camelCase rename (fullUrl → full)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        uploadId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        fullUrl: 'https://signed/full.jpg',
+        mediumUrl: 'https://signed/medium.jpg',
+        thumbUrl: 'https://signed/thumb.jpg',
+      }),
+    })
+    global.fetch = fetchMock as unknown as typeof fetch
+
+    const result = await uploadImage(
+      new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' }),
+    )
+
+    // The client renames the wire `fullUrl|mediumUrl|thumbUrl` to the local
+    // `full|medium|thumb` shape used by the rest of the frontend.
+    expect(result).toEqual({
+      uploadId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+      full: 'https://signed/full.jpg',
+      medium: 'https://signed/medium.jpg',
+      thumb: 'https://signed/thumb.jpg',
+    })
+  })
+
+  it('throws ApiError carrying the backend code, status, message, and requestId on 4xx', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({
+        code: 'IMAGE_DIMENSIONS_TOO_LARGE',
+        message: 'Image is larger than 4000 × 4000 pixels. Try a smaller resolution.',
+        requestId: 'req-xyz',
+      }),
+    })
+    global.fetch = fetchMock as unknown as typeof fetch
+
+    await expect(
+      uploadImage(new File(['bytes'], 'huge.jpg', { type: 'image/jpeg' })),
+    ).rejects.toMatchObject({
+      code: 'IMAGE_DIMENSIONS_TOO_LARGE',
+      status: 400,
+      message: expect.stringMatching(/4000/),
+      requestId: 'req-xyz',
+    })
+    // Verify the thrown error is an ApiError instance for type-safe handling
+    // upstream (try/catch with `instanceof ApiError`).
+    await expect(
+      uploadImage(new File(['bytes'], 'huge.jpg', { type: 'image/jpeg' })),
+    ).rejects.toBeInstanceOf(ApiError)
   })
 })

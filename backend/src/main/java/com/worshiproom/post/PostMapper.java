@@ -2,11 +2,15 @@ package com.worshiproom.post;
 
 import com.worshiproom.post.dto.AuthorDto;
 import com.worshiproom.post.dto.PostDto;
+import com.worshiproom.post.dto.PostImageDto;
+import com.worshiproom.storage.ObjectStorageAdapter;
+import com.worshiproom.storage.StorageProperties;
 import com.worshiproom.user.DisplayNameResolver;
 import com.worshiproom.user.User;
 import com.worshiproom.user.UserRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,14 +27,25 @@ import java.util.stream.Collectors;
  *
  * <p>Use {@link #toDtoList(List)} for batch mapping — it loads all required
  * users in a single {@code findAllById} call to avoid N+1.
+ *
+ * <p>Spec 4.6b — when {@code post.imageUrl} is non-null, builds a
+ * {@link PostImageDto} with three presigned-GET URLs (full / medium / thumb)
+ * generated at serialization time. URLs are NOT cached — caching deferred
+ * (spec § 12).
  */
 @Component
 public class PostMapper {
 
     private final UserRepository userRepository;
+    private final ObjectStorageAdapter storage;
+    private final StorageProperties storageProperties;
 
-    public PostMapper(UserRepository userRepository) {
+    public PostMapper(UserRepository userRepository,
+                      ObjectStorageAdapter storage,
+                      StorageProperties storageProperties) {
         this.userRepository = userRepository;
+        this.storage = storage;
+        this.storageProperties = storageProperties;
     }
 
     public PostDto toDto(Post post) {
@@ -77,7 +92,7 @@ public class PostMapper {
         return new AuthorDto(user.getId(), DisplayNameResolver.resolve(user), user.getAvatarUrl());
     }
 
-    private static PostDto buildDto(Post p, AuthorDto author) {
+    private PostDto buildDto(Post p, AuthorDto author) {
         return new PostDto(
                 p.getId(),
                 p.getPostType().value(),
@@ -102,7 +117,20 @@ public class PostMapper {
                 p.getUpdatedAt(),
                 p.getLastActivityAt(),
                 author,
-                p.getQuestionResolvedCommentId()
+                p.getQuestionResolvedCommentId(),
+                imageFor(p)
+        );
+    }
+
+    private PostImageDto imageFor(Post p) {
+        if (p.getImageUrl() == null) return null;
+        Duration ttl = Duration.ofHours(storageProperties.getMaxPresignHours());
+        String base = p.getImageUrl();
+        return new PostImageDto(
+                storage.generatePresignedUrl(base + "/full.jpg", ttl),
+                storage.generatePresignedUrl(base + "/medium.jpg", ttl),
+                storage.generatePresignedUrl(base + "/thumb.jpg", ttl),
+                p.getImageAltText()
         );
     }
 }

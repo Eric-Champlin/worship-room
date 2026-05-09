@@ -648,3 +648,64 @@ export async function deleteComment(
     method: 'DELETE',
   })
 }
+
+// =====================================================================
+// Spec 4.6b — image upload
+// =====================================================================
+
+/**
+ * Uploads an image to be attached to a testimony or question post.
+ *
+ * Returns the `uploadId` plus three presigned-GET URLs (full / medium / thumb).
+ * The frontend stores the `uploadId` and submits it in the subsequent
+ * `createPost` call; the backend MOVEs the pending image into the post's
+ * permanent storage location at that point.
+ *
+ * Bypasses `apiFetch` because the request body is `multipart/form-data` rather
+ * than JSON. Authorization header is read directly from `auth-storage`.
+ */
+export async function uploadImage(
+  file: File,
+): Promise<{ uploadId: string; full: string; medium: string; thumb: string }> {
+  assertCanWrite('uploadImage')
+  const token = getStoredToken()
+  if (!token) throw new AnonymousWriteAttemptError('uploadImage')
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? ''
+  const response = await fetch(`${baseUrl}/api/v1/uploads/post-image`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  })
+
+  if (!response.ok) {
+    let body: { code?: string; message?: string; requestId?: string } = {}
+    try {
+      body = await response.json()
+    } catch {
+      // Response wasn't JSON — fall through with empty body.
+    }
+    throw new ApiError(
+      body.code ?? 'UNKNOWN',
+      response.status,
+      body.message ?? 'Image upload failed.',
+      body.requestId ?? null,
+    )
+  }
+
+  const result = (await response.json()) as {
+    uploadId: string
+    fullUrl: string
+    mediumUrl: string
+    thumbUrl: string
+  }
+  return {
+    uploadId: result.uploadId,
+    full: result.fullUrl,
+    medium: result.mediumUrl,
+    thumb: result.thumbUrl,
+  }
+}

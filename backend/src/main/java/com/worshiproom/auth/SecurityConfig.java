@@ -91,6 +91,12 @@ public class SecurityConfig {
                 // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins.
                 .requestMatchers(HttpMethod.POST, "/api/v1/users/me/legal/accept").authenticated()
 
+                // Spec 4.6b — POST /api/v1/uploads/post-image requires authentication.
+                // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins
+                // (first-match-wins). Anonymous uploads are an abuse vector and the spec
+                // forbids them. Per-user rate limit (10/hour) handled in UploadRateLimitService.
+                .requestMatchers(HttpMethod.POST, "/api/v1/uploads/post-image").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

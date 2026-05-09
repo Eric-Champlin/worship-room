@@ -32,6 +32,7 @@
   <include file="db/changelog/2026-04-30-001-add-users-legal-version-columns.xml"/>
   <include file="db/changelog/2026-04-30-002-add-users-account-lockout-columns.xml"/>
   <include file="db/changelog/2026-05-08-001-add-posts-question-resolved-comment-id.xml"/>
+  <include file="db/changelog/2026-05-09-001-add-posts-image-columns.xml"/>
   <include file="db/changelog/contexts/dev-seed.xml"/>
 
 </databaseChangeLog>
