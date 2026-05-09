@@ -64,9 +64,11 @@ export const POST_TYPE_LIMITS: Record<PostType, PostTypeLimit> = {
     visibleAt: 1000,
   },
   encouragement: {
-    max: PRAYER_POST_MAX_LENGTH, // 4.6 will lower this to 280
-    warningAt: 800,
-    dangerAt: 960,
-    visibleAt: 500,
+    // Spec 4.6 — short-form 280-char ceiling matches the backend per-type limit.
+    // Encouragement is meant to be quick and focused, not a long letter.
+    max: 280,
+    warningAt: 240,
+    dangerAt: 270,
+    visibleAt: 140,
   },
 } as const

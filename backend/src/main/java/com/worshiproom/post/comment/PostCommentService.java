@@ -10,6 +10,7 @@ import com.worshiproom.post.Post;
 import com.worshiproom.post.PostNotFoundException;
 import com.worshiproom.post.PostRepository;
 import com.worshiproom.post.PostSpecifications;
+import com.worshiproom.post.PostType;
 import com.worshiproom.post.comment.dto.CommentDto;
 import com.worshiproom.post.comment.dto.CommentListResponse;
 import com.worshiproom.post.comment.dto.CreateCommentRequest;
@@ -167,8 +168,15 @@ public class PostCommentService {
         rateLimitService.checkAndConsume(authorId);
 
         // 3. Parent post existence — live posts only (soft-deleted = 404).
-        postRepository.findByIdAndIsDeletedFalse(postId)
+        Post parentPost = postRepository.findByIdAndIsDeletedFalse(postId)
                 .orElseThrow(PostNotFoundException::new);
+
+        // 3a. Per-type comment policy (Spec 4.6 — encouragement disallows comments).
+        // Reject BEFORE parent-comment validation so a reply with parentCommentId
+        // on an encouragement returns COMMENTS_NOT_ALLOWED, never INVALID_PARENT_COMMENT.
+        if (parentPost.getPostType() == PostType.ENCOURAGEMENT) {
+            throw new CommentsNotAllowedException();
+        }
 
         // 4. Parent comment validation (if threaded reply).
         if (request.parentCommentId() != null) {

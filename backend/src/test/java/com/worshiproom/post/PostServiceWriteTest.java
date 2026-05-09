@@ -416,6 +416,80 @@ class PostServiceWriteTest {
         assertThat(captor.getValue().activityType()).isEqualTo(ActivityType.PRAYER_WALL);
     }
 
+    // =====================================================================
+    // Spec 4.6 — encouragement: anonymous rejection + 280-char limit
+    // =====================================================================
+
+    private CreatePostRequest encouragementRequest(String content, boolean anonymous) {
+        return new CreatePostRequest(
+                "encouragement", content, "other", anonymous, "public",
+                null, null, null, null
+        );
+    }
+
+    @Test
+    void createPost_encouragementWithIsAnonymousTrue_throwsAnonymousNotAllowed() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, encouragementRequest("Thinking of you all today.", true), null, "rid"))
+                .isInstanceOf(AnonymousNotAllowedException.class)
+                .hasMessageContaining("encouragement");
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_encouragementWithIsAnonymousFalse_succeeds() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        CreatePostResponse response = postService.createPost(
+                authorId, encouragementRequest("A quick word of life.", false), null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getPostType()).isEqualTo(PostType.ENCOURAGEMENT);
+        assertThat(captor.getValue().isAnonymous()).isFalse();
+    }
+
+    @Test
+    void createPost_encouragementOver280Chars_throwsContentTooLong_with280InMessage() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        String over = "x".repeat(281);
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, encouragementRequest(over, false), null, "rid"))
+                .isInstanceOf(ContentTooLongException.class)
+                .hasMessageContaining("280 character limit");
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_prayerRequestWithIsAnonymousTrue_succeeds() {
+        // Regression guard: the anonymous rejection is encouragement-only (W13).
+        // prayer_request, testimony, question, discussion still accept isAnonymous=true.
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        CreatePostRequest req = new CreatePostRequest(
+                "prayer_request", "anonymous prayer request", "family",
+                true, "public",
+                null, null, null, null
+        );
+
+        CreatePostResponse response = postService.createPost(authorId, req, null, "rid");
+
+        assertThat(response.data()).isNotNull();
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().isAnonymous()).isTrue();
+    }
+
     private Post existingPost(UUID id, UUID userId, PostType postType) {
         Post post = new Post();
         post.setId(id);

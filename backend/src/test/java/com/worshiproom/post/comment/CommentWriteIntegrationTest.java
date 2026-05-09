@@ -817,4 +817,38 @@ class CommentWriteIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", "Bearer " + bobJwt))
                 .andExpect(status().isNotFound());
     }
+
+    // =========================================================================
+    // Spec 4.6 — encouragement disallows comments
+    // =========================================================================
+
+    /** Direct SQL insert for an encouragement post. */
+    private UUID seedEncouragementPost(UUID userId, String content) {
+        UUID id = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, category, visibility,
+                                   moderation_status, is_deleted, is_anonymous)
+                VALUES (?, ?, 'encouragement', ?, 'other', 'public', 'approved', false, false)
+                """,
+                id, userId, content);
+        return id;
+    }
+
+    @Test
+    void postCommentOnEncouragement_returns400_CommentsNotAllowed() throws Exception {
+        UUID encouragementId = seedEncouragementPost(alice.getId(), "A quick word of life.");
+        String body = """
+                {
+                  "content": "Trying to reply."
+                }
+                """;
+        mvc.perform(post("/api/v1/posts/" + encouragementId + "/comments")
+                        .header("Authorization", "Bearer " + bobJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("COMMENTS_NOT_ALLOWED"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("encouragements")))
+                .andExpect(jsonPath("$.requestId").exists());
+    }
 }

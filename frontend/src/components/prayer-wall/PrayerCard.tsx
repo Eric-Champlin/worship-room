@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { HandHelping, HelpCircle, MessagesSquare, Sparkles } from 'lucide-react'
+import { HandHelping, Heart, HelpCircle, MessagesSquare, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerCategory } from '@/constants/prayer-categories'
@@ -25,7 +25,7 @@ const POST_TYPE_ICONS: Record<PostType, LucideIcon> = {
   testimony: Sparkles, // 4.3 — was HandHelping placeholder
   question: HelpCircle, // 4.4 — was HandHelping placeholder
   discussion: MessagesSquare, // 4.5 — was HandHelping placeholder
-  encouragement: HandHelping, // placeholder until 4.6
+  encouragement: Heart, // 4.6 — was HandHelping placeholder
 }
 
 function TypeMarker({ postType }: { postType: PostType }) {
@@ -78,8 +78,9 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
         return 'rounded-xl border border-cyan-200/10 bg-cyan-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
       case 'discussion':
         return 'rounded-xl border border-violet-200/10 bg-violet-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-      case 'prayer_request':
       case 'encouragement':
+        return 'rounded-xl border border-rose-200/10 bg-rose-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
+      case 'prayer_request':
       default:
         return 'rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
     }
@@ -93,8 +94,11 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
         return `Question by ${prayer.authorName}`
       case 'discussion':
         return `Discussion by ${prayer.authorName}`
-      case 'prayer_request':
       case 'encouragement':
+        // Spec 4.6 — encouragement is never anonymous (rejected at backend +
+        // submit-time defense in InlineComposer), so authorName is always real.
+        return `Encouragement by ${prayer.authorName}`
+      case 'prayer_request':
       default:
         return `Prayer by ${prayer.authorName}`
     }

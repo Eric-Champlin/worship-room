@@ -121,8 +121,8 @@ After 5.6 ships: 1.5g.
 | 64  | 4.2      | Prayer Request Polish                                     | M    | Low    | ✅     |
 | 65  | 4.3      | Testimony Post Type                                       | L    | Medium | ✅     |
 | 66  | 4.4      | Question Post Type                                        | L    | Medium | ✅     |
-| 67  | 4.5      | Devotional Discussion Post Type                           | M    | Medium | ⬜     |
-| 68  | 4.6      | Encouragement Post Type                                   | M    | Medium | ⬜     |
+| 67  | 4.5      | Devotional Discussion Post Type                           | M    | Medium | ✅     |
+| 68  | 4.6      | Encouragement Post Type                                   | M    | Medium | ✅     |
 | 69  | 4.6b\*\* | Image Upload for Testimonies & Questions                  | L    | Medium | ⬜     |
 | 70  | 4.7      | Composer Chooser                                          | L    | Medium | ⬜     |
 | 71  | 4.7b     | Ways to Help MVP                                          | M    | Low    | ⬜     |

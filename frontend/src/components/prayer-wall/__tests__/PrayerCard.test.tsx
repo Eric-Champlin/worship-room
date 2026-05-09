@@ -386,3 +386,79 @@ describe('PrayerCard — Spec 4.5 discussion chrome', () => {
     ).not.toBeInTheDocument()
   })
 })
+
+const ENCOURAGEMENT_PRAYER: PrayerRequest = {
+  ...SHORT_PRAYER,
+  id: 'prayer-encouragement',
+  authorName: 'Sarah M.',
+  postType: 'encouragement',
+  category: 'other',
+  content: 'Praying you find a quiet moment today. You are seen.',
+  commentCount: 0,
+}
+
+describe('PrayerCard — Spec 4.6 encouragement chrome', () => {
+  it('encouragement postType applies rose chrome classes', () => {
+    renderCard(ENCOURAGEMENT_PRAYER, {})
+    const article = screen.getByRole('article')
+    expect(article.className).toContain('bg-rose-500/[0.04]')
+    expect(article.className).toContain('border-rose-200/10')
+  })
+
+  it('non-encouragement postTypes do NOT apply rose chrome (regression guard)', () => {
+    for (const prayer of [SHORT_PRAYER, TESTIMONY_PRAYER, QUESTION_PRAYER, DISCUSSION_PRAYER]) {
+      const { container, unmount } = render(
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PrayerCard prayer={prayer} />
+        </MemoryRouter>,
+      )
+      expect(container.querySelector('article')?.className).not.toContain(
+        'bg-rose-500/[0.04]',
+      )
+      unmount()
+    }
+  })
+
+  it('renders Heart icon for encouragement posts', () => {
+    renderCard(ENCOURAGEMENT_PRAYER, {})
+    const article = screen.getByRole('article')
+    const header = article.querySelector('header')!
+    const icon = header.querySelector('svg[aria-hidden="true"]')
+    expect(icon).toBeInTheDocument()
+    // Lucide adds a `lucide-heart` class to the rendered SVG.
+    const className = icon!.getAttribute('class') ?? ''
+    expect(/lucide-heart/.test(className)).toBe(true)
+  })
+
+  it('aria-label says "Encouragement by {authorName}" for encouragement posts', () => {
+    renderCard(ENCOURAGEMENT_PRAYER, {})
+    expect(screen.getByLabelText('Encouragement by Sarah M.')).toBe(
+      screen.getByRole('article'),
+    )
+  })
+
+  it('mixed feed renders correct chrome for all 5 types', () => {
+    const fixtures: Array<{ prayer: PrayerRequest; expectedBg: string }> = [
+      { prayer: SHORT_PRAYER, expectedBg: 'bg-white/[0.06]' },
+      { prayer: TESTIMONY_PRAYER, expectedBg: 'bg-amber-500/[0.04]' },
+      { prayer: QUESTION_PRAYER, expectedBg: 'bg-cyan-500/[0.04]' },
+      { prayer: DISCUSSION_PRAYER, expectedBg: 'bg-violet-500/[0.04]' },
+      { prayer: ENCOURAGEMENT_PRAYER, expectedBg: 'bg-rose-500/[0.04]' },
+    ]
+    for (const { prayer, expectedBg } of fixtures) {
+      const { container, unmount } = render(
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PrayerCard prayer={prayer} />
+        </MemoryRouter>,
+      )
+      expect(container.querySelector('article')?.className).toContain(expectedBg)
+      unmount()
+    }
+  })
+
+  it('encouragement does NOT show "Anonymous" attribution (always signed)', () => {
+    renderCard(ENCOURAGEMENT_PRAYER, {})
+    expect(screen.getByText('Sarah M.')).toBeInTheDocument()
+    expect(screen.queryByText('Anonymous')).not.toBeInTheDocument()
+  })
+})

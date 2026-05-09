@@ -507,7 +507,7 @@ Revisit: when Phase 4 personal-activity surfaces are in scope.
 - Spec 4.3 (Testimony) — replace `testimony: HandHelping` with `testimony: Sparkles`
 - Spec 4.4 (Question) — replace `question: HandHelping` with `question: HelpCircle`
 - Spec 4.5 (Devotional Discussion) — replace `discussion: HandHelping` with `discussion: MessagesSquare`
-- Spec 4.6 (Encouragement) — replace `encouragement: HandHelping` with `encouragement: Heart`
+- ~~Spec 4.6 (Encouragement) — replace `encouragement: HandHelping` with `encouragement: Heart`~~ ✅ Shipped 2026-05-09.
 
 When all four are replaced, this followup is closed. The TypeMarker render helper itself does not change.
 
@@ -557,6 +557,8 @@ Master plan body for 4.3 specified that reactions on testimony cards should be l
 **Priority:** LOW–MEDIUM. The HandHelping reaction button + "Praying" aria-label is theologically coherent for testimony (intercession alongside thanksgiving). The Amen label is polish, not correctness.
 
 Filed: 2026-05-08 (Spec 4.3 plan).
+
+**Update (4.6, 2026-05-09):** The per-type reaction infrastructure (`REACTION_LABEL_BY_TYPE` and `REACTION_ICON_BY_TYPE` maps in `InteractionBar.tsx`, single-flag `is_praying` data layer, render-time lookup) shipped in 4.6 with encouragement filling in `Heart` icon + 'Send thanks'/'Remove thanks' aria-labels + '+1 thanks' floating text. The remaining §29 scope is reduced to: (1) flip testimony's entry from `HandHelping`/'Pray' to a celebratory icon (likely `Sparkles` or a specialized variant) + 'Amen'/'Amen' labels + '+1 Amen' floating text. Possibly: question relabeling. Both still scheduled for Phase 6.
 
 ---
 
@@ -624,3 +626,5 @@ When Phase 6 ships, add an `expires_at` column to `posts` (Liquibase changeset) 
 - Frontend filtering: `PostList` queries should exclude expired posts by default; admin views may opt in to seeing expired posts via a filter param.
 
 **Priority:** MEDIUM. The Phase 4 post-type wave establishes the type taxonomy; expiry is the next reasonable layer once all 5 types ship and the team can decide a consistent sweep cadence.
+
+**Update (4.6, 2026-05-09):** Encouragement's 24-hour expiry shipped via `PostSpecifications.notExpired()` Specification factory (no `expires_at` column, no background job — query-side SQL math at `listFeed()` and `listAuthorPosts()` only; `getById()` deliberately bypasses the filter so bookmarks resolve). Remaining work: a general per-type expiry table for question / discussion if Phase 6 chooses to add expiry to those types. The composition sites stay the same; replace `notExpired()` with `notExpiredPerType()` reading from the table.

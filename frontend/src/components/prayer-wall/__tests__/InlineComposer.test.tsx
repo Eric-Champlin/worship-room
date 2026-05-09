@@ -800,3 +800,103 @@ describe('InlineComposer — Spec 4.5 discussion variant', () => {
     ).not.toBeInTheDocument()
   })
 })
+
+function renderEncouragementComposer(overrides?: {
+  onSubmit?: Parameters<typeof renderComposer>[0] extends infer T
+    ? T extends { onSubmit?: infer S }
+      ? S
+      : never
+    : never
+}) {
+  return render(
+    <MemoryRouter>
+      <InlineComposer
+        isOpen
+        onClose={vi.fn()}
+        postType="encouragement"
+        onSubmit={overrides?.onSubmit ?? vi.fn().mockResolvedValue(true)}
+      />
+    </MemoryRouter>,
+  )
+}
+
+describe('InlineComposer — Spec 4.6 encouragement variant', () => {
+  it('renders header "Send encouragement"', () => {
+    renderEncouragementComposer()
+    expect(screen.getByText('Send encouragement')).toBeInTheDocument()
+  })
+
+  it('renders the expiry warning callout with Clock icon', () => {
+    renderEncouragementComposer()
+    const note = screen.getByRole('note')
+    expect(note).toHaveTextContent(/gently fade after 24 hours/i)
+    // Lucide adds a `lucide-clock` class to the rendered SVG.
+    const icon = note.querySelector('svg[aria-hidden="true"]')
+    expect(icon).toBeInTheDocument()
+    const className = icon!.getAttribute('class') ?? ''
+    expect(/lucide-clock/.test(className)).toBe(true)
+  })
+
+  it('does NOT render expiry warning for non-encouragement types', () => {
+    renderComposer()
+    expect(screen.queryByRole('note')).not.toBeInTheDocument()
+  })
+
+  it('textarea maxLength attribute is 280 for encouragement', () => {
+    renderEncouragementComposer()
+    const textarea = screen.getByLabelText('Encouragement') as HTMLTextAreaElement
+    expect(textarea.maxLength).toBe(280)
+  })
+
+  it('CharacterCount appears at 140+ characters (visibleAt threshold)', async () => {
+    const user = userEvent.setup()
+    renderEncouragementComposer()
+    const textarea = screen.getByLabelText('Encouragement')
+    // 145 chars puts us above visibleAt=140 but below warningAt=240
+    await user.type(textarea, 'a'.repeat(145))
+    expect(screen.getByText('145 / 280')).toBeInTheDocument()
+  })
+
+  it('anonymous toggle is ABSENT from DOM for encouragement', () => {
+    renderEncouragementComposer()
+    expect(screen.queryByLabelText(/post anonymously/i)).not.toBeInTheDocument()
+  })
+
+  it('category fieldset is ABSENT from DOM for encouragement', () => {
+    renderEncouragementComposer()
+    expect(screen.queryByText(/^Category$/i)).not.toBeInTheDocument()
+  })
+
+  it('challenge checkbox is ABSENT from DOM for encouragement', () => {
+    renderEncouragementComposer()
+    // Active challenge is mocked as null; the checkbox is also gated by
+    // copy.showChallengeCheckbox, which is false for encouragement.
+    expect(screen.queryByLabelText(/challenge/i)).not.toBeInTheDocument()
+  })
+
+  it('submit button reads "Send Encouragement"', () => {
+    renderEncouragementComposer()
+    expect(screen.getByText('Send Encouragement')).toBeInTheDocument()
+  })
+
+  it('submit payload has category="other" and isAnonymous=false for encouragement', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderEncouragementComposer({ onSubmit })
+    await user.type(
+      screen.getByLabelText('Encouragement'),
+      'Praying you find a quiet moment today.',
+    )
+    await user.click(screen.getByText('Send Encouragement'))
+    expect(onSubmit).toHaveBeenCalledWith(
+      'Praying you find a quiet moment today.',
+      false, // isAnonymous coerced to false
+      'other', // category auto-filled via submitsAsCategory
+      undefined,
+      expect.any(String),
+      'encouragement',
+      null,
+      null,
+    )
+  })
+})

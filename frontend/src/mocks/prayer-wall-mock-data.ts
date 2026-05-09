@@ -198,6 +198,62 @@ const MOCK_PRAYERS: PrayerRequest[] = [
     prayingCount: 0,
     commentCount: 4,
   },
+  // --- Encouragement Posts (Spec 4.6) ---
+  // Recent encouragement (within 24h — appears in feed).
+  {
+    id: 'mock-encouragement-recent',
+    userId: 'user-2',
+    authorName: 'Sarah M.',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user2',
+    isAnonymous: false,
+    content: 'Praying you find a quiet moment today. You are seen.',
+    category: 'other',
+    postType: 'encouragement',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    lastActivityAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    prayingCount: 4,
+    commentCount: 0,
+  },
+  // Expired encouragement (>24h — direct ID lookup only; backend feed filter
+  // would exclude this. Useful for verify-with-playwright on the detail page.).
+  {
+    id: 'mock-encouragement-expired',
+    userId: 'user-3',
+    authorName: 'Marcus T.',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=user3',
+    isAnonymous: false,
+    content: 'Yesterday is past. Today is enough. Tomorrow, the Lord will provide.',
+    category: 'other',
+    postType: 'encouragement',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(),
+    lastActivityAt: new Date(Date.now() - 30 * 60 * 60 * 1000).toISOString(),
+    prayingCount: 12,
+    commentCount: 0,
+  },
+  // Encouragement authored by current mock user (recent).
+  {
+    id: 'mock-encouragement-self',
+    userId: 'mock-current-user',
+    authorName: 'You',
+    authorAvatarUrl: null,
+    isAnonymous: false,
+    content: 'Sending love to whoever is reading this right now.',
+    category: 'other',
+    postType: 'encouragement',
+    isAnswered: false,
+    answeredText: null,
+    answeredAt: null,
+    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    lastActivityAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+    prayingCount: 1,
+    commentCount: 0,
+  },
   // QOTD-response discussion fixture (postType: 'discussion' specifically — the
   // 3 entries above use postType: 'prayer_request' from Phase 3 and are kept
   // as-is per Spec 4.5 plan guardrail).

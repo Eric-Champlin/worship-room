@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { CharacterCount } from '@/components/ui/CharacterCount'
@@ -36,6 +37,15 @@ interface ComposerCopy {
    *  Currently set only on `discussion`. The field is OPTIONAL — composer submits
    *  successfully whether or not the user fills it in. */
   showScriptureReferenceField?: boolean
+  /** Spec 4.6 — when explicitly false, the anonymous toggle is omitted from
+   *  the DOM. Defaults to true (visible). Encouragement sets this to false. */
+  showAnonymousToggle?: boolean
+  /** Spec 4.6 — optional inline callout above the textarea (rose-tinted, with
+   *  Clock icon). Encouragement uses this to communicate the 24-hour expiry. */
+  expiryWarning?: string
+  /** Spec 4.6 — auto-fills `category` at submit time, hiding the fieldset.
+   *  Encouragement sets this to 'other'. Generalizes the discussion auto-fill. */
+  submitsAsCategory?: PrayerCategory
   minHeight: string
 }
 
@@ -91,15 +101,19 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     minHeight: '160px', // D17 — between prayer_request 120 and testimony 180
   },
   encouragement: {
-    header: 'Share a Prayer Request',
-    placeholder: "What's on your heart?",
-    ariaLabel: 'Prayer request',
-    submitButton: 'Submit Prayer Request',
-    footerNote: 'Your prayer will be shared with the community. Be kind and respectful.',
-    showCategoryFieldset: true,
-    showChallengeCheckbox: true,
+    header: 'Send encouragement',
+    placeholder: 'A quick word of life. Anything that comes to mind.',
+    ariaLabel: 'Encouragement',
+    submitButton: 'Send Encouragement',
+    footerNote: 'Your encouragement will be shared with the community. Be kind and respectful.',
+    expiryWarning: 'Encouragements gently fade after 24 hours. Say what is on your heart and let it go.',
+    showCategoryFieldset: false,
+    showChallengeCheckbox: false,
+    showAnonymousToggle: false,
     showAttributionNudge: false,
-    minHeight: '120px',
+    showScriptureReferenceField: false,
+    submitsAsCategory: 'other',
+    minHeight: '100px',
   },
 }
 
@@ -235,15 +249,23 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     setIsSubmitting(true)
     try {
       // D15 — discussion auto-fills category since the fieldset is hidden.
-      // Backend's PostController VALID_CATEGORIES already accepts 'discussion'
-      // (Phase 3 added it for QOTD).
+      // Spec 4.6 generalized this via copy.submitsAsCategory ('other' for
+      // encouragement). Backend's PostController VALID_CATEGORIES already
+      // accepts 'discussion' (Phase 3) and 'other' (always).
       const effectiveCategory: PrayerCategory | null =
-        postType === 'discussion'
+        copy.submitsAsCategory ??
+        (postType === 'discussion'
           ? ('discussion' as PrayerCategory)
-          : selectedCategory
+          : selectedCategory)
+      // Spec 4.6 — defense-in-depth: encouragement never submits anonymous,
+      // regardless of any leftover state. Backend rejects with
+      // ANONYMOUS_NOT_ALLOWED (W10), but submit-time coercion catches the case
+      // where postType changes after the user toggled the now-hidden anonymous
+      // checkbox in another mode.
+      const isAnonymousToSubmit = postType === 'encouragement' ? false : isAnonymous
       const success = await onSubmit(
         content.trim(),
-        isAnonymous,
+        isAnonymousToSubmit,
         effectiveCategory,
         isChallengePrayer && activeChallenge ? activeChallenge.id : undefined,
         idempotencyKey,
@@ -282,6 +304,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     idempotencyKey,
     postType,
     copy.showCategoryFieldset,
+    copy.submitsAsCategory,
     scriptureRef,
     scriptureText,
     scriptureFieldHasError,
@@ -340,6 +363,16 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
             message="Posting prayers requires an internet connection"
             className="mb-3 rounded-lg border border-white/10"
           />
+        )}
+
+        {copy.expiryWarning && (
+          <div
+            className="mb-3 flex items-start gap-2 rounded-md bg-rose-500/10 p-3 text-xs text-rose-200/90"
+            role="note"
+          >
+            <Clock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
+            <p>{copy.expiryWarning}</p>
+          </div>
         )}
 
         <textarea
@@ -439,15 +472,17 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
           </fieldset>
         )}
 
-        <label className="mt-3 flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={isAnonymous}
-            onChange={(e) => setIsAnonymous(e.target.checked)}
-            className="h-4 w-4 rounded border-white/20 bg-white/[0.06] text-primary accent-primary focus-visible:ring-primary"
-          />
-          <span className="text-sm text-white/70">Post anonymously</span>
-        </label>
+        {copy.showAnonymousToggle !== false && (
+          <label className="mt-3 flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isAnonymous}
+              onChange={(e) => setIsAnonymous(e.target.checked)}
+              className="h-4 w-4 rounded border-white/20 bg-white/[0.06] text-primary accent-primary focus-visible:ring-primary"
+            />
+            <span className="text-sm text-white/70">Post anonymously</span>
+          </label>
+        )}
 
         {copy.showAttributionNudge && (
           <p className="mt-1.5 text-xs text-white/60">

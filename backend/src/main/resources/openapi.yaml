@@ -1528,6 +1528,12 @@ paths:
         Idempotency: clients may pass `Idempotency-Key` header to deduplicate
         retried POSTs. Same key + same body → returns the cached response.
         Same key + different body → returns 422 IDEMPOTENCY_KEY_MISMATCH.
+
+        Per-type policy (Spec 4.6): `postType=encouragement` enforces a 280-character
+        content limit (other types use 5000 for testimony, 2000 for the rest).
+        Encouragement posts MUST set `isAnonymous=false`; submitting `true` returns
+        400 `ANONYMOUS_NOT_ALLOWED`. Encouragement posts also fade from feeds 24
+        hours after creation (direct ID lookups still resolve).
       operationId: createPost
       security:
         - bearerAuth: []
@@ -1844,6 +1850,11 @@ paths:
         Creates a top-level comment OR a threaded reply (when `parentCommentId`
         is set). The reply must reference a live comment on the same post; a
         cross-post `parentCommentId` returns 400 INVALID_INPUT.
+
+        Per-type policy (Spec 4.6): comments are NOT enabled for encouragement
+        posts. Calling this endpoint with a parent post whose `postType` is
+        `encouragement` returns 400 `COMMENTS_NOT_ALLOWED` BEFORE sanitization,
+        crisis detection, or any DB write.
 
         Sanitization strips all HTML before persisting. If the sanitized content
         contains a self-harm keyword, `crisis_flag` is set TRUE and the response

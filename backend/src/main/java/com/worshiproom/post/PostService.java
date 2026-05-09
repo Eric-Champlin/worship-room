@@ -115,7 +115,8 @@ public class PostService {
                 .and(PostSpecifications.notMutedBy(viewerId))
                 .and(PostSpecifications.byCategory(category))
                 .and(PostSpecifications.byPostType(postType))
-                .and(PostSpecifications.byQotdId(qotdId));
+                .and(PostSpecifications.byQotdId(qotdId))
+                .and(PostSpecifications.notExpired()); // Spec 4.6 — encouragement 24h feed expiry
         if (sort == SortKey.ANSWERED) {
             spec = spec.and(PostSpecifications.isAnswered());
         }
@@ -148,7 +149,8 @@ public class PostService {
         }
         Specification<Post> spec = PostSpecifications.visibleTo(viewerId)
                 .and(PostSpecifications.notMutedBy(viewerId))
-                .and(PostSpecifications.byAuthor(authorId.get()));
+                .and(PostSpecifications.byAuthor(authorId.get()))
+                .and(PostSpecifications.notExpired()); // Spec 4.6 — author profile excludes expired encouragements too
         if (sort == SortKey.ANSWERED) {
             spec = spec.and(PostSpecifications.isAnswered());
         }
@@ -192,6 +194,12 @@ public class PostService {
         boolean scriptureTextPresent = request.scriptureText() != null;
         if (scriptureRefPresent != scriptureTextPresent) {
             throw new InvalidScripturePairException();
+        }
+        // Spec 4.6 — Per-type anonymous policy. Encouragement is the messenger's
+        // signed gift; anonymous would defeat the purpose. Throws (not silent
+        // coerce) so a buggy client gets a loud 400.
+        if (postType == PostType.ENCOURAGEMENT && Boolean.TRUE.equals(request.isAnonymous())) {
+            throw new AnonymousNotAllowedException(postType.value());
         }
 
         // Step 5: HTML sanitization.
@@ -574,7 +582,8 @@ public class PostService {
     private static int maxContentLengthFor(PostType postType) {
         return switch (postType) {
             case TESTIMONY -> 5000;
-            case PRAYER_REQUEST, QUESTION, DISCUSSION, ENCOURAGEMENT -> 2000;
+            case ENCOURAGEMENT -> 280;
+            case PRAYER_REQUEST, QUESTION, DISCUSSION -> 2000;
         };
     }
 

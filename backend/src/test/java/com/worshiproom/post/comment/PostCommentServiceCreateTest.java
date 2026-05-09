@@ -6,6 +6,7 @@ import com.worshiproom.activity.dto.ActivityRequest;
 import com.worshiproom.post.Post;
 import com.worshiproom.post.PostNotFoundException;
 import com.worshiproom.post.PostRepository;
+import com.worshiproom.post.PostType;
 import com.worshiproom.post.comment.dto.CreateCommentRequest;
 import com.worshiproom.post.comment.dto.CreateCommentResponse;
 import com.worshiproom.post.dto.AuthorDto;
@@ -263,5 +264,95 @@ class PostCommentServiceCreateTest {
         assertThatThrownBy(() -> service.createComment(postId, authorId, sampleRequest(), null, "rid"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("affected 0 rows");
+    }
+
+    // =====================================================================
+    // Spec 4.6 — encouragement disallows comments
+    // =====================================================================
+
+    @Test
+    void encouragementParentPost_throwsCommentsNotAllowed_beforeDbWrite() {
+        UUID postId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        Post encouragementPost = mock(Post.class);
+        when(encouragementPost.getPostType()).thenReturn(PostType.ENCOURAGEMENT);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(encouragementPost));
+
+        assertThatThrownBy(() -> service.createComment(postId, authorId, sampleRequest(), null, "rid"))
+                .isInstanceOf(CommentsNotAllowedException.class)
+                .hasMessageContaining("encouragements");
+
+        verify(commentRepository, never()).save(any(PostComment.class));
+        verify(activityService, never()).recordActivity(any(UUID.class), any(ActivityRequest.class));
+    }
+
+    @Test
+    void encouragementParentPost_replyWithParentCommentId_throwsCommentsNotAllowed_notInvalidParentComment() {
+        // Order-of-validation guard: 3a (per-type policy) must run BEFORE 4 (parent-comment lookup)
+        // so a reply on an encouragement returns COMMENTS_NOT_ALLOWED, not INVALID_PARENT_COMMENT.
+        UUID postId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
+        UUID parentCommentId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        Post encouragementPost = mock(Post.class);
+        when(encouragementPost.getPostType()).thenReturn(PostType.ENCOURAGEMENT);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(encouragementPost));
+
+        assertThatThrownBy(() -> service.createComment(
+                postId, authorId, new CreateCommentRequest("reply", parentCommentId), null, "rid"))
+                .isInstanceOf(CommentsNotAllowedException.class);
+
+        // The parent-comment repository is never consulted — 3a short-circuits.
+        verify(commentRepository, never())
+                .findByIdAndPostIdAndIsDeletedFalse(any(UUID.class), any(UUID.class));
+    }
+
+    @Test
+    void prayerRequestParentPost_acceptsComment() {
+        // Regression guard: prayer_request still accepts comments after 4.6.
+        UUID postId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+        Post prayerPost = mock(Post.class);
+        when(prayerPost.getPostType()).thenReturn(PostType.PRAYER_REQUEST);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(prayerPost));
+        when(commentRepository.save(any(PostComment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(postRepository.incrementCommentCountAndBumpLastActivity(any(UUID.class))).thenReturn(1);
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(UUID.randomUUID());
+        when(user.getFirstName()).thenReturn("Test");
+        when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(user));
+        when(commentMapper.toDto(any(PostComment.class), any(AuthorDto.class)))
+                .thenAnswer(inv -> null);
+
+        service.createComment(postId, authorId, sampleRequest(), null, "rid");
+
+        verify(commentRepository).save(any(PostComment.class));
+    }
+
+    @Test
+    void testimonyQuestionDiscussionParentPosts_allAcceptComments() {
+        // Regression guard for the other three non-encouragement post types.
+        for (PostType type : new PostType[]{PostType.TESTIMONY, PostType.QUESTION, PostType.DISCUSSION}) {
+            UUID postId = UUID.randomUUID();
+            UUID authorId = UUID.randomUUID();
+            when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+            Post parentPost = mock(Post.class);
+            when(parentPost.getPostType()).thenReturn(type);
+            when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(parentPost));
+            when(commentRepository.save(any(PostComment.class))).thenAnswer(inv -> inv.getArgument(0));
+            when(postRepository.incrementCommentCountAndBumpLastActivity(any(UUID.class))).thenReturn(1);
+            User user = mock(User.class);
+            when(user.getId()).thenReturn(UUID.randomUUID());
+            when(user.getFirstName()).thenReturn("Test");
+            when(userRepository.findById(any(UUID.class))).thenReturn(Optional.of(user));
+            when(commentMapper.toDto(any(PostComment.class), any(AuthorDto.class)))
+                    .thenAnswer(inv -> null);
+
+            service.createComment(postId, authorId, sampleRequest(), null, "rid");
+        }
+        // Each loop iteration mocks save() — verify it was called at least 3 times.
+        verify(commentRepository, times(3)).save(any(PostComment.class));
     }
 }

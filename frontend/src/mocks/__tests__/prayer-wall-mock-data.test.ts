@@ -10,14 +10,14 @@ import {
 } from '../prayer-wall-mock-data'
 
 describe('getMockPrayers', () => {
-  it('returns 33 prayers (18 regular + 3 QOTD + 3 mental-health + 2 testimony + 4 question + 3 discussion)', () => {
+  it('returns 36 prayers (18 regular + 3 QOTD + 3 mental-health + 2 testimony + 4 question + 3 discussion + 3 encouragement)', () => {
     // Pre-Spec-4.4 baseline was 26 (24 + 2 Spec 4.3 testimonies); the test was
     // never updated for testimonies and was failing on disk. Spec 4.4 added 4
-    // question fixtures bringing the total to 30. Spec 4.5 adds 3 discussion
-    // fixtures (manual w/ scripture, manual w/o scripture, QOTD-discussion)
-    // bringing the total to 33.
+    // question fixtures bringing the total to 30. Spec 4.5 added 3 discussion
+    // fixtures bringing the total to 33. Spec 4.6 adds 3 encouragement
+    // fixtures (recent, expired, self-authored) bringing the total to 36.
     const prayers = getMockPrayers()
-    expect(prayers).toHaveLength(33)
+    expect(prayers).toHaveLength(36)
   })
 
   it.skip('prayers are sorted by lastActivityAt DESC', () => {

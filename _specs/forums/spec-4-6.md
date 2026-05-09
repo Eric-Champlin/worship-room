@@ -1,4 +1,25 @@
-/spec-forums spec-4-6
+# Forums Wave: Spec 4.6 — Encouragement Post Type
+
+**Master Plan Reference:** `_forums_master_plan/round3-master-plan.md` → Spec 4.6
+**ID:** `round3-phase04-spec06-encouragement-post-type`
+**Branch:** `forums-wave-continued` (continuation branch — do NOT create a new branch)
+**Date:** 2026-05-09
+
+---
+
+## Affected Frontend Routes
+
+The encouragement composer surface is `/prayer-wall`. PrayerCard chrome (rose wash, `Heart` icon) and the InteractionBar's per-type reaction maps (`Heart` icon, 'Send thanks' / 'Remove thanks' aria-labels, '+1 thanks' floating text) propagate to every site that renders a PrayerCard. The 24-hour `notExpired()` query predicate composes at feed sites only — single-post detail still resolves expired encouragements (D17), so bookmarks and shared links continue to work.
+
+- `/prayer-wall` — PrayerWall.tsx (composer + main feed). Production composer entry for encouragement ships in Spec 4.7 (Composer Chooser); 4.6 exposes the variant via the existing `?compose=encouragement` debug query param introduced in earlier Phase 4 specs for `/verify-with-playwright` only.
+- `/prayer-wall/:id` — PrayerDetail.tsx (single-card render; expired encouragements still resolve here per D17). CommentsSection NOT mounted for encouragement.
+- `/prayer-wall/dashboard` — PrayerWallDashboard.tsx (multiple tabs each render PrayerCard; requires auth).
+- `/prayer-wall/user/:id` — PrayerWallProfile.tsx (author profile feed; `notExpired()` composed via `getByAuthor()`).
+- `/my-prayers` — MyPrayers.tsx (authenticated user's saved/bookmarked prayers; uses direct `getById()` lookups, so bookmarked expired encouragements continue to render).
+
+All routes except `/prayer-wall/dashboard` and `/my-prayers` are public. There are no new routes; this spec only modifies what already-existing routes render when a post has `postType='encouragement'`. Backend delta: 2 new exception classes, 1 new Specification factory, modifications to existing services. Zero schema changes (per MPD-3 — 24-hour expiry via SQL math, not an `expires_at` column).
+
+---
 
 # Spec 4.6 — Encouragement Post Type
 

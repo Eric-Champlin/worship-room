@@ -68,7 +68,7 @@ const successToastByType: Record<PostType, string> = {
   testimony: 'Your testimony is on the wall. Others can rejoice with you.',
   question: 'Your question is on the wall. Others can weigh in.',
   discussion: 'Your discussion is on the wall. Others can think it through with you.',
-  encouragement: 'Your prayer is on the wall. Others can now lift it up.',
+  encouragement: 'Your encouragement is on the wall. It will fade gently in 24 hours.',
 }
 
 const authModalCtaByType: Record<PostType, string> = {
@@ -76,7 +76,7 @@ const authModalCtaByType: Record<PostType, string> = {
   testimony: 'Sign in to share a testimony',
   question: 'Sign in to ask a question',
   discussion: 'Sign in to start a discussion',
-  encouragement: 'Sign in to share a prayer request',
+  encouragement: 'Sign in to send encouragement',
 }
 
 function PrayerWallContent() {
@@ -826,7 +826,9 @@ function PrayerWallContent() {
                     ? 'question'
                     : searchParams.get('debug-post-type') === 'discussion'
                       ? 'discussion'
-                      : 'prayer_request'
+                      : searchParams.get('debug-post-type') === 'encouragement'
+                        ? 'encouragement'
+                        : 'prayer_request'
               }
               onSubmit={handleComposerSubmit}
             />
@@ -882,24 +884,26 @@ function PrayerWallContent() {
                         }}
                         onCancel={() => setSaveFormOpen(null)}
                       />
-                      <CommentsSection
-                        prayerId={prayer.id}
-                        isOpen={openComments.has(prayer.id)}
-                        comments={
-                          isBackendPrayerWallEnabled()
-                            ? [
-                                ...(localComments[prayer.id] ?? []),
-                                ...(fetchedComments[prayer.id] ?? []),
-                              ]
-                            : [...(localComments[prayer.id] ?? []), ...getMockComments(prayer.id)]
-                        }
-                        totalCount={prayer.commentCount}
-                        onSubmitComment={handleSubmitComment}
-                        prayerContent={prayer.content}
-                        postType={prayer.postType}
-                        postAuthorId={prayer.userId}
-                        onResolve={(commentId) => handleResolve(prayer.id, commentId)}
-                      />
+                      {prayer.postType !== 'encouragement' && (
+                        <CommentsSection
+                          prayerId={prayer.id}
+                          isOpen={openComments.has(prayer.id)}
+                          comments={
+                            isBackendPrayerWallEnabled()
+                              ? [
+                                  ...(localComments[prayer.id] ?? []),
+                                  ...(fetchedComments[prayer.id] ?? []),
+                                ]
+                              : [...(localComments[prayer.id] ?? []), ...getMockComments(prayer.id)]
+                          }
+                          totalCount={prayer.commentCount}
+                          onSubmitComment={handleSubmitComment}
+                          prayerContent={prayer.content}
+                          postType={prayer.postType}
+                          postAuthorId={prayer.userId}
+                          onResolve={(commentId) => handleResolve(prayer.id, commentId)}
+                        />
+                      )}
                     </PrayerCard>
                   </div>
                 )

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -260,5 +261,51 @@ class PostServiceTest extends AbstractIntegrationTest {
         assertThat(resp.meta().totalPages()).isEqualTo(0);
         assertThat(resp.meta().hasNextPage()).isFalse();
         assertThat(resp.meta().hasPrevPage()).isFalse();
+    }
+
+    // =====================================================================
+    // Spec 4.6 — encouragement 24h feed expiry
+    // =====================================================================
+
+    @Test
+    void listFeed_excludesEncouragementsOlderThan24Hours() {
+        UUID oldEnc = UUID.randomUUID();
+        UUID recentEnc = UUID.randomUUID();
+        UUID oldPrayer = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, category, visibility, moderation_status, created_at)
+                VALUES (?, ?, 'encouragement', 'old enc', 'other', 'public', 'approved', ?)
+                """, oldEnc, author.getId(), OffsetDateTime.now().minusHours(25));
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, category, visibility, moderation_status, created_at)
+                VALUES (?, ?, 'encouragement', 'recent enc', 'other', 'public', 'approved', ?)
+                """, recentEnc, author.getId(), OffsetDateTime.now().minusHours(1));
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, category, visibility, moderation_status, created_at)
+                VALUES (?, ?, 'prayer_request', 'old prayer', 'family', 'public', 'approved', ?)
+                """, oldPrayer, author.getId(), OffsetDateTime.now().minusHours(25));
+
+        PostListResponse resp = postService.listFeed(
+                null, 1, 50, null, null, null, PostService.SortKey.RECENT, "req");
+
+        assertThat(resp.data()).extracting(PostDto::id)
+                .contains(recentEnc, oldPrayer)  // recent encouragement + old prayer_request both pass
+                .doesNotContain(oldEnc);          // old encouragement filtered out
+    }
+
+    @Test
+    void getById_returnsExpiredEncouragement_byDirectIdLookup() {
+        // D17 — direct ID lookup bypasses notExpired() so bookmarks and shared URLs
+        // continue to resolve even after the 24h feed-window has passed.
+        UUID expiredEnc = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, category, visibility, moderation_status, created_at)
+                VALUES (?, ?, 'encouragement', 'old encouragement', 'other', 'public', 'approved', ?)
+                """, expiredEnc, author.getId(), OffsetDateTime.now().minusHours(48));
+
+        PostDto dto = postService.getById(expiredEnc, null);
+
+        assertThat(dto.id()).isEqualTo(expiredEnc);
+        assertThat(dto.postType()).isEqualTo("encouragement");
     }
 }

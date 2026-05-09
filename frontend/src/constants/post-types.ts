@@ -44,7 +44,7 @@ export const POST_TYPES = [
     pluralLabel: 'Encouragements',
     icon: 'Heart',
     description: 'Speak a word of life over the community.',
-    enabled: false,
+    enabled: true,
   },
 ] as const
 

@@ -293,6 +293,51 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
     }
 
     // =====================================================================
+    // Spec 4.6 — encouragement: anonymous rejection + 280-char limit + happy path
+    // =====================================================================
+
+    @Test
+    void createPost_encouragementWithIsAnonymousTrue_returns400_AnonymousNotAllowed() throws Exception {
+        String body = """
+                {
+                  "postType": "encouragement",
+                  "content": "Thinking of you all today.",
+                  "category": "other",
+                  "isAnonymous": true,
+                  "visibility": "public"
+                }
+                """;
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("ANONYMOUS_NOT_ALLOWED"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("encouragement")))
+                .andExpect(jsonPath("$.requestId").exists());
+    }
+
+    @Test
+    void createPost_encouragementWithIsAnonymousFalse_returns201() throws Exception {
+        String body = """
+                {
+                  "postType": "encouragement",
+                  "content": "A quick word of life. You are seen.",
+                  "category": "other",
+                  "isAnonymous": false,
+                  "visibility": "public"
+                }
+                """;
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.postType").value("encouragement"))
+                .andExpect(jsonPath("$.data.isAnonymous").value(false));
+    }
+
+    // =====================================================================
     // POST /api/v1/posts — validation failures
     // =====================================================================
 

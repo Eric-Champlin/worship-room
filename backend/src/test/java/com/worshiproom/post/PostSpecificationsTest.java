@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -75,7 +76,7 @@ class PostSpecificationsTest extends AbstractDataJpaTest {
                 """,
                 id, userId,
                 visibility.value(), status.value(),
-                deleted, deleted ? java.time.OffsetDateTime.now() : null);
+                deleted, deleted ? OffsetDateTime.now() : null);
         return id;
     }
 
@@ -226,5 +227,75 @@ class PostSpecificationsTest extends AbstractDataJpaTest {
         List<Post> visible = postRepository.findAll(spec);
         // Anonymous viewer has no mute relationship; muted author posts still visible.
         assertThat(visible).extracting(Post::getId).contains(postId);
+    }
+
+    // ---------- notExpired (Spec 4.6) ----------
+
+    /**
+     * Insert a post with explicit post_type and created_at — for the 24h expiry
+     * boundary tests. created_at column has DEFAULT NOW() but raw SQL can override it.
+     */
+    private UUID seedPostWithTypeAndAge(UUID userId, PostType postType, OffsetDateTime createdAt) {
+        UUID id = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO posts (
+                    id, user_id, post_type, content,
+                    visibility, moderation_status, is_deleted, created_at
+                ) VALUES (?, ?, ?, 'expiry test',
+                    'public', 'approved', false, ?)
+                """,
+                id, userId, postType.value(), createdAt);
+        return id;
+    }
+
+    @Test
+    void notExpired_excludesEncouragementsOlderThan24Hours() {
+        UUID oldEnc = seedPostWithTypeAndAge(author.getId(), PostType.ENCOURAGEMENT,
+                OffsetDateTime.now().minusHours(25));
+        UUID recentEnc = seedPostWithTypeAndAge(author.getId(), PostType.ENCOURAGEMENT,
+                OffsetDateTime.now().minusHours(1));
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notExpired());
+
+        assertThat(visible).extracting(Post::getId)
+                .contains(recentEnc)
+                .doesNotContain(oldEnc);
+    }
+
+    @Test
+    void notExpired_passesNonEncouragementsOfAnyAge() {
+        // A 30-day-old prayer_request must still be visible — encouragement-only filter.
+        UUID oldPrayer = seedPostWithTypeAndAge(author.getId(), PostType.PRAYER_REQUEST,
+                OffsetDateTime.now().minusDays(30));
+        UUID oldTestimony = seedPostWithTypeAndAge(author.getId(), PostType.TESTIMONY,
+                OffsetDateTime.now().minusDays(60));
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notExpired());
+
+        assertThat(visible).extracting(Post::getId).contains(oldPrayer, oldTestimony);
+    }
+
+    @Test
+    void notExpired_passesEncouragementJustUnder24Hours() {
+        // 23h 59m old encouragement — `cb.lessThan(createdAt, cutoff)` is strict;
+        // createdAt at exactly cutoff would also pass. This test anchors the
+        // "recent" boundary at 23h59m to be unambiguous.
+        UUID nearCutoff = seedPostWithTypeAndAge(author.getId(), PostType.ENCOURAGEMENT,
+                OffsetDateTime.now().minusHours(23).minusMinutes(59));
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notExpired());
+
+        assertThat(visible).extracting(Post::getId).contains(nearCutoff);
+    }
+
+    @Test
+    void notExpired_excludesEncouragementJustOver24Hours() {
+        // 24h 1m old encouragement — past the cutoff, must be excluded.
+        UUID justExpired = seedPostWithTypeAndAge(author.getId(), PostType.ENCOURAGEMENT,
+                OffsetDateTime.now().minusHours(24).minusMinutes(1));
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notExpired());
+
+        assertThat(visible).extracting(Post::getId).doesNotContain(justExpired);
     }
 }

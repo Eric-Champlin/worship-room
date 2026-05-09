@@ -1,12 +1,38 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { HandHelping, MessageCircle, Bookmark, Share2, Plus, Check } from 'lucide-react'
+import { Bookmark, Check, HandHelping, Heart, MessageCircle, Plus, Share2 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from './AuthModalProvider'
 import { usePrayerCardPulse } from './PrayerCard'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ShareDropdown, getShareText } from './ShareDropdown'
+import type { PostType } from '@/constants/post-types'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
+
+// Spec 4.6 — per-type reaction labels and icons. Module-scope (stable across
+// renders, O(1) lookup at render time, no memoization needed). Encouragement
+// uses Heart + "Send thanks" semantics; the other 4 post types share the
+// HandHelping + "Pray" semantics that pre-dated 4.6. Phase 6 may refine
+// testimony to "Amen" + Sparkles per post-wave-followups §29.
+const REACTION_LABEL_BY_TYPE: Record<
+  PostType,
+  { active: string; inactive: string; floatingText: string }
+> = {
+  prayer_request: { active: 'Stop praying', inactive: 'Pray', floatingText: '+1 prayer' },
+  testimony: { active: 'Stop praying', inactive: 'Pray', floatingText: '+1 prayer' },
+  question: { active: 'Stop praying', inactive: 'Pray', floatingText: '+1 prayer' },
+  discussion: { active: 'Stop praying', inactive: 'Pray', floatingText: '+1 prayer' },
+  encouragement: { active: 'Remove thanks', inactive: 'Send thanks', floatingText: '+1 thanks' },
+}
+
+const REACTION_ICON_BY_TYPE: Record<PostType, LucideIcon> = {
+  prayer_request: HandHelping,
+  testimony: HandHelping,
+  question: HandHelping,
+  discussion: HandHelping,
+  encouragement: Heart,
+}
 
 interface InteractionBarProps {
   prayer: PrayerRequest
@@ -94,9 +120,22 @@ export function InteractionBar({
     setShareOpen((prev) => !prev)
   }, [prayer.id, prayer.content])
 
+  // Spec 4.6 — resolve per-type reaction labels and icon at render scope so all
+  // reads are coherent (label, icon, floating text all from the same map entry).
+  const labels = REACTION_LABEL_BY_TYPE[prayer.postType]
+  const Icon = REACTION_ICON_BY_TYPE[prayer.postType]
+  const isEncouragement = prayer.postType === 'encouragement'
+  const reactionAriaLabel = isPraying
+    ? isEncouragement
+      ? `${labels.active} (${prayer.prayingCount} praying)`
+      : `Stop praying for this request (${prayer.prayingCount} praying)`
+    : isEncouragement
+      ? `Send thanks for this encouragement (${prayer.prayingCount} praying)`
+      : `Pray for this request (${prayer.prayingCount} praying)`
+
   return (
     <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-3 sm:gap-4">
-      {/* Pray button wrapper — relative for absolute-positioned animation elements */}
+      {/* Pray/Reaction button wrapper — relative for absolute-positioned animation elements */}
       <div className="relative">
         <button
           type="button"
@@ -105,10 +144,10 @@ export function InteractionBar({
             btnBase,
             isPraying ? 'font-medium text-primary' : 'text-white/50 hover:text-primary',
           )}
-          aria-label={isPraying ? `Stop praying for this request (${prayer.prayingCount} praying)` : `Pray for this request (${prayer.prayingCount} praying)`}
+          aria-label={reactionAriaLabel}
           aria-pressed={isPraying}
         >
-          <HandHelping
+          <Icon
             className={cn(
               'h-4 w-4',
               isAnimating && 'motion-safe:animate-pray-icon-pulse',
@@ -126,28 +165,30 @@ export function InteractionBar({
           />
         )}
 
-        {/* Floating "+1 prayer" text */}
+        {/* Floating "+1 prayer" / "+1 thanks" text */}
         {isAnimating && (
           <span
             className="pointer-events-none absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-sans text-primary motion-safe:animate-pray-float-text"
             aria-hidden="true"
           >
-            +1 prayer
+            {labels.floatingText}
           </span>
         )}
       </div>
 
-      {/* Comment button */}
-      <button
-        type="button"
-        onClick={onToggleComments}
-        className={cn(btnBase, 'text-white/50 hover:text-white/70')}
-        aria-label={`Comments, ${prayer.commentCount} ${prayer.commentCount === 1 ? 'comment' : 'comments'}`}
-        aria-expanded={isCommentsOpen}
-      >
-        <MessageCircle className="h-4 w-4" aria-hidden="true" />
-        <span>({prayer.commentCount})</span>
-      </button>
+      {/* Comment button — Spec 4.6: hidden entirely for encouragement (W6/D12) */}
+      {!isEncouragement && (
+        <button
+          type="button"
+          onClick={onToggleComments}
+          className={cn(btnBase, 'text-white/50 hover:text-white/70')}
+          aria-label={`Comments, ${prayer.commentCount} ${prayer.commentCount === 1 ? 'comment' : 'comments'}`}
+          aria-expanded={isCommentsOpen}
+        >
+          <MessageCircle className="h-4 w-4" aria-hidden="true" />
+          <span>({prayer.commentCount})</span>
+        </button>
+      )}
 
       {/* Bookmark button */}
       {isAuthenticated ? (

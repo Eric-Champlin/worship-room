@@ -9,6 +9,8 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 /**
@@ -140,5 +142,27 @@ public final class PostSpecifications {
 
     public static Specification<Post> isAnswered() {
         return (root, query, cb) -> cb.isTrue(root.get("isAnswered"));
+    }
+
+    /**
+     * Excludes encouragement posts older than 24 hours (Spec 4.6).
+     *
+     * <p>Implemented as SQL-side math (no {@code expires_at} column) per MPD-3.
+     * The cutoff is computed at query time (now - 24h), so always accurate without
+     * clock drift. The post stays in the DB; bookmarks and direct ID lookups
+     * continue to resolve (D17). Composed at {@code listFeed()} and
+     * {@code listAuthorPosts()} ONLY — never at {@code getById()}.
+     *
+     * <p>Predicate logic: {@code NOT (postType = ENCOURAGEMENT AND createdAt < cutoff)}.
+     * Equivalent to {@code postType != ENCOURAGEMENT OR createdAt >= cutoff}.
+     * Recent encouragements pass; non-encouragement posts of any age pass.
+     */
+    public static Specification<Post> notExpired() {
+        return (root, query, cb) -> {
+            OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC).minusHours(24);
+            Predicate isEncouragement = cb.equal(root.get("postType"), PostType.ENCOURAGEMENT);
+            Predicate isStale = cb.lessThan(root.get("createdAt"), cutoff);
+            return cb.not(cb.and(isEncouragement, isStale));
+        };
     }
 }

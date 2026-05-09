@@ -378,32 +378,34 @@ function PrayerDetailContent() {
             </div>
           )}
 
-          {/* All comments — no limit */}
-          <div className="mt-3 border-t border-white/10 pt-3">
-            {comments.length > 0 ? (
-              comments.map((comment) => (
-                <CommentItem
-                  key={comment.id}
-                  comment={comment}
-                  postType={prayer.postType}
-                  postAuthorId={prayer.userId}
-                  onReply={handleReply}
-                  onResolve={handleResolve}
-                />
-              ))
-            ) : (
-              <p className="py-2 text-sm text-white/50">
-                No comments yet. Be the first to encourage.
-              </p>
-            )}
+          {/* All comments — no limit. Spec 4.6: hidden entirely for encouragement (W7/D13). */}
+          {prayer.postType !== 'encouragement' && (
+            <div className="mt-3 border-t border-white/10 pt-3">
+              {comments.length > 0 ? (
+                comments.map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    postType={prayer.postType}
+                    postAuthorId={prayer.userId}
+                    onReply={handleReply}
+                    onResolve={handleResolve}
+                  />
+                ))
+              ) : (
+                <p className="py-2 text-sm text-white/50">
+                  No comments yet. Be the first to encourage.
+                </p>
+              )}
 
-            <CommentInput
-              prayerId={prayer.id}
-              onSubmit={handleSubmitComment}
-              initialValue={replyTo}
-              onLoginClick={() => authModal?.openAuthModal()}
-            />
-          </div>
+              <CommentInput
+                prayerId={prayer.id}
+                onSubmit={handleSubmitComment}
+                initialValue={replyTo}
+                onLoginClick={() => authModal?.openAuthModal()}
+              />
+            </div>
+          )}
 
           {/* Report link — hidden on own posts (Spec 3.8 D11 + Watch-For #18). */}
           {!isOwner && (

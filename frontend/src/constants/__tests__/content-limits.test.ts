@@ -90,3 +90,19 @@ describe('content-limits — discussion (Spec 4.5)', () => {
     expect(d.dangerAt).toBeLessThan(d.max)
   })
 })
+
+describe('content-limits — encouragement (Spec 4.6)', () => {
+  it('encouragement limit is 280 (short-form)', () => {
+    expect(POST_TYPE_LIMITS.encouragement.max).toBe(280)
+    expect(POST_TYPE_LIMITS.encouragement.warningAt).toBe(240)
+    expect(POST_TYPE_LIMITS.encouragement.dangerAt).toBe(270)
+    expect(POST_TYPE_LIMITS.encouragement.visibleAt).toBe(140)
+  })
+
+  it('encouragement thresholds are ordered: visibleAt < warningAt < dangerAt < max', () => {
+    const e = POST_TYPE_LIMITS.encouragement
+    expect(e.visibleAt).toBeLessThan(e.warningAt)
+    expect(e.warningAt).toBeLessThan(e.dangerAt)
+    expect(e.dangerAt).toBeLessThan(e.max)
+  })
+})

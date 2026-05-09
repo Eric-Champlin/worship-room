@@ -18,6 +18,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,7 +71,7 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
                 VALUES (?, ?, 'prayer_request', 'controller test', ?, ?, ?, ?, ?)
                 """,
                 id, userId, visibility.value(), status.value(),
-                deleted, deleted ? java.time.OffsetDateTime.now() : null, anonymous);
+                deleted, deleted ? OffsetDateTime.now() : null, anonymous);
         return id;
     }
 
@@ -334,5 +335,51 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
         mvc.perform(get("/api/v1/users/bob-bennett/posts").header("Authorization", "Bearer " + aliceJwt))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.length()").value(0));
+    }
+
+    // =====================================================================
+    // Spec 4.6 — encouragement 24h feed expiry (read paths)
+    // =====================================================================
+
+    private UUID seedEncouragementWithAge(UUID userId, OffsetDateTime createdAt) {
+        UUID id = UUID.randomUUID();
+        jdbc.update("""
+                INSERT INTO posts (id, user_id, post_type, content, category, visibility, moderation_status,
+                                   is_deleted, is_anonymous, created_at)
+                VALUES (?, ?, 'encouragement', 'enc test', 'other', 'public', 'approved', false, false, ?)
+                """,
+                id, userId, createdAt);
+        return id;
+    }
+
+    @Test
+    void getPosts_excludesEncouragementsOlderThan24Hours() throws Exception {
+        UUID recentEnc = seedEncouragementWithAge(alice.getId(), OffsetDateTime.now().minusHours(1));
+        UUID expiredEnc = seedEncouragementWithAge(alice.getId(), OffsetDateTime.now().minusHours(48));
+
+        MvcResult result = mvc.perform(get("/api/v1/posts"))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode data = mapper.readTree(result.getResponse().getContentAsString()).get("data");
+
+        boolean foundRecent = false;
+        boolean foundExpired = false;
+        for (JsonNode p : data) {
+            if (p.get("id").asText().equals(recentEnc.toString())) foundRecent = true;
+            if (p.get("id").asText().equals(expiredEnc.toString())) foundExpired = true;
+        }
+        assertThat(foundRecent).isTrue();
+        assertThat(foundExpired).isFalse();
+    }
+
+    @Test
+    void getPostById_returnsExpiredEncouragement_byDirectIdLookup() throws Exception {
+        // D17 — direct ID lookup bypasses notExpired() so bookmarks resolve.
+        UUID expiredEnc = seedEncouragementWithAge(alice.getId(), OffsetDateTime.now().minusHours(48));
+
+        mvc.perform(get("/api/v1/posts/" + expiredEnc))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(expiredEnc.toString()))
+                .andExpect(jsonPath("$.data.postType").value("encouragement"));
     }
 }

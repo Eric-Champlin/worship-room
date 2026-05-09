@@ -98,6 +98,107 @@ describe('InteractionBar', () => {
     expect(screen.getByText('Copy link')).toBeInTheDocument()
   })
 
+  // Spec 4.6 — encouragement per-type behavior
+  describe('encouragement post type', () => {
+    function renderEncouragement(
+      overrides?: Partial<PrayerReaction>,
+      callbacks?: Record<string, () => void>,
+    ) {
+      const encouragement: PrayerRequest = {
+        ...mockPrayer,
+        id: 'prayer-enc',
+        postType: 'encouragement',
+        category: 'other',
+        prayingCount: 4,
+        commentCount: 0,
+      }
+      const reactions = overrides ? { ...mockReactions, ...overrides } : mockReactions
+      return render(
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <InteractionBar
+            prayer={encouragement}
+            reactions={reactions}
+            onTogglePraying={callbacks?.onTogglePraying ?? vi.fn()}
+            onToggleComments={callbacks?.onToggleComments ?? vi.fn()}
+            onToggleBookmark={callbacks?.onToggleBookmark ?? vi.fn()}
+            isCommentsOpen={false}
+          />
+        </MemoryRouter>,
+      )
+    }
+
+    it('renders Heart icon (not HandHelping) for encouragement', () => {
+      renderEncouragement()
+      const reactionButton = screen.getByLabelText(/send thanks for this encouragement/i)
+      const icon = reactionButton.querySelector('svg[aria-hidden="true"]')
+      expect(icon).toBeInTheDocument()
+      const className = icon!.getAttribute('class') ?? ''
+      expect(/lucide-heart/.test(className)).toBe(true)
+    })
+
+    it('reaction button reads "Send thanks for this encouragement" when not praying', () => {
+      renderEncouragement()
+      expect(
+        screen.getByLabelText(/send thanks for this encouragement \(4 praying\)/i),
+      ).toBeInTheDocument()
+    })
+
+    it('reaction button reads "Remove thanks" when active', () => {
+      renderEncouragement({ isPraying: true })
+      expect(screen.getByLabelText(/remove thanks \(4 praying\)/i)).toBeInTheDocument()
+    })
+
+    it('comment button is ABSENT from DOM for encouragement', () => {
+      renderEncouragement()
+      expect(screen.queryByLabelText(/comments,/i)).not.toBeInTheDocument()
+    })
+
+    it('comment button IS present for prayer_request, testimony, question, discussion', () => {
+      const types: Array<PrayerRequest['postType']> = [
+        'prayer_request',
+        'testimony',
+        'question',
+        'discussion',
+      ]
+      for (const postType of types) {
+        const { unmount } = render(
+          <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <InteractionBar
+              prayer={{ ...mockPrayer, postType }}
+              reactions={mockReactions}
+              onTogglePraying={vi.fn()}
+              onToggleComments={vi.fn()}
+              onToggleBookmark={vi.fn()}
+              isCommentsOpen={false}
+            />
+          </MemoryRouter>,
+        )
+        expect(screen.getByLabelText(/comments,/i)).toBeInTheDocument()
+        unmount()
+      }
+    })
+
+    it('bookmark and share buttons remain present for encouragement', () => {
+      renderEncouragement()
+      expect(screen.getByLabelText(/log in to bookmark/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/share this prayer/i)).toBeInTheDocument()
+    })
+
+    it('floating "+1 thanks" text appears on tap for encouragement', async () => {
+      const user = userEvent.setup()
+      renderEncouragement()
+      await user.click(screen.getByLabelText(/send thanks for this encouragement/i))
+      expect(await screen.findByText('+1 thanks')).toBeInTheDocument()
+    })
+
+    it('floating "+1 prayer" text appears on tap for prayer_request (regression guard)', async () => {
+      const user = userEvent.setup()
+      renderBar()
+      await user.click(screen.getByLabelText(/pray for this request/i))
+      expect(await screen.findByText('+1 prayer')).toBeInTheDocument()
+    })
+  })
+
   describe('ceremony animation', () => {
     it('animation elements appear on pray click when not praying', async () => {
       const user = userEvent.setup()
