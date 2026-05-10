@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.Set;
+
 /**
  * Request body for POST /api/v1/posts.
  *
@@ -63,5 +65,12 @@ public record CreatePostRequest(
         String imageUploadId,                    // nullable
 
         @Size(max = 500)
-        String imageAltText                      // nullable; required when imageUploadId is set
+        String imageAltText,                     // nullable; required when imageUploadId is set
+
+        // Spec 4.7b — optional help_tags. Validated server-side against HelpTag enum.
+        // Must be empty or null on non-prayer_request types (else
+        // HelpTagsNotAllowedForPostTypeException, 400). Wire values are lowercase
+        // snake_case: meals, rides, errands, visits, just_prayer.
+        @Size(max = 5, message = "helpTags may contain at most 5 values")
+        Set<String> helpTags                     // nullable; null = omitted = empty
 ) {}

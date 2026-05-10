@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { InlineComposer } from '../InlineComposer'
@@ -99,6 +99,7 @@ describe('InlineComposer', () => {
       null, // scriptureText
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
+      null, // helpTags (Spec 4.7b) — null when no chips selected
     )
   })
 
@@ -121,6 +122,7 @@ describe('InlineComposer', () => {
       null, // scriptureText
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
+      null, // helpTags (Spec 4.7b) — null when no chips selected
     )
   })
 
@@ -208,7 +210,11 @@ describe('InlineComposer', () => {
     renderComposer()
     await user.type(screen.getByLabelText('Prayer request'), 'Test prayer')
     await user.click(screen.getByRole('button', { name: 'Submit Prayer Request' }))
-    const fieldset = screen.getByRole('group')
+    // Spec 4.7b — Two role="group" elements now exist on the prayer_request
+    // composer (category fieldset + WaysToHelpPicker). Filter to the fieldset.
+    const fieldset = screen
+      .getAllByRole('group')
+      .find((el) => el.tagName === 'FIELDSET')!
     expect(fieldset).toHaveAttribute('aria-invalid', 'true')
     expect(fieldset).toHaveAttribute('aria-describedby', 'composer-category-error')
   })
@@ -903,6 +909,7 @@ describe('InlineComposer — Spec 4.6 encouragement variant', () => {
       null, // scriptureText
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
+      null, // helpTags (Spec 4.7b) — null on encouragement composer
     )
   })
 })
@@ -999,5 +1006,84 @@ describe('InlineComposer — Spec 4.6b image upload affordance', () => {
     await user.clear(altInput)
     await user.type(altInput, 'A photo of the answered prayer.')
     expect(submit).not.toBeDisabled()
+  })
+
+  // ====================================================================
+  // Spec 4.7b — WaysToHelpPicker integration (3 tests)
+  // ====================================================================
+
+  it('Spec 4.7b — renders WaysToHelpPicker on prayer_request composer', () => {
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="prayer_request"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+        />
+      </MemoryRouter>,
+    )
+    expect(screen.getByTestId('ways-to-help-picker')).toBeInTheDocument()
+  })
+
+  it('Spec 4.7b — does NOT render WaysToHelpPicker on non-prayer_request composers', () => {
+    const types = ['testimony', 'question', 'discussion', 'encouragement'] as const
+    for (const postType of types) {
+      const { unmount } = render(
+        <MemoryRouter>
+          <InlineComposer
+            isOpen
+            onClose={vi.fn()}
+            postType={postType}
+            onSubmit={vi.fn().mockResolvedValue(true)}
+          />
+        </MemoryRouter>,
+      )
+      expect(screen.queryByTestId('ways-to-help-picker')).not.toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('Spec 4.7b — submit payload includes helpTags array when chips selected', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="prayer_request"
+          onSubmit={onSubmit}
+        />
+      </MemoryRouter>,
+    )
+
+    // Type content + select category (prayer_request requires category).
+    const textarea = screen.getByLabelText('Prayer request')
+    await user.type(textarea, 'Please pray.')
+    // Click the Family category chip.
+    await user.click(screen.getByText('Family'))
+    // Select the Meals help tag chip — scope to the picker so we don't pick
+    // up a same-named category button.
+    const picker = screen.getByTestId('ways-to-help-picker')
+    await user.click(within(picker).getByRole('button', { name: 'Meals' }))
+    // Submit.
+    await user.click(screen.getByText('Submit Prayer Request'))
+
+    // Use toHaveBeenCalledWith for full-arg verification (matches the pattern
+    // elsewhere in this file). helpTags is the 11th positional arg.
+    expect(onSubmit).toHaveBeenCalledWith(
+      'Please pray.',          // content
+      false,                   // isAnonymous
+      'family',                // category
+      undefined,               // challengeId — undefined when no active challenge
+      expect.any(String),      // idempotencyKey (UUID)
+      'prayer_request',        // postType
+      null,                    // scriptureReference
+      null,                    // scriptureText
+      null,                    // imageUploadId (Spec 4.6b)
+      null,                    // imageAltText (Spec 4.6b)
+      ['meals'],               // helpTags (Spec 4.7b)
+    )
   })
 })

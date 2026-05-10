@@ -99,6 +99,13 @@ column for each.
 | `UNAUTHORIZED_ACTION` | 403 | `acceptRequest` / `declineRequest` when the acting user is not the request's recipient | Dynamic per-call | `UnauthorizedActionException` ← `FriendsService.acceptRequest`, `declineRequest` | Spec 2.5.3. |
 | `USER_NOT_FOUND` (friends) | **404** | A friends or social action targeting a non-existent / soft-deleted / banned user | Dynamic per-call | `com.worshiproom.friends.UserNotFoundException` ← `FriendsService.*`; `SocialInteractionsService.sendEncouragement`, `sendNudge` | Specs 2.5.3 and 2.5.4b. **Same code as `USER_NOT_FOUND` in the Auth section above (which is 401).** Friends/social use 404 — the target is a domain resource, not the authenticated principal. The auth case is a force-logout scenario; this case is "the friend you tried to act on doesn't exist." Frontend MUST branch on status, not just code. |
 
+### Posts
+
+| Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |
+|---|---|---|---|---|---|
+| `INVALID_HELP_TAG` | 400 | `POST /api/v1/posts` or `PATCH /api/v1/posts/{id}` carries an unknown wire-value in `helpTags` (e.g., `"pizza"`) | `"Invalid help tag: <value>"` (dynamic) | `InvalidHelpTagException` ← `HelpTag.fromWireValue` ← `PostService.normalizeHelpTags` | Spec 4.7b. Wire format is lowercase snake_case ONLY (`meals`, `rides`, `errands`, `visits`, `just_prayer`); `"MEALS"` rejects (case-sensitive). Routed via the generic `handlePost(PostException)` path (no dedicated handler). |
+| `HELP_TAGS_NOT_ALLOWED_FOR_POST_TYPE` | 400 | Non-empty `helpTags` submitted on a non-prayer_request post (testimony, question, discussion, encouragement). Same code on POST and PATCH. | `"Help tags are only allowed on prayer_request posts."` (static) | `HelpTagsNotAllowedForPostTypeException` ← `PostService.createPost`, `PostService.updatePost` | Spec 4.7b. Dedicated `@ExceptionHandler` in `PostExceptionHandler.handleHelpTagsNotAllowed` logs the rejected `postType` wireValue for the audit trail (mirrors `handleImageNotAllowed`). |
+
 ### Rate limit
 
 | Code | HTTP | Triggered by | Client copy pattern | Emitted in | Notes |

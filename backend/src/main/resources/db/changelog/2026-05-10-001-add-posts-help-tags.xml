@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <changeSet id="2026-05-10-001-add-posts-help-tags" author="worship-room">
+    <addColumn tableName="posts">
+      <column name="help_tags" type="VARCHAR(200)" defaultValue="">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+    <rollback>
+      <dropColumn tableName="posts" columnName="help_tags"/>
+    </rollback>
+  </changeSet>
+
+</databaseChangeLog>

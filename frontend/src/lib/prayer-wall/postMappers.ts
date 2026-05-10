@@ -37,6 +37,7 @@ import type {
   PostType,
 } from '@/types/prayer-wall'
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import type { HelpTag } from '@/constants/ways-to-help'
 
 /**
  * Translates a backend PostDto into a frontend PrayerRequest.
@@ -98,6 +99,14 @@ export function postDtoToPrayerRequest(dto: PostDto): PrayerRequest {
       thumb: dto.image.thumbUrl,
       altText: dto.image.altText,
     }
+  }
+  // Spec 4.7b — practical-help tags. DTO contract is `string[]` (always
+  // present, may be empty). Narrow to HelpTag[] only when crossing into
+  // application types. Map empty / missing arrays to undefined so consumers
+  // have a single "no tags" sentinel — matches existing optional-field
+  // convention in PrayerRequest (D8 / W6).
+  if (dto.helpTags && dto.helpTags.length > 0) {
+    result.helpTags = dto.helpTags as HelpTag[]
   }
   return result
 }

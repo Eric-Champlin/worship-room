@@ -108,6 +108,8 @@ export interface PostDto {
   questionResolvedCommentId: string | null
   /** Spec 4.6b — image attached to the post (testimony / question only). Field is absent (undefined) when the post has no image — backend Jackson `non_null` inclusion drops the field from the wire format. */
   image?: PostImageDto
+  /** Spec 4.7b — practical-help tags. Always present; empty array when no tags. Canonical order from server. Frontends typically filter out `just_prayer` before rendering pills. */
+  helpTags: string[]
 }
 
 export interface PostListMeta {
@@ -205,6 +207,8 @@ export interface CreatePostRequest {
   imageUploadId?: string | null
   /** Spec 4.6b — required when `imageUploadId` is set. Plain text only; describes the image for screen readers. */
   imageAltText?: string | null
+  /** Spec 4.7b — optional practical-help tags. Allowed only on `prayer_request` posts. Server normalizes order and dedupes. Omit = empty. */
+  helpTags?: string[]
 }
 
 export interface CrisisResource {
@@ -269,6 +273,8 @@ export interface UpdatePostRequest {
   qotdId?: string
   scriptureReference?: string
   scriptureText?: string
+  /** Spec 4.7b — practical-help tags. Omit = no change; [] = clear. PATCH gated by the 5-minute edit window (else 409 EDIT_WINDOW_EXPIRED). */
+  helpTags?: string[]
 }
 
 export interface CreateCommentRequest {

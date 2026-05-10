@@ -3615,6 +3615,7 @@ components:
         - updatedAt
         - lastActivityAt
         - author
+        - helpTags
       properties:
         id: { type: string, format: uuid }
         postType:
@@ -3664,6 +3665,18 @@ components:
             Image attached to the post (testimony / question post types only).
             Null for posts without an image. URLs are presigned-GET, TTL =
             STORAGE_MAX_PRESIGN_HOURS (1 hour default). (Spec 4.6b)
+        helpTags:
+          type: array
+          items:
+            type: string
+            enum: [meals, rides, errands, visits, just_prayer]
+          description: |
+            Optional practical-help tags (Spec 4.7b). Always present; empty
+            array when no tags. Canonical order: meals, rides, errands, visits,
+            just_prayer. The `just_prayer` value is a positive author signal
+            ("please respect prayer-only support"); frontends typically filter
+            it out before rendering pills (D6, D8).
+          example: ['meals', 'rides']
 
     PostImage:
       description: |
@@ -3824,6 +3837,18 @@ components:
             the image for screen readers. Must be at least one non-whitespace
             character (whitespace-only strings are rejected as
             INVALID_ALT_TEXT). (Spec 4.6b)
+        helpTags:
+          type: array
+          items:
+            type: string
+            enum: [meals, rides, errands, visits, just_prayer]
+          maxItems: 5
+          description: |
+            Optional practical-help tags (Spec 4.7b). Omit = empty. When set,
+            post type MUST be `prayer_request` (else
+            HELP_TAGS_NOT_ALLOWED_FOR_POST_TYPE). Server normalizes order,
+            dedupes, and validates each value against the enum (else
+            INVALID_HELP_TAG).
 
     UpdatePostRequest:
       description: Request body for PATCH /api/v1/posts/{id} (Spec 3.5). All fields optional.
@@ -3842,6 +3867,17 @@ components:
         qotdId: { type: string, maxLength: 50 }
         scriptureReference: { type: string, maxLength: 100 }
         scriptureText: { type: string, maxLength: 2000 }
+        helpTags:
+          type: array
+          items:
+            type: string
+            enum: [meals, rides, errands, visits, just_prayer]
+          maxItems: 5
+          description: |
+            Optional practical-help tags (Spec 4.7b). Omit = no change; [] =
+            clear. PATCH gated by the 5-minute edit window (else 409
+            EDIT_WINDOW_EXPIRED). Cross-type rules apply (else 400
+            HELP_TAGS_NOT_ALLOWED_FOR_POST_TYPE).
 
     ResolveQuestionRequest:
       description: |

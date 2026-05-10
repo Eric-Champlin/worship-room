@@ -49,6 +49,20 @@ public class PostExceptionHandler {
                 .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }
 
+    // Spec 4.7b — InvalidHelpTagException rides the generic handlePost() path
+    // (its message already carries the rejected value). HelpTagsNotAllowedFor
+    // PostTypeException gets its own handler so the rejected postType wireValue
+    // is logged for the audit trail (mirrors handleImageNotAllowed above).
+    @ExceptionHandler(HelpTagsNotAllowedForPostTypeException.class)
+    public ResponseEntity<ProxyError> handleHelpTagsNotAllowed(HelpTagsNotAllowedForPostTypeException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Help tags attempted on disallowed postType wireValue={} requestId={}",
+                ex.getWireValue(), requestId);
+        return ResponseEntity
+                .status(ex.getStatus())
+                .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+    }
+
     @ExceptionHandler(PostException.class)
     public ResponseEntity<ProxyError> handlePost(PostException ex) {
         var requestId = MDC.get("requestId");

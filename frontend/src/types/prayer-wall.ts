@@ -1,10 +1,15 @@
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PostType } from '@/constants/post-types'
+import type { HelpTag } from '@/constants/ways-to-help'
 
 // Spec 3.10 type, moved to constants/post-types.ts in Spec 4.1.
 // Re-exported here for backward compatibility — existing imports of
 // `PostType` from `@/types/prayer-wall` continue to resolve unchanged.
 export type { PostType }
+
+// Spec 4.7b — re-exported for backward-compatibility so `import { HelpTag }
+// from '@/types/prayer-wall'` resolves. Canonical home is `@/constants/ways-to-help`.
+export type { HelpTag }
 
 export interface PrayerWallUser {
   id: string
@@ -69,6 +74,10 @@ export interface PrayerRequest {
   // Undefined for posts without an image (the backend omits the `image` field
   // entirely via Jackson `non_null` inclusion).
   image?: PostImage
+  // --- Spec 4.7b — practical-help tags. Only set on prayer_request posts;
+  // backend rejects on other types. Empty array or undefined when no tags.
+  // Canonical order from API (frontend trusts it; D3 / W15).
+  helpTags?: HelpTag[]
   // --- Intentionally NOT exposed:
   // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
   // - moderationStatus — server pre-filters; UI assumes 'approved'

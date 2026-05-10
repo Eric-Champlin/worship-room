@@ -1,6 +1,7 @@
 package com.worshiproom.post.dto;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -38,5 +39,8 @@ public record PostDto(
         // Spec 4.6b — null when post has no image attached. Global Jackson
         // default-property-inclusion=non_null drops the field from the wire format
         // when null.
-        PostImageDto image
+        PostImageDto image,
+        // Spec 4.7b — always present (empty Set when no tags). Canonical order
+        // (LinkedHashSet preserves the server's canonical sort).
+        Set<String> helpTags
 ) {}

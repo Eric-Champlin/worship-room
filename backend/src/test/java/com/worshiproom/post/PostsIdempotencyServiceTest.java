@@ -70,7 +70,8 @@ class PostsIdempotencyServiceTest {
                 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(), null,
                 null,
-                null
+                null,
+                java.util.Set.of()
         );
         return new CreatePostResponse(dto, null, java.util.Map.of("requestId", "rid"));
     }

@@ -11,6 +11,7 @@ import com.worshiproom.user.UserRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,8 +119,29 @@ public class PostMapper {
                 p.getLastActivityAt(),
                 author,
                 p.getQuestionResolvedCommentId(),
-                imageFor(p)
+                imageFor(p),
+                parseHelpTagsRaw(p.getHelpTagsRaw())
         );
+    }
+
+    /**
+     * Spec 4.7b — Parse the comma-separated helpTagsRaw column into a Set
+     * preserving canonical order. Empty / null string → empty Set.
+     *
+     * <p>Stored values are already canonically sorted by the service layer
+     * (D3); this method preserves that order via {@link LinkedHashSet}. Read-side
+     * does NOT validate against the {@link HelpTag} enum — values are trusted
+     * because the service layer wrote them; future-compat with retired enum
+     * values stays graceful.
+     */
+    private static Set<String> parseHelpTagsRaw(String raw) {
+        if (raw == null || raw.isEmpty()) return Set.of();
+        LinkedHashSet<String> result = new LinkedHashSet<>();
+        for (String token : raw.split(",")) {
+            String trimmed = token.trim();
+            if (!trimmed.isEmpty()) result.add(trimmed);
+        }
+        return result;
     }
 
     private PostImageDto imageFor(Post p) {

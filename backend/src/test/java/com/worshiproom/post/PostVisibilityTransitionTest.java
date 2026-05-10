@@ -96,7 +96,8 @@ class PostVisibilityTransitionTest {
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test", null),
                 null,
-                null
+                null,
+                java.util.Set.of()
         );
         when(postMapper.toDto(any(Post.class))).thenReturn(dto);
     }
@@ -114,7 +115,7 @@ class PostVisibilityTransitionTest {
         }
 
         UpdatePostRequest req = new UpdatePostRequest(
-                null, null, to.value(), null, null, null, null, null, null
+                null, null, to.value(), null, null, null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 

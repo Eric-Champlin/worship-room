@@ -19,8 +19,10 @@ import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { getChallenge } from '@/data/challenges'
 import { useRovingTabindex } from '@/hooks/useRovingTabindex'
 import type { PostType } from '@/constants/post-types'
+import type { HelpTag } from '@/constants/ways-to-help'
 import { ScriptureReferenceInput } from './ScriptureReferenceInput'
 import { ImageUpload } from './ImageUpload'
+import { WaysToHelpPicker } from './WaysToHelpPicker'
 
 interface ComposerCopy {
   header: string
@@ -52,6 +54,11 @@ interface ComposerCopy {
   showImageUpload?: boolean
   /** Spec 4.6b — helper text below the "Add a photo" button. */
   imageUploadHelperText?: string
+  /** Spec 4.7b — when true, render <WaysToHelpPicker> below the category fieldset.
+   *  Currently set on `prayer_request` only. */
+  showWaysToHelpPicker?: boolean
+  /** Spec 4.7b — inline helper text below the picker label. */
+  waysToHelpHelperText?: string
   minHeight: string
 }
 
@@ -69,6 +76,10 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showCategoryFieldset: true,
     showChallengeCheckbox: true,
     showAttributionNudge: false,
+    // Spec 4.7b — practical-help tag picker on prayer_request only.
+    showWaysToHelpPicker: true,
+    waysToHelpHelperText:
+      'Optional — leave blank if prayer is what you need right now.',
     minHeight: '120px',
   },
   testimony: {
@@ -166,6 +177,9 @@ interface InlineComposerProps {
     // Only populated for testimony / question post types.
     imageUploadId?: string | null,
     imageAltText?: string | null,
+    // Spec 4.7b — optional practical-help tags. Only populated for
+    // postType === 'prayer_request'; empty / null on all other types.
+    helpTags?: HelpTag[] | null,
   ) => boolean | Promise<boolean>
 }
 
@@ -193,6 +207,9 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
   // upload into posts/{postId}/ as part of the same transaction.
   const [imageUploadId, setImageUploadId] = useState<string | null>(null)
   const [imageAltText, setImageAltText] = useState<string>('')
+  // Spec 4.7b — practical-help tag selection. Composer-scoped local state
+  // (no reactive store; selection lives only inside the open composer).
+  const [helpTags, setHelpTags] = useState<HelpTag[]>([])
   // Spec 4.5 — InlineComposer hides via aria-hidden/inert (line 310-311) rather
   // than unmounting on close, so child components retain their internal state
   // across open/close cycles. ScriptureReferenceInput is uncontrolled (owns its
@@ -297,6 +314,10 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
         scriptureText,
         imageUploadId,
         imageUploadId ? imageAltText.trim() : null,
+        // Spec 4.7b — only thread helpTags on prayer_request; null elsewhere
+        // so the API payload is omitted (defense-in-depth alongside backend
+        // cross-type rejection).
+        postType === 'prayer_request' && helpTags.length > 0 ? helpTags : null,
       )
       if (!success) return
       setContent('')
@@ -311,6 +332,8 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       setScriptureResetKey((k) => k + 1)
       setImageUploadId(null)
       setImageAltText('')
+      // Spec 4.7b — reset selection so the next prayer starts clean.
+      setHelpTags([])
       // Generate a fresh idempotency key for the next prayer.
       setIdempotencyKey(
         typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
@@ -337,6 +360,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     scriptureFieldHasError,
     imageUploadId,
     imageAltText,
+    helpTags,
   ])
 
   const handleCancel = useCallback(() => {
@@ -351,6 +375,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     setScriptureResetKey((k) => k + 1)
     setImageUploadId(null)
     setImageAltText('')
+    setHelpTags([])
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
@@ -515,6 +540,15 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
               </p>
             )}
           </fieldset>
+        )}
+
+        {/* Spec 4.7b — practical-help tag picker (prayer_request only). */}
+        {copy.showWaysToHelpPicker && (
+          <WaysToHelpPicker
+            value={helpTags}
+            onChange={setHelpTags}
+            helperText={copy.waysToHelpHelperText}
+          />
         )}
 
         {copy.showAnonymousToggle !== false && (

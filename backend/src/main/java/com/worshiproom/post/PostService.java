@@ -38,7 +38,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Read + write orchestration for the Spec 3.3 read endpoints and Spec 3.5 write
@@ -206,6 +209,18 @@ public class PostService {
             throw new AnonymousNotAllowedException(postType.value());
         }
 
+        // Spec 4.7b — help_tags cross-type rejection + normalization. Runs in the
+        // cross-field validation block so a buggy client gets a 400 BEFORE we
+        // burn time on sanitization or crisis detection.
+        String helpTagsRaw = "";  // default empty
+        Set<String> requestedHelpTags = request.helpTags();
+        if (requestedHelpTags != null && !requestedHelpTags.isEmpty()) {
+            if (postType != PostType.PRAYER_REQUEST) {
+                throw new HelpTagsNotAllowedForPostTypeException(postTypeRaw);
+            }
+            helpTagsRaw = normalizeHelpTags(requestedHelpTags);
+        }
+
         // Step 5: HTML sanitization.
         String sanitizedContent = htmlSanitizerPolicy.sanitize(request.content()).trim();
         if (sanitizedContent.isEmpty()) {
@@ -285,6 +300,8 @@ public class PostService {
         // image_alt_text can be set immediately — it's not derived from postId.
         post.setImageUrl(null);
         post.setImageAltText(sanitizedAltText);
+        // Spec 4.7b — normalized comma-separated help_tags ("" when none).
+        post.setHelpTagsRaw(helpTagsRaw);
         // created_at, updated_at, last_activity_at populate from DB DEFAULT NOW()
         // (entity columns have insertable=false; the DB-side DEFAULT fires).
 
@@ -373,10 +390,14 @@ public class PostService {
         boolean wantsScriptureEdit = request.scriptureReference() != null || request.scriptureText() != null;
         boolean wantsAnsweredEdit = request.isAnswered() != null;
         boolean wantsAnsweredTextEdit = request.answeredText() != null;
+        // Spec 4.7b — help_tags is window-gated (5-min edit window). null = no
+        // change; [] = clear; non-empty = set (cross-type rejection applies).
+        boolean wantsHelpTagsEdit = request.helpTags() != null;
 
         boolean nonExemptEditRequested =
                 wantsContentEdit || wantsCategoryEdit || wantsQotdEdit
-                || wantsChallengeEdit || wantsScriptureEdit;
+                || wantsChallengeEdit || wantsScriptureEdit
+                || wantsHelpTagsEdit;
 
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         boolean withinWindow = !now.isAfter(
@@ -411,6 +432,25 @@ public class PostService {
         if (request.scriptureText() != null && request.scriptureReference() == null
                 && post.getScriptureReference() == null) {
             throw new InvalidScripturePairException();
+        }
+
+        // Spec 4.7b — help_tags cross-type rejection (after window check, before
+        // normalization). Unlike createPost, the postType comes from the existing
+        // post (immutable), not the request. Normalization throws on unknown
+        // values via HelpTag.fromWireValue → InvalidHelpTagException.
+        //
+        // Symmetry with createPost: the cross-type check fires only on a
+        // non-empty input. An explicit empty Set on a non-prayer_request post
+        // is a no-op (the stored value is already "") rather than a 400 — this
+        // matches the create-path semantics and the api-error-codes.md contract
+        // ("Non-empty helpTags submitted on a non-prayer_request post").
+        String newHelpTagsRaw = null;
+        if (wantsHelpTagsEdit) {
+            Set<String> requestedHelpTags = request.helpTags();
+            if (!requestedHelpTags.isEmpty() && post.getPostType() != PostType.PRAYER_REQUEST) {
+                throw new HelpTagsNotAllowedForPostTypeException(post.getPostType().value());
+            }
+            newHelpTagsRaw = normalizeHelpTags(requestedHelpTags);
         }
 
         // Step 7: sanitize free-text fields if present.
@@ -454,6 +494,7 @@ public class PostService {
         if (wantsQotdEdit) post.setQotdId(request.qotdId());
         if (request.scriptureReference() != null) post.setScriptureReference(request.scriptureReference());
         if (request.scriptureText() != null) post.setScriptureText(sanitizedScriptureText);
+        if (wantsHelpTagsEdit) post.setHelpTagsRaw(newHelpTagsRaw);
         if (newCrisisFlag != post.isCrisisFlag()) post.setCrisisFlag(newCrisisFlag);
 
         // Special case: is_answered transitions.
@@ -645,6 +686,32 @@ public class PostService {
             case RECENT -> Sort.by(Sort.Direction.DESC, "createdAt");
             case ANSWERED -> Sort.by(Sort.Direction.DESC, "answeredAt");
         };
+    }
+
+    /**
+     * Spec 4.7b — Validate, dedupe, sort, and serialize a help_tags input.
+     *
+     * <p>Rules:
+     * <ul>
+     *   <li>null or empty input → empty string ("").</li>
+     *   <li>Each non-blank value parsed via {@link HelpTag#fromWireValue} (throws on unknown).</li>
+     *   <li>Whitespace-only entries silently filtered (D4).</li>
+     *   <li>Duplicates silently deduped via Set semantics (D4).</li>
+     *   <li>Output sorted in canonical order (D3) and joined with comma.</li>
+     * </ul>
+     */
+    private static String normalizeHelpTags(Set<String> input) {
+        if (input == null || input.isEmpty()) return "";
+        Set<HelpTag> parsed = new TreeSet<>(HelpTag.CANONICAL_ORDER);
+        for (String raw : input) {
+            if (raw == null) continue;
+            String trimmed = raw.trim();
+            if (trimmed.isEmpty()) continue;
+            parsed.add(HelpTag.fromWireValue(trimmed));  // throws InvalidHelpTagException on unknown
+        }
+        return parsed.stream()
+                .map(HelpTag::wireValue)
+                .collect(Collectors.joining(","));
     }
 
     private static PostListMeta buildMeta(int page, int limit, long totalCount, String requestId) {

@@ -109,6 +109,13 @@ public class Post {
     @Column(name = "image_alt_text", length = 500)
     private String imageAltText;
 
+    // Spec 4.7b — comma-separated HelpTag wire values, canonical order, no
+    // duplicates. Empty string represents "no tags". NEVER null. The initializer
+    // `= ""` (W19) protects against a transitional migration window where the row
+    // might surface NULL before the DB DEFAULT '' fires.
+    @Column(name = "help_tags", nullable = false, length = 200)
+    private String helpTagsRaw = "";
+
     protected Post() {}
 
     public UUID getId() { return id; }
@@ -140,6 +147,7 @@ public class Post {
     public UUID getQuestionResolvedCommentId() { return questionResolvedCommentId; }
     public String getImageUrl() { return imageUrl; }
     public String getImageAltText() { return imageAltText; }
+    public String getHelpTagsRaw() { return helpTagsRaw; }
 
     public void setAnsweredAt(OffsetDateTime answeredAt) { this.answeredAt = answeredAt; }
     public void setAnsweredText(String answeredText) { this.answeredText = answeredText; }
@@ -170,6 +178,7 @@ public class Post {
     }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setImageAltText(String imageAltText) { this.imageAltText = imageAltText; }
+    public void setHelpTagsRaw(String helpTagsRaw) { this.helpTagsRaw = helpTagsRaw; }
 
     @Override
     public boolean equals(Object o) {

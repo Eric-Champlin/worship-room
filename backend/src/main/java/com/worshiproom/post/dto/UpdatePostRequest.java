@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import java.util.Set;
+
 /**
  * Request body for PATCH /api/v1/posts/{id}.
  *
@@ -47,7 +49,12 @@ public record UpdatePostRequest(
         String scriptureReference,
 
         @Size(max = 2000)
-        String scriptureText
+        String scriptureText,
+
+        // Spec 4.7b — null = no change; [] = clear all tags. Cross-type rules
+        // and edit-window gating applied in PostService.updatePost.
+        @Size(max = 5, message = "helpTags may contain at most 5 values")
+        Set<String> helpTags
 ) {
 
     /**
@@ -57,6 +64,7 @@ public record UpdatePostRequest(
         return content == null && category == null && visibility == null
                 && isAnswered == null && answeredText == null
                 && challengeId == null && qotdId == null
-                && scriptureReference == null && scriptureText == null;
+                && scriptureReference == null && scriptureText == null
+                && helpTags == null;
     }
 }

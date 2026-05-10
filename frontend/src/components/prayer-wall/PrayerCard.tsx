@@ -10,6 +10,7 @@ import { getChallenge } from '@/data/challenges'
 import { Avatar } from './Avatar'
 import { AnsweredBadge } from './AnsweredBadge'
 import { PostImage } from './PostImage'
+import { WaysToHelpPills } from './WaysToHelpPills'
 import { CategoryBadge } from './CategoryBadge'
 import { QotdBadge } from './QotdBadge'
 import { ScriptureChip } from './ScriptureChip'
@@ -207,6 +208,16 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
           Renders whenever prayer.image is non-null; postType-agnostic by design
           so future post types that gain images don't require touching PrayerCard. */}
       {prayer.image && <PostImage image={prayer.image} index={index} />}
+
+      {/* Spec 4.7b — practical-help pills (prayer_request only). Defense-in-depth:
+          backend rejects helpTags on other post types, but the postType gate here
+          guards against any leftover fixture or stale data leaking pills onto a
+          testimony / question / discussion / encouragement card (W18). The
+          WaysToHelpPills component itself returns null when the displayable set
+          is empty (W6), and filters out just_prayer (W5). */}
+      {prayer.postType === 'prayer_request' && prayer.helpTags && (
+        <WaysToHelpPills tags={prayer.helpTags} />
+      )}
 
       {children}
 

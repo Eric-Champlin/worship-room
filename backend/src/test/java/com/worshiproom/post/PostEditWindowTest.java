@@ -92,7 +92,8 @@ class PostEditWindowTest {
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test", null),
                 null,
-                null
+                null,
+                java.util.Set.of()
         );
         when(postMapper.toDto(any(Post.class))).thenReturn(dto);
     }
@@ -108,7 +109,7 @@ class PostEditWindowTest {
         wireMapper(postId);
 
         UpdatePostRequest req = new UpdatePostRequest(
-                "updated content", null, null, null, null, null, null, null, null
+                "updated content", null, null, null, null, null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 
@@ -128,7 +129,7 @@ class PostEditWindowTest {
         when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(post));
 
         UpdatePostRequest req = new UpdatePostRequest(
-                "too late", null, null, null, null, null, null, null, null
+                "too late", null, null, null, null, null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 
@@ -148,7 +149,7 @@ class PostEditWindowTest {
 
         // is_answered is window-exempt
         UpdatePostRequest req = new UpdatePostRequest(
-                null, null, null, true, "Praise God!", null, null, null, null
+                null, null, null, true, "Praise God!", null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 
@@ -171,7 +172,7 @@ class PostEditWindowTest {
         wireMapper(postId);
 
         UpdatePostRequest req = new UpdatePostRequest(
-                null, null, null, true, null, null, null, null, null
+                null, null, null, true, null, null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 
@@ -189,7 +190,7 @@ class PostEditWindowTest {
         when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(post));
 
         UpdatePostRequest req = new UpdatePostRequest(
-                null, "health", null, null, null, null, null, null, null
+                null, "health", null, null, null, null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 
@@ -209,7 +210,7 @@ class PostEditWindowTest {
 
         // false -> true with text
         UpdatePostRequest req = new UpdatePostRequest(
-                null, null, null, true, "Surgery successful!", null, null, null, null
+                null, null, null, true, "Surgery successful!", null, null, null, null, null
         );
         AuthenticatedUser principal = new AuthenticatedUser(userId, false);
 

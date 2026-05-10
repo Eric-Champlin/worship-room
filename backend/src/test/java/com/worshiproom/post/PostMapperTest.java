@@ -287,4 +287,43 @@ class PostMapperTest extends AbstractDataJpaTest {
         // Reset for other tests
         storageProps.setMaxPresignHours(1);
     }
+
+    // =====================================================================
+    // Spec 4.7b — help_tags read-side mapping (3 tests)
+    // =====================================================================
+
+    @Test
+    void toDto_with_empty_helpTagsRaw_includes_empty_set() {
+        Post post = seedPost(author.getId(), false);
+        // seedPost INSERT does not write help_tags; DB DEFAULT '' supplies it.
+        PostDto dto = postMapper.toDto(post);
+        assertThat(dto.helpTags()).isEmpty();
+    }
+
+    @Test
+    void toDto_with_meals_rides_helpTagsRaw_includes_meals_rides_in_canonical_order() {
+        Post post = seedPost(author.getId(), false);
+        jdbc.update("UPDATE posts SET help_tags = ? WHERE id = ?", "meals,rides", post.getId());
+        entityManager.clear();
+        Post reloaded = entityManager.find(Post.class, post.getId());
+
+        PostDto dto = postMapper.toDto(reloaded);
+
+        // LinkedHashSet preserves storage order; storage is canonical.
+        assertThat(dto.helpTags()).containsExactly("meals", "rides");
+    }
+
+    @Test
+    void toDto_just_prayer_helpTagsRaw_includes_just_prayer_in_set() {
+        // Frontend filters just_prayer at render time (D8 / W5); the DTO MUST
+        // still include it for AI / analytics use cases (D6).
+        Post post = seedPost(author.getId(), false);
+        jdbc.update("UPDATE posts SET help_tags = ? WHERE id = ?", "just_prayer", post.getId());
+        entityManager.clear();
+        Post reloaded = entityManager.find(Post.class, post.getId());
+
+        PostDto dto = postMapper.toDto(reloaded);
+
+        assertThat(dto.helpTags()).containsExactly("just_prayer");
+    }
 }

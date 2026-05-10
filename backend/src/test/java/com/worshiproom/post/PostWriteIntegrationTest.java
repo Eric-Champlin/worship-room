@@ -17,6 +17,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -858,5 +859,130 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isTooManyRequests())
                 .andExpect(header().exists("Retry-After"))
                 .andExpect(jsonPath("$.code").value("RATE_LIMITED"));
+    }
+
+    // =====================================================================
+    // Spec 4.7b — help_tags HTTP-level coverage (6 tests)
+    // =====================================================================
+
+    @Test
+    void POST_posts_with_meals_returns_201_with_helpTags_meals() throws Exception {
+        String body = """
+                {
+                  "postType": "prayer_request",
+                  "content": "Please pray for me.",
+                  "category": "family",
+                  "helpTags": ["meals"]
+                }
+                """;
+        MvcResult result = mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.helpTags").isArray())
+                .andExpect(jsonPath("$.data.helpTags[0]").value("meals"))
+                .andReturn();
+
+        // Verify DB column matches.
+        UUID postId = UUID.fromString(
+                mapper.readTree(result.getResponse().getContentAsString())
+                        .get("data").get("id").asText());
+        String stored = jdbc.queryForObject(
+                "SELECT help_tags FROM posts WHERE id = ?",
+                String.class, postId);
+        assertThat(stored).isEqualTo("meals");
+    }
+
+    @Test
+    void POST_posts_with_invalid_tag_returns_400_INVALID_HELP_TAG() throws Exception {
+        String body = """
+                {
+                  "postType": "prayer_request",
+                  "content": "Please pray.",
+                  "category": "family",
+                  "helpTags": ["pizza"]
+                }
+                """;
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_HELP_TAG"));
+    }
+
+    @Test
+    void POST_posts_with_helpTags_on_testimony_returns_400_HELP_TAGS_NOT_ALLOWED_FOR_POST_TYPE() throws Exception {
+        String body = """
+                {
+                  "postType": "testimony",
+                  "content": "Praise God for healing.",
+                  "helpTags": ["meals"]
+                }
+                """;
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("HELP_TAGS_NOT_ALLOWED_FOR_POST_TYPE"));
+    }
+
+    @Test
+    void PATCH_posts_with_helpTags_within_window_returns_200() throws Exception {
+        UUID postId = seedPostDirect(alice.getId());
+
+        mvc.perform(patch("/api/v1/posts/" + postId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "helpTags": ["rides", "meals"] }
+                                """))
+                .andExpect(status().isOk())
+                // Server normalizes to canonical order: meals before rides.
+                .andExpect(jsonPath("$.data.helpTags[0]").value("meals"))
+                .andExpect(jsonPath("$.data.helpTags[1]").value("rides"));
+    }
+
+    @Test
+    void PATCH_posts_with_helpTags_after_window_returns_409_EDIT_WINDOW_EXPIRED() throws Exception {
+        // Plan-Time Divergence #2: canonical status code is 409 (NOT 400).
+        UUID postId = seedPostDirect(alice.getId());
+        // Backdate the post beyond the 5-minute window.
+        jdbc.update("UPDATE posts SET created_at = ? WHERE id = ?",
+                OffsetDateTime.now().minusMinutes(10), postId);
+
+        mvc.perform(patch("/api/v1/posts/" + postId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                { "helpTags": ["meals"] }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("EDIT_WINDOW_EXPIRED"));
+    }
+
+    @Test
+    void POST_posts_with_no_helpTags_response_helpTags_is_empty_array_not_null() throws Exception {
+        // L1-cache regression guard (Phase 3 Addendum item 2). Without
+        // entityManager.refresh(saved) in PostService.createPost, helpTagsRaw
+        // would round-trip from the entity initializer ("") and parse to []
+        // anyway — but this test future-proofs the contract: the response MUST
+        // carry helpTags: [] when the field was omitted, not null.
+        String body = """
+                {
+                  "postType": "prayer_request",
+                  "content": "Plain prayer with no tags.",
+                  "category": "family"
+                }
+                """;
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.helpTags").isArray())
+                .andExpect(jsonPath("$.data.helpTags").isEmpty());
     }
 }

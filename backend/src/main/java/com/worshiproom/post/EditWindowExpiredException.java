@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
  *
  * Window-exempt operations: is_answered toggle, answered_text.
  * Window-gated operations: content, category, qotdId, challengeId,
- * scripture fields, visibility-upgrade.
+ * scripture fields, visibility-upgrade, help_tags (Spec 4.7b).
  */
 public class EditWindowExpiredException extends PostException {
     public EditWindowExpiredException() {

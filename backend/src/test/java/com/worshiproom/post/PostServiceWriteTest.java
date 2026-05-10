@@ -88,7 +88,7 @@ class PostServiceWriteTest {
                 false,
                 "public",
                 null, null, null, null,
-                null, null
+                null, null, null
         );
     }
 
@@ -100,7 +100,7 @@ class PostServiceWriteTest {
                 false,
                 "public",
                 null, null, null, null,
-                null, null
+                null, null, null
         );
     }
 
@@ -113,7 +113,8 @@ class PostServiceWriteTest {
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test User", null),
                 null,
-                null
+                null,
+                java.util.Set.of()
         );
     }
 
@@ -226,7 +227,8 @@ class PostServiceWriteTest {
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "Please pray.", "family", false, "public",
                 null, "qotd-nonexistent", null, null,
-                null, null
+                null, null,
+                null
         );
 
         assertThatThrownBy(() -> postService.createPost(authorId, req, null, "rid"))
@@ -243,7 +245,8 @@ class PostServiceWriteTest {
         CreatePostRequest req = new CreatePostRequest(
                 "prayer_request", "Please pray.", "family", false, "public",
                 null, null, "John 3:16", null,
-                null, null
+                null, null,
+                null
         );
 
         assertThatThrownBy(() -> postService.createPost(authorId, req, null, "rid"))
@@ -261,7 +264,8 @@ class PostServiceWriteTest {
                 "prayer_request", "<script>alert('x')</script>hello",
                 "family", false, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
 
         postService.createPost(authorId, req, null, "rid");
@@ -285,7 +289,8 @@ class PostServiceWriteTest {
                 "prayer_request", "anonymous prayer", "family",
                 true, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
 
         postService.createPost(authorId, req, null, "rid");
@@ -305,7 +310,8 @@ class PostServiceWriteTest {
         return new CreatePostRequest(
                 "testimony", content, null, false, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
     }
 
@@ -313,7 +319,8 @@ class PostServiceWriteTest {
         return new CreatePostRequest(
                 "prayer_request", content, "family", false, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
     }
 
@@ -405,7 +412,8 @@ class PostServiceWriteTest {
         CreatePostRequest req = new CreatePostRequest(
                 "testimony", "Praise God for healing.", null, false, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
 
         CreatePostResponse response = postService.createPost(authorId, req, null, "rid");
@@ -436,7 +444,8 @@ class PostServiceWriteTest {
         return new CreatePostRequest(
                 "encouragement", content, "other", anonymous, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
     }
 
@@ -493,7 +502,8 @@ class PostServiceWriteTest {
                 "prayer_request", "anonymous prayer request", "family",
                 true, "public",
                 null, null, null, null,
-                null, null
+                null, null,
+                null
         );
 
         CreatePostResponse response = postService.createPost(authorId, req, null, "rid");
@@ -537,7 +547,7 @@ class PostServiceWriteTest {
         when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
 
         UpdatePostRequest req = new UpdatePostRequest(
-                "a".repeat(5001), null, null, null, null, null, null, null, null);
+                "a".repeat(5001), null, null, null, null, null, null, null, null, null);
         AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
 
         assertThatThrownBy(() -> postService.updatePost(postId, principal, req, "rid"))
@@ -553,7 +563,7 @@ class PostServiceWriteTest {
         when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
 
         UpdatePostRequest req = new UpdatePostRequest(
-                "a".repeat(2001), null, null, null, null, null, null, null, null);
+                "a".repeat(2001), null, null, null, null, null, null, null, null, null);
         AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
 
         assertThatThrownBy(() -> postService.updatePost(postId, principal, req, "rid"))
@@ -604,7 +614,8 @@ class PostServiceWriteTest {
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Asker", null),
                 resolvedCommentId,
-                null
+                null,
+                java.util.Set.of()
         );
     }
 
@@ -880,7 +891,7 @@ class PostServiceWriteTest {
         return new CreatePostRequest(
                 "testimony", "God answered my prayer.", null, false, "public",
                 null, null, null, null,
-                uploadId, altText
+                uploadId, altText, null
         );
     }
 
@@ -888,7 +899,7 @@ class PostServiceWriteTest {
         return new CreatePostRequest(
                 "question", "What does this mean?", null, false, "public",
                 null, null, null, null,
-                uploadId, altText
+                uploadId, altText, null
         );
     }
 
@@ -896,7 +907,7 @@ class PostServiceWriteTest {
         return new CreatePostRequest(
                 "prayer_request", "Please pray for me.", "family", false, "public",
                 null, null, null, null,
-                uploadId, altText
+                uploadId, altText, null
         );
     }
 
@@ -1025,5 +1036,302 @@ class PostServiceWriteTest {
         verify(postRepository, times(2)).save(captor.capture());
         // Both saves should have crisisFlag=true since the entity is shared.
         assertThat(captor.getAllValues().get(0).isCrisisFlag()).isTrue();
+    }
+
+    // =====================================================================
+    // Spec 4.7b — help_tags create / update / cross-type / window (16 tests)
+    // =====================================================================
+
+    private CreatePostRequest prayerWithHelpTags(java.util.Set<String> helpTags) {
+        return new CreatePostRequest(
+                "prayer_request", "Please pray for me.", "family", false, "public",
+                null, null, null, null,
+                null, null,
+                helpTags
+        );
+    }
+
+    private CreatePostRequest postWithHelpTags(String postType, java.util.Set<String> helpTags) {
+        // category required for prayer_request and discussion; null otherwise
+        String category = (postType.equals("prayer_request") || postType.equals("discussion"))
+                ? "family" : null;
+        return new CreatePostRequest(
+                postType, "Encouragement test content.", category, false, "public",
+                null, null, null, null,
+                null, null,
+                helpTags
+        );
+    }
+
+    @Test
+    void createPost_with_no_helpTags_persists_empty_string() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        postService.createPost(authorId, sampleRequest(), null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("");
+    }
+
+    @Test
+    void createPost_with_meals_only_persists_meals() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        postService.createPost(authorId, prayerWithHelpTags(java.util.Set.of("meals")), null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("meals");
+    }
+
+    @Test
+    void createPost_with_meals_and_rides_persists_in_canonical_order() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        postService.createPost(authorId,
+                prayerWithHelpTags(new java.util.LinkedHashSet<>(java.util.List.of("meals", "rides"))),
+                null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("meals,rides");
+    }
+
+    @Test
+    void createPost_with_visits_meals_normalizes_to_meals_visits() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        // Non-canonical input order: visits before meals.
+        postService.createPost(authorId,
+                prayerWithHelpTags(new java.util.LinkedHashSet<>(java.util.List.of("visits", "meals"))),
+                null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("meals,visits");
+    }
+
+    @Test
+    void createPost_with_invalid_tag_throws_InvalidHelpTagException() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, prayerWithHelpTags(java.util.Set.of("pizza")), null, "rid"))
+                .isInstanceOf(InvalidHelpTagException.class)
+                .hasMessageContaining("pizza");
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_with_helpTags_on_testimony_throws_HelpTagsNotAllowedForPostTypeException() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, postWithHelpTags("testimony", java.util.Set.of("meals")), null, "rid"))
+                .isInstanceOf(HelpTagsNotAllowedForPostTypeException.class);
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void createPost_with_helpTags_on_question_throws() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, postWithHelpTags("question", java.util.Set.of("meals")), null, "rid"))
+                .isInstanceOf(HelpTagsNotAllowedForPostTypeException.class);
+    }
+
+    @Test
+    void createPost_with_helpTags_on_discussion_throws() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, postWithHelpTags("discussion", java.util.Set.of("rides")), null, "rid"))
+                .isInstanceOf(HelpTagsNotAllowedForPostTypeException.class);
+    }
+
+    @Test
+    void createPost_with_helpTags_on_encouragement_throws() {
+        UUID authorId = UUID.randomUUID();
+        when(idempotencyService.lookup(any(UUID.class), any(), anyInt())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> postService.createPost(
+                authorId, postWithHelpTags("encouragement", java.util.Set.of("errands")), null, "rid"))
+                .isInstanceOf(HelpTagsNotAllowedForPostTypeException.class);
+    }
+
+    @Test
+    void createPost_with_duplicate_tags_dedupes_silently() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        // Set semantics — duplicate "meals" naturally collapses to one entry.
+        // We explicitly construct a list-backed Set here to confirm the service
+        // never throws on a dup signal even at the wire-format boundary.
+        java.util.Set<String> tags = new java.util.LinkedHashSet<>();
+        tags.add("meals");
+        tags.add("meals");  // no-op via Set semantics
+        tags.add("rides");
+        postService.createPost(authorId, prayerWithHelpTags(tags), null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("meals,rides");
+    }
+
+    @Test
+    void createPost_with_whitespace_only_tag_silently_filters() {
+        UUID authorId = UUID.randomUUID();
+        wireDefaultMocks();
+
+        java.util.Set<String> tags = new java.util.LinkedHashSet<>();
+        tags.add("  ");           // whitespace-only — filtered (D4)
+        tags.add("meals");
+        postService.createPost(authorId, prayerWithHelpTags(tags), null, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("meals");
+    }
+
+    @Test
+    void updatePost_with_helpTags_within_window_succeeds() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.PRAYER_REQUEST);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                null, null, null, null, null, null, null, null, null,
+                java.util.Set.of("meals", "visits"));
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        postService.updatePost(postId, principal, req, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("meals,visits");
+    }
+
+    @Test
+    void updatePost_with_helpTags_after_window_throws_EditWindowExpiredException() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.PRAYER_REQUEST);
+        // Backdate beyond the window.
+        try {
+            java.lang.reflect.Field createdAt = Post.class.getDeclaredField("createdAt");
+            createdAt.setAccessible(true);
+            createdAt.set(existing, OffsetDateTime.now().minusMinutes(10));
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                null, null, null, null, null, null, null, null, null,
+                java.util.Set.of("meals"));
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        assertThatThrownBy(() -> postService.updatePost(postId, principal, req, "rid"))
+                .isInstanceOf(EditWindowExpiredException.class);
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void updatePost_with_helpTags_on_non_prayer_request_throws_HelpTagsNotAllowedForPostTypeException() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.TESTIMONY);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                null, null, null, null, null, null, null, null, null,
+                java.util.Set.of("meals"));
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        assertThatThrownBy(() -> postService.updatePost(postId, principal, req, "rid"))
+                .isInstanceOf(HelpTagsNotAllowedForPostTypeException.class);
+
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void updatePost_with_empty_helpTags_on_non_prayer_request_succeeds_as_noop() {
+        // Symmetry guard with createPost: an explicit empty Set on a
+        // non-prayer_request post is a no-op (the stored value is already
+        // ""), NOT a 400. Matches api-error-codes.md contract: rejection fires
+        // only on "Non-empty helpTags submitted on a non-prayer_request post."
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.TESTIMONY);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                null, null, null, null, null, null, null, null, null,
+                java.util.Set.of());  // empty — semantically a no-op clear
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        // Must NOT throw — empty Set on a non-prayer_request is a no-op.
+        postService.updatePost(postId, principal, req, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        // helpTagsRaw stays "" (was "" already; cleared to "" again).
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("");
+    }
+
+    @Test
+    void updatePost_clearing_helpTags_persists_empty_string() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.PRAYER_REQUEST);
+        existing.setHelpTagsRaw("meals,rides");  // pre-existing tags
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                null, null, null, null, null, null, null, null, null,
+                java.util.Set.of());  // explicit empty Set = clear all
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        postService.updatePost(postId, principal, req, "rid");
+
+        ArgumentCaptor<Post> captor = ArgumentCaptor.forClass(Post.class);
+        verify(postRepository).save(captor.capture());
+        assertThat(captor.getValue().getHelpTagsRaw()).isEqualTo("");
+    }
+
+    @Test
+    void updatePost_with_only_helpTags_does_not_throw_EmptyPatchBodyException() {
+        UUID authorId = UUID.randomUUID();
+        UUID postId = UUID.randomUUID();
+        Post existing = existingPost(postId, authorId, PostType.PRAYER_REQUEST);
+        when(postRepository.findByIdAndIsDeletedFalse(postId)).thenReturn(Optional.of(existing));
+        when(postRepository.save(any(Post.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        UpdatePostRequest req = new UpdatePostRequest(
+                null, null, null, null, null, null, null, null, null,
+                java.util.Set.of("rides"));
+        AuthenticatedUser principal = new AuthenticatedUser(authorId, false);
+
+        // Must NOT throw EmptyPatchBodyException; isEmpty() correctly accounts for helpTags.
+        postService.updatePost(postId, principal, req, "rid");
+
+        verify(postRepository).save(any(Post.class));
     }
 }

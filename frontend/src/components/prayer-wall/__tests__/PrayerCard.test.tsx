@@ -529,4 +529,41 @@ describe('PrayerCard — Spec 4.6b image attachment', () => {
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
   })
+
+  // ====================================================================
+  // Spec 4.7b — WaysToHelpPills integration (3 tests)
+  // ====================================================================
+
+  it('Spec 4.7b — renders pills row for prayer_request with [meals] tag', () => {
+    const prayer: PrayerRequest = { ...SHORT_PRAYER, helpTags: ['meals'] }
+    render(
+      <MemoryRouter>
+        <PrayerCard prayer={prayer} />
+      </MemoryRouter>,
+    )
+    expect(screen.getByTestId('ways-to-help-pills')).toBeInTheDocument()
+    expect(screen.getByText('Meals')).toBeInTheDocument()
+  })
+
+  it('Spec 4.7b — does NOT render pills row for prayer_request with no tags', () => {
+    render(
+      <MemoryRouter>
+        <PrayerCard prayer={SHORT_PRAYER} />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByTestId('ways-to-help-pills')).not.toBeInTheDocument()
+  })
+
+  it('Spec 4.7b — does NOT render pills row for prayer_request with only [just_prayer] (W5)', () => {
+    const prayer: PrayerRequest = {
+      ...SHORT_PRAYER,
+      helpTags: ['just_prayer'],
+    }
+    render(
+      <MemoryRouter>
+        <PrayerCard prayer={prayer} />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByTestId('ways-to-help-pills')).not.toBeInTheDocument()
+  })
 })
