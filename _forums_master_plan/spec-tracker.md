@@ -124,7 +124,7 @@ After 5.6 ships: 1.5g.
 | 67  | 4.5      | Devotional Discussion Post Type                           | M    | Medium | ✅     |
 | 68  | 4.6      | Encouragement Post Type                                   | M    | Medium | ✅     |
 | 69  | 4.6b\*\* | Image Upload for Testimonies & Questions                  | L    | Medium | ✅     |
-| 70  | 4.7      | Composer Chooser                                          | L    | Medium | ⬜     |
+| 70  | 4.7      | Composer Chooser                                          | L    | Medium | ✅     |
 | 71  | 4.7b     | Ways to Help MVP                                          | M    | Low    | ⬜     |
 | 72  | 4.8      | Room Selector and Phase 4 Cutover                         | L    | Medium | ⬜     |
 

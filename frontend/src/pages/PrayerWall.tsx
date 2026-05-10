@@ -13,6 +13,7 @@ import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { SaveToPrayersForm } from '@/components/prayer-wall/SaveToPrayersForm'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
+import { ComposerChooser } from '@/components/prayer-wall/ComposerChooser'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilterBar } from '@/components/prayer-wall/CategoryFilterBar'
 import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
@@ -107,6 +108,9 @@ function PrayerWallContent() {
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
   const { openSet: openComments, toggle: rawToggleComments } = useOpenSet()
   const [composerOpen, setComposerOpen] = useState(false)
+  // 4.7 — Composer Chooser state
+  const [chooserOpen, setChooserOpen] = useState(false)
+  const [chosenPostType, setChosenPostType] = useState<PostType>('prayer_request')
   const [localComments, setLocalComments] = useState<Record<string, PrayerComment[]>>({})
   const [saveFormOpen, setSaveFormOpen] = useState<string | null>(null)
   const [savedPrayers, setSavedPrayers] = useState<Set<string>>(new Set())
@@ -209,6 +213,13 @@ function PrayerWallContent() {
       setGettingStartedFlag('prayer_wall_visited', true)
     }
   }, [isAuthenticated])
+
+  // 4.7 — Defensive guard: chooser is never rendered to unauthenticated users.
+  useEffect(() => {
+    if (!isAuthenticated && chooserOpen) {
+      setChooserOpen(false)
+    }
+  }, [isAuthenticated, chooserOpen])
 
   // Tooltip for composer
   const composerRef = useRef<HTMLDivElement>(null)
@@ -749,10 +760,10 @@ function PrayerWallContent() {
             >
               <button
                 type="button"
-                onClick={() => setComposerOpen(!composerOpen)}
+                onClick={() => setChooserOpen(true)}
                 className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:scale-[0.98]"
               >
-                Share a Prayer Request
+                Share something
               </button>
               <Link
                 to="/prayer-wall/dashboard"
@@ -765,10 +776,10 @@ function PrayerWallContent() {
           ) : (
             <button
               type="button"
-              onClick={() => openAuthModal?.()}
+              onClick={() => openAuthModal?.('Sign in to share something')}
               className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
-              Share a Prayer Request
+              Share something
             </button>
           )
         }
@@ -820,25 +831,22 @@ function PrayerWallContent() {
           />
         ) : (
           <>
-            {/* Inline Composer */}
-            {/* REMOVE-IN-4.7: ?debug-post-type query param shim. The production
-                entry-point for testimony composer is Spec 4.7's Composer Chooser;
-                until that ships, this shim enables /verify-with-playwright to
-                exercise the testimony variant via URL. */}
+            {/* 4.7 — Composer Chooser (only mounted while open) */}
+            {chooserOpen && (
+              <ComposerChooser
+                isOpen={chooserOpen}
+                onClose={() => setChooserOpen(false)}
+                onSelect={(postType) => {
+                  setChosenPostType(postType)
+                  setChooserOpen(false)
+                  setComposerOpen(true)
+                }}
+              />
+            )}
             <InlineComposer
               isOpen={composerOpen}
               onClose={() => setComposerOpen(false)}
-              postType={
-                searchParams.get('debug-post-type') === 'testimony'
-                  ? 'testimony'
-                  : searchParams.get('debug-post-type') === 'question'
-                    ? 'question'
-                    : searchParams.get('debug-post-type') === 'discussion'
-                      ? 'discussion'
-                      : searchParams.get('debug-post-type') === 'encouragement'
-                        ? 'encouragement'
-                        : 'prayer_request'
-              }
+              postType={chosenPostType}
               onSubmit={handleComposerSubmit}
             />
 
@@ -925,12 +933,12 @@ function PrayerWallContent() {
                 icon={Heart}
                 heading="This space is for you"
                 description="Share what's on your heart, or simply pray for others."
-                ctaLabel="Share a prayer request"
+                ctaLabel="Share something"
                 onCtaClick={() => {
                   if (isAuthenticated) {
-                    setComposerOpen(true)
+                    setChooserOpen(true)
                   } else {
-                    openAuthModal?.('Sign in to share a prayer request')
+                    openAuthModal?.('Sign in to share something')
                   }
                 }}
               />
@@ -942,12 +950,12 @@ function PrayerWallContent() {
                 icon={Search}
                 heading={`No prayers in ${CATEGORY_LABELS[activeCategory]} yet`}
                 description="Be the first to share."
-                ctaLabel="Share a prayer request"
+                ctaLabel="Share something"
                 onCtaClick={() => {
                   if (isAuthenticated) {
-                    setComposerOpen(true)
+                    setChooserOpen(true)
                   } else {
-                    openAuthModal?.('Sign in to share a prayer request')
+                    openAuthModal?.('Sign in to share something')
                   }
                 }}
               />

@@ -69,10 +69,10 @@ describe('PrayerWall', () => {
     expect(articles.length).toBeGreaterThan(0)
   })
 
-  it('"Share a Prayer Request" button is visible', () => {
+  it('"Share something" button is visible', () => {
     renderPage()
-    // At least one "Share a Prayer Request" element should exist
-    const buttons = screen.getAllByText('Share a Prayer Request')
+    // At least one "Share something" element should exist
+    const buttons = screen.getAllByText('Share something')
     expect(buttons.length).toBeGreaterThan(0)
   })
 
@@ -175,34 +175,32 @@ describe('PrayerWall empty states', () => {
 // =====================================================================
 
 describe('PrayerWall — Spec 4.3 testimony composer', () => {
-  it('?debug-post-type=testimony query param opens composer in testimony mode', async () => {
-    // Logged-in: hero button opens the composer (logged-out goes to auth modal directly).
-    authState.current = {
-      user: { id: 'u-test', name: 'Test User' },
-      isAuthenticated: true,
-    }
-    const user = userEvent.setup()
-    renderPage('/prayer-wall?debug-post-type=testimony')
-    // Click the inline-composer-trigger "Share a Prayer Request" hero button.
-    // There are multiple elements with this text on the page; the hero button is
-    // the only `<button>` (others are headings/links).
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
-    // Composer renders with testimony header (per Spec 4.3).
-    expect(screen.getByText('Share a testimony')).toBeInTheDocument()
-    expect(screen.getByLabelText('Testimony')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /submit testimony/i })).toBeInTheDocument()
-  })
-
-  it('default (no query param) opens composer in prayer_request mode (no regression)', async () => {
+  it('chooser opens InlineComposer in testimony mode after testimony card click', async () => {
     authState.current = {
       user: { id: 'u-test', name: 'Test User' },
       isAuthenticated: true,
     }
     const user = userEvent.setup()
     renderPage('/prayer-wall')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
+    // Open the chooser via the hero "Share something" button.
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    // Pick the Testimony card from the chooser.
+    await user.click(screen.getByRole('button', { name: 'Testimony' }))
+    // Composer renders with testimony header (per Spec 4.3).
+    expect(screen.getByText('Share a testimony')).toBeInTheDocument()
+    expect(screen.getByLabelText('Testimony')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /submit testimony/i })).toBeInTheDocument()
+  })
+
+  it('chooser opens InlineComposer in prayer_request mode after prayer_request card click', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Test User' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall')
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    await user.click(screen.getByRole('button', { name: 'Prayer request' }))
     // Composer renders with prayer_request label, NOT testimony.
     expect(screen.queryByText('Share a testimony')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Prayer request')).toBeInTheDocument()
@@ -214,9 +212,9 @@ describe('PrayerWall — Spec 4.3 testimony composer', () => {
       isAuthenticated: true,
     }
     const user = userEvent.setup()
-    renderPage('/prayer-wall?debug-post-type=testimony')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
+    renderPage('/prayer-wall')
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    await user.click(screen.getByRole('button', { name: 'Testimony' }))
     await user.type(
       screen.getByLabelText('Testimony'),
       'Praise God for healing my friend.',
@@ -235,8 +233,8 @@ describe('PrayerWall — Spec 4.3 testimony composer', () => {
     }
     const user = userEvent.setup()
     renderPage('/prayer-wall')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    await user.click(screen.getByRole('button', { name: 'Prayer request' }))
     await user.type(screen.getByLabelText('Prayer request'), 'Please pray for my family.')
     // Pick category — composer fieldset's Health pill is the second match
     // (filter bar also has a Health pill); use a more specific selector.
@@ -254,15 +252,15 @@ describe('PrayerWall — Spec 4.3 testimony composer', () => {
 // =====================================================================
 
 describe('PrayerWall — Spec 4.4 question composer', () => {
-  it('?debug-post-type=question opens composer in question mode', async () => {
+  it('chooser opens InlineComposer in question mode after question card click', async () => {
     authState.current = {
       user: { id: 'u-test', name: 'Sarah' },
       isAuthenticated: true,
     }
     const user = userEvent.setup()
-    renderPage('/prayer-wall?debug-post-type=question')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
+    renderPage('/prayer-wall')
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    await user.click(screen.getByRole('button', { name: 'Question' }))
     expect(screen.getByText('Ask a question')).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /submit question/i }),
@@ -275,9 +273,9 @@ describe('PrayerWall — Spec 4.4 question composer', () => {
       isAuthenticated: true,
     }
     const user = userEvent.setup()
-    renderPage('/prayer-wall?debug-post-type=question')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
+    renderPage('/prayer-wall')
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    await user.click(screen.getByRole('button', { name: 'Question' }))
     await user.type(
       screen.getByLabelText('Question'),
       'What does this verse mean for someone in my situation?',
@@ -288,35 +286,13 @@ describe('PrayerWall — Spec 4.4 question composer', () => {
     ).toBeInTheDocument()
   })
 
-  it('unauthenticated question submit surfaces question-specific auth modal CTA', async () => {
-    // Logged out — submitting a question opens the AuthModal with question CTA copy.
-    // (Opening the composer alone does NOT auth-gate; the gate fires on submit
-    // via handleComposerSubmit.)
-    authState.current = { user: null, isAuthenticated: false }
-    const user = userEvent.setup()
-    const { container } = renderPage('/prayer-wall?debug-post-type=question')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
-    // Surface DOM snapshot if subsequent queries fail.
-    void container
-    await user.type(
-      screen.getByLabelText('Question'),
-      'What does this verse mean for someone in my situation?',
-    )
-    // Use queryAll to bypass aria-hidden/inert filtering — the composer button
-    // can be hidden behind a route-level filter when the composer is in the
-    // closed state's lingering inert wrapper. The composer trigger only toggles
-    // visibility of the panel; the panel renders both when open and closed.
-    const submitBtn = screen.queryByRole('button', { name: /submit question/i })
-      ?? screen.getAllByRole('button', { hidden: true }).find(
-        (b) => /submit question/i.test(b.textContent ?? ''),
-      )
-    if (!submitBtn) throw new Error('Submit Question button not found in DOM')
-    await user.click(submitBtn)
-    expect(
-      await screen.findByText('Sign in to ask a question'),
-    ).toBeInTheDocument()
-  })
+  // 4.7 — The pre-4.7 unauth submit test ("unauthenticated question submit surfaces
+  // question-specific auth modal CTA") was deleted: the chooser is auth-gated, so
+  // an unauthenticated user clicking the hero opens the AuthModal directly and
+  // never reaches the question composer. The new "hero unauth → auth modal" test
+  // covers the unauth hero path. The defensive auth gate inside handleComposerSubmit
+  // still exists for the rare logout-mid-session case but is no longer organically
+  // reachable through the UI.
 })
 
 // =====================================================================
@@ -330,9 +306,10 @@ describe('PrayerWall — Spec 4.5 discussion composer', () => {
       isAuthenticated: true,
     }
     const user = userEvent.setup()
-    renderPage('/prayer-wall?debug-post-type=discussion')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
+    renderPage('/prayer-wall')
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+    // "Discussion" also exists as a prayer-category filter pill; scope to the chooser dialog.
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Discussion' }))
     await user.type(
       screen.getByLabelText('Discussion'),
       'How do you stay disciplined in prayer?',
@@ -345,24 +322,72 @@ describe('PrayerWall — Spec 4.5 discussion composer', () => {
     ).toBeInTheDocument()
   })
 
-  it('unauthenticated discussion submit surfaces discussion-specific auth modal CTA', async () => {
+  // 4.7 — Pre-4.7 unauth submit test deleted: same rationale as the question
+  // composer above — the chooser is auth-gated, so an unauthenticated user
+  // never reaches the discussion composer through the UI.
+})
+
+// =====================================================================
+// Spec 4.7 — Composer Chooser integration (hero/auth/shim contracts)
+// =====================================================================
+
+describe('PrayerWall — Spec 4.7 Composer Chooser integration', () => {
+  it('hero button opens ComposerChooser when authenticated, not InlineComposer directly', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Test' },
+      isAuthenticated: true,
+    }
+    const user = userEvent.setup()
+    renderPage('/prayer-wall')
+
+    // Initially neither chooser nor InlineComposer header is visible.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /share a prayer request/i }),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+
+    // Chooser dialog is open with the canonical title.
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(within(dialog).getByText(/what would you like to share/i)).toBeInTheDocument()
+    // InlineComposer prayer_request header should NOT be on screen yet.
+    expect(
+      screen.queryByRole('heading', { name: /share a prayer request/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('hero button opens auth modal when unauthenticated, not chooser', async () => {
     authState.current = { user: null, isAuthenticated: false }
     const user = userEvent.setup()
-    const { container } = renderPage('/prayer-wall?debug-post-type=discussion')
-    const triggerBtn = screen.getByRole('button', { name: 'Share a Prayer Request' })
-    await user.click(triggerBtn)
-    void container
-    await user.type(
-      screen.getByLabelText('Discussion'),
-      'How do you stay disciplined in prayer?',
-    )
-    const submitBtn =
-      screen.queryByRole('button', { name: /start discussion/i }) ??
-      screen
-        .getAllByRole('button', { hidden: true })
-        .find((b) => /start discussion/i.test(b.textContent ?? ''))
-    if (!submitBtn) throw new Error('Start Discussion button not found in DOM')
-    await user.click(submitBtn)
-    expect(await screen.findByText('Sign in to start a discussion')).toBeInTheDocument()
+    renderPage('/prayer-wall')
+
+    await user.click(screen.getAllByRole('button', { name: 'Share something' })[0])
+
+    // Auth modal subtitle is shown.
+    expect(await screen.findByText(/sign in to share something/i)).toBeInTheDocument()
+    // Chooser dialog is NOT shown.
+    expect(
+      screen.queryByText(/what would you like to share/i),
+    ).not.toBeInTheDocument()
+  })
+
+  it('?debug-post-type query param is silently ignored after shim removal', async () => {
+    authState.current = {
+      user: { id: 'u-test', name: 'Test' },
+      isAuthenticated: true,
+    }
+    renderPage('/prayer-wall?debug-post-type=testimony')
+
+    // Composer is NOT auto-opened in testimony mode.
+    expect(
+      screen.queryByRole('heading', { name: /share a testimony/i }),
+    ).not.toBeInTheDocument()
+    // Chooser is NOT auto-opened.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(
+      screen.queryByText(/what would you like to share/i),
+    ).not.toBeInTheDocument()
   })
 })
