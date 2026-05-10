@@ -309,11 +309,14 @@ describe('DailyHub', () => {
     expect(hero.querySelector('[data-testid="glow-orb"]')).toBeNull()
   })
 
-  it('root has relative + overflow-hidden + min-h-screen (BackgroundCanvas shell)', () => {
+  it('root has relative + overflow-x-clip + min-h-screen (BackgroundCanvas shell)', () => {
     const { container } = renderPage()
     const root = container.firstElementChild as HTMLElement
     expect(root.className).toContain('relative')
-    expect(root.className).toContain('overflow-hidden')
+    // overflow-x-clip (not overflow-hidden) so descendants with position: sticky
+    // engage against the viewport. overflow: hidden creates a scroll container
+    // that traps sticky.
+    expect(root.className).toContain('overflow-x-clip')
     expect(root.className).toContain('min-h-screen')
   })
 

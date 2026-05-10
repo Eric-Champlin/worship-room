@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
@@ -56,10 +56,15 @@ describe('PrayerWall', () => {
     ).toBeInTheDocument()
   })
 
-  it('page wrapper has overflow-x-hidden to contain scrollable filter bar', () => {
+  it('page wrapper has overflow-x-clip to contain scrollable filter bar without trapping sticky', () => {
     const { container } = renderPage()
     const wrapper = container.firstElementChild as HTMLElement
-    expect(wrapper.className).toContain('overflow-x-hidden')
+    // BackgroundCanvas owns the horizontal-clip constraint via overflow-x-clip.
+    // overflow-x-hidden was removed from PrayerWall's pass-through className
+    // (redundant + would create a scroll container that traps sticky descendants).
+    expect(wrapper.className).toContain('overflow-x-clip')
+    expect(wrapper.className).not.toContain('overflow-x-hidden')
+    expect(wrapper.className).not.toContain('overflow-hidden')
   })
 
   it('renders prayer cards from mock data', () => {
@@ -106,8 +111,11 @@ describe('PrayerWall', () => {
 
   it('renders filter bar with "All" and category pills', () => {
     renderPage()
-    expect(screen.getByRole('toolbar', { name: /filter prayers by category/i })).toBeInTheDocument()
-    expect(screen.getByText('All')).toBeInTheDocument()
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    expect(categoryToolbar).toBeInTheDocument()
+    expect(within(categoryToolbar).getByRole('button', { name: 'All' })).toBeInTheDocument()
   })
 
   it('clicking a filter pill reduces visible prayer cards', async () => {
@@ -123,17 +131,24 @@ describe('PrayerWall', () => {
 
   it('filter bar pills include "All"', () => {
     renderPage()
-    const allBtn = screen.getByRole('button', { name: 'All' })
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    const allBtn = within(categoryToolbar).getByRole('button', { name: 'All' })
     expect(allBtn).toBeInTheDocument()
     expect(allBtn).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('URL param pre-selects filter', () => {
     renderPage('/prayer-wall?category=health')
-    const toolbar = screen.getByRole('toolbar')
-    const healthPill = within(toolbar).getByRole('button', { name: /^Health(\s|$)/i })
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    const healthPill = within(categoryToolbar).getByRole('button', {
+      name: /^Health(\s|$)/i,
+    })
     expect(healthPill).toHaveAttribute('aria-pressed', 'true')
-    const allPill = within(toolbar).getByRole('button', { name: 'All' })
+    const allPill = within(categoryToolbar).getByRole('button', { name: 'All' })
     expect(allPill).toHaveAttribute('aria-pressed', 'false')
   })
 })
@@ -389,5 +404,154 @@ describe('PrayerWall — Spec 4.7 Composer Chooser integration', () => {
     expect(
       screen.queryByText(/what would you like to share/i),
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('Spec 4.8 — RoomSelector + dual filters', () => {
+  // Restore `getMockPrayers` to its delegating implementation after each test
+  // so a `mockReturnValue([])` set inside one test (e.g. the empty-state copy
+  // assertion below) does not bleed into the next test or describe block.
+  // The vi.mock factory at the top of this file binds the fn via
+  // `vi.fn(original.getMockPrayers)` — this restore re-binds that delegation.
+  // Pre-1.9b the file relied on describe ordering for this; the new describe
+  // contains its own leak rather than depending on positional luck.
+  afterEach(async () => {
+    const actual = await vi.importActual<typeof import('@/mocks/prayer-wall-mock-data')>(
+      '@/mocks/prayer-wall-mock-data',
+    )
+    const { getMockPrayers } = await import('@/mocks/prayer-wall-mock-data')
+    vi.mocked(getMockPrayers).mockImplementation(actual.getMockPrayers)
+  })
+
+  it('renders RoomSelector toolbar above CategoryFilterBar in DOM order', () => {
+    renderPage()
+    const toolbars = screen.getAllByRole('toolbar')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    expect(toolbars).toContain(roomToolbar)
+    expect(toolbars).toContain(categoryToolbar)
+    // RoomSelector before CategoryFilterBar in document order.
+    expect(
+      roomToolbar.compareDocumentPosition(categoryToolbar) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('QOTD card renders ABOVE the filter bar wrapper (DOM order)', () => {
+    renderPage()
+    // QOTD's eyebrow text is the stable anchor — heading text is the daily question.
+    const qotdEyebrow = screen.getByText('Question of the Day')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    expect(
+      qotdEyebrow.compareDocumentPosition(roomToolbar) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('selecting Testimonies activates the Testimonies pill (URL → ?postType=testimony)', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    const testimoniesBtn = within(roomToolbar).getByRole('button', { name: 'Testimonies' })
+    await user.click(testimoniesBtn)
+    expect(testimoniesBtn).toHaveAttribute('aria-pressed', 'true')
+    expect(within(roomToolbar).getByRole('button', { name: 'All' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
+  it('selecting All clears postType but preserves category (D4 enforcement)', async () => {
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?postType=testimony&category=health')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    // Pre-condition: both pills active.
+    expect(
+      within(roomToolbar).getByRole('button', { name: 'Testimonies' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      within(categoryToolbar).getByRole('button', { name: /^Health(\s|\()/i }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await user.click(within(roomToolbar).getByRole('button', { name: 'All' }))
+    // Post: postType cleared, category preserved.
+    expect(within(roomToolbar).getByRole('button', { name: 'All' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(
+      within(categoryToolbar).getByRole('button', { name: /^Health(\s|\()/i }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('initial render with ?postType=encouragement: Encouragements pill is active', () => {
+    renderPage('/prayer-wall?postType=encouragement')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    expect(
+      within(roomToolbar).getByRole('button', { name: 'Encouragements' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(within(roomToolbar).getByRole('button', { name: 'All' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
+  it('invalid postType in URL falls back to All (defensive — W5)', () => {
+    renderPage('/prayer-wall?postType=banana')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    expect(within(roomToolbar).getByRole('button', { name: 'All' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    // No banana pill rendered.
+    expect(
+      within(roomToolbar).queryByRole('button', { name: /banana/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('combined filter URL activates both Testimonies and Health pills', () => {
+    renderPage('/prayer-wall?postType=testimony&category=health')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    expect(
+      within(roomToolbar).getByRole('button', { name: 'Testimonies' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      within(categoryToolbar).getByRole('button', { name: /^Health(\s|\()/i }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('selecting a category preserves an existing postType (D4 enforcement)', async () => {
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?postType=testimony')
+    const roomToolbar = screen.getByRole('toolbar', { name: /filter by post type/i })
+    const categoryToolbar = screen.getByRole('toolbar', {
+      name: /filter prayers by category/i,
+    })
+    expect(
+      within(roomToolbar).getByRole('button', { name: 'Testimonies' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await user.click(
+      within(categoryToolbar).getByRole('button', { name: /^Health(\s|$)/i }),
+    )
+    expect(
+      within(categoryToolbar).getByRole('button', { name: /^Health(\s|\()/i }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    // postType still set after category click — D4 invariant.
+    expect(
+      within(roomToolbar).getByRole('button', { name: 'Testimonies' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('empty-state heading adapts to combined filter ("No Testimonies in Health yet")', async () => {
+    const { getMockPrayers } = await import('@/mocks/prayer-wall-mock-data')
+    vi.mocked(getMockPrayers).mockReturnValue([])
+    renderPage('/prayer-wall?postType=testimony&category=health')
+    expect(screen.getByText(/No Testimonies in Health yet/i)).toBeInTheDocument()
   })
 })

@@ -96,7 +96,9 @@ describe('Dashboard', () => {
     const canvas = main.parentElement
     expect(canvas?.className).toContain('relative')
     expect(canvas?.className).toContain('min-h-screen')
-    expect(canvas?.className).toContain('overflow-hidden')
+    // overflow-x-clip (not overflow-hidden) — clip prevents horizontal scrollbars
+    // without trapping descendants with position: sticky.
+    expect(canvas?.className).toContain('overflow-x-clip')
   })
 
   it('has main content landmark when checked in', () => {

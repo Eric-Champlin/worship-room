@@ -18,7 +18,11 @@ export function BackgroundCanvas({ children, className }: BackgroundCanvasProps)
   return (
     <div
       data-testid="background-canvas"
-      className={cn('relative min-h-screen overflow-hidden', className)}
+      // overflow-x-clip (NOT overflow-hidden) — clip prevents horizontal scrollbars
+      // from atmospheric gradient blooms without creating a scroll container, so
+      // descendants with `position: sticky` engage against the viewport.
+      // overflow: hidden traps sticky; overflow: clip does not. See spec 4.8 verification.
+      className={cn('relative min-h-screen overflow-x-clip', className)}
       style={{ background: CANVAS_BACKGROUND }}
     >
       {children}

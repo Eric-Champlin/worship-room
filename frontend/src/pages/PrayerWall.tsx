@@ -16,6 +16,7 @@ import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
 import { ComposerChooser } from '@/components/prayer-wall/ComposerChooser'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilterBar } from '@/components/prayer-wall/CategoryFilterBar'
+import { RoomSelector } from '@/components/prayer-wall/RoomSelector'
 import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
 import { QotdComposer } from '@/components/prayer-wall/QotdComposer'
 import { Button } from '@/components/ui/Button'
@@ -57,7 +58,7 @@ const prayerWallBreadcrumbs = {
 }
 import { getChallenge } from '@/data/challenges'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
-import type { PostType } from '@/constants/post-types'
+import { isValidPostType, getPostType, type PostType } from '@/constants/post-types'
 
 const PRAYERS_PER_PAGE = 20
 
@@ -124,6 +125,8 @@ function PrayerWallContent() {
   const [searchParams, setSearchParams] = useSearchParams()
   const rawCategory = searchParams.get('category')
   const activeCategory: PrayerCategory | null = isValidCategory(rawCategory) ? rawCategory : null
+  const rawPostType = searchParams.get('postType')
+  const activePostType: PostType | null = isValidPostType(rawPostType) ? rawPostType : null
 
   // Challenge filter — computed once (pure functions, stable across renders)
   const activeChallenge = useMemo(() => {
@@ -156,13 +159,27 @@ function PrayerWallContent() {
       }
       return prayers
     }
-    // Flag-off: existing client-side filtering against the full mock set.
+    // Flag-off: client-side filtering against the full mock set.
     if (isChallengeFilterActive && activeChallenge) {
       return allPrayers.filter((p) => p.challengeId === activeChallenge.id)
     }
-    if (!activeCategory) return prayers
-    return allPrayers.filter((p) => p.category === activeCategory)
-  }, [allPrayers, prayers, activeCategory, isChallengeFilterActive, activeChallenge])
+    if (!activeCategory && !activePostType) return prayers
+    let filtered: PrayerRequest[] = allPrayers
+    if (activePostType) {
+      filtered = filtered.filter((p) => p.postType === activePostType)
+    }
+    if (activeCategory) {
+      filtered = filtered.filter((p) => p.category === activeCategory)
+    }
+    return filtered
+  }, [
+    allPrayers,
+    prayers,
+    activeCategory,
+    activePostType,
+    isChallengeFilterActive,
+    activeChallenge,
+  ])
 
   const firstQotdResponseIndex = useMemo(
     () => filteredPrayers.findIndex((p) => p.qotdId === todaysQuestion.id),
@@ -181,13 +198,52 @@ function PrayerWallContent() {
     return counts
   }, [allPrayers])
 
+  // Spec 4.8 D11 — empty-state heading adapts to combined filter state.
+  const emptyHeading = useMemo(() => {
+    if (activePostType && activeCategory) {
+      return `No ${getPostType(activePostType).pluralLabel} in ${CATEGORY_LABELS[activeCategory]} yet`
+    }
+    if (activePostType) {
+      return `No ${getPostType(activePostType).pluralLabel} yet`
+    }
+    if (activeCategory) {
+      return `No prayers in ${CATEGORY_LABELS[activeCategory]} yet`
+    }
+    return 'This space is for you'
+  }, [activePostType, activeCategory])
+
+  // Functional-callback form preserves other params (e.g. ?postType=) when
+  // toggling category. Spec 4.8 D4 — filter independence.
   const handleSelectCategory = useCallback(
     (category: PrayerCategory | null) => {
-      if (category) {
-        setSearchParams({ category }, { replace: true })
-      } else {
-        setSearchParams({}, { replace: true })
-      }
+      setSearchParams(
+        (prev) => {
+          if (category) {
+            prev.set('category', category)
+          } else {
+            prev.delete('category')
+          }
+          return prev
+        },
+        { replace: true }
+      )
+    },
+    [setSearchParams]
+  )
+
+  const handleSelectPostType = useCallback(
+    (postType: PostType | null) => {
+      setSearchParams(
+        (prev) => {
+          if (postType) {
+            prev.set('postType', postType)
+          } else {
+            prev.delete('postType')
+          }
+          return prev
+        },
+        { replace: true }
+      )
     },
     [setSearchParams]
   )
@@ -254,6 +310,7 @@ function PrayerWallContent() {
           page: 1,
           limit: PRAYERS_PER_PAGE,
           category: activeCategory ?? undefined,
+          postType: activePostType ?? undefined,
           sort: 'bumped',
         })
         if (cancelled) return
@@ -282,7 +339,7 @@ function PrayerWallContent() {
     return () => {
       cancelled = true
     }
-  }, [activeCategory, reloadTrigger])
+  }, [activeCategory, activePostType, reloadTrigger])
 
   const hasMore = isBackendPrayerWallEnabled()
     ? hasMoreFromServer
@@ -300,6 +357,7 @@ function PrayerWallContent() {
         page: nextPage,
         limit: PRAYERS_PER_PAGE,
         category: activeCategory ?? undefined,
+        postType: activePostType ?? undefined,
         sort: 'bumped',
       })
       setPrayers((prev) => [...prev, ...result.posts])
@@ -313,7 +371,7 @@ function PrayerWallContent() {
     } finally {
       setIsLoadingMore(false)
     }
-  }, [allPrayers, currentPage, activeCategory, showToast])
+  }, [allPrayers, currentPage, activeCategory, activePostType, showToast])
 
   const handleComposerSubmit = useCallback(
     async (
@@ -745,7 +803,7 @@ function PrayerWallContent() {
   )
 
   return (
-    <BackgroundCanvas className="flex min-h-screen flex-col overflow-x-hidden font-sans">
+    <BackgroundCanvas className="flex min-h-screen flex-col font-sans">
       <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
       <Navbar transparent />
       <PrayerWallHero
@@ -785,36 +843,6 @@ function PrayerWallContent() {
         }
       />
 
-      {/* Sentinel for sticky filter bar */}
-      <div ref={filterSentinelRef} aria-hidden="true" />
-
-      {/* Filter Bar */}
-      <div
-        className={cn(
-          'sticky top-0 z-30 transition-shadow motion-reduce:transition-none',
-          isFilterSticky && 'shadow-md'
-        )}
-      >
-        <CategoryFilterBar
-          activeCategory={activeCategory}
-          onSelectCategory={handleSelectCategory}
-          categoryCounts={categoryCounts}
-          showCounts={activeCategory !== null}
-          challengeFilter={challengeFilter}
-          isChallengeFilterActive={isChallengeFilterActive}
-          onToggleChallengeFilter={handleToggleChallengeFilter}
-        />
-      </div>
-
-      {/* Screen reader announcement for filter changes */}
-      <div className="sr-only" aria-live="polite">
-        {isChallengeFilterActive && challengeFilter
-          ? `Showing ${filteredPrayers.length} ${challengeFilter.title} challenge prayers`
-          : activeCategory
-            ? `Showing ${filteredPrayers.length} ${CATEGORY_LABELS[activeCategory]} prayers`
-            : `Showing all ${allPrayers.length} prayers`}
-      </div>
-
       <main id="main-content" className="mx-auto max-w-[720px] flex-1 px-4 py-6 sm:py-8">
         {isLoading ? (
           <PrayerWallSkeleton />
@@ -850,7 +878,7 @@ function PrayerWallContent() {
               onSubmit={handleComposerSubmit}
             />
 
-            {/* QOTD Card — always visible regardless of filter */}
+            {/* QOTD Card — above filters, visible in any filter state */}
             <div className="mb-4">
               <QuestionOfTheDay
                 responseCount={qotdResponseCount}
@@ -863,6 +891,44 @@ function PrayerWallContent() {
                 onClose={() => setQotdComposerOpen(false)}
                 onSubmit={handleQotdSubmit}
               />
+            </div>
+
+            {/* Sentinel for sticky filter bar */}
+            <div ref={filterSentinelRef} aria-hidden="true" />
+
+            {/* Sticky Filter Bar — RoomSelector + CategoryFilterBar together (Spec 4.8) */}
+            <div
+              className={cn(
+                'sticky top-0 z-30 transition-shadow motion-reduce:transition-none',
+                isFilterSticky && 'shadow-md'
+              )}
+            >
+              <RoomSelector
+                activePostType={activePostType}
+                onSelectPostType={handleSelectPostType}
+              />
+              <CategoryFilterBar
+                activeCategory={activeCategory}
+                onSelectCategory={handleSelectCategory}
+                categoryCounts={categoryCounts}
+                showCounts={activeCategory !== null}
+                challengeFilter={challengeFilter}
+                isChallengeFilterActive={isChallengeFilterActive}
+                onToggleChallengeFilter={handleToggleChallengeFilter}
+              />
+            </div>
+
+            {/* Screen reader announcement for filter changes */}
+            <div className="sr-only" aria-live="polite">
+              {isChallengeFilterActive && challengeFilter
+                ? `Showing ${filteredPrayers.length} ${challengeFilter.title} challenge prayers`
+                : activePostType && activeCategory
+                  ? `Showing ${filteredPrayers.length} ${getPostType(activePostType).pluralLabel} in ${CATEGORY_LABELS[activeCategory]}`
+                  : activePostType
+                    ? `Showing ${filteredPrayers.length} ${getPostType(activePostType).pluralLabel}`
+                    : activeCategory
+                      ? `Showing ${filteredPrayers.length} ${CATEGORY_LABELS[activeCategory]} prayers`
+                      : `Showing all ${allPrayers.length} prayers`}
             </div>
 
             {/* Prayer cards feed */}
@@ -928,10 +994,10 @@ function PrayerWallContent() {
             </div>
 
             {/* Empty state for empty feed (no posts at all) */}
-            {filteredPrayers.length === 0 && !activeCategory && (
+            {filteredPrayers.length === 0 && !activeCategory && !activePostType && (
               <FeatureEmptyState
                 icon={Heart}
-                heading="This space is for you"
+                heading={emptyHeading}
                 description="Share what's on your heart, or simply pray for others."
                 ctaLabel="Share something"
                 onCtaClick={() => {
@@ -945,10 +1011,10 @@ function PrayerWallContent() {
             )}
 
             {/* Empty state for filtered views */}
-            {filteredPrayers.length === 0 && activeCategory && (
+            {filteredPrayers.length === 0 && (activeCategory || activePostType) && (
               <FeatureEmptyState
                 icon={Search}
-                heading={`No prayers in ${CATEGORY_LABELS[activeCategory]} yet`}
+                heading={emptyHeading}
                 description="Be the first to share."
                 ctaLabel="Share something"
                 onCtaClick={() => {
