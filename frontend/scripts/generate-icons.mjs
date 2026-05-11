@@ -30,19 +30,19 @@ const sourceIcon = join(publicDir, 'icon-512.png')
 // Legacy: SVG-generated icons in public/ root
 // ---------------------------------------------------------------------------
 
-const PURPLE = '#6D28D9'
+const PURPLE = '#5B21B6'
 const WHITE = '#FFFFFF'
 
 function createIconSvg(size) {
   const radius = Math.round(size * 0.2)
-  const fontSize = Math.round(size * 0.32)
+  const fontSize = Math.round(size * 0.5)
   const textY = Math.round(size * 0.55)
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="${PURPLE}"/>
   <text x="50%" y="${textY}" dominant-baseline="middle" text-anchor="middle"
     font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-    font-weight="700" font-size="${fontSize}" fill="${WHITE}">WR</text>
+    font-weight="700" font-size="${fontSize}" fill="${WHITE}">W</text>
 </svg>`
 }
 

@@ -107,11 +107,7 @@ export function PrayerInput({
 
   return (
     <>
-      {retryPrompt && (
-        <p className="mb-2 text-center text-sm text-white/50">
-          {retryPrompt}
-        </p>
-      )}
+      {retryPrompt && <p className="mb-2 text-center text-sm text-white/50">{retryPrompt}</p>}
 
       {showChips && (
         <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
@@ -142,7 +138,7 @@ export function PrayerInput({
           placeholder="Start typing here..."
           maxLength={PRAYER_MAX_LENGTH}
           rows={8}
-          className="w-full resize-y min-h-[200px] max-h-[500px] rounded-lg border border-violet-400/30 bg-white/[0.04] px-4 py-3 text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
+          className="max-h-[500px] min-h-[200px] w-full resize-y rounded-lg border border-violet-400/30 bg-white/[0.04] px-4 py-3 text-white shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] placeholder:text-white/40 focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
           aria-label="Prayer request"
           aria-describedby={nudge ? 'pray-error pray-char-count' : 'pray-char-count'}
           aria-invalid={nudge ? 'true' : undefined}
@@ -158,9 +154,9 @@ export function PrayerInput({
         </div>
       </div>
 
-      <div className="mb-1 flex h-4 items-center justify-end" aria-live="polite">
+      <div className="-mb-5 flex h-4 items-center justify-end" aria-live="polite">
         {draftSaved && (
-          <p className="motion-safe:animate-fade-in flex items-center gap-1 text-xs text-white/50">
+          <p className="flex items-center gap-1 text-xs text-white/50 motion-safe:animate-fade-in">
             <CheckCircle2 className="h-3.5 w-3.5 text-success" aria-hidden="true" />
             Draft saved
           </p>
@@ -170,7 +166,11 @@ export function PrayerInput({
       <CrisisBanner text={text} />
 
       {nudge && (
-        <p id="pray-error" className="mb-2 flex items-center gap-1.5 text-sm text-red-400" role="alert">
+        <p
+          id="pray-error"
+          className="mb-2 flex items-center gap-1.5 text-sm text-red-400"
+          role="alert"
+        >
           <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
           Tell God what&apos;s on your heart — even a few words is enough.
         </p>

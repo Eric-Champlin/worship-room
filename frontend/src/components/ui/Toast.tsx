@@ -185,7 +185,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 <button
                   type="button"
                   onClick={toast.action.onClick}
-                  className="ml-2 shrink-0 rounded-md bg-primary px-3 py-1 text-xs font-medium text-white hover:bg-primary-lt"
+                  className="ml-2 inline-flex shrink-0 items-center rounded-full bg-white px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   {toast.action.label}
                 </button>

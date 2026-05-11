@@ -37,7 +37,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const merged = cn(
       'inline-flex items-center justify-center font-medium transition-[colors,transform] duration-fast motion-reduce:transition-none',
@@ -55,20 +55,26 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'bg-gray-200 text-gray-900 hover:bg-gray-300': variant === 'secondary',
         'border border-primary text-primary hover:bg-primary/5': variant === 'outline',
         'text-white/80 hover:text-white hover:bg-white/5': variant === 'ghost',
-        'h-9 px-3 text-sm': size === 'sm' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
-        'h-10 px-4': size === 'md' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
-        'h-12 px-6 text-lg': size === 'lg' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
-        'px-4 py-2 text-sm': size === 'sm' && (variant === 'light' || variant === 'gradient' || variant === 'subtle'),
-        'px-6 py-2.5 text-sm': size === 'md' && (variant === 'light' || variant === 'gradient' || variant === 'subtle'),
-        'px-8 py-3 text-base': size === 'lg' && (variant === 'light' || variant === 'gradient' || variant === 'subtle'),
+        'h-9 px-3 text-sm':
+          size === 'sm' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
+        'h-10 px-4':
+          size === 'md' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
+        'h-12 px-6 text-lg':
+          size === 'lg' && variant !== 'light' && variant !== 'gradient' && variant !== 'subtle',
+        'px-4 py-2 text-sm':
+          size === 'sm' && (variant === 'light' || variant === 'gradient' || variant === 'subtle'),
+        'px-6 py-2.5 text-sm':
+          size === 'md' && (variant === 'light' || variant === 'gradient' || variant === 'subtle'),
+        'px-8 py-3 text-base':
+          size === 'lg' && (variant === 'light' || variant === 'gradient' || variant === 'subtle'),
       },
-      className,
+      className
     )
 
     if (asChild) {
       if (isLoading && typeof console !== 'undefined' && import.meta.env?.DEV) {
         console.warn(
-          '[Button] isLoading is ignored when asChild is true — loading-state layout assumptions require a <button> host element.',
+          '[Button] isLoading is ignored when asChild is true — loading-state layout assumptions require a <button> host element.'
         )
       }
       const child = Children.only(children)
@@ -111,7 +117,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </button>
     )
-  },
+  }
 )
 
 Button.displayName = 'Button'

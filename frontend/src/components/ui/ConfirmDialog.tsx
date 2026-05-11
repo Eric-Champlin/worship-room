@@ -42,7 +42,7 @@ export function ConfirmDialog({
     'flex-1 rounded-lg px-4 py-3 font-medium transition-colors min-h-[44px] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/30',
     variant === 'destructive'
       ? 'bg-red-500 text-white hover:bg-red-600'
-      : 'bg-primary text-white hover:bg-primary-lt',
+      : 'border border-white/[0.20] bg-white/[0.12] text-white backdrop-blur-sm hover:border-white/[0.30] hover:bg-white/[0.18]',
   )
 
   return (

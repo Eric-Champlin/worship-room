@@ -1,7 +1,4 @@
-import type {
-  GuidedPrayerSession,
-  GuidedPrayerTheme,
-} from '@/types/guided-prayer'
+import type { GuidedPrayerSession, GuidedPrayerTheme } from '@/types/guided-prayer'
 
 export const THEME_SCENE_MAP: Record<GuidedPrayerTheme, string> = {
   peace: 'still-waters',
@@ -51,7 +48,7 @@ const morningOffering: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: "Scripture encourages us in Lamentations 3:22-23: \"It is because of Yahweh's loving kindnesses that we are not consumed, because his compassion doesn't fail. They are new every morning. Great is your faithfulness.\"",
+      text: 'Scripture encourages us in Lamentations 3:22-23: "It is because of Yahweh\'s loving kindnesses that we are not consumed, because his compassion doesn\'t fail. They are new every morning. Great is your faithfulness."',
       durationSeconds: 18,
     },
     {
@@ -97,7 +94,7 @@ const morningOffering: GuidedPrayerSession = {
 const eveningSurrender: GuidedPrayerSession = {
   id: 'evening-surrender',
   title: 'Evening Surrender',
-  description: 'Release the weight of your day and rest in God\'s care tonight.',
+  description: "Release the weight and stress of your day and rest in God's care tonight.",
   theme: 'evening',
   durationMinutes: 5,
   icon: 'Moon',
@@ -138,7 +135,7 @@ const eveningSurrender: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Now, gently surrender the things you cannot control. The unresolved conversations, the worries about tomorrow — lay them down. They are safe in God\'s hands tonight.',
+      text: "Now, gently surrender the things you cannot control. The unresolved conversations, the worries about tomorrow — lay them down. They are safe in God's hands tonight.",
       durationSeconds: 14,
     },
     {
@@ -170,7 +167,7 @@ const findingPeace: GuidedPrayerSession = {
   icon: 'Leaf',
   completionVerse: {
     reference: 'Isaiah 26:3',
-    text: 'You will keep whoever\'s mind is steadfast in perfect peace, because he trusts in you.',
+    text: "You will keep whoever's mind is steadfast in perfect peace, because he trusts in you.",
   },
   script: [
     {
@@ -225,7 +222,7 @@ const findingPeace: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Scripture encourages us that God\'s peace will guard our hearts and minds. Picture that peace like a gentle shield around you — not removing the difficulties, but protecting your inner world.',
+      text: "Scripture encourages us that God's peace will guard our hearts and minds. Picture that peace like a gentle shield around you — not removing the difficulties, but protecting your inner world.",
       durationSeconds: 16,
     },
     {
@@ -235,7 +232,7 @@ const findingPeace: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'As we pray together: Lord, I bring my worries to you. I choose to trust you with what I cannot control. Fill me with your peace — the kind that doesn\'t depend on circumstances but rests in who you are.',
+      text: "As we pray together: Lord, I bring my worries to you. I choose to trust you with what I cannot control. Fill me with your peace — the kind that doesn't depend on circumstances but rests in who you are.",
       durationSeconds: 17,
     },
     {
@@ -261,7 +258,7 @@ const findingPeace: GuidedPrayerSession = {
 const comfortInSorrow: GuidedPrayerSession = {
   id: 'comfort-in-sorrow',
   title: 'Comfort in Sorrow',
-  description: 'Find God\'s nearness when your heart is heavy with grief or sadness.',
+  description: "Find God's nearness when your heart is heavy with grief or sadness.",
   theme: 'comfort',
   durationMinutes: 10,
   icon: 'Heart',
@@ -272,7 +269,7 @@ const comfortInSorrow: GuidedPrayerSession = {
   script: [
     {
       type: 'narration',
-      text: 'You are welcome here, just as you are. If your heart is heavy today, you don\'t need to hide that. God meets us in our sorrow, not just in our joy.',
+      text: "You are welcome here, just as you are. If your heart is heavy today, you don't need to hide that. God meets us in our sorrow, not just in our joy.",
       durationSeconds: 14,
     },
     {
@@ -292,7 +289,7 @@ const comfortInSorrow: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Take a moment to acknowledge what hurts. You don\'t need to explain it fully or make sense of it. Simply allow yourself to feel it in God\'s presence.',
+      text: "Take a moment to acknowledge what hurts. You don't need to explain it fully or make sense of it. Simply allow yourself to feel it in God's presence.",
       durationSeconds: 13,
     },
     {
@@ -322,7 +319,7 @@ const comfortInSorrow: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Let us pray: Lord, my heart is heavy and I don\'t have the words. But you know. You see. Draw near to me now. Wrap me in your comfort and remind me that I am never alone in this.',
+      text: "Let us pray: Lord, my heart is heavy and I don't have the words. But you know. You see. Draw near to me now. Wrap me in your comfort and remind me that I am never alone in this.",
       durationSeconds: 16,
     },
     {
@@ -342,7 +339,7 @@ const comfortInSorrow: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'As you leave this time, know that it\'s okay to not be okay. Healing is not a straight line. You are brave for showing up, and God is gentle with your heart.',
+      text: "As you leave this time, know that it's okay to not be okay. Healing is not a straight line. You are brave for showing up, and God is gentle with your heart.",
       durationSeconds: 14,
     },
     {
@@ -358,7 +355,7 @@ const comfortInSorrow: GuidedPrayerSession = {
 const gratitudePrayer: GuidedPrayerSession = {
   id: 'gratitude-prayer',
   title: 'Gratitude Prayer',
-  description: 'Cultivate a thankful heart by noticing God\'s gifts in your life.',
+  description: "Cultivate a thankful heart by noticing God's gifts in your life.",
   theme: 'gratitude',
   durationMinutes: 5,
   icon: 'Sparkles',
@@ -399,7 +396,7 @@ const gratitudePrayer: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Now think of one simple gift from today — the warmth of sunlight, a meal, a moment of laughter. Even small gifts carry God\'s fingerprints.',
+      text: "Now think of one simple gift from today — the warmth of sunlight, a meal, a moment of laughter. Even small gifts carry God's fingerprints.",
       durationSeconds: 13,
     },
     {
@@ -456,7 +453,7 @@ const forgivenessRelease: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Let\'s begin by settling our hearts. Take a few slow breaths. Release the tension you may be holding — in your jaw, your shoulders, your chest.',
+      text: "Let's begin by settling our hearts. Take a few slow breaths. Release the tension you may be holding — in your jaw, your shoulders, your chest.",
       durationSeconds: 13,
     },
     {
@@ -572,7 +569,7 @@ const forgivenessRelease: GuidedPrayerSession = {
 const strengthForToday: GuidedPrayerSession = {
   id: 'strength-for-today',
   title: 'Strength for Today',
-  description: 'Draw on God\'s strength when you feel overwhelmed or weary.',
+  description: "Draw on God's strength when you feel overwhelmed or weary.",
   theme: 'strength',
   durationMinutes: 5,
   icon: 'Shield',
@@ -649,7 +646,7 @@ const strengthForToday: GuidedPrayerSession = {
 const healingPrayer: GuidedPrayerSession = {
   id: 'healing-prayer',
   title: 'Healing Prayer',
-  description: 'Invite God\'s healing presence into the places that need restoration.',
+  description: "Invite God's healing presence into the places that need restoration.",
   theme: 'healing',
   durationMinutes: 10,
   icon: 'HandHeart',
@@ -710,7 +707,7 @@ const healingPrayer: GuidedPrayerSession = {
     },
     {
       type: 'narration',
-      text: 'Now, imagine God\'s healing presence like warm light gently reaching the places that hurt most. You don\'t need to force anything. Simply receive.',
+      text: "Now, imagine God's healing presence like warm light gently reaching the places that hurt most. You don't need to force anything. Simply receive.",
       durationSeconds: 13,
     },
     {

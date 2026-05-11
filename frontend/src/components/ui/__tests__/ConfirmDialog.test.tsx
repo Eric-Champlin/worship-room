@@ -75,10 +75,12 @@ describe('ConfirmDialog', () => {
     expect(button.className).toContain('bg-red-500')
   })
 
-  it('default variant applies primary button class', () => {
+  it('default variant applies canonical frosted subtle treatment (not deprecated bg-primary)', () => {
     render(<ConfirmDialog {...defaults} variant="default" />)
     const button = screen.getByRole('button', { name: 'Confirm' })
-    expect(button.className).toContain('bg-primary')
+    expect(button.className).toContain('bg-white/[0.12]')
+    expect(button.className).toContain('border-white/[0.20]')
+    expect(button.className).not.toContain('bg-primary')
   })
 
   it('role="alertdialog" wires aria-labelledby and aria-describedby to the title and body elements', () => {

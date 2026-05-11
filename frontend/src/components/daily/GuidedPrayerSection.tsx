@@ -63,7 +63,7 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
               as="button"
               variant="default"
               onClick={() => handleCardClick(session)}
-              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center sm:w-auto sm:min-w-0 sm:min-h-[260px] text-left"
+              className="relative w-[220px] min-w-[220px] flex flex-col flex-shrink-0 snap-center p-7 sm:w-auto sm:min-w-0 sm:min-h-[256px] text-left"
             >
               {isComplete && (
                 <CheckCircle2
@@ -72,17 +72,18 @@ export function GuidedPrayerSection({ onStartSession }: GuidedPrayerSectionProps
                 />
               )}
 
-              {ThemeIcon && (
-                <ThemeIcon className="mb-3 h-8 w-8 text-primary" aria-hidden="true" />
-              )}
+              <div className="mb-2 flex flex-row items-center gap-3">
+                {ThemeIcon && (
+                  <ThemeIcon className="h-8 w-8 shrink-0 text-primary" aria-hidden="true" />
+                )}
+                <h3 className="font-semibold text-base text-white">{session.title}</h3>
+              </div>
 
-              <h3 className="font-semibold text-base text-white">{session.title}</h3>
-
-              <p className="mt-1 text-sm leading-relaxed text-white/70 flex-1">
+              <p className="mt-2 text-sm leading-relaxed text-white/70 flex-1">
                 {session.description}
               </p>
 
-              <span className="mt-2 self-start rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
+              <span className="mt-4 self-start rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70">
                 {session.durationMinutes} min
               </span>
             </FrostedCard>

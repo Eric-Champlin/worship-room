@@ -229,6 +229,9 @@ function DailyHubContent() {
           >
             {displayName}
           </h1>
+          <p className="relative z-10 pt-3 text-center text-2xl font-bold text-white sm:pt-0 sm:text-3xl">
+            What's on your mind today?
+          </p>
         </section>
 
         {/* Sentinel for sticky tab bar shadow */}
@@ -241,10 +244,11 @@ function DailyHubContent() {
             isSticky && 'shadow-md shadow-black/20'
           )}
         >
-          <div className="mx-auto flex max-w-xl items-center justify-center px-4 py-3 sm:py-4">
+          <div className="mx-auto flex max-w-xl items-center justify-center px-4 pb-0 pt-3 sm:pb-0 sm:pt-4">
+            {' '}
             <div
               ref={tabBarRef}
-              className="flex w-full rounded-full border border-white/[0.08] bg-white/[0.07] p-1 backdrop-blur-md"
+              className="flex w-full rounded-full border border-white/[0.2] bg-white/[0.07] p-1 backdrop-blur-md"
               role="tablist"
               aria-label="Daily practices"
               {...(tabBarTooltip.shouldShow ? { 'aria-describedby': 'daily-hub-tabs' } : {})}

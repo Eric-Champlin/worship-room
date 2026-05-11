@@ -389,6 +389,56 @@ describe('DailyHub', () => {
     expect(heading.className).toContain('lg:text-6xl')
   })
 
+  describe('Hero subtitle', () => {
+    it('renders the "What\'s on your mind today?" subtitle', () => {
+      renderPage()
+      expect(screen.getByText("What's on your mind today?")).toBeInTheDocument()
+    })
+
+    it('subtitle uses the canonical devotional title className', () => {
+      renderPage()
+      const subtitle = screen.getByText("What's on your mind today?")
+      // Mirrors devotional title classes: pt-3 text-center text-2xl font-bold text-white sm:pt-4 sm:text-3xl
+      expect(subtitle.className).toContain('pt-3')
+      expect(subtitle.className).toContain('text-center')
+      expect(subtitle.className).toContain('text-2xl')
+      expect(subtitle.className).toContain('font-bold')
+      expect(subtitle.className).toContain('text-white')
+      expect(subtitle.className).toContain('sm:pt-4')
+      expect(subtitle.className).toContain('sm:text-3xl')
+    })
+
+    it('subtitle carries relative z-10 per cinematic hero composition contract', () => {
+      renderPage()
+      const subtitle = screen.getByText("What's on your mind today?")
+      expect(subtitle.className).toContain('relative')
+      expect(subtitle.className).toContain('z-10')
+    })
+
+    it('subtitle renders directly after the greeting h1 in DOM order', () => {
+      renderPage()
+      const heading = screen.getByRole('heading', { level: 1 })
+      const subtitle = screen.getByText("What's on your mind today?")
+      expect(heading.nextElementSibling).toBe(subtitle)
+    })
+
+    it('subtitle is a <p> element', () => {
+      renderPage()
+      const subtitle = screen.getByText("What's on your mind today?")
+      expect(subtitle.tagName).toBe('P')
+    })
+
+    it('subtitle is not gradient, italic, or decorative font', () => {
+      renderPage()
+      const subtitle = screen.getByText("What's on your mind today?")
+      expect(subtitle.className).not.toContain('font-script')
+      expect(subtitle.className).not.toContain('font-serif')
+      expect(subtitle.className).not.toContain('italic')
+      // No inline gradient backgroundImage
+      expect(subtitle.style.backgroundImage).toBe('')
+    })
+  })
+
   it('tab bar has no animated underline div', () => {
     renderPage()
     const tablist = screen.getByRole('tablist')

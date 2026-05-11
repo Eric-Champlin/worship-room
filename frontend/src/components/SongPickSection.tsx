@@ -18,23 +18,20 @@ export function SongPickSection() {
     <div>
       <section aria-labelledby="song-pick-heading" className="px-4 py-12 sm:px-6 sm:py-16">
         {/* Section divider */}
-        <div
-          aria-hidden="true"
-          className="mx-auto max-w-xl border-t border-white/[0.08] mb-10"
-        />
+        <div aria-hidden="true" className="mx-auto mb-10 max-w-xl border-t border-white/[0.08]" />
 
         {/* Content container — centered column */}
         <div className="mx-auto max-w-2xl">
           <div className="text-center">
             <h2 id="song-pick-heading" className="flex flex-col items-center">
               <span
-                className="text-4xl font-bold leading-[1.15] pb-1 sm:text-5xl lg:text-6xl"
+                className="pb-2 text-4xl font-bold leading-[1.15] sm:text-5xl lg:text-6xl"
                 style={GRADIENT_TEXT_STYLE}
               >
-                Today&apos;s
+                Song Pick
               </span>
               <span className="mt-1 text-3xl font-bold leading-[1.15] text-white sm:text-4xl sm:tracking-[0.02em] lg:text-5xl lg:tracking-normal">
-                Song Pick
+                of the Day
               </span>
             </h2>
           </div>
@@ -72,7 +69,7 @@ export function SongPickSection() {
                 href={SPOTIFY_PLAYLIST_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-white/90"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-gray-100"
               >
                 Follow Our Playlist
               </a>

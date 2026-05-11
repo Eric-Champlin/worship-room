@@ -178,7 +178,35 @@ describe('GuidedPrayerSection', () => {
   it('cards have minimum touch target size via padding', () => {
     renderWithProviders()
     const firstButton = screen.getAllByRole('button')[0]
-    // Cards have p-6 (24px) and content, ensuring > 44px height
-    expect(firstButton.className).toContain('p-6')
+    // Cards have p-7 (28px) and content, ensuring > 44px height
+    expect(firstButton.className).toContain('p-7')
+  })
+
+  it('cards apply sm:min-h-[256px] for tablet/desktop proportions', () => {
+    renderWithProviders()
+    const firstButton = screen.getAllByRole('button')[0]
+    expect(firstButton.className).toContain('sm:min-h-[256px]')
+  })
+
+  it('icon and title render on a single horizontal row inside each card', () => {
+    renderWithProviders()
+    // First card's title heading
+    const firstTitle = screen.getByText(GUIDED_PRAYER_SESSIONS[0].title)
+    // The wrapper is the parent <div> containing the icon + title
+    const iconTitleWrapper = firstTitle.parentElement
+    expect(iconTitleWrapper).not.toBeNull()
+    expect(iconTitleWrapper!.className).toContain('flex')
+    expect(iconTitleWrapper!.className).toContain('flex-row')
+    expect(iconTitleWrapper!.className).toContain('items-center')
+    // Verify it has a sibling SVG (the Lucide icon) before the heading
+    const icon = iconTitleWrapper!.querySelector('svg')
+    expect(icon).not.toBeNull()
+    expect(icon!.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('card outer button preserves text-left alignment for the description below the icon-title row', () => {
+    renderWithProviders()
+    const firstButton = screen.getAllByRole('button')[0]
+    expect(firstButton.className).toContain('text-left')
   })
 })
