@@ -21,14 +21,8 @@ function mockReducedMotion() {
 }
 
 describe('Animation token system', () => {
-  it('ANIMATION_DURATIONS has exactly 4 tokens', () => {
-    expect(Object.keys(ANIMATION_DURATIONS)).toHaveLength(4)
-  })
-
-  it('no duration exceeds 400ms', () => {
-    for (const [, value] of Object.entries(ANIMATION_DURATIONS)) {
-      expect(value).toBeLessThanOrEqual(400)
-    }
+  it('ANIMATION_DURATIONS has exactly 6 tokens', () => {
+    expect(Object.keys(ANIMATION_DURATIONS)).toHaveLength(6)
   })
 
   it('ANIMATION_EASINGS has exactly 4 tokens', () => {

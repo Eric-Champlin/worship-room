@@ -147,7 +147,7 @@ prevents a wasted deploy attempt.
 | 73   | 5.1  | FrostedCard Migration                                                                                    | L    | Medium | ✅                                            |
 | 74   | 5.2  | BackgroundCanvas at Prayer Wall Root                                                                     | S    | Low    | ✅ (shipped via Spec 14 Step 6)               |
 | 75   | 5.3  | 2-Line Heading Treatment                                                                                 | M    | Low    | ✅                                            |
-| 76   | 5.4  | Animation Token Migration (BB-33 Compliance)                                                             | M    | Low    | ⬜                                            |
+| 76   | 5.4  | Animation Token Migration (BB-33 Compliance)                                                             | M    | Low    | ✅                                            |
 | 77   | 5.5  | Deprecated Pattern Purge and Visual Audit (PrayerWallHero typography portion shipped via Spec 14 Step 7) | M    | Low    | ⬜ (partial)                                  |
 | 78   | 5.6  | Redis Cache Foundation                                                                                   | M    | Medium | ⬜                                            |
 

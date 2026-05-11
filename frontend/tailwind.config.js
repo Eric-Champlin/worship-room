@@ -52,6 +52,10 @@ export default {
         fast: '150ms',
         base: '250ms',
         slow: '400ms',
+        // Parity invariant: these must match ANIMATION_DURATIONS.pulse / .ceremony
+        // in frontend/src/constants/animation.ts. If you change one, change both.
+        pulse: '300ms',
+        ceremony: '600ms',
       },
       transitionTimingFunction: {
         standard: 'cubic-bezier(0.4, 0, 0.2, 1)',

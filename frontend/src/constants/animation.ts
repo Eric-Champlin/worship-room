@@ -4,6 +4,8 @@ export const ANIMATION_DURATIONS = {
   fast: 150,
   base: 250,
   slow: 400,
+  pulse: 300, // PrayerCard pulse animation cleanup (matches CSS pulse keyframe exactly)
+  ceremony: 600, // InteractionBar whisper-pulse coordination (paired with sound effect timing)
 } as const
 
 /** Canonical animation easing tokens. Match Material Design standard curves. */

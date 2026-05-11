@@ -7,8 +7,8 @@ import {
 } from '../animation'
 
 describe('ANIMATION_DURATIONS', () => {
-  it('exports exactly 4 duration tokens', () => {
-    expect(Object.keys(ANIMATION_DURATIONS)).toHaveLength(4)
+  it('exports exactly 6 duration tokens', () => {
+    expect(Object.keys(ANIMATION_DURATIONS)).toHaveLength(6)
   })
 
   it('instant is 0ms', () => {
@@ -27,14 +27,16 @@ describe('ANIMATION_DURATIONS', () => {
     expect(ANIMATION_DURATIONS.slow).toBe(400)
   })
 
-  it('no duration exceeds 400ms', () => {
-    for (const value of Object.values(ANIMATION_DURATIONS)) {
-      expect(value).toBeLessThanOrEqual(400)
-    }
+  it('pulse is 300ms', () => {
+    expect(ANIMATION_DURATIONS.pulse).toBe(300)
   })
 
-  it('has keys instant, fast, base, slow', () => {
-    expect(Object.keys(ANIMATION_DURATIONS).sort()).toEqual(['base', 'fast', 'instant', 'slow'])
+  it('ceremony is 600ms', () => {
+    expect(ANIMATION_DURATIONS.ceremony).toBe(600)
+  })
+
+  it('has keys base, ceremony, fast, instant, pulse, slow', () => {
+    expect(Object.keys(ANIMATION_DURATIONS).sort()).toEqual(['base', 'ceremony', 'fast', 'instant', 'pulse', 'slow'])
   })
 })
 

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Trash2 } from 'lucide-react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { Button } from '@/components/ui/Button'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
@@ -24,7 +25,7 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
     closeTimeoutRef.current = setTimeout(() => {
       setIsClosing(false)
       setIsOpen(false)
-    }, 150)
+    }, ANIMATION_DURATIONS.fast)
   }, [reducedMotion])
   const containerRef = useFocusTrap(isOpen, handleClose)
 

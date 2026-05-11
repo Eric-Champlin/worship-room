@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { Bookmark, Check, HandHelping, Heart, MessageCircle, Plus, Share2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthModal } from './AuthModalProvider'
@@ -89,7 +90,7 @@ export function InteractionBar({
     triggerPulse?.()
     animationTimeoutRef.current = setTimeout(() => {
       setIsAnimating(false)
-    }, 600)
+    }, ANIMATION_DURATIONS.ceremony)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- triggerPulse is stable context ref
   }, [isPraying, onTogglePraying, playSoundEffect])
 

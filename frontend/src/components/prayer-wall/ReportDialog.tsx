@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Flag } from 'lucide-react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { Button } from '@/components/ui/Button'
 import { CharacterCount } from '@/components/ui/CharacterCount'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
@@ -63,7 +64,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
       setDetails('')
       setSelectedReason('other')
       setSubmitted(false)
-    }, 150)
+    }, ANIMATION_DURATIONS.fast)
   }, [reducedMotion])
   const containerRef = useFocusTrap(isOpen, handleClose)
 

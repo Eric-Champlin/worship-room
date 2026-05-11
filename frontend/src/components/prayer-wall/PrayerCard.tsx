@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { HandHelping, Heart, HelpCircle, MessagesSquare, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { ANIMATION_DURATIONS } from '@/constants/animation'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerRequest } from '@/types/prayer-wall'
@@ -61,7 +62,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current)
     pulseTimeoutRef.current = setTimeout(() => {
       el.classList.remove('motion-safe:animate-card-pulse')
-    }, 300)
+    }, ANIMATION_DURATIONS.pulse)
   }, [])
   const challengeData = prayer.challengeId ? getChallenge(prayer.challengeId) : null
   const needsTruncation = !showFull && prayer.content.length > TRUNCATE_LENGTH
