@@ -13,6 +13,7 @@ const ROUTES = [
   '/prayer-wall',
   '/prayer-wall?postType=testimony',
   '/prayer-wall?postType=encouragement&category=mental-health',
+  '/prayer-wall/dashboard',
 ]
 
 test.describe('Universal Rule 17 — Phase 4 a11y smoke', () => {
