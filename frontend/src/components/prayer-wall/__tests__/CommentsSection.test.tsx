@@ -144,4 +144,14 @@ describe('CommentsSection', () => {
       expect(prayLink.closest('a')).toBeInTheDocument()
     })
   })
+
+  it('renders FrostedCard subdued surface inside comments section', () => {
+    const { container } = renderSection({ isOpen: true })
+    expect(container.querySelector('[class*="bg-white/[0.05]"]')).toBeInTheDocument()
+  })
+
+  it('renders a section element as FrostedCard host', () => {
+    const { container } = renderSection({ isOpen: true })
+    expect(container.querySelector('section')).toBeInTheDocument()
+  })
 })

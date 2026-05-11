@@ -187,8 +187,8 @@ describe('PrayerCard — Spec 4.3 testimony chrome', () => {
   it('renders default chrome classes when postType is prayer_request', () => {
     renderCard(SHORT_PRAYER, {})
     const article = screen.getByRole('article')
-    expect(article.className).toContain('bg-white/[0.06]')
-    expect(article.className).toContain('border-white/10')
+    expect(article.className).toContain('bg-white/[0.07]')
+    expect(article.className).toContain('border-white/[0.12]')
     expect(article.className).not.toContain('amber')
   })
 
@@ -230,7 +230,7 @@ describe('PrayerCard — Spec 4.3 testimony chrome', () => {
     const articles = screen.getAllByRole('article')
     expect(articles).toHaveLength(2)
     // First card: prayer_request (white chrome)
-    expect(articles[0].className).toContain('bg-white/[0.06]')
+    expect(articles[0].className).toContain('bg-white/[0.07]')
     expect(articles[0].querySelector('svg.lucide-hand-helping')).toBeInTheDocument()
     // Second card: testimony (amber chrome)
     expect(articles[1].className).toContain('bg-amber-500/[0.04]')
@@ -296,7 +296,7 @@ describe('PrayerCard — Spec 4.4 question chrome', () => {
     )
     const articles = screen.getAllByRole('article')
     expect(articles).toHaveLength(3)
-    expect(articles[0].className).toContain('bg-white/[0.06]')
+    expect(articles[0].className).toContain('bg-white/[0.07]')
     expect(articles[1].className).toContain('bg-amber-500/[0.04]')
     expect(articles[2].className).toContain('bg-cyan-500/[0.04]')
   })
@@ -439,7 +439,7 @@ describe('PrayerCard — Spec 4.6 encouragement chrome', () => {
 
   it('mixed feed renders correct chrome for all 5 types', () => {
     const fixtures: Array<{ prayer: PrayerRequest; expectedBg: string }> = [
-      { prayer: SHORT_PRAYER, expectedBg: 'bg-white/[0.06]' },
+      { prayer: SHORT_PRAYER, expectedBg: 'bg-white/[0.07]' },
       { prayer: TESTIMONY_PRAYER, expectedBg: 'bg-amber-500/[0.04]' },
       { prayer: QUESTION_PRAYER, expectedBg: 'bg-cyan-500/[0.04]' },
       { prayer: DISCUSSION_PRAYER, expectedBg: 'bg-violet-500/[0.04]' },
@@ -565,5 +565,28 @@ describe('PrayerCard — Spec 4.6b image attachment', () => {
       </MemoryRouter>,
     )
     expect(screen.queryByTestId('ways-to-help-pills')).not.toBeInTheDocument()
+  })
+
+  it('Spec 5.1 — renders an article element inside a FrostedCard (rounded-3xl surface)', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <PrayerCard prayer={SHORT_PRAYER} />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('article')).toBeInTheDocument()
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
+
+  it('Spec 5.1 — pulse animation class is added to the wrapping div, not the article', () => {
+    const { container } = render(
+      <MemoryRouter>
+        <PrayerCard prayer={SHORT_PRAYER} />
+      </MemoryRouter>,
+    )
+    const article = screen.getByRole('article')
+    const outerDiv = article.closest('div')
+    expect(outerDiv).not.toBeNull()
+    // Pulse fires on the outer div wrapper, not on the article itself
+    expect(outerDiv).toBe(container.querySelector('article')?.closest('div'))
   })
 })

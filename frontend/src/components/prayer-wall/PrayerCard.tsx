@@ -15,6 +15,9 @@ import { CategoryBadge } from './CategoryBadge'
 import { QotdBadge } from './QotdBadge'
 import { ScriptureChip } from './ScriptureChip'
 import { formatFullDate } from '@/lib/time'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
+import { cn } from '@/lib/utils'
+import { getPerTypeChromeClass } from '@/constants/post-type-chrome'
 
 const PulseContext = createContext<(() => void) | null>(null)
 // eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with PrayerCard
@@ -46,7 +49,7 @@ interface PrayerCardProps {
 
 export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99 }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const articleRef = useRef<HTMLElement>(null)
+  const articleRef = useRef<HTMLDivElement>(null)
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   useEffect(() => {
     return () => { if (pulseTimeoutRef.current) clearTimeout(pulseTimeoutRef.current) }
@@ -74,22 +77,6 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     ? `/prayer-wall/user/${prayer.userId}`
     : null
 
-  const articleChromeClasses = (() => {
-    switch (prayer.postType) {
-      case 'testimony':
-        return 'rounded-xl border border-amber-200/10 bg-amber-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-      case 'question':
-        return 'rounded-xl border border-cyan-200/10 bg-cyan-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-      case 'discussion':
-        return 'rounded-xl border border-violet-200/10 bg-violet-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-      case 'encouragement':
-        return 'rounded-xl border border-rose-200/10 bg-rose-500/[0.04] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-      case 'prayer_request':
-      default:
-        return 'rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm transition-shadow motion-reduce:transition-none sm:p-6 lg:hover:shadow-md lg:hover:shadow-black/20'
-    }
-  })()
-
   const articleAriaLabel = (() => {
     switch (prayer.postType) {
       case 'testimony':
@@ -110,124 +97,130 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
 
   return (
     <PulseContext.Provider value={triggerPulse}>
-    <article
-      ref={articleRef}
-      className={articleChromeClasses}
-      aria-label={articleAriaLabel}
-    >
-      {prayer.qotdId && (
-        <div className="mb-1">
-          <QotdBadge />
-        </div>
-      )}
-      <header className="mb-3 flex items-center gap-3">
-        {authorLink ? (
-          <Link to={authorLink} tabIndex={-1} aria-hidden="true">
-            <Avatar
-              firstName={prayer.authorName}
-              lastName=""
-              avatarUrl={prayer.authorAvatarUrl}
-              size="md"
-              isAnonymous={prayer.isAnonymous}
-              userId={prayer.userId || ''}
-            />
-          </Link>
-        ) : (
-          <Avatar
-            firstName={prayer.authorName}
-            lastName=""
-            avatarUrl={prayer.authorAvatarUrl}
-            size="md"
-            isAnonymous={prayer.isAnonymous}
-            userId={prayer.userId || ''}
-          />
-        )}
-        <div className="min-w-0">
-          {authorLink ? (
-            <Link
-              to={authorLink}
-              className="font-semibold text-white hover:underline"
-            >
-              {prayer.authorName}
-            </Link>
-          ) : (
-            <span className="font-semibold text-white">
-              {prayer.authorName}
-            </span>
+      <div ref={articleRef}>
+        <FrostedCard
+          variant="default"
+          as="article"
+          aria-label={articleAriaLabel}
+          className={cn(
+            getPerTypeChromeClass(prayer.postType),
+            'lg:hover:shadow-md lg:hover:shadow-black/20 transition-shadow motion-reduce:transition-none',
           )}
-          <span className="text-white/40"> &mdash; </span>
-          <span className="inline-flex items-center gap-1.5">
-            <TypeMarker postType={prayer.postType} />
-            <time
-              dateTime={prayer.createdAt}
-              className="text-sm text-white/60"
-            >
-              {formatFullDate(prayer.createdAt)}
-            </time>
-          </span>
-          <div className="mt-1 flex flex-wrap items-center gap-1.5">
-            <CategoryBadge
-              category={prayer.category}
-              onClick={onCategoryClick}
-            />
-            {challengeData && (
-              <span
-                className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-                style={{ backgroundColor: `${challengeData.themeColor}26`, color: challengeData.themeColor }}
-              >
-                {challengeData.title.split(':')[0]}
+        >
+          {prayer.qotdId && (
+            <div className="mb-1">
+              <QotdBadge />
+            </div>
+          )}
+          <header className="mb-3 flex items-center gap-3">
+            {authorLink ? (
+              <Link to={authorLink} tabIndex={-1} aria-hidden="true">
+                <Avatar
+                  firstName={prayer.authorName}
+                  lastName=""
+                  avatarUrl={prayer.authorAvatarUrl}
+                  size="md"
+                  isAnonymous={prayer.isAnonymous}
+                  userId={prayer.userId || ''}
+                />
+              </Link>
+            ) : (
+              <Avatar
+                firstName={prayer.authorName}
+                lastName=""
+                avatarUrl={prayer.authorAvatarUrl}
+                size="md"
+                isAnonymous={prayer.isAnonymous}
+                userId={prayer.userId || ''}
+              />
+            )}
+            <div className="min-w-0">
+              {authorLink ? (
+                <Link
+                  to={authorLink}
+                  className="font-semibold text-white hover:underline"
+                >
+                  {prayer.authorName}
+                </Link>
+              ) : (
+                <span className="font-semibold text-white">
+                  {prayer.authorName}
+                </span>
+              )}
+              <span className="text-white/40"> &mdash; </span>
+              <span className="inline-flex items-center gap-1.5">
+                <TypeMarker postType={prayer.postType} />
+                <time
+                  dateTime={prayer.createdAt}
+                  className="text-sm text-white/60"
+                >
+                  {formatFullDate(prayer.createdAt)}
+                </time>
               </span>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                <CategoryBadge
+                  category={prayer.category}
+                  onClick={onCategoryClick}
+                />
+                {challengeData && (
+                  <span
+                    className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    style={{ backgroundColor: `${challengeData.themeColor}26`, color: challengeData.themeColor }}
+                  >
+                    {challengeData.title.split(':')[0]}
+                  </span>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <div className="mb-3">
+            <p className="whitespace-pre-wrap leading-relaxed text-white/80">
+              {displayText}
+            </p>
+            {needsTruncation && (
+              <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                aria-expanded={isExpanded}
+                className="mt-1 min-h-[44px] text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+              >
+                {isExpanded ? 'Show less' : 'Show more'}
+              </button>
             )}
           </div>
-        </div>
-      </header>
 
-      <div className="mb-3">
-        <p className="whitespace-pre-wrap leading-relaxed text-white/80">
-          {displayText}
-        </p>
-        {needsTruncation && (
-          <button
-            type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            aria-expanded={isExpanded}
-            className="mt-1 min-h-[44px] text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
-          >
-            {isExpanded ? 'Show less' : 'Show more'}
-          </button>
-        )}
+          {prayer.scriptureReference && (
+            <div className="-mt-1 mb-3">
+              <ScriptureChip reference={prayer.scriptureReference} />
+            </div>
+          )}
+
+          {/* Spec 4.6b — image attachment for testimony / question post types.
+              Renders whenever prayer.image is non-null; postType-agnostic by design
+              so future post types that gain images don't require touching PrayerCard. */}
+          {prayer.image && <PostImage image={prayer.image} index={index} />}
+
+          {/* Spec 4.7b — practical-help pills (prayer_request only). Defense-in-depth:
+              backend rejects helpTags on other post types, but the postType gate here
+              guards against any leftover fixture or stale data leaking pills onto a
+              testimony / question / discussion / encouragement card (W18). The
+              WaysToHelpPills component itself returns null when the displayable set
+              is empty (W6), and filters out just_prayer (W5). */}
+          {prayer.postType === 'prayer_request' && prayer.helpTags && (
+            <WaysToHelpPills tags={prayer.helpTags} />
+          )}
+
+          {children}
+
+          {prayer.isAnswered && (
+            <AnsweredBadge
+              answeredText={prayer.answeredText}
+              answeredAt={prayer.answeredAt}
+            />
+          )}
+        </FrostedCard>
       </div>
-
-      {prayer.scriptureReference && (
-        <div className="-mt-1 mb-3">
-          <ScriptureChip reference={prayer.scriptureReference} />
-        </div>
-      )}
-
-      {/* Spec 4.6b — image attachment for testimony / question post types.
-          Renders whenever prayer.image is non-null; postType-agnostic by design
-          so future post types that gain images don't require touching PrayerCard. */}
-      {prayer.image && <PostImage image={prayer.image} index={index} />}
-
-      {/* Spec 4.7b — practical-help pills (prayer_request only). Defense-in-depth:
-          backend rejects helpTags on other post types, but the postType gate here
-          guards against any leftover fixture or stale data leaking pills onto a
-          testimony / question / discussion / encouragement card (W18). The
-          WaysToHelpPills component itself returns null when the displayable set
-          is empty (W6), and filters out just_prayer (W5). */}
-      {prayer.postType === 'prayer_request' && prayer.helpTags && (
-        <WaysToHelpPills tags={prayer.helpTags} />
-      )}
-
-      {children}
-
-      {prayer.isAnswered && (
-        <AnsweredBadge
-          answeredText={prayer.answeredText}
-          answeredAt={prayer.answeredAt}
-        />
-      )}
-    </article>
     </PulseContext.Provider>
   )
 }

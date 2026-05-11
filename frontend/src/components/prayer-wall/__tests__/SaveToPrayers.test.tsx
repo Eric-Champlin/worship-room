@@ -186,4 +186,9 @@ describe('SaveToPrayersForm', () => {
     await user.click(screen.getByText('Cancel'))
     expect(onCancel).toHaveBeenCalled()
   })
+
+  it('renders FrostedCard with canonical radius', () => {
+    const { container } = renderForm()
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
 })

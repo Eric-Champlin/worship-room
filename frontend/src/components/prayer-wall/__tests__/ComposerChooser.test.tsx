@@ -141,4 +141,27 @@ describe('ComposerChooser', () => {
     await userEvent.click(screen.getByRole('button', { name: /close/i }))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('renders FrostedCard with canonical radius inside dialog (W5 — outer panel only)', () => {
+    render(<ComposerChooser isOpen onSelect={vi.fn()} onClose={vi.fn()} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog.querySelector('[class*="rounded-t-3xl"]')).toBeInTheDocument()
+  })
+
+  it('5 inner type-card buttons remain as <button> elements (W5 enforcement)', () => {
+    render(<ComposerChooser isOpen onSelect={vi.fn()} onClose={vi.fn()} />)
+    const enabledTypes = POST_TYPES.filter((t) => t.enabled)
+    for (const entry of enabledTypes) {
+      const card = screen.getByRole('button', { name: entry.label })
+      expect(card.tagName).toBe('BUTTON')
+    }
+    expect(enabledTypes.length).toBe(5)
+  })
+
+  it('animation classes are on the wrapping div (not FrostedCard)', () => {
+    render(<ComposerChooser isOpen onSelect={vi.fn()} onClose={vi.fn()} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog.className).toContain('transition-[transform,opacity]')
+    expect(dialog.className).toContain('duration-base')
+  })
 })

@@ -1,6 +1,6 @@
-import { MessageCircle } from 'lucide-react'
 import { useQotdToday } from '@/hooks/useQotdToday'
 import { ShareButton } from '@/components/daily/ShareButton'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 
 interface QuestionOfTheDayProps {
   responseCount: number
@@ -21,34 +21,24 @@ export function QuestionOfTheDay({
   // aria-busy + aria-live let assistive tech announce the eventual content.
   if (isLoading || !question) {
     return (
-      <section
-        aria-labelledby="qotd-heading"
-        aria-busy="true"
-        aria-live="polite"
-        className="rounded-2xl border border-primary/20 bg-primary/[0.12] p-4 sm:p-5 lg:p-6"
-      >
-        <span className="sr-only">Loading today's question</span>
-        <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
-        <p className="mt-2 text-xs uppercase tracking-wider text-white/50">
-          Question of the Day
-        </p>
-        {/* Heading placeholder — preserves layout height and the qotd-heading id */}
-        <h2 id="qotd-heading" className="mt-2 sr-only">
-          Loading
-        </h2>
-        <div
-          className="mt-2 h-7 w-4/5 rounded bg-white/[0.08]"
-          aria-hidden="true"
-        />
-        <div
-          className="mt-3 h-4 w-3/5 rounded bg-white/[0.06]"
-          aria-hidden="true"
-        />
-        <div
-          className="mt-4 h-11 w-44 rounded-lg bg-white/[0.08]"
-          aria-hidden="true"
-        />
-      </section>
+      <div aria-busy="true" aria-live="polite">
+        <FrostedCard
+          variant="accent"
+          eyebrow="Question of the Day"
+          eyebrowColor="violet"
+          as="section"
+          aria-labelledby="qotd-heading"
+        >
+          <span className="sr-only">Loading today's question</span>
+          {/* Heading placeholder — preserves layout height and the qotd-heading id */}
+          <h2 id="qotd-heading" className="sr-only">
+            Loading
+          </h2>
+          <div className="mt-2 h-7 w-4/5 rounded bg-white/[0.08]" aria-hidden="true" />
+          <div className="mt-3 h-4 w-3/5 rounded bg-white/[0.06]" aria-hidden="true" />
+          <div className="mt-4 h-11 w-44 rounded-lg bg-white/[0.08]" aria-hidden="true" />
+        </FrostedCard>
+      </div>
     )
   }
 
@@ -68,16 +58,13 @@ export function QuestionOfTheDay({
   }
 
   return (
-    <section
+    <FrostedCard
+      variant="accent"
+      eyebrow="Question of the Day"
+      eyebrowColor="violet"
+      as="section"
       aria-labelledby="qotd-heading"
-      className="rounded-2xl border border-primary/20 bg-primary/[0.12] p-4 sm:p-5 lg:p-6"
     >
-      <MessageCircle className="h-6 w-6 text-primary" aria-hidden="true" />
-
-      <p className="mt-2 text-xs uppercase tracking-wider text-white/50">
-        Question of the Day
-      </p>
-
       <h2 id="qotd-heading" className="mt-2 text-lg font-bold text-white">
         {question.text}
       </h2>
@@ -117,6 +104,6 @@ export function QuestionOfTheDay({
           className="[&>button]:border-white/30 [&>button]:bg-white/10 [&>button]:text-white [&>button]:hover:bg-white/20"
         />
       </div>
-    </section>
+    </FrostedCard>
   )
 }

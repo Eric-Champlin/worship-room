@@ -1,8 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { cn } from '@/lib/utils'
 
 interface DeletePrayerDialogProps {
   onDelete: () => void
@@ -77,37 +79,39 @@ export function DeletePrayerDialog({ onDelete }: DeletePrayerDialogProps) {
             aria-modal="true"
             aria-labelledby="delete-dialog-title"
             aria-describedby="delete-dialog-desc"
-            className={`mx-4 w-full max-w-sm rounded-xl border border-white/10 bg-surface-dark p-6 shadow-xl ${panelClass}`}
             onClick={(e) => e.stopPropagation()}
+            className={cn('mx-4 w-full max-w-sm', panelClass)}
           >
-            <h2
-              id="delete-dialog-title"
-              className="text-lg font-semibold text-white"
-            >
-              Remove this prayer?
-            </h2>
-            <p
-              id="delete-dialog-desc"
-              className="mt-2 text-sm text-white/60"
-            >
-              This will remove the prayer from the wall. This can&apos;t be undone.
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClose}
+            <FrostedCard variant="default" as="div">
+              <h2
+                id="delete-dialog-title"
+                className="text-lg font-semibold text-white"
               >
-                Cancel
-              </Button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
+                Remove this prayer?
+              </h2>
+              <p
+                id="delete-dialog-desc"
+                className="mt-2 text-sm text-white/60"
               >
-                Remove
-              </button>
-            </div>
+                This will remove the prayer from the wall. This can&apos;t be undone.
+              </p>
+              <div className="mt-4 flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClose}
+                >
+                  Cancel
+                </Button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
+                >
+                  Remove
+                </button>
+              </div>
+            </FrostedCard>
           </div>
         </div>
       )}

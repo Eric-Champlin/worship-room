@@ -71,12 +71,9 @@ describe('AuthModal — homepage visual style', () => {
     localStorage.clear()
   })
 
-  it('renders frosted glass modal container', () => {
+  it('renders FrostedCard with canonical radius inside dialog', () => {
     const { container } = renderModal()
-    const modal = container.querySelector('[role="dialog"]')
-    expect(modal?.className).toContain('bg-hero-bg/95')
-    expect(modal?.className).toContain('backdrop-blur-md')
-    expect(modal?.className).toContain('rounded-3xl')
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
   })
 
   it('backdrop has inline style for atmospheric glow', () => {

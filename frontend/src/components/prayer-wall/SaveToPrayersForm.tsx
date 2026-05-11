@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { addPrayer } from '@/services/prayer-list-storage'
 import {
   PRAYER_CATEGORIES,
@@ -60,52 +61,54 @@ export function SaveToPrayersForm({
         style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
       >
         <div className="overflow-hidden">
-          <label htmlFor={`save-title-${prayerId}`} className="sr-only">
-            Prayer title
-          </label>
-          <input
-            id={`save-title-${prayerId}`}
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Prayer title..."
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-primary focus:outline-none"
-          />
-          <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Prayer category">
-            {SAVEABLE_CATEGORIES.map((cat) => (
+          <FrostedCard variant="default" as="div">
+            <label htmlFor={`save-title-${prayerId}`} className="sr-only">
+              Prayer title
+            </label>
+            <input
+              id={`save-title-${prayerId}`}
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Prayer title..."
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-primary focus:outline-none"
+            />
+            <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Prayer category">
+              {SAVEABLE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedCategory === cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={cn(
+                    'min-h-[44px] rounded-full px-3 py-1.5 text-xs transition-colors',
+                    selectedCategory === cat
+                      ? 'bg-primary text-white'
+                      : 'border border-white/15 bg-white/10 text-white/70 hover:bg-white/15',
+                  )}
+                >
+                  {CATEGORY_LABELS[cat]}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center gap-3">
               <button
-                key={cat}
                 type="button"
-                role="radio"
-                aria-checked={selectedCategory === cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={cn(
-                  'min-h-[44px] rounded-full px-3 py-1.5 text-xs transition-colors',
-                  selectedCategory === cat
-                    ? 'bg-primary text-white'
-                    : 'border border-white/15 bg-white/10 text-white/70 hover:bg-white/15',
-                )}
+                onClick={handleSave}
+                className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
               >
-                {CATEGORY_LABELS[cat]}
+                Save to My Prayers
               </button>
-            ))}
-          </div>
-          <div className="mt-3 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleSave}
-              className="min-h-[44px] rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90"
-            >
-              Save to My Prayers
-            </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="min-h-[44px] px-2 text-sm text-white/50 hover:text-white/70"
-            >
-              Cancel
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="min-h-[44px] px-2 text-sm text-white/50 hover:text-white/70"
+              >
+                Cancel
+              </button>
+            </div>
+          </FrostedCard>
         </div>
       </div>
     </div>

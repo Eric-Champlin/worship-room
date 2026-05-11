@@ -220,4 +220,26 @@ describe('ReportDialog', () => {
       'report-char-count',
     )
   })
+
+  it('renders FrostedCard with canonical radius inside dialog', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ReportDialog prayerId="prayer-1" />)
+    await user.click(screen.getByText('Report'))
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
+
+  it('dialog has no <form> wrapper — W4/D5 form-submission risk is structurally absent', async () => {
+    // Spec 5.1 W4/D5: FrostedCard's `type` prop defaults to "button" but is
+    // only meaningful when `as="button"`. ReportDialog uses `as="div"`, and the
+    // dialog content has no <form> element at all — so there is no submission
+    // path that Cancel or Submit Report could trigger regardless of their
+    // button types. This test locks in the no-<form> invariant. If a future
+    // spec wraps the dialog in a <form>, this test will fail, and the W4/D5
+    // contract will need to be re-evaluated at that point (Cancel must be
+    // type="button", Submit Report must be type="submit").
+    const user = userEvent.setup()
+    const { container } = render(<ReportDialog prayerId="prayer-1" />)
+    await user.click(screen.getByText('Report'))
+    expect(container.querySelector('form')).toBeNull()
+  })
 })

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 
 interface MarkAsAnsweredFormProps {
   onConfirm: (praiseText: string) => void
@@ -37,7 +38,7 @@ export function MarkAsAnsweredForm({ onConfirm }: MarkAsAnsweredFormProps) {
   }
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.06] p-4">
+    <FrostedCard variant="default" as="div">
       <label htmlFor="testimony-textarea" className="mb-2 block text-sm font-medium text-white">
         Share how God answered this prayer (optional):
       </label>
@@ -65,6 +66,6 @@ export function MarkAsAnsweredForm({ onConfirm }: MarkAsAnsweredFormProps) {
           Cancel
         </Button>
       </div>
-    </div>
+    </FrostedCard>
   )
 }

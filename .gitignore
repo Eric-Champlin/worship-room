@@ -50,6 +50,7 @@ frontend/public/audio/**/*.webm
 
 # Test results
 test-results/
+frontend/playwright-report/
 
 # Local screenshots/images
 screenshots/

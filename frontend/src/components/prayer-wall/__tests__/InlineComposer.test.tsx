@@ -1086,4 +1086,9 @@ describe('InlineComposer — Spec 4.6b image upload affordance', () => {
       ['meals'],               // helpTags (Spec 4.7b)
     )
   })
+
+  it('renders FrostedCard with canonical radius inside the composer panel', () => {
+    const { container } = renderComposer({ isOpen: true, postType: 'prayer_request' })
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
 })

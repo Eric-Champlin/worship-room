@@ -41,13 +41,15 @@ describe('QuestionOfTheDay', () => {
       isLoading: true,
       source: null,
     })
-    renderCard()
+    const { container } = renderCard()
 
-    const region = screen.getByRole('region')
-    expect(region).toHaveAttribute('aria-busy', 'true')
-    expect(region).toHaveAttribute('aria-live', 'polite')
+    // aria-busy + aria-live are on the outer wrapper div (FrostedCard doesn't
+    // accept these props, so Decision 12 wraps the loading branch in <div>).
+    const busyWrapper = container.querySelector('[aria-busy="true"]')
+    expect(busyWrapper).not.toBeNull()
+    expect(busyWrapper).toHaveAttribute('aria-live', 'polite')
     expect(screen.getByText("Loading today's question")).toHaveClass('sr-only')
-    // Visible label + icon stay during skeleton.
+    // Eyebrow label stays visible during skeleton (FrostedCard renders it).
     expect(screen.getByText('Question of the Day')).toBeInTheDocument()
   })
 
@@ -130,5 +132,25 @@ describe('QuestionOfTheDay', () => {
     const question = getTodaysQuestion()
     const section = screen.getByRole('region', { name: question.text })
     expect(section).toHaveAttribute('aria-labelledby', 'qotd-heading')
+  })
+
+  it('renders FrostedCard accent variant surface in loaded state', () => {
+    const { container } = renderCard()
+    expect(container.querySelector('[class*="bg-violet-500/[0.08]"]')).toBeInTheDocument()
+  })
+
+  it('renders FrostedCard accent variant surface in loading state', () => {
+    vi.mocked(useQotdToday).mockReturnValueOnce({
+      question: null,
+      isLoading: true,
+      source: null,
+    })
+    const { container } = renderCard()
+    expect(container.querySelector('[class*="bg-violet-500/[0.08]"]')).toBeInTheDocument()
+  })
+
+  it('eyebrow "Question of the Day" is rendered by FrostedCard in both states', () => {
+    renderCard()
+    expect(screen.getByText('Question of the Day')).toBeInTheDocument()
   })
 })

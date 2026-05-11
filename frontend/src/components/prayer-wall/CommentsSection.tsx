@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import type { PrayerComment } from '@/types/prayer-wall'
 import type { PostType } from '@/constants/post-types'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { CommentItem } from './CommentItem'
 import { CommentInput } from './CommentInput'
 import { useAuthModal } from './AuthModalProvider'
@@ -60,7 +61,7 @@ export function CommentsSection({
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
-      <div className="mt-3 border-t border-white/10 pt-3">
+      <FrostedCard variant="subdued" as="section">
         {visibleComments.map((comment) => (
           <CommentItem
             key={comment.id}
@@ -107,7 +108,7 @@ export function CommentsSection({
             </Link>
           </div>
         )}
-      </div>
+      </FrostedCard>
     </div>
   )
 }

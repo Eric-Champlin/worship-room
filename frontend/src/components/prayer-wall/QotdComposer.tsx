@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { CharacterCount } from '@/components/ui/CharacterCount'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 import { QOTD_MAX_LENGTH, QOTD_WARNING_THRESHOLD } from '@/constants/content-limits'
 
@@ -71,7 +72,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
-      <div className="rounded-xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-sm sm:p-5">
+      <FrostedCard variant="default" as="div">
         <h3 className="mb-3 text-base font-semibold text-white">Share Your Thoughts</h3>
 
         <textarea
@@ -146,7 +147,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
             </ul>
           </div>
         )}
-      </div>
+      </FrostedCard>
     </div>
   )
 }

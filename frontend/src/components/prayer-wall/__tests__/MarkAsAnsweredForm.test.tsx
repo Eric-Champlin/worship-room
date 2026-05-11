@@ -36,4 +36,11 @@ describe('MarkAsAnsweredForm', () => {
     await user.click(screen.getByText('Cancel'))
     expect(screen.queryByLabelText('Share how God answered this prayer (optional):')).not.toBeInTheDocument()
   })
+
+  it('renders FrostedCard with canonical radius when expanded', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<MarkAsAnsweredForm onConfirm={vi.fn()} />)
+    await user.click(screen.getByText('Mark as Answered'))
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
 })

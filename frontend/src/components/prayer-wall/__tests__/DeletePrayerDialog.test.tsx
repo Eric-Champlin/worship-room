@@ -28,4 +28,11 @@ describe('DeletePrayerDialog', () => {
     await user.click(confirmButton)
     expect(onDelete).toHaveBeenCalledOnce()
   })
+
+  it('renders FrostedCard with canonical radius inside dialog', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<DeletePrayerDialog onDelete={vi.fn()} />)
+    await user.click(screen.getByText('Remove'))
+    expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
 })

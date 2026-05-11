@@ -15,6 +15,7 @@ import {
 } from '@/constants/prayer-categories'
 import { useOnlineStatus } from '@/hooks/useOnlineStatus'
 import { OfflineMessage } from '@/components/pwa/OfflineMessage'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { getActiveChallengeInfo } from '@/lib/challenge-calendar'
 import { getChallenge } from '@/data/challenges'
 import { useRovingTabindex } from '@/hooks/useRovingTabindex'
@@ -400,7 +401,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       aria-hidden={!isOpen}
       {...(!isOpen && { inert: '' as unknown as string })}
     >
-      <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5 backdrop-blur-sm sm:p-6">
+      <FrostedCard variant="default" as="div">
         <h2
           className={cn(
             'text-lg font-semibold text-white',
@@ -645,7 +646,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
             </ul>
           </div>
         )}
-      </div>
+      </FrostedCard>
       <UnsavedChangesModal isOpen={showModal} onLeave={confirmLeave} onStay={cancelLeave} />
     </div>
   )
