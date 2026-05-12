@@ -73,6 +73,14 @@
             <version>8.18.0</version>
         </dependency>
 
+        <!-- bucket4j Lettuce extension (Spec 5.6) — Redis-backed token bucket via
+             io.lettuce.core. Version pinned to match bucket4j_jdk17-core 8.18.0. -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-lettuce</artifactId>
+            <version>8.18.0</version>
+        </dependency>
+
         <!-- OWASP Java HTML Sanitizer (Spec 3.5) — strips HTML/JS from user-generated
              content per 02-security.md plain-text policy. Used by PostService to
              sanitize content, answeredText, scriptureText before persist. -->
@@ -129,6 +137,13 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
             <version>3.1.8</version>
+        </dependency>
+
+        <!-- Spring Data Redis starter (Spec 5.6) — brings Lettuce client + RedisTemplate +
+             Spring's @Cacheable Redis backend. Version resolved by spring-boot-starter-parent BOM. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
         <!-- Spring Boot JDBC starter — brings spring-jdbc (EmbeddedDatabaseType, enables

@@ -149,17 +149,11 @@ prevents a wasted deploy attempt.
 | 75   | 5.3  | 2-Line Heading Treatment                  | M    | Low    | ✅     |
 | 76   | 5.4  | Animation Token Migration                 | M    | Low    | ✅     |
 | 77   | 5.5  | Deprecated Pattern Purge and Visual Audit | M    | Low    | ✅     |
-| 78   | 5.6  | Redis Cache Foundation                    | M    | Medium | ⬜     |
+| 78   | 5.6  | Redis Cache Foundation                    | M    | Medium | ✅     |
 
 **Spec 5.3** 5.3 closed without code migration. PrayerWallHero's 2-line aesthetic (gradient h1 + cinematic + subtitle) shipped via Spec 14; brief's PageHero composition was geometrically incompatible (ATMOSPHERIC_HERO_BG masks cinematic; padding stacks layout shift). PrayerWallDashboard has no qualifying section headers. Axe-core dashboard route added.
 
 **Spec 5.5** (PrayerWallHero typography portion shipped via Spec 14 Step 7)
-
-### Spec 14 — Cinematic Hero Rollout (parallel Round 3 follow-on, 2026-05-07)
-
-| Spec | Title                                                                                                                                                                                                                                                                                                                          | Size | Risk | Status                                                     |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | ---- | ---------------------------------------------------------- |
-| 14   | Cinematic Hero Rollout (`/bible`, `/local-support/*`, `/ask`, `/grow`, `/prayer-wall`, `/music`) + PrayerWallHero Phase-5 fold-in + DailyHub test backfill + CinematicHeroBackground component test + 09-design-system.md Cinematic Hero Pattern subsection + Decision 24 reconciliation (Outcome A — audio cluster decoupled) | XL   | Med  | ✅ (Eric's manual /music audio smoke pending before merge) |
 
 ## Phase 6 — Engagement Features (14 specs)
 

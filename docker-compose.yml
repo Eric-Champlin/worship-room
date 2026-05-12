@@ -18,6 +18,22 @@ services:
       retries: 5
       start_period: 10s
 
+  redis:
+    image: redis:7-alpine
+    # AOF persistence (W23) — append-only file flushed every second, balancing
+    # durability and write amplification. Dev/local data survives container restarts.
+    command: redis-server --appendonly yes --appendfsync everysec
+    ports:
+      - "6379:6379"
+    volumes:
+      - worshiproom_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
   backend:
     build:
       context: ./backend
@@ -32,6 +48,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-dev}
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -53,3 +71,4 @@ services:
 
 volumes:
   worshiproom_postgres_data:
+  worshiproom_redis_data:
