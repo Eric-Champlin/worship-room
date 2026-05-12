@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -155,8 +155,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640
 
+  // Stabilize the context value. Without useMemo, the inline object literal
+  // creates a new reference on every render, which breaks any consumer that
+  // lists `useToast()`'s return value in a useEffect dependency array — see
+  // Spec 1.5g verification report (Issue #1) where AuthQueryParamHandler
+  // looped because of this. `showToast` / `showCelebrationToast` are already
+  // stable via useCallback, so the value object reference is stable too.
+  const contextValue = useMemo<ToastContextValue>(
+    () => ({ showToast, showCelebrationToast }),
+    [showToast, showCelebrationToast],
+  )
+
   return (
-    <ToastContext.Provider value={{ showToast, showCelebrationToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
 
       {/* Existing standard toasts — top-right */}

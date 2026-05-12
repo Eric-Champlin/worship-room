@@ -1,5 +1,7 @@
 package com.worshiproom.auth;
 
+import com.worshiproom.auth.blocklist.JwtBlocklistService;
+import com.worshiproom.user.UserRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtService jwtService,
+            JwtBlocklistService jwtBlocklistService,
+            UserRepository userRepository,
             RestAuthenticationEntryPoint authenticationEntryPoint,
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver
     ) throws Exception {
@@ -27,8 +31,11 @@ public class SecurityConfig {
         // twice. Lives only inside the Spring Security filter chain, which
         // itself runs via DelegatingFilterProxy AFTER RequestIdFilter (HIGHEST_PRECEDENCE)
         // and RateLimitFilter (HIGHEST_PRECEDENCE + 10).
+        // Spec 1.5g adds JwtBlocklistService + UserRepository for the blocklist
+        // + session-generation checks inside the filter.
         JwtAuthenticationFilter jwtAuthenticationFilter =
-            new JwtAuthenticationFilter(jwtService, handlerExceptionResolver);
+            new JwtAuthenticationFilter(jwtService, jwtBlocklistService, userRepository,
+                handlerExceptionResolver);
 
         return http
             .authorizeHttpRequests(auth -> auth
@@ -103,6 +110,16 @@ public class SecurityConfig {
                 // AntPathMatcher does NOT match nested paths via /api/v1/posts/*.
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/prayer-receipt").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/prayer-receipt/share").authenticated()
+
+                // Spec 1.5g — /api/v1/sessions/** all require authentication.
+                // Literal paths (/all, /all-others) declared BEFORE the wildcard
+                // (/sessions/*) per Phase 3 Addendum #4 (Spring's AntPathMatcher
+                // is first-match-wins, and the wildcard would otherwise swallow
+                // /all / /all-others before the literal rules see them).
+                .requestMatchers(HttpMethod.GET, "/api/v1/sessions").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/sessions/all").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/sessions/all-others").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/sessions/*").authenticated()
 
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes

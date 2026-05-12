@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.5g — `active_sessions` rows surface the
+       /settings/sessions UI ("Sign out other devices"). One row per live JWT;
+       the `jti` column is the join key against jwt_blocklist and the JWT's
+       `jti` claim. `device_label` is derived from User-Agent at login via
+       ua-parser-java (major-version only — never the raw UA, per W6/W11).
+       `ip_city` is derived from the client IP via MaxMind GeoLite2 — store
+       the city string only, never lat/long, never raw IP (W5/W12).
+       Both columns are nullable: degraded parsers / missing GeoIP DB / private
+       IPs fall back to NULL. `last_seen_at` is touched on each authenticated
+       request, throttled to once-per-60s via SQL WHERE clause. ON DELETE
+       CASCADE so deleting a user erases their sessions. -->
+
+  <changeSet id="2026-05-12-002-create-active-sessions-table" author="worship-room">
+
+    <createTable tableName="active_sessions">
+      <column name="session_id" type="UUID" defaultValueComputed="gen_random_uuid()">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_active_sessions"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="jti" type="UUID">
+        <constraints nullable="false" unique="true" uniqueConstraintName="uq_active_sessions_jti"/>
+      </column>
+      <column name="device_label" type="VARCHAR(200)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="ip_city" type="VARCHAR(100)">
+        <constraints nullable="true"/>
+      </column>
+      <column name="last_seen_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="active_sessions"
+      baseColumnNames="user_id"
+      constraintName="fk_active_sessions_user_id"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Supports the "list my sessions" query (filter by user, order by recency). -->
+    <createIndex tableName="active_sessions" indexName="idx_active_sessions_user_id">
+      <column name="user_id"/>
+      <column name="last_seen_at" descending="true"/>
+    </createIndex>
+
+    <!-- The UNIQUE constraint on jti already creates a unique index, but
+         the filter path issues `WHERE jti = ?` on every authenticated
+         request — keep the secondary index explicit for clarity. -->
+    <createIndex tableName="active_sessions" indexName="idx_active_sessions_jti">
+      <column name="jti"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="active_sessions"/>
+    </rollback>
+
+  </changeSet>
+
+</databaseChangeLog>

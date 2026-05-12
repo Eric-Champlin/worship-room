@@ -197,4 +197,48 @@ class JwtServiceTest {
 
         assertThat(claims.get("is_admin", Boolean.class)).isFalse();
     }
+
+    @Test
+    @DisplayName("Spec 1.5g: generateToken(uid, isAdmin, gen) emits jti and gen claims")
+    void generateToken_includesJtiAndGenClaims() {
+        JwtService service = newService(SECRET_32B, 3600L);
+        UUID userId = UUID.randomUUID();
+
+        String token = service.generateToken(userId, false, 7);
+        Claims claims = service.parseToken(token).getPayload();
+
+        assertThat(claims.getId()).as("jti claim").isNotBlank();
+        // jti must round-trip as a valid UUID
+        UUID.fromString(claims.getId());
+        assertThat(claims.get("gen", Integer.class)).isEqualTo(7);
+        assertThat(claims.getSubject()).isEqualTo(userId.toString());
+    }
+
+    @Test
+    @DisplayName("Spec 1.5g: each generateToken call produces a distinct jti")
+    void generateToken_jtiIsUniqueAcrossCalls() {
+        JwtService service = newService(SECRET_32B, 3600L);
+        UUID userId = UUID.randomUUID();
+        java.util.Set<String> jtis = new java.util.HashSet<>();
+
+        for (int i = 0; i < 100; i++) {
+            String token = service.generateToken(userId, false, 0);
+            jtis.add(service.parseToken(token).getPayload().getId());
+        }
+
+        assertThat(jtis).hasSize(100);
+    }
+
+    @Test
+    @DisplayName("Spec 1.5g: 2-arg overload synthesizes gen=0 (test-fixture convenience)")
+    void generateToken_twoArgOverloadDefaultsGenToZero() {
+        JwtService service = newService(SECRET_32B, 3600L);
+        UUID userId = UUID.randomUUID();
+
+        String token = service.generateToken(userId, false);
+        Claims claims = service.parseToken(token).getPayload();
+
+        assertThat(claims.get("gen", Integer.class)).isZero();
+        assertThat(claims.getId()).isNotBlank();
+    }
 }

@@ -185,6 +185,64 @@ Expected output (after a fresh `docker compose down -v && docker compose up -d p
 
 **Production safety:** `application-prod.properties` sets `spring.liquibase.contexts=production` — the `context="dev"` mock seed is NEVER applied to production deployments. Tests under `AbstractIntegrationTest` pin `contexts=test`, so the mock seed is also NEVER applied during the test suite (verified by `MockSeedDevContextTest.mockSeedDoesNotLoadUnderTestContext`).
 
+## GeoIP Setup (Spec 1.5g — optional)
+
+The `/settings/sessions` UI shows the user's active sign-in sessions with a coarse city derived from the request IP. The city comes from a local copy of MaxMind's free GeoLite2-City database; no third-party API calls happen at runtime (privacy + latency).
+
+**The backend boots fine without this**. When the `.mmdb` file is absent, `ip_city` is stored as `NULL` for every session and the UI shows "Unknown location". You only need to set this up if you want city labels to appear in development.
+
+### One-time setup
+
+1. **Register at <https://www.maxmind.com>** and accept the GeoLite2 EULA (free for commercial use with attribution).
+2. **Generate a license key** in your MaxMind account → "My License Key" → "Generate new license key" (any key type works; the free tier allows the GeoLite2-City download).
+3. **Set the env var** in your local environment:
+   ```sh
+   export MAXMIND_LICENSE_KEY=YOUR_KEY_HERE
+   ```
+   Recommended: add it to `backend/.env` (this file is `.gitignore`d).
+4. **Confirm `.gitignore`** covers `data/geoip/` and `*.mmdb` (already configured in `backend/.gitignore`). The `.mmdb` is ~50MB and the EULA forbids redistribution under the free tier.
+
+### Downloading / refreshing the database
+
+The download is wired into Maven via the `geoip-download` profile, activated automatically when `MAXMIND_LICENSE_KEY` is set:
+
+```sh
+./mvnw process-resources    # download to backend/data/geoip/
+```
+
+Or run as part of any full build:
+
+```sh
+./mvnw package              # also fetches if MAXMIND_LICENSE_KEY is set
+```
+
+Refresh cadence is manual — re-run `mvn process-resources` whenever you want a newer database. City geography drifts slowly; monthly is plenty. There is no `@Scheduled` runtime refresh.
+
+### Production deployment
+
+In production, set `MAXMIND_LICENSE_KEY` on the deploy platform (Railway/Render Variables UI). The build pipeline picks it up and bakes the `.mmdb` into the deployed artifact's working directory. If the key is absent in prod, sessions get `ip_city=NULL` — no crash, no startup failure.
+
+### Verification
+
+```sh
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+Watch for one of these log lines at startup:
+
+- `GeoIP database loaded path=./data/geoip/GeoLite2-City.mmdb` — working
+- `GeoIP database unavailable at path=...; city lookups disabled.` — degraded (expected if you skipped the setup)
+
+### Path override
+
+The default lookup path is `./data/geoip/GeoLite2-City.mmdb` relative to the backend working directory. Override via:
+
+```properties
+geoip.database-path=/var/data/geoip/GeoLite2-City.mmdb
+```
+
+in `application.properties` or via env var (`GEOIP_DATABASE_PATH=...`).
+
 ## Key files referenced by project rules
 
 - `.claude/rules/03-backend-standards.md` — Spring Boot conventions, API contract, `@RestControllerAdvice` scoping patterns

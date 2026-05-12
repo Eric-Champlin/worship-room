@@ -48,12 +48,42 @@ public class JwtService {
         }
     }
 
+    /**
+     * Test-fixture overload — synthesizes a token with {@code gen=0}. Production
+     * code MUST call the 3-arg overload with the real {@code users.session_generation}
+     * value; this form exists so the ~40 pre-1.5g test call sites continue to compile
+     * unchanged. {@code gen=0} matches the DB column default for newly-created users,
+     * so the filter check passes for tests that don't exercise session-generation
+     * mismatch scenarios. Mirrors the {@code AuthenticatedUser} 2-arg secondary
+     * constructor pattern (Decision 1).
+     */
     public String generateToken(UUID userId, boolean isAdmin) {
+        return generateToken(userId, isAdmin, 0);
+    }
+
+    /**
+     * Forums Wave Spec 1.5g — issue a signed JWT carrying {@code jti} (random
+     * per-call UUID) and {@code gen} (caller-supplied session generation).
+     *
+     * <p>The {@code jti} is the lookup key for the revocation blocklist
+     * ({@code jwt_blocklist} + Redis). The {@code gen} is the caller-side
+     * snapshot of {@code users.session_generation} at issue time; the auth
+     * filter rejects any token whose claim no longer matches the row value
+     * (the password-change and logout-all flows bump the row counter).
+     *
+     * <p>{@code jti} is generated INSIDE this method and is NOT derivable from
+     * {@code userId} (cryptographic unpredictability is a property of the
+     * blocklist, not a coincidence).
+     */
+    public String generateToken(UUID userId, boolean isAdmin, int sessionGeneration) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(config.getExpirationSeconds());
+        UUID jti = UUID.randomUUID();
         return Jwts.builder()
+            .id(jti.toString())
             .subject(userId.toString())
             .claim("is_admin", isAdmin)
+            .claim("gen", sessionGeneration)
             .issuedAt(Date.from(now))
             .expiration(Date.from(exp))
             .signWith(signingKey, Jwts.SIG.HS256)

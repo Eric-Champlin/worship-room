@@ -1,5 +1,7 @@
 package com.worshiproom.auth;
 
+import com.worshiproom.auth.blocklist.JwtBlocklistService;
+import com.worshiproom.user.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -41,6 +43,8 @@ class JwtAuthenticationFilterTest {
     private static final String SECRET_32B = "a-32-byte-test-secret-xxxxxxxxxx";
 
     private JwtService jwtService;
+    private JwtBlocklistService jwtBlocklistService;
+    private UserRepository userRepository;
     private HandlerExceptionResolver resolver;
     private JwtAuthenticationFilter filter;
     private MockHttpServletRequest request;
@@ -50,8 +54,10 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         jwtService = mock(JwtService.class);
+        jwtBlocklistService = mock(JwtBlocklistService.class);
+        userRepository = mock(UserRepository.class);
         resolver = mock(HandlerExceptionResolver.class);
-        filter = new JwtAuthenticationFilter(jwtService, resolver);
+        filter = new JwtAuthenticationFilter(jwtService, jwtBlocklistService, userRepository, resolver);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         chain = mock(FilterChain.class);
@@ -198,6 +204,140 @@ class JwtAuthenticationFilterTest {
         assertThat(principal.isAdmin()).isFalse();
     }
 
+    // ----- Spec 1.5g — blocklist + session-generation checks -----
+
+    @Test
+    @DisplayName("1.5g: pre-migration token (no jti, no gen) passes through (Gate-G-MIGRATION)")
+    void preMigrationTokenPassesThroughBothChecks() throws Exception {
+        UUID userId = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsNoAdminClaim(userId.toString(), 3600);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        request.addHeader("Authorization", "Bearer pre-migration.token");
+
+        filter.doFilter(request, response, chain);
+
+        // No blocklist call when jti is absent
+        verify(jwtBlocklistService, never()).isRevoked(any());
+        // No session-gen lookup when claim is absent
+        verify(userRepository, never()).getSessionGenerationByUserId(any());
+        verify(chain, times(1)).doFilter(request, response);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        AuthenticatedUser principal = (AuthenticatedUser) auth.getPrincipal();
+        assertThat(principal.jti()).isNull();
+    }
+
+    @Test
+    @DisplayName("1.5g: token with jti consults blocklist; not-revoked passes through")
+    void tokenWithJtiConsultsBlocklistAndPasses() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsWithJtiAndGen(userId.toString(), false, 3600, jti, null);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        when(jwtBlocklistService.isRevoked(jti)).thenReturn(false);
+        request.addHeader("Authorization", "Bearer valid.with.jti");
+
+        filter.doFilter(request, response, chain);
+
+        verify(jwtBlocklistService, times(1)).isRevoked(jti);
+        verify(chain, times(1)).doFilter(request, response);
+        AuthenticatedUser principal = (AuthenticatedUser) SecurityContextHolder
+            .getContext().getAuthentication().getPrincipal();
+        assertThat(principal.jti()).isEqualTo(jti);
+        assertThat(principal.expiresAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("1.5g: revoked jti → TOKEN_REVOKED, chain not advanced")
+    void revokedJtiRejectsWithTokenRevoked() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsWithJtiAndGen(userId.toString(), false, 3600, jti, null);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        when(jwtBlocklistService.isRevoked(jti)).thenReturn(true);
+        request.addHeader("Authorization", "Bearer revoked.token");
+
+        filter.doFilter(request, response, chain);
+
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(resolver, times(1)).resolveException(eq(request), eq(response), isNull(), captor.capture());
+        assertThat(((AuthException) captor.getValue()).getCode()).isEqualTo("TOKEN_REVOKED");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    @DisplayName("1.5g: gen claim matching current row passes through")
+    void genClaimMatchesCurrentRowPasses() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsWithJtiAndGen(userId.toString(), false, 3600, jti, 0);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        when(jwtBlocklistService.isRevoked(jti)).thenReturn(false);
+        when(userRepository.getSessionGenerationByUserId(userId))
+            .thenReturn(java.util.Optional.of(0));
+        request.addHeader("Authorization", "Bearer gen0.token");
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain, times(1)).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("1.5g: gen claim mismatch → TOKEN_REVOKED")
+    void genClaimMismatchRejectsWithTokenRevoked() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsWithJtiAndGen(userId.toString(), false, 3600, jti, 2);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        when(jwtBlocklistService.isRevoked(jti)).thenReturn(false);
+        when(userRepository.getSessionGenerationByUserId(userId))
+            .thenReturn(java.util.Optional.of(5));
+        request.addHeader("Authorization", "Bearer stale.gen.token");
+
+        filter.doFilter(request, response, chain);
+
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(resolver, times(1)).resolveException(eq(request), eq(response), isNull(), captor.capture());
+        assertThat(((AuthException) captor.getValue()).getCode()).isEqualTo("TOKEN_REVOKED");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    @DisplayName("1.5g: blocklist Postgres outage propagates → TOKEN_INVALID (Gate-G-FAIL-CLOSED)")
+    void blocklistInfrastructureFailureFailsClosed() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsWithJtiAndGen(userId.toString(), false, 3600, jti, null);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        when(jwtBlocklistService.isRevoked(jti))
+            .thenThrow(new IllegalStateException("redis and postgres both down"));
+        request.addHeader("Authorization", "Bearer infra.outage.token");
+
+        filter.doFilter(request, response, chain);
+
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(resolver, times(1)).resolveException(eq(request), eq(response), isNull(), captor.capture());
+        assertThat(((AuthException) captor.getValue()).getCode()).isEqualTo("TOKEN_INVALID");
+        verify(chain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    @DisplayName("1.5g: malformed jti claim → TOKEN_MALFORMED")
+    void malformedJtiClaimRejectsWithTokenMalformed() throws Exception {
+        UUID userId = UUID.randomUUID();
+        Jws<Claims> jws = signedJwsWithJtiAndGen(userId.toString(), false, 3600, "not-a-uuid", null);
+        when(jwtService.parseToken(any())).thenReturn(jws);
+        request.addHeader("Authorization", "Bearer bad.jti.token");
+
+        filter.doFilter(request, response, chain);
+
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(resolver, times(1)).resolveException(eq(request), eq(response), isNull(), captor.capture());
+        assertThat(((AuthException) captor.getValue()).getCode()).isEqualTo("TOKEN_MALFORMED");
+        verify(chain, never()).doFilter(any(), any());
+        // Blocklist never consulted — jti parse failed first
+        verify(jwtBlocklistService, never()).isRevoked(any());
+    }
+
     /** Build a real Jws<Claims> for tests that want to stub parseToken with a valid result. */
     private static Jws<Claims> signedJws(String sub, boolean isAdmin, int expiresInSeconds) {
         SecretKey key = Keys.hmacShaKeyFor(SECRET_32B.getBytes(StandardCharsets.UTF_8));
@@ -222,6 +362,30 @@ class JwtAuthenticationFilterTest {
             .expiration(Date.from(now.plusSeconds(expiresInSeconds)))
             .signWith(key, Jwts.SIG.HS256)
             .compact();
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+    }
+
+    /** Spec 1.5g — builds a token with jti + optional gen claims. */
+    private static Jws<Claims> signedJwsWithJtiAndGen(String sub, boolean isAdmin,
+                                                     int expiresInSeconds, UUID jti, Integer gen) {
+        return signedJwsWithJtiAndGen(sub, isAdmin, expiresInSeconds, jti.toString(), gen);
+    }
+
+    /** Spec 1.5g — String-jti variant for malformed-jti tests. */
+    private static Jws<Claims> signedJwsWithJtiAndGen(String sub, boolean isAdmin,
+                                                     int expiresInSeconds, String jti, Integer gen) {
+        SecretKey key = Keys.hmacShaKeyFor(SECRET_32B.getBytes(StandardCharsets.UTF_8));
+        Instant now = Instant.now();
+        io.jsonwebtoken.JwtBuilder builder = Jwts.builder()
+            .id(jti)
+            .subject(sub)
+            .claim("is_admin", isAdmin)
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plusSeconds(expiresInSeconds)));
+        if (gen != null) {
+            builder.claim("gen", gen);
+        }
+        String token = builder.signWith(key, Jwts.SIG.HS256).compact();
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
     }
 }

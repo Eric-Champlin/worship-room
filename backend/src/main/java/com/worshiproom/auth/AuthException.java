@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
  * maps instances back to the shared ProxyError API response shape.
  *
  * Error codes: UNAUTHORIZED, TOKEN_INVALID, TOKEN_EXPIRED, TOKEN_MALFORMED,
- * INVALID_CREDENTIALS, ACCOUNT_LOCKED, CURRENT_PASSWORD_INCORRECT,
- * PASSWORDS_MUST_DIFFER, CHANGE_PASSWORD_RATE_LIMITED.
+ * TOKEN_REVOKED, INVALID_CREDENTIALS, ACCOUNT_LOCKED, CURRENT_PASSWORD_INCORRECT,
+ * PASSWORDS_MUST_DIFFER, CHANGE_PASSWORD_RATE_LIMITED, SESSION_RATE_LIMITED.
  */
 public class AuthException extends RuntimeException {
     private final HttpStatus status;
@@ -42,6 +42,18 @@ public class AuthException extends RuntimeException {
         return new AuthException(HttpStatus.UNAUTHORIZED, "TOKEN_EXPIRED",
             "Authentication token has expired.");
     }
+    /**
+     * Forums Wave Spec 1.5g — the token's {@code jti} is in the blocklist, OR the
+     * token's {@code gen} claim no longer matches the user's {@code session_generation}
+     * (logout-all or password-change rolled the counter forward). Frontend treats
+     * this identically to TOKEN_EXPIRED: clear the stored JWT and surface the auth
+     * modal. Anti-pressure copy: "This session has been signed out." — no surveillance
+     * framing, no urgency.
+     */
+    public static AuthException tokenRevoked() {
+        return new AuthException(HttpStatus.UNAUTHORIZED, "TOKEN_REVOKED",
+            "This session has been signed out.");
+    }
     public static AuthException invalidCredentials() {
         return new AuthException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
             "Invalid email or password.");
@@ -68,5 +80,12 @@ public class AuthException extends RuntimeException {
     }
     public static ChangePasswordRateLimitedException changePasswordRateLimited(long retryAfterSeconds) {
         return new ChangePasswordRateLimitedException(Math.max(1L, retryAfterSeconds));
+    }
+    /**
+     * Forums Wave Spec 1.5g — too many calls to {@code /api/v1/sessions/*} within
+     * the configured window. Per-user limit (10/hour by default).
+     */
+    public static SessionRateLimitedException sessionRateLimited(long retryAfterSeconds) {
+        return new SessionRateLimitedException(Math.max(1L, retryAfterSeconds));
     }
 }

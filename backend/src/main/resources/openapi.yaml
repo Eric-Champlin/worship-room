@@ -32,6 +32,8 @@ tags:
     description: Proxied FCBH Digital Bible Platform endpoints
   - name: Auth
     description: Registration, login, logout
+  - name: Sessions
+    description: Active-session management — list / revoke one / revoke others / sign out everywhere (Spec 1.5g)
   - name: Users
     description: Authenticated user profile (self) — Spec 1.6
   - name: Activity
@@ -673,16 +675,28 @@ paths:
   /api/v1/auth/logout:
     post:
       tags: [Auth]
-      summary: Log out (stateless no-op)
+      summary: Log out (Spec 1.5g — now actually invalidates the token)
       description: |
-        Stateless logout — the backend has no session to destroy. Returns 204
-        regardless of token presence or validity. Spec 1.5g will add session
-        invalidation.
+        Spec 1.5g — endpoint requires authentication. Reads `principal.jti` from
+        the JWT and blocklists it (Postgres + Redis dual-write). Subsequent
+        requests with the same token return 401 TOKEN_REVOKED.
+
+        Pre-1.5g tokens (no `jti` claim) are silent no-op — the principal carries
+        a null `jti` and the service skips the blocklist write.
       operationId: logoutUser
-      security: []
+      security:
+        - bearerAuth: []
       responses:
         '204':
           description: No content
+        '401':
+          description: |
+            Missing/invalid Authorization header (UNAUTHORIZED, TOKEN_INVALID,
+            TOKEN_EXPIRED, TOKEN_MALFORMED, or TOKEN_REVOKED if the token was
+            already revoked).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
 
   /api/v1/auth/change-password:
     post:
@@ -691,8 +705,15 @@ paths:
       description: |
         Verifies the current password via BCrypt, rejects if the new password
         matches the current hash, then re-hashes and saves the new password.
-        Existing JWTs (current request and other devices) remain valid until
-        their natural expiry — Spec 1.5g will add session invalidation.
+
+        **Spec 1.5g** — atomically bumps `users.session_generation`, invalidating
+        every JWT for the user with the prior `gen` claim. Issues a NEW JWT
+        carrying the new `gen` claim and returns it in the response body so the
+        current device can swap it transparently. Other devices' tokens fail
+        their next request with 401 TOKEN_REVOKED.
+
+        **Response shape change from pre-1.5g:** was 204 No Content; now 200 OK
+        with `{ data: { token: "<new-jwt>" }, meta: { requestId } }`.
 
         Rate-limited per user: 5 attempts per 15 min. On 429 includes
         Retry-After header.
@@ -708,8 +729,22 @@ paths:
           application/json:
             schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
       responses:
-        '204':
-          description: Password updated successfully (no body)
+        '200':
+          description: |
+            Password updated successfully. The body carries a freshly-issued JWT
+            that the caller swaps into their stored token (other devices'
+            tokens are now invalidated server-side).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/ChangePasswordResponse' }
+                  meta:
+                    type: object
+                    properties:
+                      requestId: { type: string }
         '400':
           description: |
             Validation failed (current/new blank, new < 8 chars, etc.) OR new
@@ -748,6 +783,147 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ProxyError' }
         '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/sessions:
+    get:
+      tags: [Sessions]
+      summary: List the current user's active sessions (Spec 1.5g)
+      description: |
+        Returns one row per live JWT for the authenticated user, sorted by
+        last-seen-at descending. The `isCurrent` flag identifies the row
+        backing this request's token (server-derived; clients can't determine
+        their own `jti`).
+
+        Rate-limited per user (10/hour by default).
+      operationId: listSessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sessions list.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionListResponse' }
+        '401':
+          description: Missing/invalid/revoked token.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Too many session-management requests.
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
+  /api/v1/sessions/all:
+    delete:
+      tags: [Sessions]
+      summary: Sign out everywhere — revoke every session including current (Spec 1.5g)
+      description: |
+        Atomically bumps `users.session_generation`, invalidating every JWT
+        for the user (including the current request's token). Deletes every
+        `active_sessions` row for the user. Returns 204; the current request's
+        token now fails 401 TOKEN_REVOKED on the next call. Frontend handles
+        the redirect after this 204 lands.
+
+        Rate-limited per user (10/hour).
+      operationId: revokeAllSessions
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: All sessions revoked.
+        '401':
+          description: Missing/invalid/revoked token.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Too many session-management requests.
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
+  /api/v1/sessions/all-others:
+    delete:
+      tags: [Sessions]
+      summary: Sign out other devices — revoke every session except current (Spec 1.5g)
+      description: |
+        Blocklists every `jti` for the user except `principal.jti`, then
+        deletes the corresponding `active_sessions` rows. Current device
+        continues with its existing token.
+
+        Rate-limited per user (10/hour).
+      operationId: revokeAllOtherSessions
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Other sessions revoked.
+        '401':
+          description: Missing/invalid/revoked token.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Too many session-management requests.
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
+  /api/v1/sessions/{sessionId}:
+    delete:
+      tags: [Sessions]
+      summary: Revoke one specific session by its sessionId (Spec 1.5g)
+      description: |
+        Blocklists the session's `jti` and deletes the `active_sessions` row.
+        Cross-user revoke returns 403 FORBIDDEN (NEVER 404 — don't leak the
+        existence of other users' sessions). Unknown `sessionId` also returns
+        403 for the same anti-enumeration reason.
+
+        Rate-limited per user (10/hour).
+      operationId: revokeSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Session revoked.
+        '401':
+          description: Missing/invalid/revoked token.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '403':
+          description: |
+            Session not found or owned by a different user. Same response
+            shape and status for both cases — W7/W9 anti-enumeration.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Too many session-management requests.
+          headers:
+            Retry-After:
+              schema: { type: integer, minimum: 1 }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
 
   /api/v1/users/me:
     get:
@@ -3071,6 +3247,72 @@ components:
           description: |
             New password. Minimum 8 characters; no complexity requirements.
             Must differ from the current password (BCrypt-checked).
+
+    ChangePasswordResponse:
+      description: |
+        Spec 1.5g — body shape for the 200 response of POST /auth/change-password.
+        Carries the freshly-issued JWT (with new `gen` claim) that the caller
+        swaps into their stored token. Other devices' tokens are now stale.
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          description: New JWT carrying the post-increment `gen` claim.
+
+    Session:
+      description: |
+        Spec 1.5g — one active session (one live JWT). Returned by GET /sessions.
+        NEVER includes `jti` (server-side blocklist key); `sessionId` is the
+        public revocation key.
+      type: object
+      required: [sessionId, lastSeenAt, createdAt, isCurrent]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: Public identifier used as the path parameter for DELETE /sessions/{sessionId}.
+        deviceLabel:
+          type: string
+          maxLength: 200
+          nullable: true
+          description: |
+            Parsed device label (major-version only — never raw User-Agent).
+            Example "Chrome 124 on macOS 14". Null or "Unknown device" when
+            the UA was missing or unparseable.
+        ipCity:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: |
+            City derived from the login IP via MaxMind GeoLite2 (offline). Null
+            when the IP is private/local/unknown or the GeoIP database isn't
+            loaded. Never lat/long; never raw IP.
+        lastSeenAt:
+          type: string
+          format: date-time
+          description: Last seen time (throttled to once-per-60s update).
+        createdAt:
+          type: string
+          format: date-time
+        isCurrent:
+          type: boolean
+          description: |
+            True when this session backs the current request's token
+            (server-derived; clients can't observe their own jti).
+
+    SessionListResponse:
+      description: Spec 1.5g — response shape for GET /api/v1/sessions.
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Session' }
+        meta:
+          type: object
+          properties:
+            requestId: { type: string }
 
     RegisterResponseData:
       type: object

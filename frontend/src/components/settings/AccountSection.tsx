@@ -69,6 +69,17 @@ export function AccountSection({ email }: AccountSectionProps) {
               Change Password
             </button>
           </div>
+
+          {/* Spec 1.5g — Active Sessions */}
+          <div>
+            <button
+              type="button"
+              onClick={() => navigate('/settings/sessions')}
+              className="text-sm text-violet-300 hover:text-violet-200 transition-colors min-h-[44px] px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dashboard-dark"
+            >
+              Active sessions
+            </button>
+          </div>
         </div>
 
         {/* Delete Account */}

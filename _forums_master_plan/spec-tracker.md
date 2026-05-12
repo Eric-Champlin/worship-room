@@ -38,7 +38,7 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 11  | 1.5d  | Email Verification Flow                        | L    | Medium   | ‼️     |
 | 12  | 1.5e  | Change Email with Re-Verification              | M    | Medium   | ‼️     |
 | 13  | 1.5f  | Account Lockout & Brute Force Protection       | M    | Medium   | ✅     |
-| 14  | 1.5g  | Session Invalidation & Logout-All-Devices      | M    | Medium   | ‼️     |
+| 14  | 1.5g  | Session Invalidation & Logout-All-Devices      | M    | Medium   | ✅     |
 | 15  | 1.6   | User Me Endpoint                               | S    | Low      | ✅     |
 | 16  | 1.7   | Testcontainers Integration Test Infrastructure | M    | Low      | ✅     |
 | 17  | 1.8   | Dev Seed Data                                  | S    | Low      | ✅     |
@@ -59,7 +59,6 @@ Within each phase, specs are sequential — each spec's prerequisites are the sp
 | 32  | 1.10m | Community Guidelines Document                  | S    | Low      | ✅     |
 
 After 15.1 ships: 1.5b, 1.5d, 1.5e.
-After 5.6 ships: 1.5g.
 1.10c is $20/month.
 
 > **1.10f partial-shipped (2026-04-28 audit):** Canonical legal markdown at `content/{terms-of-service,privacy-policy,community-guidelines}.md` IS shipped. The `users.terms_version` / `users.privacy_version` columns, registration consent checkbox, `LegalVersionService.java`, `TermsUpdateModal.tsx`, `GET /api/v1/legal/versions`, and `POST /api/v1/users/me/legal/accept` endpoints are NOT yet shipped. Tracker reverted to ⬜ pending the column-and-endpoint work; the legal-content portion remains in `content/`.
@@ -159,7 +158,7 @@ prevents a wasted deploy attempt.
 
 | #   | Spec  | Title                         | Size | Risk     | Status |
 | --- | ----- | ----------------------------- | ---- | -------- | ------ |
-| 79  | 6.1   | Prayer Receipt                | L    | Medium   | ⬜     |
+| 79  | 6.1   | Prayer Receipt                | L    | Medium   | ✅     |
 | 80  | 6.2   | Quick Lift                    | M    | Low      | ⬜     |
 | 81  | 6.2b  | Prayer Length Options         | M    | Low      | ⬜     |
 | 82  | 6.3   | Night Mode                    | L    | Medium   | ⬜     |

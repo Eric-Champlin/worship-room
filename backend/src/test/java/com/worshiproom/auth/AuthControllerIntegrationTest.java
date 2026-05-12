@@ -164,22 +164,46 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
             .andExpect(jsonPath("$.data.user.email").value("caseless@example.com"));
     }
 
+    // ----- Spec 1.5g — logout now requires authentication (was anonymous before) -----
+
     @Test
-    void logoutReturns204() throws Exception {
+    void logoutWithoutTokenReturns401() throws Exception {
+        // 1.5g — endpoint removed from PublicPaths so the filter can read
+        // principal.jti for blocklisting. Anonymous calls now get 401.
         mvc.perform(post("/api/v1/auth/logout"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void logoutIdempotent() throws Exception {
-        mvc.perform(post("/api/v1/auth/logout")).andExpect(status().isNoContent());
-        mvc.perform(post("/api/v1/auth/logout")).andExpect(status().isNoContent());
-    }
-
-    @Test
-    void logoutWithInvalidTokenStillReturns204() throws Exception {
+    void logoutWithInvalidTokenReturns401() throws Exception {
         mvc.perform(post("/api/v1/auth/logout").header("Authorization", "Bearer invalid.token"))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logoutWithValidTokenReturns204AndRevokesJti() throws Exception {
+        // Full flow: register + login → use returned JWT to call logout → 204
+        // → same token now fails subsequent requests with 401 TOKEN_REVOKED.
+        registerHelper("logout-revoke@example.com", "hunter2hunter2", "Lo", "Out", "UTC");
+        String loginBody = mapper.writeValueAsString(Map.of(
+            "email", "logout-revoke@example.com", "password", "hunter2hunter2"));
+        MvcResult loginResult = mvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON).content(loginBody))
+            .andExpect(status().isOk())
+            .andReturn();
+        String token = mapper.readTree(loginResult.getResponse().getContentAsString())
+            .get("data").get("token").asText();
+
+        // First logout: 204, jti is now blocklisted.
+        mvc.perform(post("/api/v1/auth/logout")
+                .header("Authorization", "Bearer " + token))
             .andExpect(status().isNoContent());
+
+        // Second request with the same token fails 401 TOKEN_REVOKED.
+        mvc.perform(post("/api/v1/auth/logout")
+                .header("Authorization", "Bearer " + token))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("TOKEN_REVOKED"));
     }
 
     @Test

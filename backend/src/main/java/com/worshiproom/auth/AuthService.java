@@ -1,7 +1,10 @@
 package com.worshiproom.auth;
 
+import com.worshiproom.auth.blocklist.JwtBlocklistService;
 import com.worshiproom.auth.dto.AuthResponse;
 import com.worshiproom.auth.dto.ChangePasswordRequest;
+import com.worshiproom.auth.dto.ChangePasswordResponse;
+import com.worshiproom.auth.session.ActiveSessionService;
 import com.worshiproom.auth.dto.LoginRequest;
 import com.worshiproom.auth.dto.RegisterRequest;
 import com.worshiproom.auth.dto.RegisterResponse;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DateTimeException;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -46,6 +50,9 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final JwtConfig jwtConfig;
+    private final JwtBlocklistService jwtBlocklistService;
+    private final ActiveSessionService activeSessionService;
     private final LegalVersionService legalVersionService;
     private final LoginAttemptService loginAttemptService;
     private final ChangePasswordRateLimitService changePasswordRateLimitService;
@@ -53,12 +60,18 @@ public class AuthService {
     public AuthService(UserRepository userRepository,
                        BCryptPasswordEncoder passwordEncoder,
                        JwtService jwtService,
+                       JwtConfig jwtConfig,
+                       JwtBlocklistService jwtBlocklistService,
+                       ActiveSessionService activeSessionService,
                        LegalVersionService legalVersionService,
                        LoginAttemptService loginAttemptService,
                        ChangePasswordRateLimitService changePasswordRateLimitService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.jwtConfig = jwtConfig;
+        this.jwtBlocklistService = jwtBlocklistService;
+        this.activeSessionService = activeSessionService;
         this.legalVersionService = legalVersionService;
         this.loginAttemptService = loginAttemptService;
         this.changePasswordRateLimitService = changePasswordRateLimitService;
@@ -112,8 +125,18 @@ public class AuthService {
     // even though we're about to throw AuthException.invalidCredentials(). Default
     // rollback-on-RuntimeException would silently undo the lockout write — five wrong
     // attempts would never accumulate, defeating the entire spec.
-    @Transactional(noRollbackFor = AuthException.class)
+    /**
+     * Convenience overload — preserves the pre-1.5g 1-arg shape for any caller
+     * that doesn't care about session recording (notably most unit tests). The
+     * primary 3-arg overload accepts {@code userAgent} + {@code ipAddress} so
+     * {@code active_sessions} can be populated for the production HTTP path.
+     */
     public AuthResponse login(LoginRequest request) {
+        return login(request, null, null);
+    }
+
+    @Transactional(noRollbackFor = AuthException.class)
+    public AuthResponse login(LoginRequest request, String userAgent, String ipAddress) {
         String normalizedEmail = request.email().toLowerCase(Locale.ROOT).trim();
         Optional<User> maybeUser = userRepository.findByEmailIgnoreCase(normalizedEmail);
 
@@ -165,7 +188,20 @@ public class AuthService {
         // Password correct and not locked — reset counters (conditional) and issue token.
         loginAttemptService.recordSuccessfulLogin(user);
 
-        String token = jwtService.generateToken(user.getId(), user.isAdmin());
+        // Spec 1.5g — issue token carrying the current session_generation so the
+        // filter's per-request check can compare against the row value.
+        String token = jwtService.generateToken(user.getId(), user.isAdmin(),
+            user.getSessionGeneration());
+
+        // Spec 1.5g — record the live session for /settings/sessions UI. UA + IP
+        // arrive from the controller (which has the HttpServletRequest); when
+        // they're null (e.g., the 1-arg overload used by unit tests), we skip
+        // the recording entirely — there's no useful row to write.
+        if (userAgent != null || ipAddress != null) {
+            UUID jti = extractJtiFromToken(token);
+            activeSessionService.recordSession(user.getId(), jti, userAgent, ipAddress);
+        }
+
         UserSummary summary = new UserSummary(
             user.getId(),
             user.getEmail(),
@@ -179,18 +215,27 @@ public class AuthService {
         return new AuthResponse(token, summary);
     }
 
+    private UUID extractJtiFromToken(String token) {
+        return UUID.fromString(jwtService.parseToken(token).getPayload().getId());
+    }
+
     /**
-     * Spec 1.5c — Change Password.
+     * Spec 1.5c (modified by Spec 1.5g) — Change Password.
      *
-     * Flow: rate-limit check (fail-fast on abuse) → load user → BCrypt-verify
+     * <p>Flow: rate-limit check (fail-fast on abuse) → load user → BCrypt-verify
      * current password (always run, for timing equalization defense-in-depth) →
-     * BCrypt-verify new differs from current → re-hash and save.
+     * BCrypt-verify new differs from current → re-hash and save → 1.5g: bump
+     * {@code session_generation} (atomically invalidates OTHER devices' tokens)
+     * → issue NEW JWT with new {@code gen} claim → return it.
      *
-     * Does NOT invalidate other sessions (Spec 1.5g territory; Redis-blocked).
-     * Does NOT issue a new JWT — caller continues with their existing token.
+     * <p>Other devices' tokens stop working on their next request (filter rejects
+     * with TOKEN_REVOKED). This device continues seamlessly with the returned
+     * fresh token.
+     *
+     * @return {@link ChangePasswordResponse} carrying the new JWT
      */
     @Transactional
-    public void changePassword(UUID userId, ChangePasswordRequest request) {
+    public ChangePasswordResponse changePassword(UUID userId, ChangePasswordRequest request) {
         changePasswordRateLimitService.checkAndConsume(userId);
 
         User user = userRepository.findById(userId)
@@ -216,7 +261,47 @@ public class AuthService {
         user.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         userRepository.save(user);
 
-        log.info("changePasswordSucceeded userId={}", userId);
+        // Spec 1.5g — atomic increment invalidates every JWT for this user with
+        // the prior gen claim. Custom-impl UPDATE...RETURNING runs as a single
+        // SQL statement (row-locked for concurrent-safety) and returns the new
+        // value; @CacheEvict on the custom impl clears the session-gen lookup
+        // cache so subsequent filter checks see the fresh value.
+        int newGen = userRepository.incrementSessionGeneration(userId);
+
+        // Issue the new JWT BEFORE returning so the caller can swap it transparently.
+        String newToken = jwtService.generateToken(userId, user.isAdmin(), newGen);
+        log.info("changePasswordSucceeded userId={} newGen={}", userId, newGen);
+        return new ChangePasswordResponse(newToken);
+    }
+
+    /**
+     * Forums Wave Spec 1.5g — actual logout (was a no-op before this spec).
+     *
+     * <p>Blocklists the principal's current {@code jti} so subsequent requests
+     * with the same token fail with 401 TOKEN_REVOKED, then removes the matching
+     * {@code active_sessions} row so {@code GET /api/v1/sessions} reflects the
+     * logout immediately. Pre-1.5g tokens (no {@code jti} carried on the
+     * principal) silently no-op — there's nothing to blocklist, and the natural
+     * token expiry kicks in within an hour.
+     *
+     * <p>Does NOT touch {@code session_generation}: only THIS session is being
+     * revoked. Other devices keep their sessions. "Sign out all devices" lives
+     * at {@code DELETE /api/v1/sessions/all} and uses
+     * {@link JwtBlocklistService#invalidateAllForUser}.
+     */
+    @Transactional
+    public void logout(AuthenticatedUser principal) {
+        if (principal.jti() == null) {
+            // Pre-1.5g token. Gate-G-MIGRATION: no jti to blocklist; no-op.
+            log.info("logoutPreMigrationToken userId={}", principal.userId());
+            return;
+        }
+        OffsetDateTime expiresAtUtc = OffsetDateTime.ofInstant(
+            principal.expiresAt(), ZoneOffset.UTC);
+        Duration maxTtl = Duration.ofSeconds(jwtConfig.getExpirationSeconds());
+        jwtBlocklistService.revoke(principal.jti(), principal.userId(), expiresAtUtc, maxTtl);
+        activeSessionService.removeByJti(principal.jti());
+        log.info("logoutSucceeded userId={} jti={}", principal.userId(), principal.jti());
     }
 
     private static String resolveTimezoneOrUtc(String input) {

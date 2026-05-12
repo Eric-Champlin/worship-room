@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -31,6 +33,19 @@ public class AuthExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(AuthExceptionHandler.class);
 
+    /**
+     * Spec 1.5g — service-thrown {@link AccessDeniedException} (e.g.,
+     * cross-user session revoke). Returns the project's {@code ProxyError}
+     * shape with code {@code FORBIDDEN}; Spring's default 403 has an empty body.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ProxyError> handleAccessDenied(AccessDeniedException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Access denied: message={}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(ProxyError.of("FORBIDDEN", ex.getMessage(), requestId));
+    }
+
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ProxyError> handleAuth(AuthException ex) {
         var requestId = MDC.get("requestId");
@@ -40,6 +55,8 @@ public class AuthExceptionHandler {
             builder.header(HttpHeaders.RETRY_AFTER, String.valueOf(locked.getRetryAfterSeconds()));
         } else if (ex instanceof ChangePasswordRateLimitedException rl) {
             builder.header(HttpHeaders.RETRY_AFTER, String.valueOf(rl.getRetryAfterSeconds()));
+        } else if (ex instanceof SessionRateLimitedException srl) {
+            builder.header(HttpHeaders.RETRY_AFTER, String.valueOf(srl.getRetryAfterSeconds()));
         }
         return builder.body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }

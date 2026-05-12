@@ -2,11 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AuthQueryParamHandler } from '@/components/AuthQueryParamHandler'
+import { SESSIONS_COPY } from '@/constants/sessions-copy'
 
 const mockOpenAuthModal = vi.fn()
+const mockShowToast = vi.fn()
 
 vi.mock('@/components/prayer-wall/AuthModalProvider', () => ({
   useAuthModal: () => ({ openAuthModal: mockOpenAuthModal }),
+}))
+
+vi.mock('@/components/ui/Toast', () => ({
+  useToastSafe: () => ({ showToast: mockShowToast, showCelebrationToast: vi.fn() }),
 }))
 
 function Locator() {
@@ -42,6 +48,7 @@ function getPathname(): string {
 describe('AuthQueryParamHandler', () => {
   beforeEach(() => {
     mockOpenAuthModal.mockClear()
+    mockShowToast.mockClear()
   })
 
   it('opens AuthModal in login view when ?auth=login', async () => {
@@ -96,5 +103,35 @@ describe('AuthQueryParamHandler', () => {
       expect(getSearch()).toBe('?ref=share')
     })
     expect(mockOpenAuthModal).toHaveBeenCalledWith(undefined, 'register')
+  })
+
+  // Spec 1.5g — signed-out-everywhere reason flash + idempotency.
+
+  it('fires the signed-out-everywhere toast exactly once and strips reason param', async () => {
+    renderAt('/?auth=login&reason=signed_out_everywhere')
+    await waitFor(() => {
+      expect(mockOpenAuthModal).toHaveBeenCalledWith(undefined, 'login')
+      expect(getSearch()).toBe('')
+    })
+    // Idempotent under StrictMode's double-mount + the re-render the toast
+    // state update itself triggers. Without the URL-signature ref this fires
+    // 2-3 times (see Spec 1.5g verification report Issue #1).
+    expect(mockShowToast).toHaveBeenCalledTimes(1)
+    expect(mockShowToast).toHaveBeenCalledWith(SESSIONS_COPY.signedOutEverywhereFlash)
+  })
+
+  it('does not fire the toast when reason is missing or unknown', async () => {
+    renderAt('/?auth=login&reason=some_other_reason')
+    await waitFor(() => {
+      expect(mockOpenAuthModal).toHaveBeenCalledWith(undefined, 'login')
+    })
+    expect(mockShowToast).not.toHaveBeenCalled()
+  })
+
+  it('does not fire the toast when reason is set without auth param', async () => {
+    renderAt('/?reason=signed_out_everywhere')
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(mockOpenAuthModal).not.toHaveBeenCalled()
+    expect(mockShowToast).not.toHaveBeenCalled()
   })
 })

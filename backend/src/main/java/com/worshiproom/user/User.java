@@ -89,6 +89,17 @@ public class User {
     @Column(name = "locked_until")
     private OffsetDateTime lockedUntil;
 
+    /**
+     * Forums Wave Spec 1.5g — session generation counter. JWTs carry the
+     * value at issue time in a `gen` claim; the auth filter rejects any
+     * token whose claim does not match the current row value. Mutation
+     * goes through {@code UserRepository.incrementSessionGeneration} only —
+     * no public setter, no JPQL UPDATE. Defaults to 0 at the DB level for
+     * existing rows (Gate-G-MIGRATION).
+     */
+    @Column(name = "session_generation", nullable = false)
+    private int sessionGeneration = 0;
+
     protected User() {}
 
     public User(String email, String passwordHash, String firstName, String lastName, String timezone) {
@@ -136,6 +147,7 @@ public class User {
     public int getFailedLoginCount() { return failedLoginCount; }
     public OffsetDateTime getFailedLoginWindowStart() { return failedLoginWindowStart; }
     public OffsetDateTime getLockedUntil() { return lockedUntil; }
+    public int getSessionGeneration() { return sessionGeneration; }
 
     public void setEmail(String email) { this.email = email; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }

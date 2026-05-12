@@ -31,6 +31,8 @@ class AuthServiceTest {
 
     @Mock private UserRepository userRepository;
     @Mock private JwtService jwtService;
+    @Mock private com.worshiproom.auth.blocklist.JwtBlocklistService jwtBlocklistService;
+    @Mock private com.worshiproom.auth.session.ActiveSessionService activeSessionService;
     @Mock private LoginAttemptService loginAttemptService;
     @Mock private ChangePasswordRateLimitService changePasswordRateLimitService;
 
@@ -40,8 +42,11 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         realEncoder = new BCryptPasswordEncoder();
-        authService = new AuthService(userRepository, realEncoder, jwtService,
-            new LegalVersionService(), loginAttemptService, changePasswordRateLimitService);
+        JwtConfig jwtConfig = new JwtConfig();
+        jwtConfig.setExpirationSeconds(3600);
+        authService = new AuthService(userRepository, realEncoder, jwtService, jwtConfig,
+            jwtBlocklistService, activeSessionService, new LegalVersionService(),
+            loginAttemptService, changePasswordRateLimitService);
     }
 
     private static final String V = LegalVersionService.TERMS_VERSION; // shorthand for current versions in tests
@@ -147,7 +152,7 @@ class AuthServiceTest {
     void loginWithCorrectCredentialsReturnsToken() {
         User user = buildUser("alice@example.com", realEncoder.encode("hunter2hunter2"));
         when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user.getId(), false)).thenReturn("fake.jwt.token");
+        when(jwtService.generateToken(user.getId(), false, 0)).thenReturn("fake.jwt.token");
 
         AuthResponse response = authService.login(new LoginRequest(
             "Alice@Example.COM", "hunter2hunter2"));
@@ -209,7 +214,7 @@ class AuthServiceTest {
     void loginEmailLookupIsCaseInsensitive() {
         User user = buildUser("alice@example.com", realEncoder.encode("hunter2hunter2"));
         when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(any(UUID.class), eq(false))).thenReturn("jwt");
+        when(jwtService.generateToken(any(UUID.class), eq(false), eq(0))).thenReturn("jwt");
 
         AuthResponse response = authService.login(new LoginRequest(
             "ALICE@Example.COM", "hunter2hunter2"));
@@ -284,7 +289,7 @@ class AuthServiceTest {
         User user = buildUser("alice@example.com", realEncoder.encode("hunter2hunter2"));
         user.setFailedLoginCount(1);
         when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user.getId(), false)).thenReturn("jwt");
+        when(jwtService.generateToken(user.getId(), false, 0)).thenReturn("jwt");
 
         authService.login(new LoginRequest("alice@example.com", "hunter2hunter2"));
 
@@ -336,7 +341,7 @@ class AuthServiceTest {
 
         verify(loginAttemptService, never()).recordSuccessfulLogin(any(User.class));
         verify(loginAttemptService, never()).recordFailedAttempt(any(UUID.class));
-        verify(jwtService, never()).generateToken(any(UUID.class), any(boolean.class));
+        verify(jwtService, never()).generateToken(any(UUID.class), any(boolean.class), org.mockito.ArgumentMatchers.anyInt());
     }
 
     @Test
@@ -345,7 +350,7 @@ class AuthServiceTest {
         user.setFailedLoginCount(5);
         user.setLockedUntil(OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(1));
         when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user.getId(), false)).thenReturn("jwt");
+        when(jwtService.generateToken(user.getId(), false, 0)).thenReturn("jwt");
 
         AuthResponse response = authService.login(new LoginRequest("alice@example.com", "correctpassword"));
 
@@ -407,24 +412,62 @@ class AuthServiceTest {
         User user = buildUser("admin@example.com", realEncoder.encode("hunter2hunter2"));
         user.setAdmin(true);
         when(userRepository.findByEmailIgnoreCase("admin@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user.getId(), true)).thenReturn("admin-jwt");
+        when(jwtService.generateToken(user.getId(), true, 0)).thenReturn("admin-jwt");
 
         AuthResponse response = authService.login(new LoginRequest("admin@example.com", "hunter2hunter2"));
 
         assertThat(response.token()).isEqualTo("admin-jwt");
-        verify(jwtService, times(1)).generateToken(user.getId(), true);
+        verify(jwtService, times(1)).generateToken(user.getId(), true, 0);
     }
 
     @Test
     void loginCorrectPasswordSkipsResetWhenStateAlreadyClean() {
         User user = buildUser("alice@example.com", realEncoder.encode("hunter2hunter2"));
         when(userRepository.findByEmailIgnoreCase("alice@example.com")).thenReturn(Optional.of(user));
-        when(jwtService.generateToken(user.getId(), false)).thenReturn("jwt");
+        when(jwtService.generateToken(user.getId(), false, 0)).thenReturn("jwt");
 
         authService.login(new LoginRequest("alice@example.com", "hunter2hunter2"));
 
         // Service-level guard is INSIDE LoginAttemptService — we just assert the call happens.
         verify(loginAttemptService, times(1)).recordSuccessfulLogin(user);
+    }
+
+    // ----- Spec 1.5g logout -----
+
+    @Test
+    void logout_withJti_callsBlocklistRevoke() {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        java.time.Instant exp = java.time.Instant.now().plusSeconds(1800);
+        AuthenticatedUser principal = new AuthenticatedUser(userId, false, jti, exp);
+
+        authService.logout(principal);
+
+        verify(jwtBlocklistService, times(1)).revoke(eq(jti), eq(userId), any(), any());
+    }
+
+    @Test
+    void logout_withJti_deletesActiveSessionRow() {
+        UUID userId = UUID.randomUUID();
+        UUID jti = UUID.randomUUID();
+        java.time.Instant exp = java.time.Instant.now().plusSeconds(1800);
+        AuthenticatedUser principal = new AuthenticatedUser(userId, false, jti, exp);
+
+        authService.logout(principal);
+
+        // /settings/sessions must reflect the logout immediately rather than
+        // waiting up to an hour for JwtBlocklistCleanupJob's orphan sweep.
+        verify(activeSessionService, times(1)).removeByJti(jti);
+    }
+
+    @Test
+    void logout_preMigrationTokenNoJti_isNoOp() {
+        AuthenticatedUser principal = new AuthenticatedUser(UUID.randomUUID(), false);
+
+        authService.logout(principal);
+
+        verifyNoInteractions(jwtBlocklistService);
+        verifyNoInteractions(activeSessionService);
     }
 
     private static User buildUser(String email, String passwordHash) {

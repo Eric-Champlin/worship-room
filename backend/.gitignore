@@ -21,3 +21,10 @@ Thumbs.db
 # Spring Boot
 *.log
 HELP.md
+
+# GeoIP database (Spec 1.5g) — fetched at build time by download-maven-plugin
+# using MAXMIND_LICENSE_KEY env var. Never commit; ~50MB and the MaxMind
+# EULA forbids re-distribution under the free GeoLite2 license tier.
+data/geoip/
+*.mmdb
+*.mmdb.tar.gz

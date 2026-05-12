@@ -258,6 +258,27 @@
             <artifactId>imageio-webp</artifactId>
             <version>3.10.1</version>
         </dependency>
+
+        <!-- Forums Wave Spec 1.5g — User-Agent parsing for session device labels.
+             ua-parser-java exposes major browser/OS info from the UA string.
+             We store only major-version fields (W11 — no fingerprinting via
+             minor-version uniqueness). MIT license; no attribution required. -->
+        <dependency>
+            <groupId>com.github.ua-parser</groupId>
+            <artifactId>uap-java</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
+        <!-- Forums Wave Spec 1.5g — MaxMind GeoLite2 reader for offline city lookup
+             from session IPs. The GeoLite2-City.mmdb data file is fetched at build
+             time by the download-maven-plugin (see below) using the MAXMIND_LICENSE_KEY
+             env var. NEVER call third-party IP-to-city APIs at runtime (D-GeoIP / W5).
+             Apache 2.0 license; attribution to MaxMind in GeoIpResolver class JavaDoc. -->
+        <dependency>
+            <groupId>com.maxmind.geoip2</groupId>
+            <artifactId>geoip2</artifactId>
+            <version>4.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -266,7 +287,66 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <!-- Forums Wave Spec 1.5g — fetch GeoLite2-City.mmdb from MaxMind at
+                 build time. The downloaded file lives OUTSIDE src/main/resources/
+                 (it's ~50MB and changes independently of code; not appropriate to
+                 bundle into the JAR). Target path is configurable in code via the
+                 geoip.database-path property; default is ${project.basedir}/data/geoip.
+                 The file is .gitignored.
+
+                 The download is gated behind the `geoip-download` Maven profile,
+                 activated only when MAXMIND_LICENSE_KEY env var is present. When
+                 the key is absent (default for CI, new contributors), the plugin
+                 is never invoked, no URL evaluation happens, and the backend
+                 boots in GeoIP-disabled mode at runtime — see GeoIpResolver for
+                 the runtime degradation contract.
+
+                 Refresh cadence is manual — re-run `mvn process-resources -Pgeoip-download`
+                 (or any full build with the env var set) to fetch a newer .mmdb.
+                 No runtime @Scheduled refresh; city geography drifts slowly. -->
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Activated only when MAXMIND_LICENSE_KEY is set. Adds the download-maven-plugin
+             execution that fetches GeoLite2-City.mmdb. When the env var is absent, this
+             profile is inactive and the plugin (and its templated URL) are never resolved. -->
+        <profile>
+            <id>geoip-download</id>
+            <activation>
+                <property>
+                    <name>env.MAXMIND_LICENSE_KEY</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.9.0</version>
+                        <executions>
+                            <execution>
+                                <id>download-geolite2-city</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&amp;license_key=${env.MAXMIND_LICENSE_KEY}&amp;suffix=tar.gz</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${project.basedir}/data/geoip</outputDirectory>
+                                    <!-- Fail-soft. If the download fails (network, expired key, etc.)
+                                         the .mmdb is absent and GeoIpResolver degrades to NULL city
+                                         lookups with a single startup WARN. -->
+                                    <failOnError>false</failOnError>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

@@ -52,9 +52,14 @@ class AuthControllerChangePasswordTest extends AbstractIntegrationTest {
     void clean() { userRepository.deleteAll(); }
 
     @Test
-    void post_returns204_onSuccess() throws Exception {
+    void post_returns200WithNewToken_onSuccess() throws Exception {
+        // Spec 1.5g — response shape change: was 204 No Content, now 200 OK with
+        // a body carrying { data: { token: "..." }, meta: { requestId: "..." } }.
+        // The new token reflects the post-increment session_generation so the
+        // caller can swap it transparently while other devices' tokens fail.
         User user = createUser("ok@example.com", "current-password");
         String token = jwtService.generateToken(user.getId(), false);
+        int genBefore = user.getSessionGeneration();
 
         mvc.perform(post("/api/v1/auth/change-password")
                 .header("Authorization", "Bearer " + token)
@@ -62,10 +67,14 @@ class AuthControllerChangePasswordTest extends AbstractIntegrationTest {
                 .content(mapper.writeValueAsString(Map.of(
                     "currentPassword", "current-password",
                     "newPassword", "new-password-9876"))))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.token").isNotEmpty())
+            .andExpect(jsonPath("$.meta.requestId").exists());
 
         User reloaded = userRepository.findById(user.getId()).orElseThrow();
         assertThat(encoder.matches("new-password-9876", reloaded.getPasswordHash())).isTrue();
+        // 1.5g: session_generation must have been incremented atomically.
+        assertThat(reloaded.getSessionGeneration()).isEqualTo(genBefore + 1);
     }
 
     @Test
@@ -198,27 +207,37 @@ class AuthControllerChangePasswordTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void post_existingJwtSurvivesSuccessfulChange() throws Exception {
-        // Spec 1.5c D4: existing JWTs (current request and other devices) remain
-        // valid until natural expiry. Session invalidation is Spec 1.5g territory.
-        // This regression test guards against accidental session invalidation —
-        // if a future contributor wires logout-all-on-password-change without
-        // updating D4 explicitly, this test fails.
+    void post_newJwtFromBodyWorks_oldJwtIsRevoked() throws Exception {
+        // Spec 1.5g inverts the prior 1.5c D4 stance: change-password now bumps
+        // session_generation, invalidating every JWT issued before the change.
+        // The response body carries a fresh JWT carrying the new `gen` claim;
+        // callers swap it in place (the frontend's changePasswordApi does this
+        // automatically). This regression test guards both halves: (a) the new
+        // token works, (b) the old token fails with TOKEN_REVOKED.
         User user = createUser("jwt-survives@example.com", "current-password");
-        String token = jwtService.generateToken(user.getId(), false);
+        String oldToken = jwtService.generateToken(user.getId(), false);
 
-        mvc.perform(post("/api/v1/auth/change-password")
-                .header("Authorization", "Bearer " + token)
+        String responseJson = mvc.perform(post("/api/v1/auth/change-password")
+                .header("Authorization", "Bearer " + oldToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(Map.of(
                     "currentPassword", "current-password",
                     "newPassword", "new-password-9876"))))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        String newToken = mapper.readTree(responseJson).get("data").get("token").asText();
+        assertThat(newToken).isNotEqualTo(oldToken);
 
-        // Same JWT must still authenticate a subsequent request.
+        // New token (returned in body) authenticates subsequent requests.
         mvc.perform(get("/api/v1/users/me")
-                .header("Authorization", "Bearer " + token))
+                .header("Authorization", "Bearer " + newToken))
             .andExpect(status().isOk());
+
+        // Old token now fails the session-generation check → TOKEN_REVOKED.
+        mvc.perform(get("/api/v1/users/me")
+                .header("Authorization", "Bearer " + oldToken))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("TOKEN_REVOKED"));
     }
 
     @Test
@@ -232,7 +251,7 @@ class AuthControllerChangePasswordTest extends AbstractIntegrationTest {
                 .content(mapper.writeValueAsString(Map.of(
                     "currentPassword", "current-password",
                     "newPassword", "new-password-9876"))))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk());
 
         // Login with new password succeeds.
         mvc.perform(post("/api/v1/auth/login")

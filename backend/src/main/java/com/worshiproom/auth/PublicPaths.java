@@ -21,7 +21,9 @@ public final class PublicPaths {
         "/api/hello",
         "/api/v1/auth/register",
         "/api/v1/auth/login",
-        "/api/v1/auth/logout",
+        // Spec 1.5g — /api/v1/auth/logout REMOVED from public list. The endpoint
+        // now requires authentication so the filter can read principal.jti and
+        // blocklist the current token. Anonymous calls return 401.
         "/api/v1/legal/versions",
         "/api/v1/proxy/**",
         "/actuator/health",

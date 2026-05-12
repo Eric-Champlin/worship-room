@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.5g — durable JWT blocklist (Postgres half of the
+       dual-write pair with Redis per MPD-2). Redis is the fast path on the
+       filter's read side; Postgres is the source of truth and the fallback
+       when Redis is unreachable. The cleanup job (JwtBlocklistCleanupJob,
+       hourly) sweeps rows where `expires_at < NOW()` so the table stays
+       bounded by the active JWT TTL window (1 hour today). The PK is `jti`
+       directly because that is the only lookup key — there is never a
+       per-user enumeration of blocklisted tokens at request time. ON DELETE
+       CASCADE so deleting a user clears their revoked tokens. -->
+
+  <changeSet id="2026-05-12-003-create-jwt-blocklist-table" author="worship-room">
+
+    <createTable tableName="jwt_blocklist">
+      <column name="jti" type="UUID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_jwt_blocklist"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="revoked_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expires_at" type="TIMESTAMP WITH TIME ZONE">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="jwt_blocklist"
+      baseColumnNames="user_id"
+      constraintName="fk_jwt_blocklist_user_id"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <!-- Supports the hourly cleanup job: DELETE FROM jwt_blocklist WHERE expires_at < NOW(). -->
+    <createIndex tableName="jwt_blocklist" indexName="idx_jwt_blocklist_expires_at">
+      <column name="expires_at"/>
+    </createIndex>
+
+    <rollback>
+      <dropTable tableName="jwt_blocklist"/>
+    </rollback>
+
+  </changeSet>
+
+</databaseChangeLog>

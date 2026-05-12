@@ -1,5 +1,7 @@
 package com.worshiproom.auth;
 
+import com.worshiproom.auth.blocklist.JwtBlocklistService;
+import com.worshiproom.user.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -21,6 +23,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -45,6 +48,16 @@ import java.util.UUID;
  * reach authorization checks with no principal. If the route is protected,
  * RestAuthenticationEntryPoint emits the 401 response. Public routes (e.g.,
  * /api/v1/health, /api/v1/proxy/**) proceed normally.
+ *
+ * <p>Forums Wave Spec 1.5g insertion point: blocklist + session-generation
+ * checks AFTER claim extraction, BEFORE principal construction. Pre-1.5g
+ * tokens (no {@code jti} claim, no {@code gen} claim) are tolerated per
+ * Gate-G-MIGRATION — they pass through the new checks as no-ops. Infrastructure
+ * failures (Redis AND Postgres unreachable on the blocklist check, or Postgres
+ * unreachable on the session-gen lookup) propagate to the conservative catch-all
+ * and produce 401 TOKEN_INVALID (Gate-G-FAIL-CLOSED). The principal carries
+ * the {@code jti} so {@code AuthController.logout} can blocklist the current
+ * token.
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -60,11 +73,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     private final JwtService jwtService;
+    private final JwtBlocklistService jwtBlocklistService;
+    private final UserRepository userRepository;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     public JwtAuthenticationFilter(JwtService jwtService,
+                                   JwtBlocklistService jwtBlocklistService,
+                                   UserRepository userRepository,
                                    HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtService = jwtService;
+        this.jwtBlocklistService = jwtBlocklistService;
+        this.userRepository = userRepository;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
@@ -109,7 +128,51 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Boolean isAdminClaim = claims.get("is_admin", Boolean.class);
             boolean isAdmin = isAdminClaim != null && isAdminClaim;
 
-            AuthenticatedUser principal = new AuthenticatedUser(userId, isAdmin);
+            // 1.5g: extract jti — tolerate missing claim (Gate-G-MIGRATION). Pre-1.5g
+            // tokens have no jti; the blocklist check below is skipped for them.
+            String jtiStr = claims.getId();
+            UUID jti = null;
+            if (jtiStr != null && !jtiStr.isBlank()) {
+                try {
+                    jti = UUID.fromString(jtiStr);
+                } catch (IllegalArgumentException malformed) {
+                    log.info("JWT malformed jti claim: {}", malformed.getClass().getSimpleName());
+                    handlerExceptionResolver.resolveException(request, response, null,
+                        AuthException.tokenMalformed());
+                    return;
+                }
+            }
+
+            // 1.5g: blocklist check — only when jti is present. Exception during the
+            // check propagates to the conservative catch-all below → 401 TOKEN_INVALID
+            // (Gate-G-FAIL-CLOSED: never authenticate when both Redis AND Postgres
+            // are unreachable).
+            if (jti != null && jwtBlocklistService.isRevoked(jti)) {
+                log.info("JWT revoked jti={}", jti);
+                handlerExceptionResolver.resolveException(request, response, null,
+                    AuthException.tokenRevoked());
+                return;
+            }
+
+            // 1.5g: session-generation check — only when claim is present (Gate-G-MIGRATION).
+            // Pre-1.5g tokens with no `gen` claim pass through. A claim of `gen=0` on a
+            // user whose current row says `session_generation=0` matches and passes.
+            Integer claimGen = claims.get("gen", Integer.class);
+            if (claimGen != null) {
+                Optional<Integer> currentGen = userRepository.getSessionGenerationByUserId(userId);
+                if (currentGen.isPresent() && !currentGen.get().equals(claimGen)) {
+                    log.info("JWT session generation mismatch jti={} userId={} claimGen={} currentGen={}",
+                        jti, userId, claimGen, currentGen.get());
+                    handlerExceptionResolver.resolveException(request, response, null,
+                        AuthException.tokenRevoked());
+                    return;
+                }
+            }
+
+            // 1.5g: principal carries jti + expiresAt so AuthController.logout can
+            // blocklist the current token without re-parsing the JWT.
+            AuthenticatedUser principal = new AuthenticatedUser(
+                userId, isAdmin, jti, claims.getExpiration().toInstant());
             UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(authToken);

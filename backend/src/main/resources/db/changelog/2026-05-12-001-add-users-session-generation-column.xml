@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 1.5g — Session generation counter on users.
+       Bumping this column invalidates every JWT previously issued for the
+       user: each JWT carries a `gen` claim, and JwtAuthenticationFilter
+       rejects tokens whose claim doesn't match the current row value.
+       Used by /api/v1/sessions/all (logout-all) and /api/v1/auth/change-password
+       (invalidate other devices). Mutation goes through the atomic native query
+       UserRepository.incrementSessionGeneration; no setter, no JPQL UPDATE.
+       Existing rows default to 0 — pre-1.5g tokens have no `gen` claim so the
+       filter tolerates them (Gate-G-MIGRATION). -->
+
+  <changeSet id="2026-05-12-001-add-users-session-generation-column" author="worship-room">
+    <addColumn tableName="users">
+      <column name="session_generation" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+    <rollback>
+      <dropColumn tableName="users" columnName="session_generation"/>
+    </rollback>
+  </changeSet>
+
+</databaseChangeLog>

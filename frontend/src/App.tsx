@@ -75,6 +75,8 @@ const MusicPage = lazy(() => import('./pages/MusicPage').then((m) => ({ default:
 const RoutinesPage = lazy(() => import('./pages/RoutinesPage').then((m) => ({ default: m.RoutinesPage })))
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })))
+// Spec 1.5g — Sessions page for /settings/sessions.
+const SessionsPage = lazy(() => import('./pages/SessionsPage').then((m) => ({ default: m.SessionsPage })))
 const GrowthProfile = lazy(() => import('./pages/GrowthProfile').then((m) => ({ default: m.GrowthProfile })))
 const MyPrayers = lazy(() => import('./pages/MyPrayers').then((m) => ({ default: m.MyPrayers })))
 const GrowPage = lazy(() => import('./pages/GrowPage').then((m) => ({ default: m.GrowPage })))
@@ -224,6 +226,8 @@ function App() {
           <Route path="/insights/monthly" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><MonthlyReport /></Suspense></RouteErrorBoundary>} />
           <Route path="/friends" element={<RouteErrorBoundary><Suspense fallback={<FriendsSkeleton />}><Friends /></Suspense></RouteErrorBoundary>} />
           <Route path="/settings" element={<RouteErrorBoundary><Suspense fallback={<SettingsSkeleton />}><Settings /></Suspense></RouteErrorBoundary>} />
+          {/* Spec 1.5g — /settings/sessions */}
+          <Route path="/settings/sessions" element={<RouteErrorBoundary><Suspense fallback={<SettingsSkeleton />}><SessionsPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/my-prayers" element={<RouteErrorBoundary><Suspense fallback={<MyPrayersSkeleton />}><MyPrayers /></Suspense></RouteErrorBoundary>} />
           <Route path="/daily" element={<RouteErrorBoundary><Suspense fallback={<DailyHubSkeleton />}><DailyHub /></Suspense></RouteErrorBoundary>} />
           <Route path="/ask" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><AskPage /></Suspense></RouteErrorBoundary>} />

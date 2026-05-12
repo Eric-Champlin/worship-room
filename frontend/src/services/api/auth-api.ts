@@ -1,9 +1,11 @@
 /**
- * Auth API client — Spec 1.5c (Change Password).
+ * Auth API client — Spec 1.5c + Spec 1.5g (Change Password + Session Invalidation).
  *
- * POST /api/v1/auth/change-password requires authentication. Returns 204 No
- * Content on success; apiFetch returns undefined for 204 per its envelope
- * convention.
+ * POST /api/v1/auth/change-password requires authentication. Spec 1.5g changed
+ * the response from 204 No Content to 200 OK carrying a fresh JWT. The new
+ * token reflects the post-increment session_generation; this device's caller
+ * swaps the stored token in place so the current session continues seamlessly
+ * while other devices' tokens are invalidated server-side.
  *
  * Errors bubble through as ApiError with codes:
  * - CURRENT_PASSWORD_INCORRECT (403) — user entered wrong current password.
@@ -20,13 +22,25 @@
  */
 
 import { apiFetch } from '@/lib/api-client'
+import { setStoredToken } from '@/lib/auth-storage'
+
+export interface ChangePasswordResult {
+  token: string
+}
 
 export async function changePasswordApi(
   currentPassword: string,
   newPassword: string,
-): Promise<void> {
-  await apiFetch<void>('/api/v1/auth/change-password', {
+): Promise<ChangePasswordResult> {
+  const result = await apiFetch<ChangePasswordResult>('/api/v1/auth/change-password', {
     method: 'POST',
     body: JSON.stringify({ currentPassword, newPassword }),
   })
+  // Spec 1.5g — swap to the new token in place so the current device continues
+  // seamlessly. Other devices' tokens (with stale `gen` claim) now fail their
+  // next request with 401 TOKEN_REVOKED.
+  if (result?.token) {
+    setStoredToken(result.token)
+  }
+  return result
 }
