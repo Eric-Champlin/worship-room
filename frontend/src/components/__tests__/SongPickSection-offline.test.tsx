@@ -35,8 +35,8 @@ describe('SongPickSection offline handling', () => {
     mockUseOnlineStatus.mockReturnValue({ isOnline: false })
     renderWithRouter()
     const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading).toHaveTextContent("Today's")
     expect(heading).toHaveTextContent('Song Pick')
+    expect(heading).toHaveTextContent('of the Day')
   })
 
   it('shows iframe when online', () => {

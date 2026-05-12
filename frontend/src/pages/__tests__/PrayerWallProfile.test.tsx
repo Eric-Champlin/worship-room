@@ -70,6 +70,22 @@ describe('PrayerWallProfile', () => {
     expect(screen.getByText('User not found')).toBeInTheDocument()
   })
 
+  it('Spec 5.5 — bio paragraph renders without font-serif italic', () => {
+    renderProfile('user-1')
+    // Profile bio paragraph carries text-white/70 but no font-serif or italic
+    const paragraphs = document.querySelectorAll('p.text-white\\/70')
+    let foundBio = false
+    paragraphs.forEach((p) => {
+      const cls = p.className
+      if (cls.includes('max-w-md')) {
+        foundBio = true
+        expect(cls).not.toContain('font-serif')
+        expect(cls).not.toContain('italic')
+      }
+    })
+    expect(foundBio).toBe(true)
+  })
+
   it('can switch to Replies tab', async () => {
     const user = userEvent.setup()
     renderProfile('user-1')

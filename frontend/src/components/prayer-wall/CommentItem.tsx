@@ -35,14 +35,14 @@ function parseContent(text: string) {
           <Link
             key={key}
             to={`/prayer-wall/user/${user.id}`}
-            className="font-semibold text-primary hover:underline"
+            className="font-semibold text-violet-300 hover:text-violet-200 hover:underline"
           >
             {part}
           </Link>
         )
       }
       return (
-        <span key={key} className="font-semibold text-primary">
+        <span key={key} className="font-semibold text-violet-300">
           {part}
         </span>
       )
@@ -95,7 +95,7 @@ export function CommentItem({
           <button
             type="button"
             onClick={() => onReply(comment.authorName)}
-            className="min-h-[44px] px-2 text-xs text-white/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded sm:min-h-0 sm:px-0"
+            className="min-h-[44px] px-2 text-xs text-white/50 hover:text-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded sm:min-h-0 sm:px-0"
           >
             Reply
           </button>

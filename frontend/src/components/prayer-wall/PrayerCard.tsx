@@ -46,9 +46,11 @@ interface PrayerCardProps {
   children?: ReactNode
   /** Spec 4.6b — feed index. Indices < 5 load images eagerly; >= 5 load lazily. */
   index?: number
+  /** Spec 5.5 — Tier 1 elevation for PrayerDetail's main card; Tier 2 default for feed/dashboard/profile. */
+  tier?: 'feed' | 'detail'
 }
 
-export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99 }: PrayerCardProps) {
+export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99, tier = 'feed' }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const articleRef = useRef<HTMLDivElement>(null)
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
@@ -100,11 +102,11 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
     <PulseContext.Provider value={triggerPulse}>
       <div ref={articleRef}>
         <FrostedCard
-          variant="default"
+          variant={tier === 'detail' ? 'accent' : 'default'}
           as="article"
           aria-label={articleAriaLabel}
           className={cn(
-            getPerTypeChromeClass(prayer.postType),
+            tier === 'feed' && getPerTypeChromeClass(prayer.postType),
             'lg:hover:shadow-md lg:hover:shadow-black/20 transition-shadow motion-reduce:transition-none',
           )}
         >
@@ -184,7 +186,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
                 aria-expanded={isExpanded}
-                className="mt-1 min-h-[44px] text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                className="mt-1 min-h-[44px] text-sm font-medium text-violet-300 hover:text-violet-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
               >
                 {isExpanded ? 'Show less' : 'Show more'}
               </button>

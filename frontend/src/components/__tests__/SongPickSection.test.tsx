@@ -13,15 +13,15 @@ function renderComponent() {
 }
 
 describe('SongPickSection', () => {
-  it('renders heading with gradient "Today\'s" and white "Song Pick"', () => {
+  it('renders heading with gradient "Song Pick" and white "of the Day"', () => {
     renderComponent()
     const heading = screen.getByRole('heading', { level: 2 })
     expect(heading).toBeInTheDocument()
-    expect(heading).toHaveTextContent("Today's")
     expect(heading).toHaveTextContent('Song Pick')
+    expect(heading).toHaveTextContent('of the Day')
   })
 
-  it('applies gradient text style to "Today\'s" line', () => {
+  it('applies gradient text style to "Song Pick" line', () => {
     renderComponent()
     const heading = screen.getByRole('heading', { level: 2 })
     const gradientSpan = heading.querySelector('span')
@@ -108,19 +108,19 @@ describe('SongPickSection', () => {
     expect(wrapper?.className).not.toContain('md:hidden')
   })
 
-  it('heading is flex-col with gradient "Today\'s" as the larger line', () => {
+  it('heading is flex-col with gradient "Song Pick" as the larger line', () => {
     renderComponent()
     const heading = screen.getByRole('heading', { level: 2 })
     expect(heading).toHaveClass('flex', 'flex-col')
     const spans = heading.querySelectorAll('span')
     expect(spans).toHaveLength(2)
-    // First span = "Today's" (gradient, larger)
-    expect(spans[0]).toHaveTextContent("Today's")
+    // First span = "Song Pick" (gradient, larger)
+    expect(spans[0]).toHaveTextContent('Song Pick')
     expect(spans[0].className).toContain('text-4xl')
     expect(spans[0].className).toContain('sm:text-5xl')
     expect(spans[0].className).toContain('lg:text-6xl')
-    // Second span = "Song Pick" (white, smaller)
-    expect(spans[1]).toHaveTextContent('Song Pick')
+    // Second span = "of the Day" (white, smaller)
+    expect(spans[1]).toHaveTextContent('of the Day')
     expect(spans[1]).toHaveClass('text-white')
     expect(spans[1].className).toContain('text-3xl')
     expect(spans[1].className).toContain('sm:text-4xl')
@@ -137,11 +137,11 @@ describe('SongPickSection', () => {
     expect(container?.className).not.toContain('max-w-4xl')
   })
 
-  it('Song Pick uses responsive tracking for visual refinement', () => {
+  it('"of the Day" uses responsive tracking for visual refinement', () => {
     renderComponent()
     const heading = screen.getByRole('heading', { level: 2 })
     const spans = heading.querySelectorAll('span')
-    expect(spans[1]).toHaveTextContent('Song Pick')
+    expect(spans[1]).toHaveTextContent('of the Day')
     // Responsive tracking: sm adds slight tracking, lg resets to normal
     expect(spans[1].className).toContain('sm:tracking-[0.02em]')
     expect(spans[1].className).toContain('lg:tracking-normal')

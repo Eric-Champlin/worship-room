@@ -47,7 +47,7 @@ interface InteractionBarProps {
 }
 
 const btnBase =
-  'flex items-center gap-1 text-sm min-h-[44px] min-w-[44px] justify-center transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded active:scale-[0.98]'
+  'flex items-center gap-1 text-sm min-h-[44px] min-w-[44px] justify-center transition-[colors,transform] duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded active:scale-[0.98]'
 
 export function InteractionBar({
   prayer,
@@ -143,7 +143,7 @@ export function InteractionBar({
           onClick={handlePrayClick}
           className={cn(
             btnBase,
-            isPraying ? 'font-medium text-primary' : 'text-white/50 hover:text-primary',
+            isPraying ? 'font-medium text-violet-300' : 'text-white/50 hover:text-violet-300',
           )}
           aria-label={reactionAriaLabel}
           aria-pressed={isPraying}
@@ -169,7 +169,7 @@ export function InteractionBar({
         {/* Floating "+1 prayer" / "+1 thanks" text */}
         {isAnimating && (
           <span
-            className="pointer-events-none absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-sans text-primary motion-safe:animate-pray-float-text"
+            className="pointer-events-none absolute -top-1 left-1/2 -translate-x-1/2 text-xs font-sans text-violet-300 motion-safe:animate-pray-float-text"
             aria-hidden="true"
           >
             {labels.floatingText}
@@ -199,8 +199,8 @@ export function InteractionBar({
           className={cn(
             btnBase,
             isBookmarked
-              ? 'text-primary'
-              : 'text-white/50 hover:text-primary',
+              ? 'text-violet-300'
+              : 'text-white/50 hover:text-violet-300',
           )}
           aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark this prayer'}
           aria-pressed={isBookmarked}
@@ -211,7 +211,7 @@ export function InteractionBar({
         <button
           type="button"
           onClick={() => authModal?.openAuthModal()}
-          className={cn(btnBase, 'text-white/50 hover:text-primary')}
+          className={cn(btnBase, 'text-white/50 hover:text-violet-300')}
           aria-label="Log in to bookmark"
         >
           <Bookmark className="h-4 w-4" aria-hidden="true" />
@@ -248,7 +248,7 @@ export function InteractionBar({
         <button
           type="button"
           onClick={() => { onToggleSave?.(); triggerPulse?.() }}
-          className={cn(btnBase, 'text-white/50 hover:text-primary')}
+          className={cn(btnBase, 'text-white/50 hover:text-violet-300')}
           aria-label="Save to your prayer list"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
@@ -258,7 +258,7 @@ export function InteractionBar({
         <button
           type="button"
           onClick={() => authModal?.openAuthModal('Sign in to save prayers to your list')}
-          className={cn(btnBase, 'text-white/50 hover:text-primary')}
+          className={cn(btnBase, 'text-white/50 hover:text-violet-300')}
           aria-label="Sign in to save to your prayer list"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />

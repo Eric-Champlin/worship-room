@@ -816,13 +816,13 @@ function PrayerWallContent() {
                 ? { 'aria-describedby': 'prayer-wall-composer' }
                 : {})}
             >
-              <button
-                type="button"
+              <Button
+                variant="subtle"
+                size="lg"
                 onClick={() => setChooserOpen(true)}
-                className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-[colors,transform] duration-fast hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:scale-[0.98]"
               >
                 Share something
-              </button>
+              </Button>
               <Link
                 to="/prayer-wall/dashboard"
                 className="inline-flex items-center gap-1.5 text-sm text-white/70 transition-colors hover:text-white hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
@@ -832,13 +832,13 @@ function PrayerWallContent() {
               </Link>
             </div>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="subtle"
+              size="lg"
               onClick={() => openAuthModal?.('Sign in to share something')}
-              className="rounded-lg border border-white/30 bg-white/10 px-8 py-3 font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
               Share something
-            </button>
+            </Button>
           )
         }
       />

@@ -110,7 +110,7 @@ export function CommentInput({
           onKeyDown={handleKeyDown}
           maxLength={MAX_COMMENT_LENGTH}
           placeholder="Write a comment..."
-          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           aria-label="Comment"
           aria-invalid={crisisDetected || undefined}
           aria-describedby={
@@ -125,8 +125,8 @@ export function CommentInput({
           disabled={!value.trim() || isSubmitting}
           aria-busy={isSubmitting}
           className={cn(
-            'flex min-h-[44px] min-w-[44px] items-center justify-center focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-            value.trim() && !isSubmitting ? 'text-primary hover:text-primary-lt' : 'text-white/20'
+            'flex min-h-[44px] min-w-[44px] items-center justify-center focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
+            value.trim() && !isSubmitting ? 'text-violet-300 hover:text-violet-200' : 'text-white/20'
           )}
           aria-label="Submit comment"
         >
@@ -157,7 +157,7 @@ export function CommentInput({
               {CRISIS_RESOURCES.suicide_prevention.name}:{' '}
               <a
                 href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`}
-                className="font-medium text-primary underline"
+                className="font-medium text-violet-300 hover:text-violet-200 underline"
               >
                 {CRISIS_RESOURCES.suicide_prevention.phone}
               </a>
@@ -169,7 +169,7 @@ export function CommentInput({
               {CRISIS_RESOURCES.samhsa.name}:{' '}
               <a
                 href={`tel:${CRISIS_RESOURCES.samhsa.phone}`}
-                className="font-medium text-primary underline"
+                className="font-medium text-violet-300 hover:text-violet-200 underline"
               >
                 {CRISIS_RESOURCES.samhsa.phone}
               </a>

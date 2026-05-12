@@ -327,12 +327,11 @@ function PrayerDetailContent() {
               maxWidth="max-w-[720px]"
             />
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
-            <p className="text-lg font-semibold text-white">Prayer not found</p>
-            <p className="mt-2 text-sm text-white/60">
-              This prayer request may have been removed or the link is invalid.
-            </p>
-          </div>
+          <FeatureEmptyState
+            icon={AlertCircle}
+            heading="Prayer not found"
+            description="This prayer request may have been removed or the link is invalid."
+          />
         </main>
       </PageShell>
     )
@@ -360,7 +359,7 @@ function PrayerDetailContent() {
           />
         </div>
 
-        <PrayerCard prayer={prayer} showFull>
+        <PrayerCard prayer={prayer} showFull tier="detail">
           <InteractionBar
             prayer={prayer}
             reactions={reactions[prayer.id]}

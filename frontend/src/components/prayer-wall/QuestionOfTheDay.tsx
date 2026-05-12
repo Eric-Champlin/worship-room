@@ -78,7 +78,7 @@ export function QuestionOfTheDay({
       <button
         type="button"
         onClick={handleResponseCountClick}
-        className="mt-3 flex min-h-[44px] items-center text-sm text-white/60 transition-colors hover:text-white/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+        className="mt-3 flex min-h-[44px] items-center text-sm text-white/60 transition-colors hover:text-white/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
         aria-label={
           responseCount === 0
             ? "Be the first to respond to today's question"

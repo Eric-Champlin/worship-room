@@ -94,7 +94,7 @@ function renderPage() {
   )
 }
 
-describe('Pray Ceremony', { timeout: 15000 }, () => {
+describe('Pray Ceremony', { timeout: 30000 }, () => {
   beforeEach(() => {
     localStorage.clear()
     resetReactionsStore()

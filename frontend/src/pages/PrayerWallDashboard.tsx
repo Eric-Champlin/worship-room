@@ -15,6 +15,7 @@ import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { Button } from '@/components/ui/Button'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { SkeletonCard } from '@/components/skeletons/SkeletonCard'
 import { SkeletonText } from '@/components/skeletons/SkeletonText'
 import { useToast } from '@/components/ui/Toast'
@@ -378,7 +379,7 @@ function DashboardContent() {
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-1 text-xl font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="rounded-lg border border-white/[0.12] bg-white/[0.04] px-3 py-1 text-xl font-semibold text-white placeholder:text-white/40 focus:border-violet-400/30 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
                 aria-label="Display name"
               />
               <Button
@@ -398,7 +399,7 @@ function DashboardContent() {
               <button
                 type="button"
                 onClick={() => setEditingName(true)}
-                className="text-white/50 hover:text-primary focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="text-white/50 hover:text-violet-300 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 aria-label="Edit name"
               >
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -415,7 +416,7 @@ function DashboardContent() {
                     setBio(e.target.value)
                   }
                 }}
-                className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="w-full resize-none rounded-lg border border-violet-400/30 bg-white/[0.04] p-3 text-sm text-white placeholder:text-white/40 shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)] focus:border-violet-400/60 focus:outline-none focus:ring-2 focus:ring-violet-400/30"
                 rows={3}
                 aria-label="Bio"
               />
@@ -435,11 +436,11 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="mt-2 flex items-start gap-2">
-              <p className="max-w-md font-serif italic text-white/70">{bio || 'Add a bio...'}</p>
+              <p className="max-w-md text-white/70">{bio || 'Add a bio...'}</p>
               <button
                 type="button"
                 onClick={() => setEditingBio(true)}
-                className="mt-0.5 text-text-light hover:text-primary focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="mt-0.5 text-text-light hover:text-violet-300 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 aria-label="Edit bio"
               >
                 <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
@@ -480,7 +481,7 @@ function DashboardContent() {
                 document.getElementById(`dashboard-tab-${tabs[nextIndex].key}`)?.focus()
               }}
               className={cn(
-                'whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                 activeTab === tab.key ? 'text-white' : 'text-white/60 hover:text-white/80'
               )}
             >
@@ -595,18 +596,15 @@ function DashboardContent() {
                 />
               ) : myComments.length > 0 ? (
                 myComments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="rounded-xl border border-white/10 bg-white/[0.06] p-4"
-                  >
+                  <FrostedCard key={comment.id} variant="default" className="p-4">
                     <p className="whitespace-pre-wrap text-sm text-white/80">{comment.content}</p>
                     <Link
                       to={`/prayer-wall/${comment.prayerId}`}
-                      className="mt-2 block text-xs text-primary hover:underline"
+                      className="mt-2 block text-xs text-violet-300 hover:text-violet-200 hover:underline"
                     >
                       View prayer
                     </Link>
-                  </div>
+                  </FrostedCard>
                 ))
               ) : (
                 <FeatureEmptyState
@@ -719,7 +717,7 @@ function DashboardContent() {
           )}
 
           {activeTab === 'settings' && (
-            <div className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
+            <FrostedCard variant="default" className="p-5">
               <h2 className="mb-4 text-lg font-semibold text-white">Notification Preferences</h2>
               <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-900/20 p-3">
                 <p className="text-sm text-amber-200">Notifications coming soon</p>
@@ -727,18 +725,18 @@ function DashboardContent() {
               {NOTIFICATION_TYPES.map((type) => (
                 <label
                   key={type.key}
-                  className="flex items-center justify-between border-b border-white/10 py-3 last:border-0"
+                  className="flex items-center justify-between border-b border-white/[0.12] py-3 last:border-0"
                 >
                   <span className="text-sm text-white/70">{type.label}</span>
                   <input
                     type="checkbox"
                     defaultChecked
                     disabled
-                    className="h-4 w-4 rounded border-white/20 text-primary accent-primary"
+                    className="h-4 w-4 rounded border-white/20 text-violet-300 accent-violet-300"
                   />
                 </label>
               ))}
-            </div>
+            </FrostedCard>
           )}
         </div>
       </main>

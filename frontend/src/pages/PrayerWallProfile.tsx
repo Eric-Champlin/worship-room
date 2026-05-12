@@ -12,6 +12,7 @@ import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
+import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { SkeletonCard } from '@/components/skeletons/SkeletonCard'
 import { SkeletonText } from '@/components/skeletons/SkeletonText'
 import { cn } from '@/lib/utils'
@@ -211,12 +212,11 @@ function PrayerWallProfileContent() {
               maxWidth="max-w-[720px]"
             />
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-8 text-center">
-            <p className="text-lg font-semibold text-white">User not found</p>
-            <p className="mt-2 text-sm text-white/60">
-              This profile doesn't exist or has been removed.
-            </p>
-          </div>
+          <FeatureEmptyState
+            icon={AlertCircle}
+            heading="User not found"
+            description="This profile doesn't exist or has been removed."
+          />
         </main>
       </PageShell>
     )
@@ -272,7 +272,7 @@ function PrayerWallProfileContent() {
             {profileChrome?.firstName ?? 'Profile'}
           </h1>
           {profileChrome?.bio && (
-            <p className="mt-2 max-w-md font-serif italic text-white/70">{profileChrome.bio}</p>
+            <p className="mt-2 max-w-md text-white/70">{profileChrome.bio}</p>
           )}
           {profileChrome?.joinedDate && (
             <p className="mt-1 text-sm text-white/60">
@@ -309,7 +309,7 @@ function PrayerWallProfileContent() {
                 document.getElementById(`profile-tab-${tabs[nextIndex].key}`)?.focus()
               }}
               className={cn(
-                'px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                'px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50',
                 activeTab === tab.key ? 'text-white' : 'text-white/60 hover:text-white/80'
               )}
             >
@@ -407,18 +407,15 @@ function PrayerWallProfileContent() {
                 />
               ) : userComments.length > 0 ? (
                 userComments.map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="rounded-xl border border-white/10 bg-white/[0.06] p-4"
-                  >
+                  <FrostedCard key={comment.id} variant="default" className="p-4">
                     <p className="whitespace-pre-wrap text-sm text-white/80">{comment.content}</p>
                     <Link
                       to={`/prayer-wall/${comment.prayerId}`}
-                      className="mt-2 block text-xs text-primary hover:underline"
+                      className="mt-2 block text-xs text-violet-300 hover:text-violet-200 hover:underline"
                     >
                       View prayer
                     </Link>
-                  </div>
+                  </FrostedCard>
                 ))
               ) : (
                 <p className="py-8 text-center text-sm text-white/50">No replies yet.</p>

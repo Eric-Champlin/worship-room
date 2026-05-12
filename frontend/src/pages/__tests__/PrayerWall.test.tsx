@@ -81,6 +81,15 @@ describe('PrayerWall', () => {
     expect(buttons.length).toBeGreaterThan(0)
   })
 
+  it('Spec 5.5 — Share Something hero CTA renders as Button variant="subtle" (rounded-full frosted pill)', () => {
+    renderPage()
+    const cta = screen.getAllByRole('button', { name: 'Share something' })[0]
+    // Button variant="subtle" canonical chrome
+    expect(cta.className).toContain('rounded-full')
+    expect(cta.className).toContain('bg-white/[0.07]')
+    expect(cta.className).toContain('border-white/[0.12]')
+  })
+
   it('Pray button toggles and updates count', async () => {
     const user = userEvent.setup()
     renderPage()

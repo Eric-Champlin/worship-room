@@ -180,8 +180,8 @@ describe('PrayerCard — Spec 4.3 testimony chrome', () => {
   it('renders testimony chrome classes when postType is testimony', () => {
     renderCard(TESTIMONY_PRAYER, {})
     const article = screen.getByRole('article')
-    expect(article.className).toContain('bg-amber-500/[0.04]')
-    expect(article.className).toContain('border-amber-200/10')
+    expect(article.className).toContain('bg-amber-500/[0.08]')
+    expect(article.className).toContain('border-amber-200/[0.12]')
   })
 
   it('renders default chrome classes when postType is prayer_request', () => {
@@ -233,7 +233,7 @@ describe('PrayerCard — Spec 4.3 testimony chrome', () => {
     expect(articles[0].className).toContain('bg-white/[0.07]')
     expect(articles[0].querySelector('svg.lucide-hand-helping')).toBeInTheDocument()
     // Second card: testimony (amber chrome)
-    expect(articles[1].className).toContain('bg-amber-500/[0.04]')
+    expect(articles[1].className).toContain('bg-amber-500/[0.08]')
     expect(articles[1].querySelector('svg.lucide-sparkles')).toBeInTheDocument()
   })
 })
@@ -251,8 +251,8 @@ describe('PrayerCard — Spec 4.4 question chrome', () => {
   it('renders question chrome classes when postType is question', () => {
     renderCard(QUESTION_PRAYER, {})
     const article = screen.getByRole('article')
-    expect(article.className).toContain('bg-cyan-500/[0.04]')
-    expect(article.className).toContain('border-cyan-200/10')
+    expect(article.className).toContain('bg-cyan-500/[0.08]')
+    expect(article.className).toContain('border-cyan-200/[0.12]')
   })
 
   it('does not render question chrome classes when postType is prayer_request', () => {
@@ -297,8 +297,8 @@ describe('PrayerCard — Spec 4.4 question chrome', () => {
     const articles = screen.getAllByRole('article')
     expect(articles).toHaveLength(3)
     expect(articles[0].className).toContain('bg-white/[0.07]')
-    expect(articles[1].className).toContain('bg-amber-500/[0.04]')
-    expect(articles[2].className).toContain('bg-cyan-500/[0.04]')
+    expect(articles[1].className).toContain('bg-amber-500/[0.08]')
+    expect(articles[2].className).toContain('bg-cyan-500/[0.08]')
   })
 })
 
@@ -326,8 +326,8 @@ describe('PrayerCard — Spec 4.5 discussion chrome', () => {
   it('discussion postType applies violet chrome classes', () => {
     renderCard(DISCUSSION_PRAYER, {})
     const article = screen.getByRole('article')
-    expect(article.className).toContain('bg-violet-500/[0.04]')
-    expect(article.className).toContain('border-violet-200/10')
+    expect(article.className).toContain('bg-violet-500/[0.08]')
+    expect(article.className).toContain('border-violet-200/[0.12]')
   })
 
   it('non-discussion postTypes do NOT apply violet chrome', () => {
@@ -338,7 +338,7 @@ describe('PrayerCard — Spec 4.5 discussion chrome', () => {
         </MemoryRouter>,
       )
       expect(container.querySelector('article')?.className).not.toContain(
-        'bg-violet-500/[0.04]',
+        'bg-violet-500/[0.08]',
       )
       unmount()
     }
@@ -401,8 +401,8 @@ describe('PrayerCard — Spec 4.6 encouragement chrome', () => {
   it('encouragement postType applies rose chrome classes', () => {
     renderCard(ENCOURAGEMENT_PRAYER, {})
     const article = screen.getByRole('article')
-    expect(article.className).toContain('bg-rose-500/[0.04]')
-    expect(article.className).toContain('border-rose-200/10')
+    expect(article.className).toContain('bg-rose-500/[0.08]')
+    expect(article.className).toContain('border-rose-200/[0.12]')
   })
 
   it('non-encouragement postTypes do NOT apply rose chrome (regression guard)', () => {
@@ -413,7 +413,7 @@ describe('PrayerCard — Spec 4.6 encouragement chrome', () => {
         </MemoryRouter>,
       )
       expect(container.querySelector('article')?.className).not.toContain(
-        'bg-rose-500/[0.04]',
+        'bg-rose-500/[0.08]',
       )
       unmount()
     }
@@ -440,10 +440,10 @@ describe('PrayerCard — Spec 4.6 encouragement chrome', () => {
   it('mixed feed renders correct chrome for all 5 types', () => {
     const fixtures: Array<{ prayer: PrayerRequest; expectedBg: string }> = [
       { prayer: SHORT_PRAYER, expectedBg: 'bg-white/[0.07]' },
-      { prayer: TESTIMONY_PRAYER, expectedBg: 'bg-amber-500/[0.04]' },
-      { prayer: QUESTION_PRAYER, expectedBg: 'bg-cyan-500/[0.04]' },
-      { prayer: DISCUSSION_PRAYER, expectedBg: 'bg-violet-500/[0.04]' },
-      { prayer: ENCOURAGEMENT_PRAYER, expectedBg: 'bg-rose-500/[0.04]' },
+      { prayer: TESTIMONY_PRAYER, expectedBg: 'bg-amber-500/[0.08]' },
+      { prayer: QUESTION_PRAYER, expectedBg: 'bg-cyan-500/[0.08]' },
+      { prayer: DISCUSSION_PRAYER, expectedBg: 'bg-violet-500/[0.08]' },
+      { prayer: ENCOURAGEMENT_PRAYER, expectedBg: 'bg-rose-500/[0.08]' },
     ]
     for (const { prayer, expectedBg } of fixtures) {
       const { container, unmount } = render(
@@ -588,5 +588,67 @@ describe('PrayerCard — Spec 4.6b image attachment', () => {
     expect(outerDiv).not.toBeNull()
     // Pulse fires on the outer div wrapper, not on the article itself
     expect(outerDiv).toBe(container.querySelector('article')?.closest('div'))
+  })
+})
+
+// =====================================================================
+// Spec 5.5 — tier prop (PrayerDetail elevates main card to Tier 1 accent)
+// =====================================================================
+
+describe('PrayerCard — Spec 5.5 tier prop', () => {
+  it('defaults to tier="feed" — renders default-variant chrome with per-type overlay (testimony)', () => {
+    renderCard(TESTIMONY_PRAYER, {})
+    const article = screen.getByRole('article')
+    // tailwind-merge resolves per-type chrome over the default surface, so amber wins for bg/border
+    expect(article.className).toContain('bg-amber-500/[0.08]')
+    expect(article.className).toContain('border-amber-200/[0.12]')
+    // No accent variant (violet) — default variant produces frosted base, not violet tint
+    expect(article.className).not.toContain('bg-violet-500/[0.08]')
+    expect(article.className).not.toContain('border-violet-400/70')
+  })
+
+  it('prayer_request with default tier — frosted default surface (no per-type overlay)', () => {
+    renderCard(SHORT_PRAYER, {})
+    const article = screen.getByRole('article')
+    // prayer_request has empty per-type chrome string, so default surface remains
+    expect(article.className).toContain('bg-white/[0.07]')
+    expect(article.className).toContain('border-white/[0.12]')
+  })
+
+  it('tier="detail" — renders accent-variant chrome (violet)', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={SHORT_PRAYER} tier="detail" />
+      </MemoryRouter>,
+    )
+    const article = screen.getByRole('article')
+    // Accent variant: violet tint
+    expect(article.className).toContain('bg-violet-500/[0.08]')
+    expect(article.className).toContain('border-violet-400/70')
+  })
+
+  it('tier="detail" drops per-type chrome (safe default — no overlay wash on Tier 1)', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={TESTIMONY_PRAYER} tier="detail" />
+      </MemoryRouter>,
+    )
+    const article = screen.getByRole('article')
+    // No amber overlay — only the accent violet
+    expect(article.className).not.toContain('bg-amber-500/[0.08]')
+    expect(article.className).not.toContain('border-amber-200/[0.12]')
+    expect(article.className).toContain('bg-violet-500/[0.08]')
+  })
+
+  it('"Show more" expand button uses canonical violet text-button (text-violet-300)', () => {
+    const longPrayer: PrayerRequest = {
+      ...SHORT_PRAYER,
+      content: 'a'.repeat(200),
+    }
+    renderCard(longPrayer, {})
+    const showMore = screen.getByRole('button', { name: 'Show more' })
+    expect(showMore.className).toContain('text-violet-300')
+    expect(showMore.className).toContain('hover:text-violet-200')
+    expect(showMore.className).toContain('focus-visible:ring-white/50')
   })
 })

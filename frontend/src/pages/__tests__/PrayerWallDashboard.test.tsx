@@ -82,4 +82,42 @@ describe('PrayerWallDashboard', () => {
     expect(screen.getByLabelText('Edit name')).toBeInTheDocument()
     expect(screen.getByLabelText('Edit bio')).toBeInTheDocument()
   })
+
+  it('Spec 5.5 — display-name input uses canonical chrome when editing', async () => {
+    const user = userEvent.setup()
+    renderDashboard()
+    await user.click(screen.getByLabelText('Edit name'))
+    const input = screen.getByLabelText('Display name')
+    expect(input.className).toContain('bg-white/[0.04]')
+    expect(input.className).toContain('border-white/[0.12]')
+    expect(input.className).toContain('focus:ring-violet-400/30')
+  })
+
+  it('Spec 5.5 — bio textarea uses canonical violet glow when editing', async () => {
+    const user = userEvent.setup()
+    renderDashboard()
+    await user.click(screen.getByLabelText('Edit bio'))
+    const textarea = screen.getByLabelText('Bio')
+    expect(textarea.className).toContain('border-violet-400/30')
+    expect(textarea.className).toContain('shadow-[0_0_20px_rgba(167,139,250,0.18),0_0_40px_rgba(167,139,250,0.10)]')
+    expect(textarea.className).toContain('focus:ring-violet-400/30')
+  })
+
+  it('Spec 5.5 — Settings notification card renders with FrostedCard chrome', async () => {
+    const user = userEvent.setup()
+    renderDashboard()
+    await user.click(screen.getByRole('tab', { name: 'Settings' }))
+    // FrostedCard default-variant canonical chrome
+    const heading = screen.getByText('Notification Preferences')
+    const card = heading.closest('div')
+    expect(card?.className).toContain('bg-white/[0.07]')
+    expect(card?.className).toContain('border-white/[0.12]')
+    expect(card?.className).toContain('rounded-3xl')
+  })
+
+  it('Spec 5.5 — tab focus ring is canonical ring-white/50', () => {
+    renderDashboard()
+    const tab = screen.getByRole('tab', { name: 'My Prayers' })
+    expect(tab.className).toContain('focus-visible:ring-white/50')
+  })
 })

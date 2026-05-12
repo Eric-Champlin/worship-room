@@ -558,7 +558,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
               type="checkbox"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="h-4 w-4 rounded border-white/20 bg-white/[0.06] text-primary accent-primary focus-visible:ring-primary"
+              className="h-4 w-4 rounded border-white/20 bg-white/[0.06] text-violet-300 accent-violet-300 focus-visible:ring-white/50"
             />
             <span className="text-sm text-white/70">Post anonymously</span>
           </label>
@@ -625,7 +625,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
                 <strong>{CRISIS_RESOURCES.suicide_prevention.name}:</strong>{' '}
                 <a
                   href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`}
-                  className="font-medium text-primary underline"
+                  className="font-medium text-violet-300 hover:text-violet-200 underline"
                 >
                   {CRISIS_RESOURCES.suicide_prevention.phone}
                 </a>
@@ -638,7 +638,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
                 <strong>{CRISIS_RESOURCES.samhsa.name}:</strong>{' '}
                 <a
                   href={`tel:${CRISIS_RESOURCES.samhsa.phone}`}
-                  className="font-medium text-primary underline"
+                  className="font-medium text-violet-300 hover:text-violet-200 underline"
                 >
                   {CRISIS_RESOURCES.samhsa.phone}
                 </a>

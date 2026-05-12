@@ -225,7 +225,7 @@ describe('DailyHub', () => {
   it('renders the Spotify embed', () => {
     renderPage()
     expect(
-      screen.getByRole('heading', { name: /today's song pick/i }),
+      screen.getByRole('heading', { name: /song pick of the day/i }),
     ).toBeInTheDocument()
   })
 
@@ -398,13 +398,13 @@ describe('DailyHub', () => {
     it('subtitle uses the canonical devotional title className', () => {
       renderPage()
       const subtitle = screen.getByText("What's on your mind today?")
-      // Mirrors devotional title classes: pt-3 text-center text-2xl font-bold text-white sm:pt-4 sm:text-3xl
+      // Mirrors devotional title classes: pt-3 text-center text-2xl font-bold text-white sm:pt-0 sm:text-3xl
       expect(subtitle.className).toContain('pt-3')
       expect(subtitle.className).toContain('text-center')
       expect(subtitle.className).toContain('text-2xl')
       expect(subtitle.className).toContain('font-bold')
       expect(subtitle.className).toContain('text-white')
-      expect(subtitle.className).toContain('sm:pt-4')
+      expect(subtitle.className).toContain('sm:pt-0')
       expect(subtitle.className).toContain('sm:text-3xl')
     })
 

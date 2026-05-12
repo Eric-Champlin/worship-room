@@ -208,7 +208,7 @@ export function ReportDialog({ prayerId, onReport }: ReportDialogProps) {
                     onChange={(e) => setDetails(e.target.value)}
                     placeholder="Add more context..."
                     maxLength={500}
-                    className="mt-2 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="mt-2 w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                     rows={3}
                     aria-label="Report reason"
                     aria-describedby="report-char-count"

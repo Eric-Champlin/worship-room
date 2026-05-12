@@ -81,7 +81,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
           onChange={handleChange}
           placeholder="Share your thoughts..."
           maxLength={QOTD_MAX_LENGTH}
-          className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
           style={{ minHeight: '100px' }}
           aria-label="Your response to the question of the day"
           aria-invalid={content.length > QOTD_MAX_LENGTH ? 'true' : undefined}
@@ -126,7 +126,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
                 <strong>{CRISIS_RESOURCES.suicide_prevention.name}:</strong>{' '}
                 <a
                   href={`tel:${CRISIS_RESOURCES.suicide_prevention.phone}`}
-                  className="font-medium text-primary underline"
+                  className="font-medium text-violet-300 hover:text-violet-200 underline"
                 >
                   {CRISIS_RESOURCES.suicide_prevention.phone}
                 </a>
@@ -139,7 +139,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
                 <strong>{CRISIS_RESOURCES.samhsa.name}:</strong>{' '}
                 <a
                   href={`tel:${CRISIS_RESOURCES.samhsa.phone}`}
-                  className="font-medium text-primary underline"
+                  className="font-medium text-violet-300 hover:text-violet-200 underline"
                 >
                   {CRISIS_RESOURCES.samhsa.phone}
                 </a>

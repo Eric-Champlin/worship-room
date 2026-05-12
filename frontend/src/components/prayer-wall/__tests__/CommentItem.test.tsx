@@ -88,7 +88,7 @@ describe('CommentItem', () => {
     }
     renderItem({ comment: mentionComment })
     expect(screen.getByText('@Sarah')).toBeInTheDocument()
-    expect(screen.getByText('@Sarah').className).toContain('text-primary')
+    expect(screen.getByText('@Sarah').className).toContain('text-violet-300')
   })
 })
 

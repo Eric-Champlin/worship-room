@@ -100,6 +100,14 @@ describe('PrayerDetail', () => {
     ).toBeInTheDocument()
   })
 
+  it('Spec 5.5 — main PrayerCard renders with tier="detail" (accent variant chrome)', () => {
+    renderDetail('prayer-1')
+    const article = screen.getByRole('article')
+    // Tier 1 accent variant
+    expect(article.className).toContain('bg-violet-500/[0.08]')
+    expect(article.className).toContain('border-violet-400/70')
+  })
+
   it('shows report link', () => {
     renderDetail('prayer-1')
     expect(screen.getByText('Report')).toBeInTheDocument()

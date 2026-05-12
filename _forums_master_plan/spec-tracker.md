@@ -141,17 +141,19 @@ prevents a wasted deploy attempt.
 >
 > **Spec 14 partial fold-in (2026-05-07 — Cinematic Hero Rollout):** Spec 14 rolled the cinematic atmospheric onto every cinematic-mounting page (`/bible`, `/local-support/*`, `/ask`, `/grow`, `/prayer-wall`, `/music`) and folded four Phase 5 items in along the way: PrayerWallHero migration ✅, `font-script` "Wall" cleanup ✅, `font-serif italic` subtitle cleanup ✅, BackgroundCanvas promotion on `/prayer-wall` ✅ (Spec 5.2 shipped). Remaining Phase 5 scope: PrayerCard FrostedCard migration (5.1), 2-line heading treatment (5.3), animation token migration (5.4), the rest of the deprecated pattern purge (5.5 — only the PrayerWallHero typography portion done), Redis (5.6). See spec-14 plan + execution log: `_plans/2026-05-07-spec-14-cinematic-hero-rollout.md`.
 
-| #    | Spec | Title                                                                                                    | Size | Risk   | Status                                        |
-| ---- | ---- | -------------------------------------------------------------------------------------------------------- | ---- | ------ | --------------------------------------------- |
-| 72.5 | 5.0  | Architecture Context Refresh (stub)                                                                      | XS   | None   | ✅ (N/A — reconciliation report is canonical) |
-| 73   | 5.1  | FrostedCard Migration                                                                                    | L    | Medium | ✅                                            |
-| 74   | 5.2  | BackgroundCanvas at Prayer Wall Root                                                                     | S    | Low    | ✅ (shipped via Spec 14 Step 6)               |
-| 75   | 5.3  | 2-Line Heading Treatment                                                                                 | M    | Low    | ✅                                            |
-| 76   | 5.4  | Animation Token Migration (BB-33 Compliance)                                                             | M    | Low    | ✅                                            |
-| 77   | 5.5  | Deprecated Pattern Purge and Visual Audit (PrayerWallHero typography portion shipped via Spec 14 Step 7) | M    | Low    | ⬜ (partial)                                  |
-| 78   | 5.6  | Redis Cache Foundation                                                                                   | M    | Medium | ⬜                                            |
+| #    | Spec | Title                                     | Size | Risk   | Status |
+| ---- | ---- | ----------------------------------------- | ---- | ------ | ------ |
+| 72.5 | 5.0  | Architecture Context Refresh              | XS   | None   | ✅     |
+| 73   | 5.1  | FrostedCard Migration                     | L    | Medium | ✅     |
+| 74   | 5.2  | BackgroundCanvas at PW Root               | S    | Low    | ✅     |
+| 75   | 5.3  | 2-Line Heading Treatment                  | M    | Low    | ✅     |
+| 76   | 5.4  | Animation Token Migration                 | M    | Low    | ✅     |
+| 77   | 5.5  | Deprecated Pattern Purge and Visual Audit | M    | Low    | ✅     |
+| 78   | 5.6  | Redis Cache Foundation                    | M    | Medium | ⬜     |
 
 **Spec 5.3** 5.3 closed without code migration. PrayerWallHero's 2-line aesthetic (gradient h1 + cinematic + subtitle) shipped via Spec 14; brief's PageHero composition was geometrically incompatible (ATMOSPHERIC_HERO_BG masks cinematic; padding stacks layout shift). PrayerWallDashboard has no qualifying section headers. Axe-core dashboard route added.
+
+**Spec 5.5** (PrayerWallHero typography portion shipped via Spec 14 Step 7)
 
 ### Spec 14 — Cinematic Hero Rollout (parallel Round 3 follow-on, 2026-05-07)
 

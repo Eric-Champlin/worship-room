@@ -335,7 +335,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
             <button
               type="button"
               onClick={handleClose}
-              className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center text-white/50 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
+              className="absolute right-0 top-1/2 -translate-y-1/2 flex min-h-[44px] min-w-[44px] items-center justify-center text-white/50 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded-full"
               aria-label="Close"
             >
               <X className="h-5 w-5" aria-hidden="true" />
@@ -387,7 +387,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                 <button
                   type="button"
                   onClick={() => setView('login')}
-                  className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                  className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
                 >
                   Back to Log In
                 </button>
@@ -589,7 +589,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                   <button
                     type="button"
                     onClick={() => setView('forgot-password')}
-                    className="mb-3 text-sm text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                    className="mb-3 text-sm text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
                   >
                     Forgot password?
                   </button>
@@ -605,7 +605,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                         onChange={(e) => setHasAcceptedTerms(e.target.checked)}
                         required
                         aria-required="true"
-                        className="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                        className="mt-1 h-4 w-4 rounded border-white/30 bg-white/10 text-violet-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                       />
                       <span>
                         I have read and agree to the{' '}
@@ -687,7 +687,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     <button
                       type="button"
                       onClick={() => setView('register')}
-                      className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                      className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
                     >
                       Create one!
                     </button>
@@ -698,7 +698,7 @@ export function AuthModal({ isOpen, onClose, onShowToast, subtitle, initialView 
                     <button
                       type="button"
                       onClick={() => setView('login')}
-                      className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded"
+                      className="font-medium text-purple-400 hover:text-purple-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:rounded"
                     >
                       Log in
                     </button>
