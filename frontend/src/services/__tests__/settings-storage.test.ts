@@ -115,4 +115,36 @@ describe('settings-storage', () => {
     a.privacy.blockedUsers.push('user-1')
     expect(b.privacy.blockedUsers).toEqual([])
   })
+
+  // --- Spec 6.1 — prayerWall namespace (Step 11) ---
+
+  it('returns prayerWall.prayerReceiptsVisible=true by default on fresh localStorage', () => {
+    const settings = getSettings()
+    expect(settings.prayerWall.prayerReceiptsVisible).toBe(true)
+  })
+
+  it('backward-compat: stored blob missing prayerWall key merges in defaults', () => {
+    // Simulate an older blob written before Spec 6.1 — no prayerWall namespace
+    localStorage.setItem(
+      SETTINGS_KEY,
+      JSON.stringify({
+        profile: { displayName: 'Legacy' },
+        notifications: { pushNotifications: true },
+        privacy: { nudgePermission: 'nobody' },
+      }),
+    )
+    const settings = getSettings()
+    expect(settings.prayerWall.prayerReceiptsVisible).toBe(true)
+    // Old data preserved
+    expect(settings.profile.displayName).toBe('Legacy')
+    expect(settings.notifications.pushNotifications).toBe(true)
+    expect(settings.privacy.nudgePermission).toBe('nobody')
+  })
+
+  it('updateSettings persists prayerWall.prayerReceiptsVisible=false and reads back', () => {
+    const updated = updateSettings({ prayerWall: { prayerReceiptsVisible: false } })
+    expect(updated.prayerWall.prayerReceiptsVisible).toBe(false)
+    const fromStorage = getSettings()
+    expect(fromStorage.prayerWall.prayerReceiptsVisible).toBe(false)
+  })
 })

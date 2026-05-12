@@ -17,21 +17,25 @@ vi.mock('@/hooks/useAuth', () => ({
 }))
 
 const defaultPrivacy = { ...DEFAULT_SETTINGS.privacy }
+const defaultPrayerWall = { ...DEFAULT_SETTINGS.prayerWall }
 
 function renderPrivacy(props: Partial<Parameters<typeof PrivacySection>[0]> = {}) {
   const onUpdatePrivacy = props.onUpdatePrivacy ?? vi.fn()
+  const onUpdatePrayerWall = props.onUpdatePrayerWall ?? vi.fn()
   const onUnblock = props.onUnblock ?? vi.fn()
   const result = render(
     <ToastProvider>
       <PrivacySection
         privacy={props.privacy ?? defaultPrivacy}
+        prayerWall={props.prayerWall ?? defaultPrayerWall}
         friendsBlocked={props.friendsBlocked ?? []}
         onUpdatePrivacy={onUpdatePrivacy}
+        onUpdatePrayerWall={onUpdatePrayerWall}
         onUnblock={onUnblock}
       />
     </ToastProvider>,
   )
-  return { ...result, onUpdatePrivacy, onUnblock }
+  return { ...result, onUpdatePrivacy, onUpdatePrayerWall, onUnblock }
 }
 
 describe('PrivacySection', () => {
@@ -41,12 +45,59 @@ describe('PrivacySection', () => {
 
   // --- Toggles ---
 
-  it('both privacy toggles render with correct defaults', () => {
+  it('privacy toggles render with correct defaults', () => {
     renderPrivacy()
     const switches = screen.getAllByRole('switch')
-    expect(switches).toHaveLength(2)
+    // Spec 6.1 added prayerReceiptsVisible — now 3 toggles, all default ON.
+    expect(switches).toHaveLength(3)
     expect(switches[0]).toHaveAttribute('aria-checked', 'true') // showOnGlobalLeaderboard
     expect(switches[1]).toHaveAttribute('aria-checked', 'true') // activityStatus
+    expect(switches[2]).toHaveAttribute('aria-checked', 'true') // prayerReceiptsVisible
+  })
+
+  // --- Spec 6.1 — Prayer Receipts toggle ---
+
+  it('toggling the Prayer Receipts switch calls onUpdatePrayerWall', async () => {
+    const user = userEvent.setup()
+    const { onUpdatePrayerWall } = renderPrivacy()
+    // 3rd switch is prayerReceiptsVisible (order: leaderboard, activityStatus, prayerReceipts).
+    const switches = screen.getAllByRole('switch')
+    expect(switches).toHaveLength(3)
+    await user.click(switches[2])
+    expect(onUpdatePrayerWall).toHaveBeenCalledWith({ prayerReceiptsVisible: false })
+  })
+
+  it('Prayer Receipts off-state shows NO shaming copy (Gate-35 / W25)', () => {
+    renderPrivacy({ prayerWall: { prayerReceiptsVisible: false } })
+    // Off-state description is the SAME canonical helper as the on-state
+    // (Copy Deck verbatim — Gate-34). Anti-pressure check: the off-state
+    // adds no shaming copy — no "you've hidden", no "you're missing X
+    // prayers", no "people are still praying but you can't see them",
+    // no exclamation points in the toggle row, no comparison framing.
+    expect(screen.queryByText(/you've hidden/i)).toBeNull()
+    expect(screen.queryByText(/you are missing/i)).toBeNull()
+    expect(screen.queryByText(/you're missing/i)).toBeNull()
+    expect(screen.queryByText(/still praying but/i)).toBeNull()
+    expect(screen.queryByText(/people have prayed/i)).toBeNull()
+    // The toggle renders, off.
+    const prayerToggle = screen.getByLabelText(/Show me my prayer receipts/i)
+    expect(prayerToggle).toHaveAttribute('aria-checked', 'false')
+    // The canonical helper text from the master plan Copy Deck IS present —
+    // it's informational, not shaming, and renders in both states.
+    expect(
+      screen.getByText(
+        /Turn this off if you'd rather not see who's praying for you right now\. You can turn it back on anytime\./,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('Prayer Receipts on-state shows the canonical Copy Deck helper text (Gate-34)', () => {
+    renderPrivacy({ prayerWall: { prayerReceiptsVisible: true } })
+    expect(
+      screen.getByText(
+        /Turn this off if you'd rather not see who's praying for you right now\. You can turn it back on anytime\./,
+      ),
+    ).toBeInTheDocument()
   })
 
   it('toggling persists to settings', async () => {

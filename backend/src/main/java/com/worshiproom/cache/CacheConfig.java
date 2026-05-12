@@ -2,6 +2,7 @@ package com.worshiproom.cache;
 
 import java.time.Duration;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,12 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
  * declared in {@code application.properties}. No cache names are declared in 5.6;
  * {@code RepoWideTtlEnforcementTest} verifies that every {@code @Cacheable} present has a
  * corresponding TTL property (vacuous today).
+ *
+ * <p>{@link EnableCaching} activates Spring's caching AOP proxy. Added in Spec 6.1 (the
+ * first @{@code Cacheable} consumer) — without it the annotation is silently ignored.
  */
 @Configuration
+@EnableCaching
 public class CacheConfig {
 
     private static final Duration DEFAULT_TTL = Duration.ofMinutes(5);

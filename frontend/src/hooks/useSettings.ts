@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy } from '@/types/settings'
+import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy, UserSettingsPrayerWall } from '@/types/settings'
 import { getSettings, saveSettings, SETTINGS_KEY } from '@/services/settings-storage'
 
 export function useSettings(): {
@@ -8,6 +8,7 @@ export function useSettings(): {
   updateNotifications: (key: keyof UserSettingsNotifications, value: boolean) => void
   updatePrivacy: (updates: Partial<Omit<UserSettingsPrivacy, 'blockedUsers'>>) => void
   unblockUser: (userId: string) => void
+  updatePrayerWall: (updates: Partial<UserSettingsPrayerWall>) => void
 } {
   const [settings, setSettings] = useState<UserSettings>(() => getSettings())
 
@@ -49,6 +50,15 @@ export function useSettings(): {
     })
   }, [])
 
+  // Spec 6.1 — Prayer Wall settings namespace updater.
+  const updatePrayerWall = useCallback((updates: Partial<UserSettingsPrayerWall>) => {
+    setSettings((prev) => {
+      const next = { ...prev, prayerWall: { ...prev.prayerWall, ...updates } }
+      saveSettings(next)
+      return next
+    })
+  }, [])
+
   // Cross-tab sync
   useEffect(() => {
     function handleStorage(e: StorageEvent) {
@@ -60,5 +70,5 @@ export function useSettings(): {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  return { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser }
+  return { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser, updatePrayerWall }
 }

@@ -35,6 +35,31 @@ public class PostExceptionHandler {
                 .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }
 
+    // Spec 6.1 — Prayer Receipt READ rate limit. Same Retry-After header pattern as
+    // PostsRateLimitException. Most-specific-handler dispatch picks this before
+    // the catch-all handlePost branch.
+    @ExceptionHandler(PrayerReceiptReadRateLimitException.class)
+    public ResponseEntity<ProxyError> handlePrayerReceiptReadRateLimit(PrayerReceiptReadRateLimitException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Prayer receipt read rate limit hit retryAfter={}s", ex.getRetryAfterSeconds());
+        return ResponseEntity
+                .status(ex.getStatus())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+    }
+
+    // Spec 6.1 — Prayer Receipt SHARE rate limit. Per-(post, user) limit; share
+    // endpoint records the rate-limit event but never writes to the DB.
+    @ExceptionHandler(PrayerReceiptShareRateLimitException.class)
+    public ResponseEntity<ProxyError> handlePrayerReceiptShareRateLimit(PrayerReceiptShareRateLimitException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Prayer receipt share rate limit hit retryAfter={}s", ex.getRetryAfterSeconds());
+        return ResponseEntity
+                .status(ex.getStatus())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+    }
+
     // Spec 4.6b — InvalidAltTextException and ImageClaimFailedException extend
     // PostException and are caught by handlePost below via most-specific-handler
     // dispatch. ImageNotAllowedForPostTypeException has its own handler so the

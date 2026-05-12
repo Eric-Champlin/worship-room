@@ -8,6 +8,7 @@ import { PRAYER_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
+import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentItem } from '@/components/prayer-wall/CommentItem'
 import { CommentInput } from '@/components/prayer-wall/CommentInput'
@@ -360,6 +361,16 @@ function PrayerDetailContent() {
         </div>
 
         <PrayerCard prayer={prayer} showFull tier="detail">
+          {/* Spec 6.1 — Prayer Receipt above InteractionBar. Internally gates;
+              non-authors / hidden-at-zero / setting-off cases all return null. */}
+          {prayer.userId && (
+            <PrayerReceipt
+              postId={prayer.id}
+              postAuthorId={prayer.userId}
+              prayingCount={prayer.prayingCount ?? 0}
+              postExcerpt={prayer.content}
+            />
+          )}
           <InteractionBar
             prayer={prayer}
             reactions={reactions[prayer.id]}

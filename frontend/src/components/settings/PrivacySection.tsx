@@ -5,12 +5,21 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useToast } from '@/components/ui/Toast'
 import { useMutes } from '@/hooks/useMutes'
 import { ALL_MOCK_USERS } from '@/mocks/friends-mock-data'
-import type { UserSettingsPrivacy, NudgePermission, StreakVisibility } from '@/types/settings'
+import type {
+  UserSettingsPrivacy,
+  UserSettingsPrayerWall,
+  NudgePermission,
+  StreakVisibility,
+} from '@/types/settings'
 
 interface PrivacySectionProps {
   privacy: UserSettingsPrivacy
+  /** Spec 6.1 — Prayer Wall settings namespace. */
+  prayerWall: UserSettingsPrayerWall
   friendsBlocked: string[]
   onUpdatePrivacy: (updates: Partial<Omit<UserSettingsPrivacy, 'blockedUsers'>>) => void
+  /** Spec 6.1 — Prayer Wall settings updater. */
+  onUpdatePrayerWall: (updates: Partial<UserSettingsPrayerWall>) => void
   onUnblock: (userId: string) => void
 }
 
@@ -38,8 +47,10 @@ function getMockUserInitial(userId: string): string {
 
 export function PrivacySection({
   privacy,
+  prayerWall,
   friendsBlocked,
   onUpdatePrivacy,
+  onUpdatePrayerWall,
   onUnblock,
 }: PrivacySectionProps) {
   const { showToast } = useToast()
@@ -108,6 +119,17 @@ export function PrivacySection({
             onChange={(v) => onUpdatePrivacy({ activityStatus: v })}
             label="Activity status"
             description="Show friends when you're active"
+          />
+          {/* Spec 6.1 — Prayer Receipts toggle. Lives inside Privacy (single-click
+              from /settings to reach the toggle). Label + description are verbatim
+              from the master plan Copy Deck (Gate-34). The helper text is identical
+              in on AND off states — no shaming copy added when off (W25 / Gate-35). */}
+          <ToggleSwitch
+            id="privacy-prayer-receipts"
+            checked={prayerWall.prayerReceiptsVisible}
+            onChange={(v) => onUpdatePrayerWall({ prayerReceiptsVisible: v })}
+            label="Show me my prayer receipts"
+            description="Turn this off if you'd rather not see who's praying for you right now. You can turn it back on anytime."
           />
         </div>
 

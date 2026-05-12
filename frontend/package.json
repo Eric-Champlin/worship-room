@@ -17,11 +17,13 @@
     "test:watch": "vitest",
     "og-generate": "node scripts/generate-og-cards.mjs",
     "og-check": "node scripts/check-og-sizes.mjs",
-    "build-search-index": "npx tsx scripts/build-search-index.mjs"
+    "build-search-index": "npx tsx scripts/build-search-index.mjs",
+    "check-bundle-budget": "node scripts/check-bundle-budget.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.0",
     "howler": "^2.2.4",
+    "html2canvas": "^1.4.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.356.0",
     "react": "^18.3.1",

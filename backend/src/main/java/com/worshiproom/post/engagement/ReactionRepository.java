@@ -33,4 +33,18 @@ public interface ReactionRepository extends JpaRepository<PostReaction, PostReac
             @Param("postId") UUID postId,
             @Param("userId") UUID userId,
             @Param("reactionType") String reactionType);
+
+    /**
+     * Spec 6.1 — return all user IDs that have reacted with the given type on a post.
+     * Used by {@link com.worshiproom.post.PrayerReceiptService} to enumerate praying
+     * reactors so the service can classify them friend-vs-non-friend.
+     *
+     * <p>Returns IDs only — no user-data hydration here (the service hydrates only the
+     * friend subset to enforce the Gate-32 privacy invariant: non-friend identities
+     * never leave the service).
+     */
+    @Query("SELECT r.userId FROM PostReaction r WHERE r.postId = :postId AND r.reactionType = :reactionType")
+    List<UUID> findReactorIdsByPostIdAndReactionType(
+            @Param("postId") UUID postId,
+            @Param("reactionType") String reactionType);
 }

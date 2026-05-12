@@ -97,6 +97,13 @@ public class SecurityConfig {
                 // forbids them. Per-user rate limit (10/hour) handled in UploadRateLimitService.
                 .requestMatchers(HttpMethod.POST, "/api/v1/uploads/post-image").authenticated()
 
+                // Spec 6.1 — Prayer Receipt endpoints require authentication. Author-only
+                // enforcement happens at the controller (PrayerReceiptForbiddenException → 403).
+                // Same first-match-wins + explicit nested-path pattern as Specs 3.5/3.6/3.7/3.8 —
+                // AntPathMatcher does NOT match nested paths via /api/v1/posts/*.
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/prayer-receipt").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/prayer-receipt/share").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

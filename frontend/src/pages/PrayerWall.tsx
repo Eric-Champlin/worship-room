@@ -10,6 +10,7 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
+import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { SaveToPrayersForm } from '@/components/prayer-wall/SaveToPrayersForm'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
@@ -944,6 +945,17 @@ function PrayerWallContent() {
                     style={stagger.style}
                   >
                     <PrayerCard prayer={prayer} index={index} onCategoryClick={handleSelectCategory}>
+                      {/* Spec 6.1 — Prayer Receipt above InteractionBar. Internally
+                          gates: only renders when viewer === author AND prayingCount > 0
+                          AND settings.prayerWall.prayerReceiptsVisible. */}
+                      {prayer.userId && (
+                        <PrayerReceipt
+                          postId={prayer.id}
+                          postAuthorId={prayer.userId}
+                          prayingCount={prayer.prayingCount ?? 0}
+                          postExcerpt={prayer.content}
+                        />
+                      )}
                       <InteractionBar
                         prayer={prayer}
                         reactions={reactions[prayer.id]}

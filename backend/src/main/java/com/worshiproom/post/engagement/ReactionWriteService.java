@@ -11,6 +11,7 @@ import com.worshiproom.post.engagement.dto.ToggleReactionResponse;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,12 +64,27 @@ public class ReactionWriteService {
     /**
      * Toggle a reaction. Returns the post-mutation state and counters.
      *
+     * <p>Spec 6.1 (Gate-33): {@code @CacheEvict} on the {@code prayer-receipt}
+     * cache fires when this method returns successfully. Spring's default
+     * {@code beforeInvocation = false} means eviction happens AFTER the
+     * transaction commits — there is a microsecond race window between
+     * commit and eviction where a concurrent {@code GET /prayer-receipt}
+     * could serve the prior cache entry. With a 30s TTL and atomic
+     * insert+counter update inside the transaction, the practical staleness
+     * floor is bounded by the Spring proxy unwind time (≪ 1ms in typical
+     * deploys). The spec's "atomic" framing refers to this end-to-end
+     * commit-then-evict sequence; true within-transaction eviction would
+     * require {@code beforeInvocation = true} (which we deliberately do NOT
+     * use because a transaction rollback would then leave the cache in a
+     * stale state worse than the current behavior).
+     *
      * @param postId        target post (must be visible to viewer)
      * @param userId        actor
      * @param reactionType  validated upstream by {@code @Pattern} —
      *                      MUST be {@code "praying"} or {@code "candle"}
      */
     @Transactional
+    @CacheEvict(value = "prayer-receipt", key = "#postId")
     public ToggleReactionResponse toggle(UUID postId, UUID userId, String reactionType, String requestId) {
         rateLimitService.checkAndConsume(userId);
 
@@ -121,6 +137,7 @@ public class ReactionWriteService {
      * NO activity event (mirrors toggle-remove).
      */
     @Transactional
+    @CacheEvict(value = "prayer-receipt", key = "#postId")
     public void remove(UUID postId, UUID userId, String reactionType, String requestId) {
         rateLimitService.checkAndConsume(userId);
 

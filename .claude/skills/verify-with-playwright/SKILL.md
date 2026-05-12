@@ -415,6 +415,10 @@ import { test, expect, type Page, type ConsoleMessage } from '@playwright/test';
  
 const BASE_URL = 'http://localhost:5173';
 const SCREENSHOT_DIR = 'playwright-screenshots';
+
+// Ensure screenshot directory exists before any capture (no orphan PNGs in CWD)
+import { mkdirSync } from 'node:fs';
+mkdirSync(SCREENSHOT_DIR, { recursive: true });
  
 // 6 breakpoints matching Worship Room design system + industry standards
 const BREAKPOINTS = {
@@ -1225,6 +1229,21 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - Only verify what was requested — don't test unrelated pages
 - Do not fix issues — report them
 - Do not modify source code (only temp test file, deleted after)
+
+### Screenshot Path Discipline (mandatory)
+
+**ALL screenshot file paths MUST be rooted at `frontend/playwright-screenshots/`.** This rule applies to:
+
+- The test fixture template in Step 5 (`screenshotAtBreakpoint` helper)
+- Any ad-hoc Playwright snippet run for diagnosis at any step
+- Step 6 design-compliance captures
+- Step 8 responsive-verification captures
+
+**Never use bare filenames in `page.screenshot({ path: ... })`.** Bare filenames write to the current working directory — which is repo root if the snippet is run from anywhere but `frontend/`. The result is permanent orphan PNGs cluttering the repo root.
+
+**Pre-flight check:** Before running any Playwright command in this skill, run `mkdir -p frontend/playwright-screenshots` so the destination exists.
+
+The `frontend/playwright-screenshots/` directory is gitignored (`.gitignore` has `*.png` plus `screenshots/` excluded globally). Screenshots there are local-only artifacts and accumulate per session.
  
 ### Screenshots
 - Always capture at all 6+ breakpoints + before/after interactions

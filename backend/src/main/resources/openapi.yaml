@@ -2131,6 +2131,105 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/posts/{id}/prayer-receipt:
+    get:
+      tags: [Posts]
+      summary: Get the prayer receipt for a post (author-only — Spec 6.1)
+      description: |
+        Returns the count of intercessors who tapped Pray on the post, with
+        FRIENDS of the post author named and non-friends counted only. The
+        response carries `totalCount` (raw `praying_count`),
+        `attributedIntercessors` (sorted alphabetically by display name),
+        and `anonymousCount` (non-friend reactors). The invariant
+        `totalCount === attributedIntercessors.length + anonymousCount`
+        holds on every response.
+
+        **Author-only (Gate-31):** Non-authors receive 403 with NO
+        intercessor data of any kind in the response body. Anonymous-post
+        authors fetching their own receipt succeed — anonymity is a wire-
+        presentation concern, not an auth boundary.
+
+        **Privacy invariant (Gate-32):** Non-friend reactor user IDs,
+        display names, and avatars NEVER appear on the wire. Server-side
+        classification happens before serialization; the controller has
+        no opportunity to leak.
+
+        **Caching:** Author-only access keys the cache by postId alone
+        (privacy by construction). TTL: 30s (`spring.cache.redis.time-to-
+        live.prayer-receipt`); evicted on reaction add/remove via
+        `@CacheEvict` in `ReactionWriteService`.
+
+        Rate limit: 60 requests per hour per user.
+
+        Returns 404 if the post is missing or soft-deleted — uniform for
+        all viewers (including the author) to prevent existence-scanning
+        via differential status codes.
+      operationId: getPrayerReceipt
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Receipt fetched
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/PrayerReceiptResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/v1/posts/{id}/prayer-receipt/share:
+    post:
+      tags: [Posts]
+      summary: Record a prayer-receipt share event (rate-limit only — Spec 6.1)
+      description: |
+        Records a share event for rate-limit accounting only. NO database
+        write — the endpoint exists to bound how often an author can share
+        the same post's receipt PNG (mitigates abuse of the on-demand PNG
+        generation pipeline).
+
+        Author-only — non-authors receive 403. Missing/soft-deleted posts
+        receive 404 (uniform).
+
+        Rate limit: 5 shares per post per user per day (composite-key
+        bucket: different posts have independent quotas).
+
+        Frontend pattern: client calls this endpoint immediately before
+        invoking `navigator.share()` or the download fallback; the 429
+        response is treated as a soft block (toast notification, share
+        UI does NOT fire).
+      operationId: recordPrayerReceiptShare
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Share recorded
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/posts/{id}/bookmark:
     post:
       tags: [Posts]
@@ -4106,6 +4205,58 @@ components:
           type: integer
           minimum: 0
           description: Post-mutation candle count for the parent post.
+
+    PrayerReceiptResponse:
+      description: |
+        Author-only response for `GET /api/v1/posts/{id}/prayer-receipt`
+        (Spec 6.1). The server has already classified each praying reactor
+        as friend-vs-non-friend; non-friend identities NEVER appear on
+        the wire (Gate-32).
+
+        Invariant: `totalCount == attributedIntercessors.length + anonymousCount`.
+      type: object
+      required: [totalCount, attributedIntercessors, anonymousCount]
+      properties:
+        totalCount:
+          type: integer
+          minimum: 0
+          description: |
+            Total praying reactions on the post (mirrors `posts.praying_count`).
+        attributedIntercessors:
+          type: array
+          description: |
+            Friends of the post author who have reacted with `praying`.
+            Sorted alphabetically (case-insensitive) by display name.
+            Deleted or banned friends are excluded and roll into `anonymousCount`.
+          items: { $ref: '#/components/schemas/AttributedIntercessor' }
+        anonymousCount:
+          type: integer
+          minimum: 0
+          description: |
+            Count of praying reactions from users who are NOT friends of the
+            author (or who are friends but have been deleted/banned). Their
+            identities NEVER appear on the wire.
+
+    AttributedIntercessor:
+      description: |
+        A friend of the post author who reacted with `praying` (Spec 6.1).
+        Only the friend subset of reactors is ever serialized here.
+      type: object
+      required: [userId, displayName]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          description: |
+            Resolved via DisplayNameResolver from the friend's display-name
+            preference + custom name + first/last name fields.
+        avatarUrl:
+          type: string
+          nullable: true
+          description: |
+            Friend's avatar URL, or null if the friend has not set one.
 
     BookmarkResponse:
       description: |

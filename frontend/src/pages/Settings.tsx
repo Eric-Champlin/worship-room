@@ -41,6 +41,7 @@ export function Settings() {
     updateNotifications,
     updatePrivacy,
     unblockUser: unblockSettings,
+    updatePrayerWall,
   } = useSettings()
   const { blocked: friendsBlocked, unblockUser: unblockFriend } = useFriends()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -210,8 +211,10 @@ export function Settings() {
             {activeSection === 'privacy' && (
               <PrivacySection
                 privacy={settings.privacy}
+                prayerWall={settings.prayerWall}
                 friendsBlocked={friendsBlocked}
                 onUpdatePrivacy={updatePrivacy}
+                onUpdatePrayerWall={updatePrayerWall}
                 onUnblock={handleUnblock}
               />
             )}

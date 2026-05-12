@@ -8,6 +8,7 @@ import { PRAYER_WALL_DASHBOARD_METADATA } from '@/lib/seo/routeMetadata'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
+import { PrayerReceiptMini } from '@/components/prayer-wall/PrayerReceiptMini'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
@@ -540,6 +541,16 @@ function DashboardContent() {
                       onToggleBookmark={() => toggleBookmark(prayer.id)}
                       isCommentsOpen={openComments.has(prayer.id)}
                     />
+                    {/* Spec 6.1 — Dashboard mini-receipt. Count + scripture
+                        reference only, no avatars, no friend names (D-Dashboard-
+                        mini / Gate-32 defense in depth). PrayerReceiptMini
+                        internally gates and returns null otherwise. */}
+                    {prayer.userId && (
+                      <PrayerReceiptMini
+                        postAuthorId={prayer.userId}
+                        prayingCount={prayer.prayingCount ?? 0}
+                      />
+                    )}
                     {/*
                       Spec 4.4 — `onResolve` intentionally NOT passed here.
                       Dashboard renders comments via `getMockComments()` (or `[]`

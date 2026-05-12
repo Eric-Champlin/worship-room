@@ -31,6 +31,11 @@ export const DEFAULT_SETTINGS: UserSettings = {
     streakVisibility: 'friends',
     blockedUsers: [],
   },
+  prayerWall: {
+    // Spec 6.1 — Prayer Receipt visible by default. Author can turn it off
+    // in /settings?tab=privacy (no shaming copy on off-state).
+    prayerReceiptsVisible: true,
+  },
 }
 
 function deepMerge<T extends object>(defaults: T, partial: DeepPartial<T>): T {
@@ -65,12 +70,12 @@ export function getSettings(): UserSettings {
     if (raw === null) return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
     const parsed = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
+      return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall } }
     }
     return deepMerge(DEFAULT_SETTINGS, parsed)
   } catch (_e) {
     // localStorage may be unavailable or data malformed
-    return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
+    return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall } }
   }
 }
 
