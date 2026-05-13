@@ -42,5 +42,9 @@ public record PostDto(
         PostImageDto image,
         // Spec 4.7b — always present (empty Set when no tags). Canonical order
         // (LinkedHashSet preserves the server's canonical sort).
-        Set<String> helpTags
+        Set<String> helpTags,
+        // Spec 6.5 — populated only by feed endpoint (listFeed). Null on
+        // getById and listAuthorPosts. Global Jackson default-property-inclusion
+        // = non_null drops the field from the wire format when null.
+        IntercessorSummary intercessorSummary
 ) {}

@@ -1,5 +1,6 @@
 package com.worshiproom.post.engagement;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -47,4 +48,48 @@ public interface ReactionRepository extends JpaRepository<PostReaction, PostReac
     List<UUID> findReactorIdsByPostIdAndReactionType(
             @Param("postId") UUID postId,
             @Param("reactionType") String reactionType);
+
+    /**
+     * Spec 6.5 — fetch reactions of a given type for a post, sorted by reactedAt DESC
+     * with deterministic tiebreak on userId ASC. Capped via Pageable (50 for the
+     * Intercessor Timeline endpoint).
+     *
+     * <p>Returns full PostReaction entities so the service layer can read userId
+     * + createdAt without a second hop. Tiebreaker on userId ASC is deterministic
+     * because (post_id, user_id, reaction_type) is the composite PK — for a single
+     * (post_id, reaction_type) pair, user_id is unique.
+     */
+    @Query("SELECT r FROM PostReaction r WHERE r.postId = :postId AND r.reactionType = :reactionType "
+         + "ORDER BY r.createdAt DESC, r.userId ASC")
+    List<PostReaction> findByPostIdAndReactionTypeOrderByCreatedAtDescUserIdAsc(
+            @Param("postId") UUID postId,
+            @Param("reactionType") String reactionType,
+            Pageable pageable);
+
+    /**
+     * Spec 6.5 — top-N reactions per post for a page of post IDs (used by feed-endpoint
+     * intercessorSummary firstThree). Native SQL with window function — JPQL has no
+     * ROW_NUMBER() OVER (PARTITION BY ...) support.
+     *
+     * <p>Returns rows as a {@link ReactionTopProjection}: (post_id, user_id, created_at).
+     * Service layer groups by post_id and classifies each entry against the viewer's
+     * friend set. Tiebreaker (user_id ASC) matches the dedicated-endpoint sort.
+     *
+     * <p>The window-function partition predicate is satisfied by the existing
+     * {@code idx_post_reactions_post_type} index on {@code (post_id, reaction_type)}.
+     */
+    @Query(value = """
+        SELECT post_id, user_id, created_at
+        FROM (
+          SELECT post_id, user_id, created_at,
+                 ROW_NUMBER() OVER (PARTITION BY post_id ORDER BY created_at DESC, user_id) AS rn
+          FROM post_reactions
+          WHERE post_id IN :postIds AND reaction_type = :reactionType
+        ) ranked
+        WHERE rn <= :n
+        """, nativeQuery = true)
+    List<ReactionTopProjection> findTopNPerPost(
+            @Param("postIds") List<UUID> postIds,
+            @Param("reactionType") String reactionType,
+            @Param("n") int n);
 }

@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -112,7 +113,12 @@ public class PostController {
         PostService.SortKey sortKey = PostService.SortKey.parse(sort, PostService.SortKey.BUMPED);
         PostListResponse body = postService.listFeed(
                 viewerId, page, limit, category, pt, qotdId, sortKey, MDC.get("requestId"));
-        return ResponseEntity.ok(body);
+        // Spec 6.5 — feed carries per-viewer intercessorSummary (firstThree
+        // classified against the viewer's friend set). Shared caches between
+        // server and client would leak one viewer's classification to another.
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
+                .body(body);
     }
 
     @GetMapping("/posts/{id}")

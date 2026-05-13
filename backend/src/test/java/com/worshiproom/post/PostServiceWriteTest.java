@@ -64,6 +64,7 @@ class PostServiceWriteTest {
     @Mock private com.worshiproom.post.comment.PostCommentRepository commentRepository;
     @Mock private ResolveRateLimitService resolveRateLimitService;
     @Mock private com.worshiproom.upload.UploadService uploadService;
+    @Mock private IntercessorService intercessorService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -77,7 +78,7 @@ class PostServiceWriteTest {
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
                 htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
-                uploadService);
+                uploadService, intercessorService);
     }
 
     private CreatePostRequest sampleRequest() {
@@ -114,7 +115,8 @@ class PostServiceWriteTest {
                 new AuthorDto(UUID.randomUUID(), "Test User", null),
                 null,
                 null,
-                java.util.Set.of()
+                java.util.Set.of(),
+                null
         );
     }
 
@@ -615,7 +617,8 @@ class PostServiceWriteTest {
                 new AuthorDto(UUID.randomUUID(), "Asker", null),
                 resolvedCommentId,
                 null,
-                java.util.Set.of()
+                java.util.Set.of(),
+                null
         );
     }
 

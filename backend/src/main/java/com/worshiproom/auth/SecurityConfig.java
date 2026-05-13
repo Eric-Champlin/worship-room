@@ -111,6 +111,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/prayer-receipt").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/posts/*/prayer-receipt/share").authenticated()
 
+                // Spec 6.5 — Intercessor Timeline endpoint requires authentication.
+                // Nested path under /api/v1/posts/* — AntPathMatcher single-segment '*'
+                // does NOT match nested paths, so this needs its own explicit rule
+                // ABOVE OPTIONAL_AUTH_PATTERNS per first-match-wins.
+                .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/intercessors").authenticated()
+
                 // Spec 1.5g — /api/v1/sessions/** all require authentication.
                 // Literal paths (/all, /all-others) declared BEFORE the wildcard
                 // (/sessions/*) per Phase 3 Addendum #4 (Spring's AntPathMatcher

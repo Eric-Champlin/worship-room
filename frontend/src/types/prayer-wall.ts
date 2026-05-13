@@ -1,6 +1,7 @@
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PostType } from '@/constants/post-types'
 import type { HelpTag } from '@/constants/ways-to-help'
+import type { IntercessorSummary } from '@/types/intercessor'
 
 // Spec 3.10 type, moved to constants/post-types.ts in Spec 4.1.
 // Re-exported here for backward compatibility — existing imports of
@@ -78,6 +79,10 @@ export interface PrayerRequest {
   // backend rejects on other types. Empty array or undefined when no tags.
   // Canonical order from API (frontend trusts it; D3 / W15).
   helpTags?: HelpTag[]
+  // --- Spec 6.5 — inline intercessor summary populated by the feed endpoint
+  // (GET /api/v1/posts). Absent on getById / listAuthorPosts responses.
+  // `firstThree` is classified server-side against the viewer's friend set.
+  intercessorSummary?: IntercessorSummary
   // --- Intentionally NOT exposed:
   // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
   // - moderationStatus — server pre-filters; UI assumes 'approved'

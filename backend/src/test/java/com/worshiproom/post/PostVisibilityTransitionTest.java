@@ -50,6 +50,7 @@ class PostVisibilityTransitionTest {
     @Mock private com.worshiproom.post.comment.PostCommentRepository commentRepository;
     @Mock private ResolveRateLimitService resolveRateLimitService;
     @Mock private com.worshiproom.upload.UploadService uploadService;
+    @Mock private IntercessorService intercessorService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -63,7 +64,7 @@ class PostVisibilityTransitionTest {
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
                 htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
-                uploadService);
+                uploadService, intercessorService);
     }
 
     private static Post buildPost(UUID id, UUID userId,
@@ -97,7 +98,8 @@ class PostVisibilityTransitionTest {
                 new AuthorDto(UUID.randomUUID(), "Test", null),
                 null,
                 null,
-                java.util.Set.of()
+                java.util.Set.of(),
+                null
         );
         when(postMapper.toDto(any(Post.class))).thenReturn(dto);
     }

@@ -2390,6 +2390,78 @@ paths:
         '429': { $ref: '#/components/responses/RateLimited' }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/v1/posts/{postId}/intercessors:
+    get:
+      tags: [Posts]
+      summary: Get the Intercessor Timeline for a post (Spec 6.5)
+      description: |
+        Returns the ordered list of recent praying-reaction entries for a
+        post, classified against the requesting viewer's friend set.
+
+        **Privacy model (D-PrivacyContrast):** Distinct from 6.1's prayer
+        receipt (which is author-only and classifies against the AUTHOR's
+        friend set). 6.5 is open to any authorized viewer and classifies
+        against the VIEWER's friend set — so the same post can show
+        different timelines to different viewers (by design).
+
+        **Gate-G-ANONYMOUS-PRIVACY (HARD):** entries for reactors who are
+        NOT in the viewer's active friend list (and are not the viewer
+        themselves) appear as `{ displayName: "Anonymous", isAnonymous:
+        true, reactedAt }` — the `userId` field is ABSENT from the JSON,
+        not present-with-null. See `IntercessorEntry` schema.
+
+        **Self always named:** if the viewer themselves reacted, their
+        entry shows their resolved display name regardless of friend
+        classification.
+
+        Capped at 50 entries (DESC by reactedAt, tiebroken by userId ASC).
+        `totalCount` carries the full reaction count so the client can
+        render "and N others" when totalCount > 50.
+
+        **Cache-Control:** `private, no-store` — responses are per-viewer
+        and MUST NOT be shared across viewers via any cache layer.
+
+        Rate limit: 60 requests per minute per user (faster than 6.1's
+        60/hour because this endpoint is invoked on every tap-to-expand).
+
+        Returns 404 for posts that are missing, soft-deleted, moderation-
+        hidden, OR not visible to the viewer — uniform across causes to
+        prevent existence-scanning.
+      operationId: getIntercessors
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Intercessor timeline fetched
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: ["private, no-store"]
+              description: |
+                Always `private, no-store` — per-viewer response, no caching.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data: { $ref: '#/components/schemas/IntercessorResponse' }
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
   /api/v1/posts/{id}/prayer-receipt/share:
     post:
       tags: [Posts]
@@ -4197,6 +4269,20 @@ components:
             ("please respect prayer-only support"); frontends typically filter
             it out before rendering pills (D6, D8).
           example: ['meals', 'rides']
+        intercessorSummary:
+          allOf:
+            - $ref: '#/components/schemas/IntercessorSummary'
+          nullable: true
+          description: |
+            Inline summary of recent prayer-reactions on the post (Spec 6.5).
+            PRESENT on `GET /api/v1/posts` (feed) — even for posts with zero
+            reactions, where it carries `count=0, firstThree=[]`. ABSENT
+            (omitted from JSON) on `GET /api/v1/posts/{id}` and
+            `GET /api/v1/users/{username}/posts`. Entries are classified
+            against the requesting viewer's friend set, so the same post can
+            show different summaries to different viewers — the feed
+            response carries `Cache-Control: private, no-store` to prevent
+            cross-viewer cache leakage.
 
     PostImage:
       description: |
@@ -4678,6 +4764,76 @@ components:
           nullable: true
           description: |
             Friend's avatar URL, or null if the friend has not set one.
+
+    IntercessorEntry:
+      description: |
+        A single entry in the Intercessor Timeline (Spec 6.5). Either a named
+        entry (the reactor is the viewer themselves OR is in the viewer's
+        active friend list) or anonymous (everyone else).
+
+        **Gate-G-ANONYMOUS-PRIVACY (HARD):** when `isAnonymous=true`, the
+        `userId` field is ABSENT from the JSON output — not present-with-null.
+        This is enforced server-side via `@JsonInclude(NON_NULL)` plus a
+        factory-method invariant that rejects (anonymous, non-null-userId)
+        combinations at construction time. Clients MUST treat the field as
+        absent rather than nullable.
+      type: object
+      required: [displayName, isAnonymous, reactedAt]
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: |
+            UUID of the reactor. PRESENT only when `isAnonymous=false`.
+            ABSENT (omitted from JSON entirely) when `isAnonymous=true` —
+            not nullable.
+        displayName:
+          type: string
+          description: |
+            Resolved display name when named, OR the literal string
+            "Anonymous" when isAnonymous=true.
+        isAnonymous:
+          type: boolean
+        reactedAt:
+          type: string
+          format: date-time
+
+    IntercessorResponse:
+      description: |
+        Dedicated-endpoint response for `GET /api/v1/posts/{postId}/intercessors`
+        (Spec 6.5). Ordered list of up to 50 most-recent praying reactions
+        (DESC by `reactedAt`, tiebroken by `userId` ASC) plus the total reaction
+        count for the "and N others" affordance when the cap is reached.
+      type: object
+      required: [entries, totalCount]
+      properties:
+        entries:
+          type: array
+          items: { $ref: '#/components/schemas/IntercessorEntry' }
+          maxItems: 50
+        totalCount:
+          type: integer
+          format: int64
+          minimum: 0
+
+    IntercessorSummary:
+      description: |
+        Inline summary embedded in `PostDto.intercessorSummary` on feed
+        responses (Spec 6.5). `count` is the total praying-reaction count
+        for the post (mirrors `posts.praying_count`); `firstThree` is the
+        most-recent 3 entries classified against the viewer's friend set.
+        Posts with zero reactions appear as `{ count: 0, firstThree: [] }`.
+      type: object
+      required: [count, firstThree]
+      properties:
+        count:
+          type: integer
+          format: int64
+          minimum: 0
+        firstThree:
+          type: array
+          items: { $ref: '#/components/schemas/IntercessorEntry' }
+          maxItems: 3
 
     BookmarkResponse:
       description: |

@@ -76,6 +76,7 @@ public class PostService {
     private final PostCommentRepository commentRepository;
     private final ResolveRateLimitService resolveRateLimitService;
     private final UploadService uploadService;
+    private final IntercessorService intercessorService;
 
     public PostService(PostRepository postRepository,
                        PostMapper postMapper,
@@ -91,7 +92,8 @@ public class PostService {
                        EntityManager entityManager,
                        PostCommentRepository commentRepository,
                        ResolveRateLimitService resolveRateLimitService,
-                       UploadService uploadService) {
+                       UploadService uploadService,
+                       IntercessorService intercessorService) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.userResolverService = userResolverService;
@@ -107,6 +109,7 @@ public class PostService {
         this.commentRepository = commentRepository;
         this.resolveRateLimitService = resolveRateLimitService;
         this.uploadService = uploadService;
+        this.intercessorService = intercessorService;
     }
 
     public PostListResponse listFeed(
@@ -129,7 +132,10 @@ public class PostService {
         }
         Pageable pageable = PageRequest.of(page - 1, limit, sortFor(sort));
         Page<Post> resultPage = postRepository.findAll(spec, pageable);
-        List<PostDto> dtos = postMapper.toDtoList(resultPage.getContent());
+        // Spec 6.5 — attach per-post intercessor summary classified against the viewer's
+        // friend set. Batched window-function query for the entire page (no N+1).
+        var summaries = intercessorService.buildFeedSummaries(resultPage.getContent(), viewerId);
+        List<PostDto> dtos = postMapper.toDtoList(resultPage.getContent(), summaries);
         return new PostListResponse(dtos, buildMeta(page, limit, resultPage.getTotalElements(), requestId));
     }
 

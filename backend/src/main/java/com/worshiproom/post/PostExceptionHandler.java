@@ -60,6 +60,19 @@ public class PostExceptionHandler {
                 .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }
 
+    // Spec 6.5 — Intercessor Timeline READ rate limit. Same Retry-After header
+    // pattern as 6.1's prayer receipt read limit. Most-specific-handler dispatch
+    // picks this before the catch-all handlePost branch.
+    @ExceptionHandler(IntercessorReadRateLimitException.class)
+    public ResponseEntity<ProxyError> handleIntercessorReadRateLimit(IntercessorReadRateLimitException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Intercessor read rate limit hit retryAfter={}s", ex.getRetryAfterSeconds());
+        return ResponseEntity
+                .status(ex.getStatus())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+    }
+
     // Spec 4.6b — InvalidAltTextException and ImageClaimFailedException extend
     // PostException and are caught by handlePost below via most-specific-handler
     // dispatch. ImageNotAllowedForPostTypeException has its own handler so the

@@ -15,6 +15,7 @@ import { WaysToHelpPills } from './WaysToHelpPills'
 import { CategoryBadge } from './CategoryBadge'
 import { QotdBadge } from './QotdBadge'
 import { ScriptureChip } from './ScriptureChip'
+import { IntercessorTimeline } from './IntercessorTimeline'
 import { formatFullDate } from '@/lib/time'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { cn } from '@/lib/utils'
@@ -212,6 +213,19 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
               is empty (W6), and filters out just_prayer (W5). */}
           {prayer.postType === 'prayer_request' && prayer.helpTags && (
             <WaysToHelpPills tags={prayer.helpTags} />
+          )}
+
+          {/* Spec 6.5 — Intercessor Timeline. Restricted to prayer_request posts
+              because the "praying" reaction (and "Anonymous is praying" copy)
+              only fits this post type. Other post types still surface
+              `prayer.intercessorSummary` on the wire if the backend returns it,
+              but we don't render the timeline UI for them. */}
+          {prayer.postType === 'prayer_request' && (
+            <IntercessorTimeline
+              postId={prayer.id}
+              prayingCount={prayer.prayingCount}
+              initialSummary={prayer.intercessorSummary ?? null}
+            />
           )}
 
           {children}

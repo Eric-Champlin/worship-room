@@ -1,6 +1,7 @@
 package com.worshiproom.post;
 
 import com.worshiproom.post.dto.AuthorDto;
+import com.worshiproom.post.dto.IntercessorSummary;
 import com.worshiproom.post.dto.PostDto;
 import com.worshiproom.post.dto.PostImageDto;
 import com.worshiproom.storage.ObjectStorageAdapter;
@@ -8,6 +9,7 @@ import com.worshiproom.storage.StorageProperties;
 import com.worshiproom.user.DisplayNameResolver;
 import com.worshiproom.user.User;
 import com.worshiproom.user.UserRepository;
+import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -59,10 +61,28 @@ public class PostMapper {
                             "Post " + post.getId() + " references missing user " + post.getUserId()));
             author = authorFor(user);
         }
-        return buildDto(post, author);
+        return buildDto(post, author, null);
     }
 
+    /**
+     * Map a list of posts to DTOs without intercessor summaries. Used by
+     * {@code getById} fallback paths and any caller that doesn't need
+     * Spec 6.5 feed inline data.
+     */
     public List<PostDto> toDtoList(List<Post> posts) {
+        return toDtoList(posts, Map.of());
+    }
+
+    /**
+     * Spec 6.5 — map posts to DTOs, attaching the per-post {@link IntercessorSummary}
+     * from {@code summaries}. Missing entries in the map result in {@code null}
+     * for that post's {@code intercessorSummary} (Jackson omits null fields).
+     *
+     * <p>Call site contract: the feed endpoint passes a non-empty map populated
+     * by {@link IntercessorService#buildFeedSummaries}. Other call sites pass
+     * the empty map (or use the no-arg overload).
+     */
+    public List<PostDto> toDtoList(List<Post> posts, Map<UUID, IntercessorSummary> summaries) {
         Set<UUID> authorIds = posts.stream()
                 .filter(p -> !p.isAnonymous())
                 .map(Post::getUserId)
@@ -81,7 +101,7 @@ public class PostMapper {
                 }
                 author = authorFor(u);
             }
-            return buildDto(p, author);
+            return buildDto(p, author, summaries.get(p.getId()));
         }).toList();
     }
 
@@ -93,7 +113,7 @@ public class PostMapper {
         return new AuthorDto(user.getId(), DisplayNameResolver.resolve(user), user.getAvatarUrl());
     }
 
-    private PostDto buildDto(Post p, AuthorDto author) {
+    private PostDto buildDto(Post p, AuthorDto author, @Nullable IntercessorSummary intercessorSummary) {
         return new PostDto(
                 p.getId(),
                 p.getPostType().value(),
@@ -120,7 +140,8 @@ public class PostMapper {
                 author,
                 p.getQuestionResolvedCommentId(),
                 imageFor(p),
-                parseHelpTagsRaw(p.getHelpTagsRaw())
+                parseHelpTagsRaw(p.getHelpTagsRaw()),
+                intercessorSummary
         );
     }
 
