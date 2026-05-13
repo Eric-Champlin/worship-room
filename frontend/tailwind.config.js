@@ -360,6 +360,12 @@ export default {
           '0%, 100%': { opacity: '0' },
           '50%': { opacity: '1' },
         },
+        // Spec 6.3 — NightWatchChip breathing-glow (W12: subtle 0.7-1.0 oscillation,
+        // never 0.0-1.0 flashing-alert range).
+        'night-pulse': {
+          '0%, 100%': { opacity: '0.7' },
+          '50%': { opacity: '1' },
+        },
       },
       animation: {
         // --- Utility (keep as-is) ---
@@ -438,6 +444,8 @@ export default {
         'garden-flame-flicker': 'garden-flame-flicker 2s cubic-bezier(0.4, 0, 0.2, 1) infinite',
         'garden-seasonal-fade': 'garden-seasonal-fade 1s cubic-bezier(0, 0, 0.2, 1) forwards',
         'garden-element-fade': 'garden-element-fade 400ms cubic-bezier(0, 0, 0.2, 1) forwards',
+        // Spec 6.3 — NightWatchChip breathing-glow.
+        'night-pulse': 'night-pulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
       },
     },
   },

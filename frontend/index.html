@@ -29,6 +29,42 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Spec 6.3 — Night Mode no-FOUC bootstrap.
+         Logic mirror: frontend/src/lib/night-mode-resolver.ts.
+         If you change the function bodies here, update night-mode-resolver.ts
+         and re-run frontend/src/lib/__tests__/night-mode-resolver-parity.test.ts.
+         <5ms execution, graceful no-op on any failure. -->
+    <script>
+      (function () {
+        try {
+          var path = window.location.pathname;
+          var isPrayerWallRoute = path === '/prayer-wall' || path.indexOf('/prayer-wall/') === 0;
+          if (!isPrayerWallRoute) return;
+
+          var preference = 'auto';
+          try {
+            var rawSettings = localStorage.getItem('wr_settings');
+            if (rawSettings) {
+              var parsed = JSON.parse(rawSettings);
+              if (parsed && parsed.prayerWall && (parsed.prayerWall.nightMode === 'on' || parsed.prayerWall.nightMode === 'off' || parsed.prayerWall.nightMode === 'auto')) {
+                preference = parsed.prayerWall.nightMode;
+              }
+            }
+          } catch (_) { /* parse failure — fall back to 'auto' */ }
+
+          var hour = new Date().getHours();
+          var inNight = hour >= 21 || hour < 6;
+          var active;
+          if (preference === 'on') active = true;
+          else if (preference === 'off') active = false;
+          else active = inNight;
+
+          if (active) {
+            document.documentElement.setAttribute('data-prayer-wall-night-mode-pending', 'on');
+          }
+        } catch (_) { /* graceful no-op on any failure */ }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

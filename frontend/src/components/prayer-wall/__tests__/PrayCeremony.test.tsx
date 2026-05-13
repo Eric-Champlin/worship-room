@@ -55,6 +55,19 @@ vi.mock('@/hooks/useSoundEffects', () => ({
   useSoundEffects: () => ({ playSoundEffect: vi.fn() }),
 }))
 
+// Spec 6.3 — useNightMode internally calls setInterval(60_000) for the
+// hour-boundary polling tick. Under vi.useFakeTimers(), `vi.runAllTimers()`
+// would re-fire this interval indefinitely and trip the 10K-iteration safety
+// abort. Mock with a static day-state return so tests that flush all timers
+// don't hit the recurring interval.
+vi.mock('@/hooks/useNightMode', () => ({
+  useNightMode: () => ({
+    active: false,
+    source: 'auto' as const,
+    userPreference: 'auto' as const,
+  }),
+}))
+
 // Mock prayer data: set prayer-1 userId to match mockUser and clear its initial praying state
 vi.mock('@/mocks/prayer-wall-mock-data', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/mocks/prayer-wall-mock-data')>()

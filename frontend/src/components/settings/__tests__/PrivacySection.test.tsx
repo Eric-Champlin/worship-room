@@ -151,7 +151,9 @@ describe('PrivacySection', () => {
   it('role="radiogroup" with role="radio" on options', () => {
     renderPrivacy()
     const groups = screen.getAllByRole('radiogroup')
-    expect(groups).toHaveLength(2)
+    // Spec 6.3 added a Night Mode radiogroup — now 3 groups
+    // (nudge permission, streak visibility, night mode).
+    expect(groups).toHaveLength(3)
     groups.forEach((group) => {
       const radios = group.querySelectorAll('[role="radio"]')
       expect(radios.length).toBeGreaterThan(0)
@@ -275,6 +277,43 @@ describe('PrivacySection', () => {
     renderPrivacy()
     const btn = screen.getByRole('button', { name: 'Unmute' })
     expect(btn.className).toContain('text-violet-300')
+  })
+
+  // --- Spec 6.3 — Night Mode preference UI ---
+
+  it('Night Mode RadioPillGroup renders with 3 options', () => {
+    renderPrivacy()
+    const nightGroup = screen.getByRole('radiogroup', { name: 'Night Mode' })
+    const radios = nightGroup.querySelectorAll('[role="radio"]')
+    expect(radios).toHaveLength(3)
+    expect(radios[0]).toHaveTextContent('Auto (9pm – 6am)')
+    expect(radios[1]).toHaveTextContent('Always on')
+    expect(radios[2]).toHaveTextContent('Always off')
+  })
+
+  it('Night Mode defaults to auto (matches DEFAULT_SETTINGS)', () => {
+    renderPrivacy()
+    const nightGroup = screen.getByRole('radiogroup', { name: 'Night Mode' })
+    const selected = nightGroup.querySelector('[aria-checked="true"]')
+    expect(selected).toHaveTextContent('Auto (9pm – 6am)')
+  })
+
+  it('selecting "Always on" calls onUpdatePrayerWall with nightMode="on"', async () => {
+    const user = userEvent.setup()
+    const { onUpdatePrayerWall } = renderPrivacy()
+    const nightGroup = screen.getByRole('radiogroup', { name: 'Night Mode' })
+    const onBtn = within(nightGroup).getByRole('radio', { name: 'Always on' })
+    await user.click(onBtn)
+    expect(onUpdatePrayerWall).toHaveBeenCalledWith({ nightMode: 'on' })
+  })
+
+  it('Prayer Wall sub-section has id="night-mode" anchor for chip popover deep link', () => {
+    const { container } = renderPrivacy()
+    const anchor = container.querySelector('#night-mode')
+    expect(anchor).not.toBeNull()
+    // Both the Prayer Receipts toggle and the Night Mode radiogroup live inside the same anchor
+    expect(anchor!.querySelector('[role="radiogroup"][aria-label="Night Mode"]')).not.toBeNull()
+    expect(within(anchor as HTMLElement).getByLabelText(/Show me my prayer receipts/i)).toBeInTheDocument()
   })
 
   it('Confirming Unmute removes the entry; canceling does not', async () => {

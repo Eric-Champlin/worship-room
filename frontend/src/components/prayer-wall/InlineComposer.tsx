@@ -1,4 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from 'react'
+import { useNightMode } from '@/hooks/useNightMode'
+import { getNightModeCopy } from '@/constants/night-mode-copy'
 import { useSearchParams } from 'react-router-dom'
 import { Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -187,6 +189,15 @@ interface InlineComposerProps {
 export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', onSubmit }: InlineComposerProps) {
   const copy = composerCopyByType[postType]
   const limits = POST_TYPE_LIMITS[postType]
+  // Spec 6.3 — Night-aware placeholder for prayer_request only. Other post
+  // types have type-specific placeholders that carry semantic meaning
+  // ("What has God done?", "What are you wondering about?") and must be
+  // preserved across day/night per Plan-Time Divergence #4.
+  const { active: nightActive } = useNightMode()
+  const nightAwarePlaceholder =
+    nightActive && postType === 'prayer_request'
+      ? getNightModeCopy('composePlaceholder', true)
+      : copy.placeholder
   const { isOnline } = useOnlineStatus()
   const [searchParams] = useSearchParams()
   const [content, setContent] = useState('')
@@ -436,7 +447,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
           ref={textareaRef}
           value={content}
           onChange={handleChange}
-          placeholder={copy.placeholder}
+          placeholder={nightAwarePlaceholder}
           maxLength={limits.max}
           className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
           style={{ minHeight: copy.minHeight }}

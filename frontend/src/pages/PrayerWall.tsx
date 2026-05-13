@@ -9,6 +9,9 @@ import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
+import { NightWatchChip } from '@/components/prayer-wall/NightWatchChip'
+import { useNightMode } from '@/hooks/useNightMode'
+import { getNightModeCopy } from '@/constants/night-mode-copy'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
@@ -88,6 +91,8 @@ function PrayerWallContent() {
   const { recordActivity } = useFaithPoints()
   const authModal = useAuthModal()
   const openAuthModal = authModal?.openAuthModal
+  // Spec 6.3 — Night Mode (active state + source for chip aria-label).
+  const { active: nightActive, source: nightSource } = useNightMode()
   const allPrayers = useMemo(() => getMockPrayers(), [])
 
   // Flag-on uses initial empty state populated by the load effect; flag-off
@@ -804,10 +809,29 @@ function PrayerWallContent() {
   )
 
   return (
-    <BackgroundCanvas className="flex min-h-screen flex-col font-sans">
-      <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
+    <BackgroundCanvas
+      className="flex min-h-screen flex-col font-sans"
+      nightMode={nightActive ? 'on' : 'off'}
+    >
+      {nightActive ? (
+        // Spec 6.3 — only override SEO title at night; day-state stays on the
+        // canonical PRAYER_WALL_METADATA suffixed title. `noSuffix` because the
+        // night copy already includes "Worship Room" in the string.
+        <SEO
+          {...PRAYER_WALL_METADATA}
+          title={getNightModeCopy('pageTitle', true)}
+          noSuffix
+          jsonLd={prayerWallBreadcrumbs}
+        />
+      ) : (
+        <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
+      )}
       <Navbar transparent />
       <PrayerWallHero
+        subtitle={getNightModeCopy('heroSubtitle', nightActive)}
+        nightWatchChip={
+          nightActive ? <NightWatchChip source={nightSource} /> : null
+        }
         action={
           isAuthenticated ? (
             <div
@@ -821,6 +845,11 @@ function PrayerWallContent() {
                 variant="subtle"
                 size="lg"
                 onClick={() => setChooserOpen(true)}
+                aria-label={
+                  nightActive
+                    ? getNightModeCopy('composeFabTooltip', true)
+                    : undefined
+                }
               >
                 Share something
               </Button>
@@ -837,6 +866,11 @@ function PrayerWallContent() {
               variant="subtle"
               size="lg"
               onClick={() => openAuthModal?.('Sign in to share something')}
+              aria-label={
+                nightActive
+                  ? getNightModeCopy('composeFabTooltip', true)
+                  : undefined
+              }
             >
               Share something
             </Button>
@@ -1010,7 +1044,11 @@ function PrayerWallContent() {
               <FeatureEmptyState
                 icon={Heart}
                 heading={emptyHeading}
-                description="Share what's on your heart, or simply pray for others."
+                description={
+                  nightActive
+                    ? getNightModeCopy('emptyFeedState', true)
+                    : "Share what's on your heart, or simply pray for others."
+                }
                 ctaLabel="Share something"
                 onCtaClick={() => {
                   if (isAuthenticated) {

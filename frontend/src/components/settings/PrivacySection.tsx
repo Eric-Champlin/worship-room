@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ToggleSwitch } from './ToggleSwitch'
 import { RadioPillGroup } from './RadioPillGroup'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -9,6 +9,7 @@ import type {
   UserSettingsPrivacy,
   UserSettingsPrayerWall,
   NudgePermission,
+  NightModePreference,
   StreakVisibility,
 } from '@/types/settings'
 
@@ -33,6 +34,13 @@ const STREAK_OPTIONS = [
   { value: 'everyone', label: 'Everyone' },
   { value: 'friends', label: 'Friends' },
   { value: 'only_me', label: 'Only me' },
+]
+
+// Spec 6.3 — Night Mode 3-state preference.
+const NIGHT_MODE_OPTIONS = [
+  { value: 'auto', label: 'Auto (9pm – 6am)' },
+  { value: 'on', label: 'Always on' },
+  { value: 'off', label: 'Always off' },
 ]
 
 function getMockUserName(userId: string): string {
@@ -66,6 +74,27 @@ export function PrivacySection({
     () => Array.from(new Set([...friendsBlocked, ...privacy.blockedUsers])),
     [friendsBlocked, privacy.blockedUsers],
   )
+
+  // Spec 6.3 — Hash-fragment scroll to the Night Mode anchor. The
+  // NightWatchChip popover Settings link targets `/settings?tab=privacy#night-mode`
+  // expecting the page to scroll to the Prayer Wall subsection. React Router
+  // does not auto-scroll to hash fragments; this effect wires that behavior.
+  // Honors prefers-reduced-motion via the `behavior` choice — the standard
+  // `smooth` value is overridden to `auto` (instant) when the user has
+  // reduced motion enabled.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.location.hash !== '#night-mode') return
+    const el = document.getElementById('night-mode')
+    if (!el) return
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+    el.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  }, [])
 
   function handleUnblockClick(userId: string) {
     setConfirmingUserId(userId)
@@ -120,17 +149,6 @@ export function PrivacySection({
             label="Activity status"
             description="Show friends when you're active"
           />
-          {/* Spec 6.1 — Prayer Receipts toggle. Lives inside Privacy (single-click
-              from /settings to reach the toggle). Label + description are verbatim
-              from the master plan Copy Deck (Gate-34). The helper text is identical
-              in on AND off states — no shaming copy added when off (W25 / Gate-35). */}
-          <ToggleSwitch
-            id="privacy-prayer-receipts"
-            checked={prayerWall.prayerReceiptsVisible}
-            onChange={(v) => onUpdatePrayerWall({ prayerReceiptsVisible: v })}
-            label="Show me my prayer receipts"
-            description="Turn this off if you'd rather not see who's praying for you right now. You can turn it back on anytime."
-          />
         </div>
 
         {/* Radio groups */}
@@ -147,6 +165,34 @@ export function PrivacySection({
             value={privacy.streakVisibility}
             onChange={(v) => onUpdatePrivacy({ streakVisibility: v as StreakVisibility })}
           />
+        </div>
+
+        {/* Spec 6.1 + 6.3 — Prayer Wall sub-section: Prayer Receipts toggle
+            (Spec 6.1) + Night Mode preference (Spec 6.3). The `id="night-mode"`
+            anchor matches the NightWatchChip popover link target
+            `/settings?tab=privacy#night-mode`. Both controls live in the same
+            `UserSettingsPrayerWall` namespace so the co-location is type-aligned. */}
+        <div id="night-mode" className="border-t border-white/10 pt-6">
+          <h3 className="text-sm font-medium text-white/80 mb-3">Prayer Wall</h3>
+          <div className="space-y-4">
+            <ToggleSwitch
+              id="privacy-prayer-receipts"
+              checked={prayerWall.prayerReceiptsVisible}
+              onChange={(v) =>
+                onUpdatePrayerWall({ prayerReceiptsVisible: v })
+              }
+              label="Show me my prayer receipts"
+              description="Turn this off if you'd rather not see who's praying for you right now. You can turn it back on anytime."
+            />
+            <RadioPillGroup
+              label="Night Mode"
+              options={NIGHT_MODE_OPTIONS}
+              value={prayerWall.nightMode}
+              onChange={(v) =>
+                onUpdatePrayerWall({ nightMode: v as NightModePreference })
+              }
+            />
+          </div>
         </div>
 
         {/* Blocked Users */}

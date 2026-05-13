@@ -35,6 +35,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
     // Spec 6.1 — Prayer Receipt visible by default. Author can turn it off
     // in /settings?tab=privacy (no shaming copy on off-state).
     prayerReceiptsVisible: true,
+    // Spec 6.3 — Night Mode default 'auto' so night users discover the
+    // feature ambiently; day users see no difference.
+    nightMode: 'auto',
   },
 }
 

@@ -167,6 +167,36 @@ function ReadingPlansRedirect() {
   return <Navigate to={target} replace />
 }
 
+/**
+ * Spec 6.3 — Strip the no-FOUC `data-prayer-wall-night-mode-pending` attribute
+ * from <html> when the active route is not a Prayer Wall surface. The inline
+ * script in `index.html` sets the attribute on initial page load when the user
+ * loads a Prayer Wall URL directly; on subsequent SPA navigation, the inline
+ * script does not re-run, so the attribute would otherwise persist across the
+ * /prayer-wall → /daily transition and leak the warm body backdrop onto every
+ * non-PW route until the next full page reload (Gate-G-SCOPE-PRAYER-WALL-ONLY
+ * scope violation in spirit). The plan's Step 6 documents this as "React may
+ * leave the pending attribute alone (harmless) or remove it on first
+ * reconciliation (cleaner — chosen)" — this is the cleanup.
+ *
+ * Removing on every non-PW route is safe: the pending attribute exists only
+ * to paint the body backdrop in the warm dim color BEFORE React mounts, and
+ * after React mounts the canonical `[data-night-mode='on']` rules on the
+ * canvas/PageShell wrapper take over for the visible night palette.
+ */
+function NightModePendingCleanup() {
+  const location = useLocation()
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const isPrayerWallRoute =
+      location.pathname === '/prayer-wall' || location.pathname.startsWith('/prayer-wall/')
+    if (!isPrayerWallRoute) {
+      document.documentElement.removeAttribute('data-prayer-wall-night-mode-pending')
+    }
+  }, [location.pathname])
+  return null
+}
+
 /** BB-41: Fire-and-forget notification scheduling on app load */
 function NotificationSchedulerEffect() {
   useEffect(() => {
@@ -214,6 +244,7 @@ function App() {
         <OfflineIndicator />
         <InstallPrompt />
         <NotificationSchedulerEffect />
+        <NightModePendingCleanup />
         <ChunkErrorBoundary>
         <ScrollToTop />
         <Suspense fallback={<RouteLoadingFallback />}>

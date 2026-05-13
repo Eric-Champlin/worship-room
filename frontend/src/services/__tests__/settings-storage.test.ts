@@ -147,4 +147,21 @@ describe('settings-storage', () => {
     const fromStorage = getSettings()
     expect(fromStorage.prayerWall.prayerReceiptsVisible).toBe(false)
   })
+
+  // --- Spec 6.3 — Night Mode default + back-compat migration ---
+
+  it('DEFAULT_SETTINGS.prayerWall.nightMode === "auto"', () => {
+    expect(DEFAULT_SETTINGS.prayerWall.nightMode).toBe('auto')
+  })
+
+  it('back-compat: pre-6.3 wr_settings (no nightMode key) injects nightMode="auto"', () => {
+    // Pre-6.3 prayerWall shape with only prayerReceiptsVisible
+    localStorage.setItem(
+      SETTINGS_KEY,
+      JSON.stringify({ prayerWall: { prayerReceiptsVisible: false } }),
+    )
+    const settings = getSettings()
+    expect(settings.prayerWall.nightMode).toBe('auto')
+    expect(settings.prayerWall.prayerReceiptsVisible).toBe(false)
+  })
 })

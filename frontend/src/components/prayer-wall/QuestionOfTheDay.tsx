@@ -28,6 +28,7 @@ export function QuestionOfTheDay({
           eyebrowColor="violet"
           as="section"
           aria-labelledby="qotd-heading"
+          className="frosted-card-accent-night-aware"
         >
           <span className="sr-only">Loading today's question</span>
           {/* Heading placeholder — preserves layout height and the qotd-heading id */}
@@ -64,6 +65,7 @@ export function QuestionOfTheDay({
       eyebrowColor="violet"
       as="section"
       aria-labelledby="qotd-heading"
+      className="frosted-card-accent-night-aware"
     >
       <h2 id="qotd-heading" className="mt-2 text-lg font-bold text-white">
         {question.text}

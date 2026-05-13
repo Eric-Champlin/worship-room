@@ -1,6 +1,9 @@
 export type NudgePermission = 'everyone' | 'friends' | 'nobody'
 export type StreakVisibility = 'everyone' | 'friends' | 'only_me'
 
+// Spec 6.3 — Night Mode 3-state preference.
+export type NightModePreference = 'auto' | 'on' | 'off'
+
 export interface UserSettingsProfile {
   displayName: string
   avatarId: string
@@ -37,6 +40,12 @@ export interface UserSettingsPrayerWall {
    * X" copy. Default `true` per AC.
    */
   prayerReceiptsVisible: boolean
+  /**
+   * Spec 6.3 — Night Mode preference. 'auto' enables dimmed warm palette
+   * between 21:00 and 05:59 browser-local time. 'on' / 'off' explicit
+   * overrides. Default 'auto'.
+   */
+  nightMode: NightModePreference
 }
 
 export interface UserSettings {

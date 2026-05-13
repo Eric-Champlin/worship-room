@@ -8,9 +8,27 @@ describe('PrayerWallHero', () => {
     expect(screen.getByRole('heading', { name: 'Prayer Wall', level: 1 })).toBeInTheDocument()
   })
 
-  it('renders subtitle "You\'re not alone."', () => {
+  it('renders default day-state subtitle (Spec 6.3 Divergence #2 — replaces "You\'re not alone." with the brief\'s pair-1 day variant)', () => {
     render(<PrayerWallHero />)
-    expect(screen.getByText("You're not alone.")).toBeInTheDocument()
+    expect(screen.getByText('What weighs on you today?')).toBeInTheDocument()
+  })
+
+  it('accepts a subtitle prop override (Spec 6.3 night-mode wiring)', () => {
+    render(<PrayerWallHero subtitle="It's quiet here. You're awake." />)
+    expect(
+      screen.getByText("It's quiet here. You're awake."),
+    ).toBeInTheDocument()
+  })
+
+  it('renders nightWatchChip prop above action when provided', () => {
+    render(
+      <PrayerWallHero
+        nightWatchChip={<button>chip</button>}
+        action={<button>action</button>}
+      />,
+    )
+    expect(screen.getByText('chip')).toBeInTheDocument()
+    expect(screen.getByText('action')).toBeInTheDocument()
   })
 
   it('renders title with padding for gradient text clipping', () => {
@@ -43,7 +61,7 @@ describe('PrayerWallHero', () => {
 
   it('subtitle does NOT use font-serif italic (Spec 14 cleanup — canonical hero subtitle treatment)', () => {
     render(<PrayerWallHero />)
-    const subtitle = screen.getByText("You're not alone.")
+    const subtitle = screen.getByText('What weighs on you today?')
     expect(subtitle.className).not.toContain('font-serif')
     expect(subtitle.className).not.toContain('italic')
     expect(subtitle.className).toContain('text-white')

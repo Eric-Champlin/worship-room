@@ -161,6 +161,12 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 | `wr_notification_prefs`            | NotificationPrefs      | User notification preferences (which types are enabled, daily verse delivery time, last-fired dates per type for dedup)                                                              |
 | `wr_notification_prompt_dismissed` | `"true"`               | BibleReader contextual prompt once-per-user flag. Set when the user dismisses the "Want a daily verse?" card after a reading session, prevents the prompt from ever appearing again. |
 
+### Night Mode (Spec 6.3)
+
+| Key                   | Type             | Feature                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `wr_night_mode_hint`  | `"on"` \| `"off"` | Prayer Wall Night Mode bootstrap hint (Spec 6.3). Written by `useNightMode()` on every reconciliation pass (active-state changes). Read by the inline `index.html` no-FOUC script as a secondary signal — the primary signal is `wr_settings.prayerWall.nightMode` + browser hour, recomputed inline (Plan-Time Divergence #3). Survives logout. The 3-state preference itself lives at `wr_settings.prayerWall.nightMode` (`'auto'` \| `'on'` \| `'off'`, default `'auto'`). |
+
 ---
 
 ## Key naming conventions

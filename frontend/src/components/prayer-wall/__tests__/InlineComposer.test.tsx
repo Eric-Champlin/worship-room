@@ -22,6 +22,17 @@ vi.mock('@/hooks/useUnsavedChanges', () => ({
   }),
 }))
 
+// Spec 6.3 — useNightMode mock with day-state default. Individual Night Mode
+// tests below override via vi.mocked(useNightMode).mockReturnValue.
+vi.mock('@/hooks/useNightMode', () => ({
+  useNightMode: vi.fn(() => ({
+    active: false,
+    source: 'auto' as const,
+    userPreference: 'auto' as const,
+  })),
+}))
+import { useNightMode } from '@/hooks/useNightMode'
+
 function renderComposer(overrides?: {
   isOpen?: boolean
   onClose?: () => void
@@ -1090,5 +1101,45 @@ describe('InlineComposer — Spec 4.6b image upload affordance', () => {
   it('renders FrostedCard with canonical radius inside the composer panel', () => {
     const { container } = renderComposer({ isOpen: true, postType: 'prayer_request' })
     expect(container.querySelector('[class*="rounded-3xl"]')).toBeInTheDocument()
+  })
+})
+
+// --- Spec 6.3 — Night Mode placeholder swap (prayer_request only) ---
+
+describe('InlineComposer — Spec 6.3 night-aware placeholder', () => {
+  it('prayer_request placeholder uses day variant when nightActive=false', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: false,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    renderComposer()
+    expect(
+      screen.getByPlaceholderText("What's on your heart?"),
+    ).toBeInTheDocument()
+  })
+
+  it('prayer_request placeholder swaps to night variant when nightActive=true', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    renderComposer()
+    expect(
+      screen.getByPlaceholderText("Write what's on your mind tonight..."),
+    ).toBeInTheDocument()
+  })
+
+  it('testimony placeholder is unchanged regardless of nightActive (Divergence #4)', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    renderTestimonyComposer()
+    expect(
+      screen.getByPlaceholderText('What has God done?'),
+    ).toBeInTheDocument()
   })
 })

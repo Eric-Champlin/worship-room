@@ -4,6 +4,14 @@ import { cn } from '@/lib/utils'
 interface BackgroundCanvasProps {
   children: ReactNode
   className?: string
+  /**
+   * Spec 6.3 — Night Mode marker. When provided, the outer div receives
+   * `data-night-mode={value}`. Used only by `/prayer-wall` to scope night-mode
+   * CSS to the Prayer Wall surface. Always passed as `'on'` or `'off'` (never
+   * undefined when active) so CSS rules under `[data-night-mode='on']` fire
+   * while keeping the off-state attribute as a stable hook for E2E tests.
+   */
+  nightMode?: 'on' | 'off'
 }
 
 const CANVAS_BACKGROUND = `
@@ -14,10 +22,11 @@ const CANVAS_BACKGROUND = `
   linear-gradient(135deg, #120A1F 0%, #08051A 50%, #0A0814 100%)
 `
 
-export function BackgroundCanvas({ children, className }: BackgroundCanvasProps) {
+export function BackgroundCanvas({ children, className, nightMode }: BackgroundCanvasProps) {
   return (
     <div
       data-testid="background-canvas"
+      data-night-mode={nightMode}
       // overflow-x-clip (NOT overflow-hidden) — clip prevents horizontal scrollbars
       // from atmospheric gradient blooms without creating a scroll container, so
       // descendants with `position: sticky` engage against the viewport.

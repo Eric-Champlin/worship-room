@@ -33,6 +33,17 @@ vi.mock('@/hooks/useFaithPoints', () => ({
   }),
 }))
 
+// Spec 6.3 — useNightMode mock with default 'day-state' return. Individual
+// Night Mode tests below override via vi.mocked(useNightMode).mockReturnValue.
+vi.mock('@/hooks/useNightMode', () => ({
+  useNightMode: vi.fn(() => ({
+    active: false,
+    source: 'auto' as const,
+    userPreference: 'auto' as const,
+  })),
+}))
+import { useNightMode } from '@/hooks/useNightMode'
+
 function renderPage(initialEntry = '/prayer-wall') {
   return render(
     <MemoryRouter
@@ -562,5 +573,92 @@ describe('Spec 4.8 — RoomSelector + dual filters', () => {
     vi.mocked(getMockPrayers).mockReturnValue([])
     renderPage('/prayer-wall?postType=testimony&category=health')
     expect(screen.getByText(/No Testimonies in Health yet/i)).toBeInTheDocument()
+  })
+})
+
+// --- Spec 6.3 — Night Mode integration tests ---
+
+describe('PrayerWall — Spec 6.3 Night Mode', () => {
+  beforeEach(() => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: false,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+  })
+
+  it("BackgroundCanvas receives data-night-mode='off' when nightActive=false", () => {
+    const { container } = renderPage()
+    const canvas = container.querySelector('[data-testid="background-canvas"]')
+    expect(canvas).not.toBeNull()
+    expect(canvas!.getAttribute('data-night-mode')).toBe('off')
+  })
+
+  it("BackgroundCanvas receives data-night-mode='on' when nightActive=true", () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    const { container } = renderPage()
+    const canvas = container.querySelector('[data-testid="background-canvas"]')
+    expect(canvas!.getAttribute('data-night-mode')).toBe('on')
+  })
+
+  it('renders <NightWatchChip /> when nightActive=true', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    renderPage()
+    expect(
+      screen.getByRole('button', { name: /night mode active/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('does NOT render <NightWatchChip /> when nightActive=false', () => {
+    renderPage()
+    expect(
+      screen.queryByRole('button', { name: /night mode active/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('hero subtitle uses day variant when nightActive=false', () => {
+    renderPage()
+    expect(screen.getByText('What weighs on you today?')).toBeInTheDocument()
+  })
+
+  it('hero subtitle uses night variant when nightActive=true', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    renderPage()
+    expect(
+      screen.getByText("It's quiet here. You're awake."),
+    ).toBeInTheDocument()
+  })
+
+  // NOTE: document.title verification requires HelmetProvider in the render
+  // wrapper; the rest of the suite intentionally doesn't mount it. Page title
+  // copy correctness is covered by `night-mode-copy.test.ts`, and the
+  // conditional `<SEO ... title=... noSuffix />` render branch is exercised
+  // implicitly by the night-state mock above. Real-browser title behavior is
+  // covered by the e2e test (which mounts the full app + HelmetProvider).
+
+  it('empty-state description swaps to night variant when feed empty + nightActive=true', async () => {
+    const { getMockPrayers } = await import('@/mocks/prayer-wall-mock-data')
+    vi.mocked(getMockPrayers).mockReturnValue([])
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    renderPage()
+    expect(
+      screen.getByText("It's quiet tonight. Be the first."),
+    ).toBeInTheDocument()
   })
 })
