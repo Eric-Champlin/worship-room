@@ -8,7 +8,11 @@ import { getTodaysQuestion } from '@/constants/question-of-the-day'
 vi.mock('@/hooks/useQotdToday', () => ({
   useQotdToday: vi.fn(),
 }))
+vi.mock('@/hooks/useWatchMode', () => ({
+  useWatchMode: vi.fn(),
+}))
 import { useQotdToday } from '@/hooks/useQotdToday'
+import { useWatchMode } from '@/hooks/useWatchMode'
 
 const defaultProps = {
   responseCount: 0,
@@ -27,11 +31,18 @@ function renderCard(overrides: Partial<typeof defaultProps> = {}) {
 
 describe('QuestionOfTheDay', () => {
   // Default mock: loaded state with the constants-derived question (matches pre-3.9 behavior).
+  // Watch is OFF by default so QOTD renders as normal (Spec 6.4 MPD-14).
   beforeEach(() => {
     vi.mocked(useQotdToday).mockReturnValue({
       question: getTodaysQuestion(),
       isLoading: false,
       source: 'fallback',
+    })
+    vi.mocked(useWatchMode).mockReturnValue({
+      active: false,
+      source: 'auto',
+      userPreference: 'off',
+      degraded: true,
     })
   })
 
@@ -150,6 +161,25 @@ describe('QuestionOfTheDay', () => {
   })
 
   it('eyebrow "Question of the Day" is rendered by FrostedCard in both states', () => {
+    renderCard()
+    expect(screen.getByText('Question of the Day')).toBeInTheDocument()
+  })
+
+  // --- Spec 6.4 MPD-14 — Watch suppression ---
+
+  it('renders nothing when useWatchMode().active=true (Spec 6.4 MPD-14)', () => {
+    vi.mocked(useWatchMode).mockReturnValue({
+      active: true,
+      source: 'manual',
+      userPreference: 'on',
+      degraded: true,
+    })
+    const { container } = renderCard()
+    expect(container.firstChild).toBeNull()
+  })
+
+  it('renders normally when useWatchMode().active=false', () => {
+    // beforeEach already mocks active=false; verify normal render still works
     renderCard()
     expect(screen.getByText('Question of the Day')).toBeInTheDocument()
   })

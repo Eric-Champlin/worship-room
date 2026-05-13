@@ -82,7 +82,27 @@ public class PostController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String postType,
             @RequestParam(required = false) String qotdId,
-            @RequestParam(required = false, defaultValue = "bumped") String sort
+            @RequestParam(required = false, defaultValue = "bumped") String sort,
+            // TODO Spec 6.4b: enforce Trust Level 2+ and apply feed slicing
+            //
+            // Spec 6.4 v1 stub — accepted but ignored. Returns the standard
+            // feed identical to ?watch=false. Spec 6.4b will enforce Trust
+            // Level 2+ (403 for TL<2) and re-sort the feed (crisis-flagged →
+            // mental-health → friends → regular) with deterministic SQL
+            // section dividers. The param is accepted now so frontend can
+            // pass it without 400 errors and so the API contract is stable
+            // when 6.4b lands.
+            //
+            // Bound as `String` (not primitive `boolean`) because Spring's
+            // primitive boolean binding rejects values that aren't strict
+            // `"true"`/`"false"` with a 400 (verified during Step 15
+            // execution; Plan-Time Divergence #5). String binding accepts
+            // any value and lets us return 200 for `?watch=invalid` per the
+            // API contract. v1 does not read the value; 6.4b will replace
+            // this with `Boolean.parseBoolean(watch)` once Trust Level
+            // enforcement is wired.
+            @SuppressWarnings("unused")
+            @RequestParam(required = false, defaultValue = "false") String watch
     ) {
         UUID viewerId = principal == null ? null : principal.userId();
         log.info("Posts feed requested viewerId={} page={} limit={} category={} postType={} sort={}",

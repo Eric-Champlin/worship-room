@@ -8,6 +8,9 @@ export const CRISIS_RESOURCES = {
     name: '988 Suicide & Crisis Lifeline',
     phone: '988',
     link: 'https://988lifeline.org',
+    // Spec 6.4 — chat URL surfaces in the new prayer-wall/CrisisResourcesBanner.
+    // Mirrored in backend CrisisResources.java per CrisisResourcesParityTest.
+    chat_url: 'https://988lifeline.org/chat/',
   },
   crisis_text: {
     name: 'Crisis Text Line',

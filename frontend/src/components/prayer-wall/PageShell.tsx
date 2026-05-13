@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { Navbar } from '@/components/Navbar'
 import { useNightMode } from '@/hooks/useNightMode'
+import { useWatchMode } from '@/hooks/useWatchMode'
+import { CrisisResourcesBanner } from './CrisisResourcesBanner'
 
 interface PageShellProps {
   children: ReactNode
@@ -10,6 +12,10 @@ export function PageShell({ children }: PageShellProps) {
   // Spec 6.3 — Apply night-mode attribute always (off when day, on when night)
   // so CSS rules under [data-night-mode='on'] can fire without a wrapper swap.
   const { active } = useNightMode()
+  // Spec 6.4 — Crisis banner mounts here so all 4 prayer-wall family routes
+  // (/prayer-wall, /prayer-wall/:id, /prayer-wall/dashboard, /prayer-wall/user/:id)
+  // inherit it. Gate-G-CRISIS-RESOURCES-ALWAYS-VISIBLE.
+  const watchMode = useWatchMode()
   return (
     <div
       data-night-mode={active ? 'on' : 'off'}
@@ -22,6 +28,11 @@ export function PageShell({ children }: PageShellProps) {
         Skip to content
       </a>
       <Navbar transparent />
+      {watchMode.active && (
+        <div className="mx-auto mt-4 w-full max-w-3xl px-4">
+          <CrisisResourcesBanner />
+        </div>
+      )}
       {children}
     </div>
   )

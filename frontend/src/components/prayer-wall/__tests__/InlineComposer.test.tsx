@@ -1143,3 +1143,83 @@ describe('InlineComposer — Spec 6.3 night-aware placeholder', () => {
     ).toBeInTheDocument()
   })
 })
+
+// --- Spec 6.4 — Watch placeholder supersedes night/day variants ---
+
+describe('InlineComposer — Spec 6.4 Watch placeholder', () => {
+  it('swaps placeholder to Watch variant when watchActive=true (prayer_request)', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: false,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen={true}
+          onClose={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          watchActive={true}
+        />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByPlaceholderText(
+        "Simple presence matters. You don’t need to fix it.",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('uses normal placeholder when watchActive=false or undefined', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: false,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen={true}
+          onClose={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          watchActive={false}
+        />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.queryByPlaceholderText(
+        "Simple presence matters. You don’t need to fix it.",
+      ),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByPlaceholderText("What's on your heart?"),
+    ).toBeInTheDocument()
+  })
+
+  it('Watch placeholder supersedes night-aware placeholder when BOTH active', () => {
+    vi.mocked(useNightMode).mockReturnValue({
+      active: true,
+      source: 'auto',
+      userPreference: 'auto',
+    })
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen={true}
+          onClose={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          watchActive={true}
+        />
+      </MemoryRouter>,
+    )
+    // Watch wins; the night-mode variant should NOT be visible.
+    expect(
+      screen.getByPlaceholderText(
+        "Simple presence matters. You don’t need to fix it.",
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByPlaceholderText("Write what's on your mind tonight..."),
+    ).not.toBeInTheDocument()
+  })
+})

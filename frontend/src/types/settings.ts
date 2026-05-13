@@ -4,6 +4,16 @@ export type StreakVisibility = 'everyone' | 'friends' | 'only_me'
 // Spec 6.3 — Night Mode 3-state preference.
 export type NightModePreference = 'auto' | 'on' | 'off'
 
+/**
+ * Spec 6.4 — 3am Watch 3-state preference.
+ * 'off'  — Watch never activates (default; fail-closed).
+ * 'auto' — Watch activates only when Night Mode is also active.
+ * 'on'   — Watch activates whenever Watch hours [23..04] apply, independent of Night Mode.
+ */
+export type WatchPreference = 'off' | 'auto' | 'on'
+
+export const DEFAULT_WATCH_PREFERENCE: WatchPreference = 'off'
+
 export interface UserSettingsProfile {
   displayName: string
   avatarId: string
@@ -46,6 +56,12 @@ export interface UserSettingsPrayerWall {
    * overrides. Default 'auto'.
    */
   nightMode: NightModePreference
+  /**
+   * Spec 6.4 — 3am Watch opt-in preference. Default 'off' (fail-closed).
+   * Opting in (to 'auto' or 'on') requires the WatchOptInConfirmModal
+   * confirmation; opting out is friction-free.
+   */
+  watchEnabled: WatchPreference
 }
 
 export interface UserSettings {

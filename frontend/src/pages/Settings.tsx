@@ -9,6 +9,7 @@ import { DevAuthToggle } from '@/components/dev/DevAuthToggle'
 import { ProfileSection } from '@/components/settings/ProfileSection'
 import { NotificationsSection } from '@/components/settings/NotificationsSection'
 import { PrivacySection } from '@/components/settings/PrivacySection'
+import { SensitiveFeaturesSection } from '@/components/settings/SensitiveFeaturesSection'
 import { AccountSection } from '@/components/settings/AccountSection'
 import { AppSection } from '@/components/settings/AppSection'
 import { DashboardSection } from '@/components/settings/DashboardSection'
@@ -19,18 +20,36 @@ import { useSettings } from '@/hooks/useSettings'
 import { useFriends } from '@/hooks/useFriends'
 import { cn } from '@/lib/utils'
 
-type SettingsSection = 'profile' | 'dashboard' | 'notifications' | 'privacy' | 'account' | 'app'
+type SettingsSection =
+  | 'profile'
+  | 'dashboard'
+  | 'notifications'
+  | 'privacy'
+  | 'sensitive-features'
+  | 'account'
+  | 'app'
 
 const SECTIONS: { id: SettingsSection; label: string }[] = [
   { id: 'profile', label: 'Profile' },
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'notifications', label: 'Notifications' },
   { id: 'privacy', label: 'Privacy' },
+  // Spec 6.4 — Sensitive features section (MPD-11). Inserted between Privacy
+  // and Account so Night Mode (in Privacy) sits adjacent to 3am Watch.
+  { id: 'sensitive-features', label: 'Sensitive features' },
   { id: 'account', label: 'Account' },
   { id: 'app', label: 'App' },
 ]
 
-const VALID_SECTIONS: SettingsSection[] = ['profile', 'dashboard', 'notifications', 'privacy', 'account', 'app']
+const VALID_SECTIONS: SettingsSection[] = [
+  'profile',
+  'dashboard',
+  'notifications',
+  'privacy',
+  'sensitive-features',
+  'account',
+  'app',
+]
 
 // Loading state: use SettingsSkeleton
 export function Settings() {
@@ -216,6 +235,12 @@ export function Settings() {
                 onUpdatePrivacy={updatePrivacy}
                 onUpdatePrayerWall={updatePrayerWall}
                 onUnblock={handleUnblock}
+              />
+            )}
+            {activeSection === 'sensitive-features' && (
+              <SensitiveFeaturesSection
+                prayerWall={settings.prayerWall}
+                onUpdatePrayerWall={updatePrayerWall}
               />
             )}
             {activeSection === 'account' && (

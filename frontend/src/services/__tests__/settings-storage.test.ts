@@ -164,4 +164,25 @@ describe('settings-storage', () => {
     expect(settings.prayerWall.nightMode).toBe('auto')
     expect(settings.prayerWall.prayerReceiptsVisible).toBe(false)
   })
+
+  // --- Spec 6.4 — 3am Watch default + back-compat migration ---
+
+  it('DEFAULT_SETTINGS.prayerWall.watchEnabled === "off" (Gate-G-FAIL-CLOSED-OPT-IN)', () => {
+    expect(DEFAULT_SETTINGS.prayerWall.watchEnabled).toBe('off')
+  })
+
+  it('back-compat: pre-6.4 wr_settings (no watchEnabled key) injects watchEnabled="off"', () => {
+    // Pre-6.4 prayerWall shape with only prayerReceiptsVisible + nightMode
+    localStorage.setItem(
+      SETTINGS_KEY,
+      JSON.stringify({
+        prayerWall: { prayerReceiptsVisible: true, nightMode: 'on' },
+      }),
+    )
+    const settings = getSettings()
+    expect(settings.prayerWall.watchEnabled).toBe('off')
+    // Other prayerWall fields preserved
+    expect(settings.prayerWall.nightMode).toBe('on')
+    expect(settings.prayerWall.prayerReceiptsVisible).toBe(true)
+  })
 })

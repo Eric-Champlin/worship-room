@@ -382,4 +382,52 @@ class PostControllerIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.data.id").value(expiredEnc.toString()))
                 .andExpect(jsonPath("$.data.postType").value("encouragement"));
     }
+
+    // =====================================================================
+    // Spec 6.4 — ?watch query parameter (v1 stub)
+    // =====================================================================
+
+    @Test
+    void getPosts_withWatchTrueQueryParam_returnsStandardFeed() throws Exception {
+        // Spec 6.4 v1 stub: ?watch=true returns standard feed (identical
+        // ordering to ?watch=false). Param accepted but ignored.
+        seedPost(alice.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false, false);
+        seedPost(bob.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false, false);
+
+        MvcResult withoutWatch = mvc.perform(
+                get("/api/v1/posts").header("Authorization", "Bearer " + aliceJwt)
+        ).andExpect(status().isOk()).andReturn();
+        MvcResult withWatch = mvc.perform(
+                get("/api/v1/posts?watch=true").header("Authorization", "Bearer " + aliceJwt)
+        ).andExpect(status().isOk()).andReturn();
+
+        JsonNode dataWithoutWatch = mapper.readTree(withoutWatch.getResponse().getContentAsString()).get("data");
+        JsonNode dataWithWatch = mapper.readTree(withWatch.getResponse().getContentAsString()).get("data");
+        assertThat(dataWithWatch).isEqualTo(dataWithoutWatch);
+    }
+
+    @Test
+    void getPosts_withWatchTrue_fromUnauthenticatedRequest_returns200WithPublicFeed() throws Exception {
+        // Spec 6.4 v1 stub: GET /api/v1/posts is optional-auth (the
+        // unauthenticated path is exercised by getPosts_unauthenticated_returns200WithPublicOnly
+        // above). The Watch param does NOT change auth posture — unauthenticated
+        // request returns 200 with the public-only feed. Plan-Time Divergence #6
+        // documented this as a correction to the spec's "returns 401" assumption.
+        seedPost(alice.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false, false);
+        mvc.perform(get("/api/v1/posts?watch=true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").exists());
+    }
+
+    @Test
+    void getPosts_withWatchInvalidValue_fallsBackToFalse_andReturns200() throws Exception {
+        // Spec 6.4 v1 stub: ?watch=invalid binds to `false` via Spring's primitive
+        // boolean default — no 400 error, no exception, standard feed returned.
+        seedPost(alice.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false, false);
+        mvc.perform(
+                get("/api/v1/posts?watch=invalid").header("Authorization", "Bearer " + aliceJwt)
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").exists());
+    }
 }

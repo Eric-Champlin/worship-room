@@ -57,7 +57,7 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 
 | Key                              | Type                 | Feature                                                                                                                                 |
 | -------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `wr_settings`                    | UserSettings         | Profile, notifications, privacy, prayerWall (Spec 6.1 — `prayerWall.prayerReceiptsVisible` defaults to `true`), account                  |
+| `wr_settings`                    | UserSettings         | Profile, notifications, privacy, prayerWall (Spec 6.1 + 6.3 + **6.4 Watch** — `prayerWall.prayerReceiptsVisible` defaults to `true`, `prayerWall.nightMode` defaults to `'auto'`, `prayerWall.watchEnabled` defaults to `'off'` per Gate-G-FAIL-CLOSED-OPT-IN), account                  |
 | `wr_dashboard_collapsed`         | {cardId: bool}       | Dashboard card collapse state                                                                                                           |
 | `wr_dashboard_layout`            | DashboardLayout      | Dashboard widget layout/ordering                                                                                                        |
 | `wr_seasonal_banner_dismissed_*` | "true"               | Seasonal banner dismissal (per season suffix)                                                                                           |

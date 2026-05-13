@@ -1,4 +1,5 @@
 import { useQotdToday } from '@/hooks/useQotdToday'
+import { useWatchMode } from '@/hooks/useWatchMode'
 import { ShareButton } from '@/components/daily/ShareButton'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 
@@ -16,6 +17,10 @@ export function QuestionOfTheDay({
   onScrollToResponses,
 }: QuestionOfTheDayProps) {
   const { question, isLoading } = useQotdToday()
+  // Spec 6.4 MPD-14 — Watch mode suppresses QOTD entirely.
+  // Hook called at top to comply with the React rules of hooks.
+  const { active: watchActive } = useWatchMode()
+  if (watchActive) return null
 
   // Skeleton state during initial fetch — anti-pressure (no copy, no spinner).
   // aria-busy + aria-live let assistive tech announce the eventual content.

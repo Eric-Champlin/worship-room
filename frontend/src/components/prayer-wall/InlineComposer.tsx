@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useMemo } from 'react'
 import { useNightMode } from '@/hooks/useNightMode'
 import { getNightModeCopy } from '@/constants/night-mode-copy'
+import { WATCH_COMPOSER_PLACEHOLDER } from '@/constants/watch-copy'
 import { useSearchParams } from 'react-router-dom'
 import { Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -184,9 +185,15 @@ interface InlineComposerProps {
     // postType === 'prayer_request'; empty / null on all other types.
     helpTags?: HelpTag[] | null,
   ) => boolean | Promise<boolean>
+  /**
+   * Spec 6.4 — When true, swap the textarea placeholder to the Watch
+   * variant ("Simple presence matters. You don't need to fix it.") to set
+   * a quieter, anti-pressure tone during 3am Watch hours.
+   */
+  watchActive?: boolean
 }
 
-export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', onSubmit }: InlineComposerProps) {
+export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', onSubmit, watchActive = false }: InlineComposerProps) {
   const copy = composerCopyByType[postType]
   const limits = POST_TYPE_LIMITS[postType]
   // Spec 6.3 — Night-aware placeholder for prayer_request only. Other post
@@ -198,6 +205,12 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     nightActive && postType === 'prayer_request'
       ? getNightModeCopy('composePlaceholder', true)
       : copy.placeholder
+  // Spec 6.4 — Watch placeholder supersedes both day and night variants
+  // when 3am Watch is active. The Watch tone is the safety-appropriate
+  // voice during late-night hours regardless of post type.
+  const effectivePlaceholder = watchActive
+    ? WATCH_COMPOSER_PLACEHOLDER
+    : nightAwarePlaceholder
   const { isOnline } = useOnlineStatus()
   const [searchParams] = useSearchParams()
   const [content, setContent] = useState('')
@@ -447,7 +460,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
           ref={textareaRef}
           value={content}
           onChange={handleChange}
-          placeholder={nightAwarePlaceholder}
+          placeholder={effectivePlaceholder}
           maxLength={limits.max}
           className="w-full resize-none rounded-lg border border-white/10 bg-white/[0.06] p-3 leading-relaxed text-white placeholder:text-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-glow-cyan"
           style={{ minHeight: copy.minHeight }}

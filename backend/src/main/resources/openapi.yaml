@@ -1685,6 +1685,25 @@ paths:
             type: string
             enum: [bumped, recent, answered]
             default: bumped
+        - name: watch
+          in: query
+          required: false
+          description: |
+            Spec 6.4 v1 stub — accepted but does NOT change the response.
+            ?watch=true returns identical feed ordering to ?watch=false.
+            Spec 6.4b will enforce Trust Level 2+ (403 for TL<2) and re-sort
+            the feed (crisis-flagged → mental-health → friends → regular)
+            with deterministic SQL section dividers. The param is documented
+            now so the API contract is stable when 6.4b lands.
+
+            Note: implemented as `String` with lenient manual parsing — any
+            non-`"true"` value (including `"invalid"`) falls back to `false`
+            without 400 errors. The schema is documented as `boolean` because
+            that is the semantic contract; the lenient binding is an
+            implementation detail.
+          schema:
+            type: boolean
+            default: false
       responses:
         '200':
           description: Paginated posts (possibly empty)

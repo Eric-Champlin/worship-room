@@ -38,6 +38,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
     // Spec 6.3 — Night Mode default 'auto' so night users discover the
     // feature ambiently; day users see no difference.
     nightMode: 'auto',
+    // Spec 6.4 — 3am Watch opt-in default. NEVER auto-enable (Gate-G-FAIL-CLOSED-OPT-IN).
+    // Users must explicitly opt in via Settings; opt-in requires confirmation modal.
+    watchEnabled: 'off',
   },
 }
 

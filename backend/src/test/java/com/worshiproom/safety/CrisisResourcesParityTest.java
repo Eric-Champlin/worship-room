@@ -42,7 +42,22 @@ class CrisisResourcesParityTest {
                         .as("Frontend must contain backend text '%s'", resource.text())
                         .contains(resource.text());
             }
+            // Spec 6.4 — chat URL parity. Only 988 entry carries a chat URL in v1.
+            if (resource.chatUrl() != null) {
+                assertThat(content)
+                        .as("Frontend must contain backend chatUrl '%s'", resource.chatUrl())
+                        .contains(resource.chatUrl());
+            }
         }
+    }
+
+    @Test
+    void suicidePreventionEntry_hasChatUrl_perSpec64() {
+        // Spec 6.4 — the 988 Lifeline must carry a non-null chat URL so the
+        // prayer-wall/CrisisResourcesBanner can link to https://988lifeline.org/chat/.
+        CrisisResource ninetyEight = CrisisResources.RESOURCES.get(0);
+        assertThat(ninetyEight.name()).isEqualTo("988 Suicide & Crisis Lifeline");
+        assertThat(ninetyEight.chatUrl()).isEqualTo("https://988lifeline.org/chat/");
     }
 
     @Test

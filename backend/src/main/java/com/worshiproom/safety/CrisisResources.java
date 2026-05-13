@@ -24,19 +24,22 @@ public final class CrisisResources {
                     "988 Suicide & Crisis Lifeline",
                     "988",
                     null,
-                    "https://988lifeline.org"
+                    "https://988lifeline.org",
+                    "https://988lifeline.org/chat/"  // Spec 6.4 — surfaces in prayer-wall/CrisisResourcesBanner.tsx
             ),
             new CrisisResource(
                     "Crisis Text Line",
                     null,
                     "Text HOME to 741741",
-                    "https://www.crisistextline.org"
+                    "https://www.crisistextline.org",
+                    null
             ),
             new CrisisResource(
                     "SAMHSA National Helpline",
                     "1-800-662-4357",
                     null,
-                    "https://www.samhsa.gov/find-help/national-helpline"
+                    "https://www.samhsa.gov/find-help/national-helpline",
+                    null
             )
     );
 

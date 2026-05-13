@@ -16,13 +16,21 @@ interface PrayerWallHeroProps {
    * the chip with the night-active state.
    */
   nightWatchChip?: ReactNode
+  /**
+   * Spec 6.4 — WatchIndicator chip rendered alongside nightWatchChip when
+   * Watch is active. Renders side-by-side with NightWatchChip if both are
+   * present (Plan-Time Divergence #3).
+   */
+  watchIndicator?: ReactNode
 }
 
 export function PrayerWallHero({
   action,
   subtitle = 'What weighs on you today?',
   nightWatchChip,
+  watchIndicator,
 }: PrayerWallHeroProps) {
+  const showChipsRow = nightWatchChip || watchIndicator
   return (
     <section
       aria-labelledby="prayer-wall-heading"
@@ -40,8 +48,11 @@ export function PrayerWallHero({
       <p className="text-white-night-aware relative z-10 mx-auto max-w-xl text-base leading-relaxed text-white sm:text-lg">
         {subtitle}
       </p>
-      {nightWatchChip && (
-        <div className="relative z-10 mt-4">{nightWatchChip}</div>
+      {showChipsRow && (
+        <div className="relative z-10 mt-4 flex flex-wrap items-center justify-center gap-2">
+          {nightWatchChip}
+          {watchIndicator}
+        </div>
       )}
       {action && <div className="relative z-10 mt-6">{action}</div>}
     </section>

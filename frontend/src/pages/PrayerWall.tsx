@@ -11,6 +11,9 @@ import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
 import { NightWatchChip } from '@/components/prayer-wall/NightWatchChip'
 import { useNightMode } from '@/hooks/useNightMode'
+import { useWatchMode } from '@/hooks/useWatchMode'
+import { WatchIndicator } from '@/components/prayer-wall/WatchIndicator'
+import { CrisisResourcesBanner } from '@/components/prayer-wall/CrisisResourcesBanner'
 import { getNightModeCopy } from '@/constants/night-mode-copy'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
 import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
@@ -93,6 +96,7 @@ function PrayerWallContent() {
   const openAuthModal = authModal?.openAuthModal
   // Spec 6.3 — Night Mode (active state + source for chip aria-label).
   const { active: nightActive, source: nightSource } = useNightMode()
+  const watchMode = useWatchMode()
   const allPrayers = useMemo(() => getMockPrayers(), [])
 
   // Flag-on uses initial empty state populated by the load effect; flag-off
@@ -827,11 +831,17 @@ function PrayerWallContent() {
         <SEO {...PRAYER_WALL_METADATA} jsonLd={prayerWallBreadcrumbs} />
       )}
       <Navbar transparent />
+      {watchMode.active && (
+        <div className="mx-auto mt-4 w-full max-w-3xl px-4">
+          <CrisisResourcesBanner />
+        </div>
+      )}
       <PrayerWallHero
         subtitle={getNightModeCopy('heroSubtitle', nightActive)}
         nightWatchChip={
           nightActive ? <NightWatchChip source={nightSource} /> : null
         }
+        watchIndicator={watchMode.active ? <WatchIndicator /> : null}
         action={
           isAuthenticated ? (
             <div
@@ -911,6 +921,7 @@ function PrayerWallContent() {
               onClose={() => setComposerOpen(false)}
               postType={chosenPostType}
               onSubmit={handleComposerSubmit}
+              watchActive={watchMode.active}
             />
 
             {/* QOTD Card — above filters, visible in any filter state */}
