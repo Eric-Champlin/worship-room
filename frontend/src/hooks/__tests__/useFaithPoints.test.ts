@@ -908,3 +908,48 @@ describe('useFaithPoints — skipBackendDualWrite option (Spec 6.2)', () => {
     await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
   });
 });
+
+describe('useFaithPoints — metadata option (Spec 6.2b)', () => {
+  // PraySession records {length, ended_early, prompts_seen, audio_used} via the
+  // metadata option. The metadata is forwarded to postActivityToBackend → wire
+  // body, and is intentionally NOT persisted to localStorage (which stays
+  // metadata-blind per R-OVR-3).
+  beforeEach(() => {
+    simulateLogin();
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockReset();
+    vi.mocked(apiFetch).mockResolvedValue(undefined as never);
+    vi.mocked(isBackfillCompleted).mockReset();
+    vi.mocked(isBackfillCompleted).mockReturnValue(true);
+  });
+
+  it('forwards metadata into the backend POST body when provided', async () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub_session', {
+        metadata: { length: 5, ended_early: false, prompts_seen: 5, audio_used: false },
+      });
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
+    const [path, options] = vi.mocked(apiFetch).mock.calls[0];
+    expect(path).toBe('/api/v1/activity');
+    const body = JSON.parse(options?.body as string);
+    expect(body).toEqual({
+      activityType: 'pray',
+      sourceFeature: 'daily_hub_session',
+      metadata: { length: 5, ended_early: false, prompts_seen: 5, audio_used: false },
+    });
+  });
+
+  it('omits metadata key entirely when options.metadata is undefined', async () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
+    const [, options] = vi.mocked(apiFetch).mock.calls[0];
+    const body = JSON.parse(options?.body as string);
+    // Key absence, not metadata: undefined — clean wire shape for non-6.2b callers.
+    expect('metadata' in body).toBe(false);
+  });
+});

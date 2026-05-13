@@ -16,6 +16,7 @@ import { useScenePlayer } from '@/hooks/useScenePlayer'
 import { SCENE_BY_ID } from '@/data/scenes'
 import { PRAYER_DRAFT_KEY, VERSE_FRAMINGS } from '@/constants/daily-experience'
 import { DevotionalPreviewPanel } from '@/components/daily/DevotionalPreviewPanel'
+import { PrayLengthPicker } from '@/components/daily/PrayLengthPicker'
 import { VersePromptCard, VersePromptSkeleton } from '@/components/daily/VersePromptCard'
 import { useVerseContextPreload } from '@/hooks/dailyHub/useVerseContextPreload'
 import { getPrayerPrefill } from '@/data/challenge-prefills'
@@ -205,6 +206,12 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
     <>
       <div>
         <div className="mx-auto max-w-2xl px-4 pt-10 pb-4 sm:pt-14 sm:pb-6">
+          {/* Spec 6.2b — Length picker. Renders when no AI prayer is loading or
+              displayed (same condition as PrayerInput below). DailyHub mounts a
+              PraySession overlay above this content when ?length= is valid, so
+              the picker is visually hidden during a session. */}
+          {!prayer && !isLoading && <PrayLengthPicker />}
+
           {/* Devotional Preview Panel */}
           {prayContext?.from === 'devotional' && prayContext.devotionalSnapshot && !contextDismissed && !isLoading && !prayer && (
             <DevotionalPreviewPanel

@@ -461,4 +461,22 @@ describe('DailyHub', () => {
     expect(activeTab.className).toContain('ring-offset-hero-bg')
     expect(activeTab.className).not.toContain('ring-offset-dashboard-dark')
   })
+
+  describe('Spec 6.2b — PraySession deep-link mounting', () => {
+    it('?tab=pray&length=5 mounts PraySession (End-early button present)', () => {
+      mockUseAuth.mockReturnValue({ user: { name: 'TestUser' }, isAuthenticated: true, login: vi.fn(), logout: vi.fn() })
+      renderPage('/daily?tab=pray&length=5')
+      expect(screen.getByRole('button', { name: 'End prayer session early' })).toBeInTheDocument()
+    })
+
+    it('?tab=pray&length=invalid does NOT mount PraySession (Gate-G-DEEP-LINK-GRACEFUL)', () => {
+      renderPage('/daily?tab=pray&length=invalid')
+      expect(screen.queryByRole('button', { name: 'End prayer session early' })).not.toBeInTheDocument()
+    })
+
+    it('?tab=journal&length=5 does NOT mount PraySession (length ignored off pray tab)', () => {
+      renderPage('/daily?tab=journal&length=5')
+      expect(screen.queryByRole('button', { name: 'End prayer session early' })).not.toBeInTheDocument()
+    })
+  })
 })

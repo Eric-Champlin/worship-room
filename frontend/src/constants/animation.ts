@@ -6,6 +6,7 @@ export const ANIMATION_DURATIONS = {
   slow: 400,
   pulse: 300, // PrayerCard pulse animation cleanup (matches CSS pulse keyframe exactly)
   ceremony: 600, // InteractionBar whisper-pulse coordination (paired with sound effect timing)
+  meditative: 1500, // Reverent crossfade pacing (Spec 6.2b PraySession prompts; breathing exercise; audio Bible slow fades)
 } as const
 
 /** Canonical animation easing tokens. Match Material Design standard curves. */

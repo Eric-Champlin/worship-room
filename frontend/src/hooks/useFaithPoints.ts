@@ -137,6 +137,14 @@ interface RecordActivityOptions {
    * the user.
    */
   skipBackendDualWrite?: boolean
+  /**
+   * Spec 6.2b — opaque metadata forwarded to the backend's
+   * {@code ActivityRequest.metadata} JSONB column. Used by PraySession to
+   * record {@code {length, ended_early, prompts_seen, audio_used}}. Backend
+   * does NOT inspect; treats as opaque {@code Map<String, Object>}. localStorage
+   * half of the dual-write does NOT persist this — it lives backend-side only.
+   */
+  metadata?: Record<string, unknown>
 }
 
 const noopRecordActivity = (
@@ -295,7 +303,7 @@ export function useFaithPoints(): FaithPointsState & {
           });
       }
 
-      postActivityToBackend(type, sourceFeature).catch((err) => {
+      postActivityToBackend(type, sourceFeature, options?.metadata).catch((err) => {
         console.warn('[useFaithPoints] backend dual-write failed:', err);
       });
     }

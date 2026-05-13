@@ -15,10 +15,12 @@ import type { ActivityType } from '@/types/dashboard';
 export async function postActivityToBackend(
   type: ActivityType,
   sourceFeature: string,
+  metadata?: Record<string, unknown>,
 ): Promise<void> {
   const body: ActivityRequest = {
     activityType: type,
     sourceFeature,
+    ...(metadata !== undefined && { metadata }),
   };
   await apiFetch<void>('/api/v1/activity', {
     method: 'POST',

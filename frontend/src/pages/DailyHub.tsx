@@ -47,6 +47,15 @@ import { DailyAmbientPillFAB } from '@/components/daily/DailyAmbientPillFAB'
 import type { AmbientContext } from '@/constants/ambient-suggestions'
 import type { PrayContext, DevotionalSnapshot } from '@/types/daily-experience'
 import { useDailyHubTab } from '@/hooks/url/useDailyHubTab'
+import { PraySession } from '@/pages/daily/PraySession'
+
+type PrayLength = 1 | 5 | 10
+function parsePrayLength(raw: string | null): PrayLength | null {
+  if (raw === '1') return 1
+  if (raw === '5') return 5
+  if (raw === '10') return 10
+  return null
+}
 
 const TABS = [
   { id: 'devotional', label: 'Devotional', mobileLabel: 'Devos', icon: BookOpen },
@@ -100,10 +109,21 @@ function DailyHubContent() {
     if (urlParamsConsumed.current) return
     urlParamsConsumed.current = true
     if (urlContext.current || urlPrompt.current) {
-      // Clean URL params after consuming, keep only tab
-      setSearchParams({ tab: activeTab }, { replace: true })
+      // Clean URL params after consuming, keep tab AND length (Spec 6.2b —
+      // length is owned by PraySession and stripped on session end, not here).
+      const nextParams: Record<string, string> = { tab: activeTab }
+      const currentLength = searchParams.get('length')
+      if (currentLength !== null) nextParams.length = currentLength
+      setSearchParams(nextParams, { replace: true })
     }
-  }, [activeTab, setSearchParams])
+  }, [activeTab, searchParams, setSearchParams])
+
+  // Spec 6.2b — read ?length= and only honor it when the pray tab is active
+  // and the value is one of {1, 5, 10}. Anything else falls through to the
+  // picker silently (Gate-G-DEEP-LINK-GRACEFUL).
+  const lengthParam = searchParams.get('length')
+  const validLength: PrayLength | null =
+    activeTab === 'pray' ? parsePrayLength(lengthParam) : null
 
   // Tooltip for tab bar
   const tabBarRef = useRef<HTMLDivElement>(null)
@@ -377,6 +397,12 @@ function DailyHubContent() {
 
       {/* Sticky ambient pill FAB */}
       <DailyAmbientPillFAB context={getAmbientContextForTab(activeTab)} />
+
+      {/* Spec 6.2b — PraySession immersive overlay. fixed inset-0 z-50 sits
+          above navbar (z-10), sticky tabs (z-40), FAB (z-40). Mounts only when
+          tab=pray AND length parses to {1, 5, 10}. PraySession strips ?length=
+          via setSearchParams on natural completion or early exit. */}
+      {validLength !== null && <PraySession length={validLength} />}
     </BackgroundCanvas>
   )
 }
