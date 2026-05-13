@@ -1,69 +1,83 @@
 /**
- * Spec 6.5 — Intercessor Timeline component.
+ * Spec 6.5 — Intercessor Timeline component (presentational).
  *
  * Mounted inside PrayerCard for prayer_request posts. Renders a single-line
  * summary that's tap-to-expand into a sorted list of recent praying reactions.
+ *
+ * **Presentational only.** The owning `useIntercessors` hook lives in
+ * `PrayerCard` so that the `InteractionBar` (mounted under `PrayerCard`'s
+ * `{children}` slot) can fire optimistic updates through the shared
+ * `IntercessorActionsContext`. This component takes the hook result as
+ * props and renders.
  *
  * **Privacy model (Plan-Time Divergence §1):** entries are classified
  * server-side against the viewer's friend set. Non-friend reactors render as
  * "Anonymous" with the same visual treatment as named entries — no badge,
  * no italic, no demotion (Gate-G-NO-LEADERBOARD W14).
  *
- * **Collapsed-count source:** uses `prayingCount` (live, updates immediately
- * when the viewer reacts via InteractionBar). The `initialSummary.firstThree`
- * is used for the named-entries portion of the collapsed summary line; it
- * stays at the feed-query snapshot until the user expands, at which point
- * the server-fetched `entries` replace it.
+ * **Live count source:** `totalCount` from the hook is the unified count.
+ * It starts at the parent-provided `initialCount` (prayer.prayingCount),
+ * tracks parent updates while collapsed, is replaced by server-truth on
+ * expand, and is adjusted by the viewer's own optimistic toggles via
+ * `InteractionBar` → `IntercessorActionsContext` → hook.
  *
  * **Anti-pressure (W14):** no clickable display-name profile links, no
  * Faithful Watcher badges, no visual differentiation of anonymous vs named
  * entries beyond the text label itself.
  */
 
-import { useId, useMemo } from 'react'
+import { useId } from 'react'
 import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { cn } from '@/lib/utils'
 import { relativeTime } from '@/lib/relative-time'
 import { formatSummaryLine } from '@/lib/intercessor-summary'
-import { useIntercessors } from '@/hooks/useIntercessors'
-import type { IntercessorSummary } from '@/types/intercessor'
+import type {
+  IntercessorEntry,
+  IntercessorSummary,
+} from '@/types/intercessor'
 
 interface IntercessorTimelineProps {
-  postId: string
-  /** Live praying-reaction count from the parent prayer. Always preferred over
-   * `initialSummary.count` because it updates synchronously when the viewer
-   * toggles their own reaction via InteractionBar (no hook plumbing needed). */
-  prayingCount: number
-  /** Feed-query snapshot of the first 3 entries. Used for collapsed summary
-   * line only. Null on non-feed surfaces (detail, profile). */
+  /** Feed-query snapshot of the first 3 entries. Used for the collapsed
+   *  summary line only; expanded view uses server-fetched `entries`. Null on
+   *  non-feed surfaces (detail, profile) where the inline summary isn't
+   *  populated. */
   initialSummary?: IntercessorSummary | null
+  /** Server-fetched timeline entries (populated by expand). */
+  entries: IntercessorEntry[]
+  /** Live count — unified across collapsed and expanded states. */
+  totalCount: number
+  expanded: boolean
+  loading: boolean
+  /** Fetch error message, or null. Surfaced inline below the summary so the
+   *  user knows a tap-to-expand failed and can retry. */
+  error: string | null
+  onExpand: () => void
+  onCollapse: () => void
 }
 
-const EMPTY_FIRST_THREE: IntercessorSummary['firstThree'] = []
-
 export function IntercessorTimeline({
-  postId,
-  prayingCount,
   initialSummary,
+  entries,
+  totalCount,
+  expanded,
+  loading,
+  error,
+  onExpand,
+  onCollapse,
 }: IntercessorTimelineProps) {
-  const {
-    entries,
-    totalCount,
-    expanded,
-    loading,
-    expand,
-    collapse,
-  } = useIntercessors(postId)
+  // Unified count source — see useIntercessors.ts doc-block.
+  const summaryCount = totalCount
 
-  const summaryCount = expanded ? totalCount : prayingCount
+  // When expanded, the server-fetched entries are authoritative for the
+  // names rendered. When collapsed, fall back to the feed-query snapshot.
   const summaryFirstThree = expanded
     ? entries.slice(0, 3)
-    : (initialSummary?.firstThree ?? EMPTY_FIRST_THREE)
+    : (initialSummary?.firstThree ?? [])
 
-  const summaryLine = useMemo(
-    () => formatSummaryLine(summaryCount, summaryFirstThree),
-    [summaryCount, summaryFirstThree],
-  )
+  // Plain function call — formatSummaryLine is a cheap string concat, so
+  // memoization on an unstable `entries.slice(0,3)` reference produced no
+  // wins. Just compute every render.
+  const summaryLine = formatSummaryLine(summaryCount, summaryFirstThree)
 
   const regionId = useId()
   const canExpand = summaryCount >= 2
@@ -85,7 +99,7 @@ export function IntercessorTimeline({
     <div data-testid="intercessor-timeline" className="mt-2">
       <button
         type="button"
-        onClick={() => (expanded ? collapse() : void expand())}
+        onClick={() => (expanded ? onCollapse() : onExpand())}
         aria-expanded={expanded}
         aria-controls={regionId}
         aria-label={
@@ -97,6 +111,27 @@ export function IntercessorTimeline({
       >
         {summaryLine}
       </button>
+      {/* Loading + error live OUTSIDE the aria-hidden expand region so
+          the user sees feedback during the fetch (loading=true is reached
+          before expanded=true). aria-live="polite" announces the loading
+          to screen readers without interrupting. */}
+      {loading && (
+        <p
+          className="mt-1 py-1 text-sm text-white/40"
+          role="status"
+          aria-live="polite"
+        >
+          Loading…
+        </p>
+      )}
+      {error && !loading && (
+        <p
+          role="alert"
+          className="mt-1 text-xs text-red-100/80"
+        >
+          We couldn't load the full list. Tap again to retry.
+        </p>
+      )}
       <div
         id={regionId}
         className={cn(
@@ -106,11 +141,6 @@ export function IntercessorTimeline({
         style={{ transitionDuration: `${ANIMATION_DURATIONS.base}ms` }}
         aria-hidden={!expanded}
       >
-        {loading && (
-          <p className="py-2 text-sm text-white/40" role="status">
-            Loading…
-          </p>
-        )}
         {!loading && expanded && (
           <ul role="list" className="mt-2 space-y-1.5">
             {entries.map((entry, idx) => (

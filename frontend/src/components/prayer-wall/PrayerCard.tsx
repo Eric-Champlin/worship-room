@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { HandHelping, Heart, HelpCircle, MessagesSquare, Sparkles } from 'lucide-react'
@@ -7,6 +7,8 @@ import { ANIMATION_DURATIONS } from '@/constants/animation'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerCategory } from '@/constants/prayer-categories'
 import type { PrayerRequest } from '@/types/prayer-wall'
+import type { IntercessorEntry } from '@/types/intercessor'
+import { useIntercessors } from '@/hooks/useIntercessors'
 import { getChallenge } from '@/data/challenges'
 import { Avatar } from './Avatar'
 import { AnsweredBadge } from './AnsweredBadge'
@@ -24,6 +26,19 @@ import { getPerTypeChromeClass } from '@/constants/post-type-chrome'
 const PulseContext = createContext<(() => void) | null>(null)
 // eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with PrayerCard
 export function usePrayerCardPulse() { return useContext(PulseContext) }
+
+// Spec 6.5 — Intercessor optimistic actions exposed to InteractionBar (which
+// is mounted under PrayerCard's `{children}` slot). Mirrors the PulseContext
+// pattern above. Null when there is no provider (e.g., InteractionBar mounted
+// outside a PrayerCard, or in a test with no PrayerCard wrap) — consumers
+// must null-check.
+export interface IntercessorActions {
+  optimisticInsert: (entry: IntercessorEntry) => void
+  optimisticRemove: (viewerUserId: string) => void
+}
+const IntercessorActionsContext = createContext<IntercessorActions | null>(null)
+// eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with PrayerCard
+export function useIntercessorActions() { return useContext(IntercessorActionsContext) }
 
 const TRUNCATE_LENGTH = 150
 
@@ -67,6 +82,21 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
       el.classList.remove('motion-safe:animate-card-pulse')
     }, ANIMATION_DURATIONS.pulse)
   }, [])
+
+  // Spec 6.5 — Intercessor Timeline state owned at the PrayerCard level so
+  // that InteractionBar (mounted under `{children}` below) can fire
+  // optimisticInsert / optimisticRemove via IntercessorActionsContext when
+  // the viewer toggles their own praying reaction. Live count is `prayer.prayingCount`
+  // — the hook syncs to it while collapsed and switches to server-truth on expand.
+  const intercessor = useIntercessors(prayer.id, prayer.prayingCount)
+  const intercessorActions = useMemo<IntercessorActions>(
+    () => ({
+      optimisticInsert: intercessor.optimisticInsert,
+      optimisticRemove: intercessor.optimisticRemove,
+    }),
+    [intercessor.optimisticInsert, intercessor.optimisticRemove],
+  )
+
   const challengeData = prayer.challengeId ? getChallenge(prayer.challengeId) : null
   const needsTruncation = !showFull && prayer.content.length > TRUNCATE_LENGTH
 
@@ -101,6 +131,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
 
   return (
     <PulseContext.Provider value={triggerPulse}>
+     <IntercessorActionsContext.Provider value={intercessorActions}>
       <div ref={articleRef}>
         <FrostedCard
           variant={tier === 'detail' ? 'accent' : 'default'}
@@ -222,9 +253,14 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
               but we don't render the timeline UI for them. */}
           {prayer.postType === 'prayer_request' && (
             <IntercessorTimeline
-              postId={prayer.id}
-              prayingCount={prayer.prayingCount}
               initialSummary={prayer.intercessorSummary ?? null}
+              entries={intercessor.entries}
+              totalCount={intercessor.totalCount}
+              expanded={intercessor.expanded}
+              loading={intercessor.loading}
+              error={intercessor.error}
+              onExpand={intercessor.expand}
+              onCollapse={intercessor.collapse}
             />
           )}
 
@@ -238,6 +274,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
           )}
         </FrostedCard>
       </div>
+     </IntercessorActionsContext.Provider>
     </PulseContext.Provider>
   )
 }

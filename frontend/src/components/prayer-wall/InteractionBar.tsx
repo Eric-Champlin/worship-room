@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useAuthModal } from './AuthModalProvider'
-import { usePrayerCardPulse } from './PrayerCard'
+import { usePrayerCardPulse, useIntercessorActions } from './PrayerCard'
 import { QuickLiftOverlay } from './QuickLiftOverlay'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ShareDropdown, getShareText } from './ShareDropdown'
@@ -61,10 +61,15 @@ export function InteractionBar({
   onToggleSave,
   isSaved,
 }: InteractionBarProps) {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const authModal = useAuthModal()
   const { playSoundEffect } = useSoundEffects()
   const triggerPulse = usePrayerCardPulse()
+  // Spec 6.5 — when mounted under a PrayerCard, drive the Intercessor
+  // Timeline's optimistic state on praying toggles. Null when mounted
+  // outside a PrayerCard (e.g., bare InteractionBar tests) — handler
+  // null-checks before calling.
+  const intercessorActions = useIntercessorActions()
   const { recordActivity } = useFaithPoints()
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
@@ -84,6 +89,12 @@ export function InteractionBar({
       }
       setIsAnimating(false)
       onTogglePraying()
+      // Spec 6.5 — keep the Intercessor Timeline in sync. Viewer always
+      // sees their own entry by display name (per IntercessorService self-case),
+      // so we remove by the viewer's userId.
+      if (intercessorActions && user) {
+        intercessorActions.optimisticRemove(user.id)
+      }
       return
     }
     // Toggle ON — start ceremony
@@ -94,11 +105,23 @@ export function InteractionBar({
     onTogglePraying()
     playSoundEffect('whisper')
     triggerPulse?.()
+    // Spec 6.5 — optimistic insert at the top of the timeline. Viewer
+    // self-classification is always named per IntercessorService — see
+    // classifyEntry's self-case. displayName uses user.displayName so the
+    // user reads the same name they see elsewhere in the app.
+    if (intercessorActions && user) {
+      intercessorActions.optimisticInsert({
+        userId: user.id,
+        displayName: user.displayName,
+        isAnonymous: false,
+        reactedAt: new Date().toISOString(),
+      })
+    }
     animationTimeoutRef.current = setTimeout(() => {
       setIsAnimating(false)
     }, ANIMATION_DURATIONS.ceremony)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- triggerPulse is stable context ref
-  }, [isPraying, onTogglePraying, playSoundEffect])
+  }, [isPraying, onTogglePraying, playSoundEffect, intercessorActions, user])
 
   useEffect(() => {
     return () => {
