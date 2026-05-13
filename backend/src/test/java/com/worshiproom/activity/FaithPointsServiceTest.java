@@ -205,15 +205,15 @@ class FaithPointsServiceTest {
         }
 
         @Test
-        void allThirteenActivities_yields330Points() {
-            // 5+10+10+15+15+20+25+5+10+20+10+10+10 = 165 base × 2.0 = 330 (matches MAX_DAILY_POINTS)
-            // Spec 3.6 added INTERCESSION (10 pts), bumping totals from 155→165 base and 310→330.
+        void allFourteenActivities_yields370Points() {
+            // 5+10+10+15+15+20+25+5+10+20+10+10+10+20 = 185 base × 2.0 = 370 (matches MAX_DAILY_POINTS)
+            // Spec 3.6 added INTERCESSION (10 pts); Spec 6.2 added QUICK_LIFT (20 pts).
             FaithPointsResult result = service.calculate(EnumSet.allOf(ActivityType.class), 0);
-            assertThat(result.activityCount()).isEqualTo(13);
-            assertThat(result.basePoints()).isEqualTo(165);
+            assertThat(result.activityCount()).isEqualTo(14);
+            assertThat(result.basePoints()).isEqualTo(185);
             assertThat(result.multiplierTier().multiplier()).isEqualTo(2.0);
             assertThat(result.multiplierTier().label()).isEqualTo("Full Worship Day");
-            assertThat(result.pointsEarned()).isEqualTo(330);
+            assertThat(result.pointsEarned()).isEqualTo(370);
         }
     }
 
@@ -323,10 +323,11 @@ class FaithPointsServiceTest {
         }
 
         @Test
-        void worstCase_allThirteenActivitiesEquals330() {
-            // Spec 3.6 added INTERCESSION (10 pts), bumping the cap from 310 to 330.
+        void worstCase_allFourteenActivitiesEquals370() {
+            // Spec 3.6 added INTERCESSION (10 pts); Spec 6.2 added QUICK_LIFT (20 pts).
+            // Cap is now 185 base × 2.0 = 370.
             FaithPointsResult result = service.calculate(EnumSet.allOf(ActivityType.class), 0);
-            assertThat(result.pointsEarned()).isEqualTo(330);
+            assertThat(result.pointsEarned()).isEqualTo(370);
         }
     }
 

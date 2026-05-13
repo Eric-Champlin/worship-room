@@ -49,6 +49,7 @@ public final class BadgeThresholds {
     public static final int[] MEDITATION_SESSIONS = {10, 50, 100};
     public static final int[] PRAYER_WALL_POSTS = {1, 10};
     public static final int INTERCESSIONS = 25;
+    public static final int QUICK_LIFTS = 10;
     public static final int[] BIBLE_CHAPTERS = {1, 10, 25};
     public static final int[] GRATITUDE_TOTAL_DAYS = {30, 100};
     public static final int GRATITUDE_CONSECUTIVE_STREAK = 7;

@@ -65,7 +65,7 @@ class CountTypeTest {
     }
 
     @Test
-    void enumHasExactly14Values() {
-        assertThat(CountType.values()).hasSize(14);
+    void enumHasExactly15Values() {
+        assertThat(CountType.values()).hasSize(15);
     }
 }

@@ -159,7 +159,7 @@ prevents a wasted deploy attempt.
 | #   | Spec  | Title                         | Size | Risk     | Status |
 | --- | ----- | ----------------------------- | ---- | -------- | ------ |
 | 79  | 6.1   | Prayer Receipt                | L    | Medium   | ✅     |
-| 80  | 6.2   | Quick Lift                    | M    | Low      | ⬜     |
+| 80  | 6.2   | Quick Lift                    | M    | Low      | ✅     |
 | 81  | 6.2b  | Prayer Length Options         | M    | Low      | ⬜     |
 | 82  | 6.3   | Night Mode                    | L    | Medium   | ⬜     |
 | 83  | 6.4   | 3am Watch                     | L    | HIGH     | ⬜     |

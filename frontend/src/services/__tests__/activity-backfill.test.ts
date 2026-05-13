@@ -139,10 +139,10 @@ describe('assembleBackfillPayload', () => {
     expect(payload.streak.longestStreak).toBe(0);
     expect(payload.streak.lastActiveDate).toBeNull();
     expect(payload.badges.earned).toEqual({});
-    // All 14 counters default to 0
+    // All 15 counters default to 0
     expect(payload.badges.activityCounts.pray).toBe(0);
     expect(payload.badges.activityCounts.prayerWallPosts).toBe(0);
-    expect(Object.keys(payload.badges.activityCounts)).toHaveLength(14);
+    expect(Object.keys(payload.badges.activityCounts)).toHaveLength(15);
   });
 
   it('excludes streak-repair data from the payload (Divergence 2)', () => {

@@ -27,6 +27,25 @@
 
 /* shimmer keyframe defined in tailwind.config.js — kept there */
 
+/* === Quick Lift Ring Fill (Spec 6.2) ===
+ * 30-second progress ring on QuickLiftOverlay. CSS-only stroke-dashoffset
+ * animation for GPU compositing (60fps mobile). Two variants: smooth (linear
+ * 30s) and reduced (still 30s — the timing IS the feature; only the visual
+ * motion is reduced via the reduced-motion exemption below).
+ */
+@keyframes quickLiftRingFill {
+  from { stroke-dashoffset: 565.49; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.quick-lift-ring--smooth {
+  animation: quickLiftRingFill 30s linear forwards;
+}
+
+.quick-lift-ring--reduced {
+  animation: quickLiftRingFill 30s steps(2, end) forwards;
+}
+
 /* === Universal Reduced Motion Safety Net === */
 
 @media (prefers-reduced-motion: reduce) {
@@ -41,6 +60,14 @@
   .animate-shimmer {
     animation-duration: 300ms !important;
     animation-iteration-count: infinite !important;
+  }
+
+  /* Quick Lift exemption: the 30-second timer IS the feature. The reduced
+   * variant uses steps(2, end) so motion happens in 2 discrete jumps instead
+   * of a continuous sweep — preserving the timing while reducing motion. */
+  .quick-lift-ring--reduced {
+    animation-duration: 30s !important;
+    animation-iteration-count: 1 !important;
   }
 }
 

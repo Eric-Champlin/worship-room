@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Optional;
 
 /**
- * The 14 count types tracked by the Worship Room activity engine.
+ * The 15 count types tracked by the Worship Room activity engine.
  *
  * <p>Java identifiers use SCREAMING_SNAKE_CASE per Java convention; the
  * camelCase wire-format string used in JSON request/response bodies and
@@ -43,7 +43,8 @@ public enum CountType {
     CHALLENGES_COMPLETED("challengesCompleted"),
     INTERCESSION_COUNT("intercessionCount"),
     BIBLE_CHAPTERS_READ("bibleChaptersRead"),
-    PRAYER_WALL_POSTS("prayerWallPosts");
+    PRAYER_WALL_POSTS("prayerWallPosts"),
+    QUICK_LIFT("quickLift");
 
     private final String wireValue;
 

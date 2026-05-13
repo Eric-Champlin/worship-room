@@ -12,6 +12,7 @@ const ACTIVITY_TYPE_TO_COUNT_KEY: Partial<Record<ActivityType, keyof ActivityCou
   prayerWall: 'prayerWall',
   readingPlan: 'readingPlan',
   gratitude: 'gratitude',
+  quickLift: 'quickLiftCount',
   // mood has no counter
 };
 
@@ -35,6 +36,7 @@ function fillActivityCounts(partial: Partial<ActivityCounts>): ActivityCounts {
     intercessionCount: typeof partial.intercessionCount === 'number' ? partial.intercessionCount : 0,
     bibleChaptersRead: typeof partial.bibleChaptersRead === 'number' ? partial.bibleChaptersRead : 0,
     prayerWallPosts: typeof partial.prayerWallPosts === 'number' ? partial.prayerWallPosts : 0,
+    quickLiftCount: typeof partial.quickLiftCount === 'number' ? partial.quickLiftCount : 0,
   };
 }
 

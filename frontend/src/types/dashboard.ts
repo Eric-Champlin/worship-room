@@ -18,7 +18,7 @@ export interface MoodEntry {
   timeOfDay?: 'morning' | 'evening';
 }
 
-export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection' | 'challenge' | 'localVisit' | 'devotional' | 'intercession';
+export type ActivityType = 'mood' | 'pray' | 'listen' | 'prayerWall' | 'meditate' | 'journal' | 'readingPlan' | 'gratitude' | 'reflection' | 'challenge' | 'localVisit' | 'devotional' | 'intercession' | 'quickLift';
 
 export interface DailyActivities {
   mood: boolean;
@@ -34,6 +34,7 @@ export interface DailyActivities {
   localVisit: boolean;
   devotional: boolean;
   intercession: boolean;
+  quickLift: boolean;
   pointsEarned: number;
   multiplier: number;
 }
@@ -82,6 +83,7 @@ export interface ActivityCounts {
   intercessionCount: number;
   bibleChaptersRead: number;
   prayerWallPosts: number;
+  quickLiftCount: number;
 }
 
 export interface BadgeData {

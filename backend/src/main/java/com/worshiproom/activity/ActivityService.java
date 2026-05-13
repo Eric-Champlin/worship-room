@@ -78,11 +78,11 @@ public class ActivityService {
     private static final Logger log = LoggerFactory.getLogger(ActivityService.class);
 
     /**
-     * The 7 {@link ActivityType} values that map to a {@link CountType}.
-     * The other 5 ({@code MOOD}, {@code REFLECTION}, {@code CHALLENGE},
-     * {@code LOCAL_VISIT}, {@code DEVOTIONAL}) trigger no count increment
-     * via this endpoint (their counters are accumulated by other code paths
-     * or do not exist as counters).
+     * The 8 {@link ActivityType} values that map to a {@link CountType}.
+     * The other 6 ({@code MOOD}, {@code REFLECTION}, {@code CHALLENGE},
+     * {@code LOCAL_VISIT}, {@code DEVOTIONAL}, {@code INTERCESSION}) trigger
+     * no count increment via this endpoint (their counters are accumulated by
+     * other code paths or do not exist as counters).
      */
     private static final Map<ActivityType, CountType> ACTIVITY_TO_COUNT;
     static {
@@ -94,6 +94,7 @@ public class ActivityService {
         m.put(ActivityType.PRAYER_WALL,  CountType.PRAYER_WALL);
         m.put(ActivityType.READING_PLAN, CountType.READING_PLAN);
         m.put(ActivityType.GRATITUDE,    CountType.GRATITUDE);
+        m.put(ActivityType.QUICK_LIFT,   CountType.QUICK_LIFT);
         ACTIVITY_TO_COUNT = Collections.unmodifiableMap(m);
     }
 
@@ -331,7 +332,8 @@ public class ActivityService {
             counts.getOrDefault(CountType.CHALLENGES_COMPLETED, 0),
             counts.getOrDefault(CountType.INTERCESSION_COUNT, 0),
             counts.getOrDefault(CountType.BIBLE_CHAPTERS_READ, 0),
-            counts.getOrDefault(CountType.PRAYER_WALL_POSTS, 0)
+            counts.getOrDefault(CountType.PRAYER_WALL_POSTS, 0),
+            counts.getOrDefault(CountType.QUICK_LIFT, 0)
         );
         // Per Spec 2.4 Divergence 1: backend has empty data for friendCount,
         // reading plans, bible progress, meditation history, gratitude entries,

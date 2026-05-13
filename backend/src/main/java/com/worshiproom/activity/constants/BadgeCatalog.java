@@ -105,13 +105,15 @@ public final class BadgeCatalog {
         put(m, "meditate_100", "Master of Stillness", "100 meditations. You've built a practice that will carry you for a lifetime.",
             "meditation", CelebrationTier.FULL_SCREEN, false, null);
 
-        // --- Prayer-wall milestones (3) ---
+        // --- Prayer-wall milestones (4) ---
         put(m, "prayerwall_first_post",        "First Prayer Shared", "You shared your heart with the community. That takes courage.",
             "prayer-wall", CelebrationTier.TOAST_CONFETTI, false, null);
         put(m, "prayerwall_10_posts",          "Prayer Warrior",      "You've shared 10 prayers. You're building a community of faith.",
             "prayer-wall", CelebrationTier.TOAST_CONFETTI, false, null);
         put(m, "prayerwall_25_intercessions",  "Intercessor",         "You've lifted 25 people in prayer. Heaven notices.",
             "prayer-wall", CelebrationTier.SPECIAL_TOAST, false, null);
+        put(m, "faithful_watcher",             "Faithful Watcher",    "Held space for ten others in prayer.",
+            "prayer-wall", CelebrationTier.TOAST_CONFETTI, false, null);
 
         // --- Bible-reading milestones (3) ---
         put(m, "bible_first_chapter",  "First Chapter",     "Your first chapter! The Word is a lamp to your feet.",

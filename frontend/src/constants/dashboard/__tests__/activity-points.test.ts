@@ -10,7 +10,7 @@ import {
 } from '../activity-points';
 
 describe('ACTIVITY_POINTS', () => {
-  it('has correct values for all 13 activity types', () => {
+  it('has correct values for all 14 activity types', () => {
     expect(ACTIVITY_POINTS.mood).toBe(5);
     expect(ACTIVITY_POINTS.pray).toBe(10);
     expect(ACTIVITY_POINTS.listen).toBe(10);
@@ -29,7 +29,7 @@ describe('ACTIVITY_POINTS', () => {
   it('sums to MAX_DAILY_BASE_POINTS', () => {
     const total = Object.values(ACTIVITY_POINTS).reduce((sum, v) => sum + v, 0);
     expect(total).toBe(MAX_DAILY_BASE_POINTS);
-    expect(total).toBe(165);
+    expect(total).toBe(185);
   });
 });
 
@@ -53,13 +53,13 @@ describe('MULTIPLIER_TIERS', () => {
 describe('MAX_DAILY_POINTS', () => {
   it('equals MAX_DAILY_BASE_POINTS × 2x multiplier', () => {
     expect(MAX_DAILY_POINTS).toBe(MAX_DAILY_BASE_POINTS * 2);
-    expect(MAX_DAILY_POINTS).toBe(330);
+    expect(MAX_DAILY_POINTS).toBe(370);
   });
 });
 
 describe('ALL_ACTIVITY_TYPES', () => {
-  it('contains all 13 activity types', () => {
-    expect(ALL_ACTIVITY_TYPES).toHaveLength(13);
+  it('contains all 14 activity types', () => {
+    expect(ALL_ACTIVITY_TYPES).toHaveLength(14);
     expect(ALL_ACTIVITY_TYPES).toContain('mood');
     expect(ALL_ACTIVITY_TYPES).toContain('pray');
     expect(ALL_ACTIVITY_TYPES).toContain('listen');
@@ -73,12 +73,13 @@ describe('ALL_ACTIVITY_TYPES', () => {
     expect(ALL_ACTIVITY_TYPES).toContain('localVisit');
     expect(ALL_ACTIVITY_TYPES).toContain('devotional');
     expect(ALL_ACTIVITY_TYPES).toContain('intercession');
+    expect(ALL_ACTIVITY_TYPES).toContain('quickLift');
   });
 });
 
 describe('ACTIVITY_DISPLAY_NAMES', () => {
-  it('has display names for all 13 types', () => {
-    expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(13);
+  it('has display names for all 14 types', () => {
+    expect(Object.keys(ACTIVITY_DISPLAY_NAMES)).toHaveLength(14);
     expect(ACTIVITY_DISPLAY_NAMES.mood).toBe('Logged mood');
     expect(ACTIVITY_DISPLAY_NAMES.journal).toBe('Journaled');
     expect(ACTIVITY_DISPLAY_NAMES.reflection).toBe('Evening reflection');
@@ -89,8 +90,8 @@ describe('ACTIVITY_DISPLAY_NAMES', () => {
 });
 
 describe('ACTIVITY_CHECKLIST_NAMES', () => {
-  it('has all 13 activity types', () => {
-    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(13);
+  it('has all 14 activity types', () => {
+    expect(Object.keys(ACTIVITY_CHECKLIST_NAMES)).toHaveLength(14);
     ALL_ACTIVITY_TYPES.forEach((type) => {
       expect(ACTIVITY_CHECKLIST_NAMES[type]).toBeDefined();
     });

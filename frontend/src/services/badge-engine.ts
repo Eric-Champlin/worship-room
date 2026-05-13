@@ -209,6 +209,11 @@ export function checkForNewBadges(
     result.push('prayerwall_25_intercessions');
   }
 
+  // 11b. Faithful Watcher badge (Spec 6.2 — from activityCounts.quickLiftCount)
+  if (context.activityCounts.quickLiftCount >= 10 && !earned['faithful_watcher']) {
+    result.push('faithful_watcher');
+  }
+
   // 12. Bible chapter milestones (from wr_bible_progress, total chapters across all books)
   const BIBLE_CHAPTER_BADGES: Record<number, string> = {
     1: 'bible_first_chapter',

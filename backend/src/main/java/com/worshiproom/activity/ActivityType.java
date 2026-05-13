@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * The 13 activity types tracked by the Worship Room activity engine.
+ * The 14 activity types tracked by the Worship Room activity engine.
  *
  * <p>Java identifiers use SCREAMING_SNAKE_CASE per Java convention; the
  * camelCase wire-format string used in JSON request bodies is mapped via
@@ -17,6 +17,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * <p>{@code INTERCESSION} (Spec 3.6) — added when a user creates a comment on a
  * Prayer Wall post. 10 points; lower-intensity participation tier matching
  * {@code PRAY}, {@code LISTEN}, {@code DEVOTIONAL}.
+ *
+ * <p>{@code QUICK_LIFT} (Spec 6.2) — added when a user completes a 30-second
+ * Quick Lift on a Prayer Wall post. 20 points; high-intensity participation
+ * tier matching {@code MEDITATE}, {@code CHALLENGE}.
  */
 public enum ActivityType {
     MOOD("mood"),
@@ -31,7 +35,8 @@ public enum ActivityType {
     CHALLENGE("challenge"),
     LOCAL_VISIT("localVisit"),
     DEVOTIONAL("devotional"),
-    INTERCESSION("intercession");
+    INTERCESSION("intercession"),
+    QUICK_LIFT("quickLift");
 
     private final String wireValue;
 

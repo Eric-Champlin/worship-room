@@ -64,7 +64,7 @@ public class BadgeService {
         30, "gratitude_30_days", 100, "gratitude_100_days");
 
     /**
-     * Run the 15 eligibility categories against the supplied context, apply
+     * Run the 16 eligibility categories against the supplied context, apply
      * the idempotency-vs-repeatability filter, and return the badges newly
      * earned by this call.
      *
@@ -93,6 +93,7 @@ public class BadgeService {
         candidates.addAll(meditationSessionBadges(context));
         candidates.addAll(prayerWallPostBadges(context));
         candidates.addAll(intercessor(context));
+        candidates.addAll(faithfulWatcher(context));
         candidates.addAll(bibleChapterBadges(context));
         candidates.addAll(gratitudeBadges(context));
         candidates.addAll(localFirstVisit(context));
@@ -243,6 +244,13 @@ public class BadgeService {
         return List.of();
     }
 
+    private List<String> faithfulWatcher(BadgeCheckContext c) {
+        if (c.activityCounts().quickLiftCount() >= BadgeThresholds.QUICK_LIFTS) {
+            return List.of("faithful_watcher");
+        }
+        return List.of();
+    }
+
     private List<String> bibleChapterBadges(BadgeCheckContext c) {
         List<String> out = new ArrayList<>();
         int totalChapters = 0;
@@ -346,6 +354,7 @@ public class BadgeService {
             case GRATITUDE -> counts.gratitude();
             case REFLECTION -> counts.reflection();
             case INTERCESSION -> counts.intercessionCount();
+            case QUICK_LIFT -> counts.quickLiftCount();
             case MOOD, CHALLENGE, LOCAL_VISIT, DEVOTIONAL -> 0;
         };
     }

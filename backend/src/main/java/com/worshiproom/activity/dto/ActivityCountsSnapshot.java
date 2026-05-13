@@ -22,9 +22,10 @@ public record ActivityCountsSnapshot(
     int challengesCompleted,
     int intercessionCount,
     int bibleChaptersRead,
-    int prayerWallPosts
+    int prayerWallPosts,
+    int quickLiftCount
 ) {
     public static ActivityCountsSnapshot zeros() {
-        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }

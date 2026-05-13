@@ -14,6 +14,7 @@ export const ACTIVITY_POINTS: Record<ActivityType, number> = {
   localVisit: 10,
   devotional: 10,
   intercession: 10,
+  quickLift: 20,
 } as const;
 
 export const ACTIVITY_DISPLAY_NAMES: Record<ActivityType, string> = {
@@ -30,6 +31,7 @@ export const ACTIVITY_DISPLAY_NAMES: Record<ActivityType, string> = {
   localVisit: 'Visited local support',
   devotional: 'Read devotional',
   intercession: 'Interceded',
+  quickLift: 'Quick Lift',
 } as const;
 
 export const MULTIPLIER_TIERS = [
@@ -39,8 +41,8 @@ export const MULTIPLIER_TIERS = [
   { minActivities: 0, multiplier: 1, label: '' },
 ] as const;
 
-export const MAX_DAILY_BASE_POINTS = 165; // 5+10+10+15+15+20+25+5+10+20+10+10+10
-export const MAX_DAILY_POINTS = 330; // 165 × 2x
+export const MAX_DAILY_BASE_POINTS = 185; // 5+10+10+15+15+20+25+5+10+20+10+10+10+20
+export const MAX_DAILY_POINTS = 370; // 185 × 2x
 
 export const ACTIVITY_CHECKLIST_NAMES: Record<ActivityType, string> = {
   mood: 'Log your mood',
@@ -56,8 +58,9 @@ export const ACTIVITY_CHECKLIST_NAMES: Record<ActivityType, string> = {
   localVisit: 'Visit local support',
   devotional: 'Read devotional',
   intercession: 'Pray for someone (comment)',
+  quickLift: 'Lift someone in prayer',
 } as const;
 
 export const ALL_ACTIVITY_TYPES: ActivityType[] = [
-  'mood', 'pray', 'listen', 'prayerWall', 'readingPlan', 'meditate', 'journal', 'gratitude', 'reflection', 'challenge', 'localVisit', 'devotional', 'intercession',
+  'mood', 'pray', 'listen', 'prayerWall', 'readingPlan', 'meditate', 'journal', 'gratitude', 'reflection', 'challenge', 'localVisit', 'devotional', 'intercession', 'quickLift',
 ];

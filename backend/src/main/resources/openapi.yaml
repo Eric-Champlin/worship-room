@@ -50,6 +50,8 @@ tags:
     description: Image upload for testimony and question posts — Spec 4.6b
   - name: QOTD
     description: Question of the Day rotation endpoint — Spec 3.9
+  - name: Quick Lift
+    description: 30-second prayer Quick Lift on Prayer Wall posts — Spec 6.2
   - name: Dev / Storage
     description: |
       Development-only presigned-URL serving for the LocalFilesystem
@@ -2885,6 +2887,164 @@ paths:
               schema: { $ref: '#/components/schemas/ProxyError' }
         '410':
           description: Presigned URL expired
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
+  /api/v1/quick-lift/start:
+    post:
+      tags: [Quick Lift]
+      summary: Start a 30-second Quick Lift session
+      description: |
+        Opens a new Quick Lift session for the authenticated user against the
+        given Prayer Wall post. The session's `started_at` is server-owned
+        (DB `NOW()`); the response returns the wall-clock timestamp the client
+        can use to drive its progress UI. Rejects with 409 when an active
+        session already exists for the same (user, post). Rate-limited to 10
+        requests per minute per user (dev: 30/min).
+      operationId: startQuickLift
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [postId]
+              properties:
+                postId:
+                  type: string
+                  format: uuid
+                  description: UUID of the Prayer Wall post to lift.
+      responses:
+        '200':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [sessionId, serverStartedAt]
+                    properties:
+                      sessionId:
+                        type: string
+                        format: uuid
+                      serverStartedAt:
+                        type: string
+                        format: date-time
+                  meta:
+                    type: object
+                    properties:
+                      requestId: { type: string }
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '409':
+          description: Active session already exists for this (user, post)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Rate-limited (10/min per user; dev 30/min)
+          headers:
+            Retry-After:
+              schema: { type: integer }
+              description: Seconds until the next token is available.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
+  /api/v1/quick-lift/{sessionId}/complete:
+    post:
+      tags: [Quick Lift]
+      summary: Complete a Quick Lift session (server enforces 30-second minimum)
+      description: |
+        Marks the session terminal after a server-authoritative 30-second
+        elapsed check. On success the activity is recorded (20 points), the
+        `quickLift` counter increments, and `faithful_watcher` may unlock on
+        the 10th completion. Rejects 400 if elapsed < 30 s, 403 if the session
+        belongs to a different user, 409 if already terminal. Rate-limited
+        defense-in-depth to 30/min per user.
+      operationId: completeQuickLift
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Session completed, activity recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [activityRecorded, pointsAwarded, badgesUnlocked]
+                    properties:
+                      activityRecorded: { type: boolean }
+                      pointsAwarded: { type: integer }
+                      badgesUnlocked:
+                        type: array
+                        items:
+                          type: object
+                          required: [id, name, celebrationTier, earnedAt]
+                          properties:
+                            id: { type: string }
+                            name: { type: string }
+                            celebrationTier:
+                              type: string
+                              enum: [toast, toast-confetti, special-toast, full-screen]
+                            earnedAt: { type: string, format: date-time }
+                  meta:
+                    type: object
+                    properties:
+                      requestId: { type: string }
+        '400':
+          description: TIMING_TOO_EARLY (server elapsed < 30 s)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '403':
+          description: FORBIDDEN — session belongs to a different user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '409':
+          description: ALREADY_COMPLETED — session is already terminal
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Rate-limited (30/min per user defense-in-depth)
+          headers:
+            Retry-After:
+              schema: { type: integer }
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProxyError' }

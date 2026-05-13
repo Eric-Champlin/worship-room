@@ -58,7 +58,7 @@ const NOT_FOUND: ProfileData = {
   longestStreak: null,
   daysActive: null,
   statsVisible: false,
-  badgeData: { earned: {}, newlyEarned: [], activityCounts: { pray: 0, journal: 0, meditate: 0, listen: 0, prayerWall: 0, readingPlan: 0, gratitude: 0, reflection: 0, encouragementsSent: 0, fullWorshipDays: 0, challengesCompleted: 0, intercessionCount: 0, bibleChaptersRead: 0, prayerWallPosts: 0 } },
+  badgeData: { earned: {}, newlyEarned: [], activityCounts: { pray: 0, journal: 0, meditate: 0, listen: 0, prayerWall: 0, readingPlan: 0, gratitude: 0, reflection: 0, encouragementsSent: 0, fullWorshipDays: 0, challengesCompleted: 0, intercessionCount: 0, bibleChaptersRead: 0, prayerWallPosts: 0, quickLiftCount: 0 } },
   relationship: 'none',
 }
 

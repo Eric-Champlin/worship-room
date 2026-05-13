@@ -141,7 +141,7 @@ class ActivityCountsServiceIntegrationTest extends AbstractIntegrationTest {
     // ------------------------------------------------------------
 
     @Test
-    void getAllCounts_returnsAllFourteenKeysWithZeroFillForAbsentRows() {
+    void getAllCounts_returnsAllFifteenKeysWithZeroFillForAbsentRows() {
         jdbcTemplate.update(
             "INSERT INTO activity_counts (user_id, count_type, count_value, last_updated) VALUES (?, ?, ?, NOW())",
             userId, "pray", 7);
@@ -150,7 +150,7 @@ class ActivityCountsServiceIntegrationTest extends AbstractIntegrationTest {
             userId, "journal", 3);
 
         Map<CountType, Integer> all = service.getAllCounts(userId);
-        assertThat(all).hasSize(14);
+        assertThat(all).hasSize(15);
         assertThat(all).containsKeys(CountType.values());
         assertThat(all.get(CountType.PRAY)).isEqualTo(7);
         assertThat(all.get(CountType.JOURNAL)).isEqualTo(3);
@@ -169,9 +169,9 @@ class ActivityCountsServiceIntegrationTest extends AbstractIntegrationTest {
             userId, "futureSpec_unknownCounter", 99);
 
         Map<CountType, Integer> all = service.getAllCounts(userId);
-        assertThat(all).hasSize(14);
+        assertThat(all).hasSize(15);
         assertThat(all.get(CountType.PRAY)).isEqualTo(4);
-        // Rogue row is skipped; map still contains all 14 keys, no crash
+        // Rogue row is skipped; map still contains all 15 keys, no crash
     }
 
     // ------------------------------------------------------------

@@ -126,7 +126,8 @@ class DriftDetectionTest {
             input.challengesCompleted(),
             input.intercessionCount(),
             input.bibleChaptersRead(),
-            input.prayerWallPosts()
+            input.prayerWallPosts(),
+            incrementedCounts.getOrDefault("quickLift", 0)
         );
 
         BadgeCheckContext context = new BadgeCheckContext(

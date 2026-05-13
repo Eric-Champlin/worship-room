@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { getLocalDateString, getCurrentWeekStart } from '@/utils/date';
 import { getMoodEntries } from '@/services/mood-storage';
 import {
@@ -56,7 +56,7 @@ const DEFAULT_STATE: FaithPointsState = {
   currentLevel: 1,
   levelName: 'Seedling',
   pointsToNextLevel: 100,
-  todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false, challenge: false, localVisit: false, devotional: false, intercession: false },
+  todayActivities: { mood: false, pray: false, listen: false, prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false, challenge: false, localVisit: false, devotional: false, intercession: false, quickLift: false },
   todayPoints: 0,
   todayMultiplier: 1,
   currentStreak: 0,
@@ -81,6 +81,7 @@ function extractActivities(da: DailyActivities): Record<ActivityType, boolean> {
     localVisit: da.localVisit,
     devotional: da.devotional ?? false,
     intercession: da.intercession ?? false,
+    quickLift: da.quickLift ?? false,
   };
 }
 
@@ -127,12 +128,27 @@ function loadState(): FaithPointsState {
   };
 }
 
-const noopRecordActivity = (_type: ActivityType, _sourceFeature: string) => {};
+interface RecordActivityOptions {
+  /**
+   * Spec 6.2 — when true, skip the dual-write {@code postActivityToBackend} call.
+   * Required for features whose backend already records the activity inside its
+   * own transaction (e.g., Quick Lift /complete); without this, the default
+   * dual-write would double-insert into {@code activity_log} and double-credit
+   * the user.
+   */
+  skipBackendDualWrite?: boolean
+}
+
+const noopRecordActivity = (
+  _type: ActivityType,
+  _sourceFeature: string,
+  _options?: RecordActivityOptions,
+) => {};
 const noopClearNewlyEarned = () => {};
 const noopRepairStreak = (_useFreeRepair: boolean) => {};
 
 export function useFaithPoints(): FaithPointsState & {
-  recordActivity: (type: ActivityType, sourceFeature: string) => void
+  recordActivity: (type: ActivityType, sourceFeature: string, options?: RecordActivityOptions) => void
   clearNewlyEarnedBadges: () => void
   repairStreak: (useFreeRepair: boolean) => void
 } {
@@ -143,7 +159,11 @@ export function useFaithPoints(): FaithPointsState & {
     return loadState();
   });
 
-  const recordActivity = useCallback((type: ActivityType, sourceFeature: string) => {
+  const recordActivity = useCallback((
+    type: ActivityType,
+    sourceFeature: string,
+    options?: RecordActivityOptions,
+  ) => {
     if (!isAuthenticated) return;
 
     const today = getLocalDateString();
@@ -263,7 +283,7 @@ export function useFaithPoints(): FaithPointsState & {
     // Spec 2.7 dual-write + Spec 2.10 one-time backfill — both fire-and-forget.
     // localStorage above is the contract; backend is a shadow copy.
     // Failures are logged and swallowed — never block UX.
-    if (isBackendActivityEnabled()) {
+    if (isBackendActivityEnabled() && !options?.skipBackendDualWrite) {
       // Spec 2.10: one-time backfill of pre-cutover localStorage history.
       // Gated by wr_activity_backfill_completed; .then() is the ONLY place
       // the flag is set (per Architectural Decision #10).

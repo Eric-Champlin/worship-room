@@ -26,8 +26,18 @@ class BadgeCatalogTest {
     class SizeAndShape {
 
         @Test
-        void catalog_hasExactly58Badges() {
-            assertThat(BadgeCatalog.all()).hasSize(58);
+        void catalog_hasExactly59Badges() {
+            assertThat(BadgeCatalog.all()).hasSize(59);
+        }
+
+        @Test
+        void faithfulWatcher_entryExists() {
+            assertThat(BadgeCatalog.lookup("faithful_watcher")).isPresent();
+            BadgeDefinition def = BadgeCatalog.lookup("faithful_watcher").orElseThrow();
+            assertThat(def.name()).isEqualTo("Faithful Watcher");
+            assertThat(def.category()).isEqualTo("prayer-wall");
+            assertThat(def.celebrationTier()).isEqualTo(CelebrationTier.TOAST_CONFETTI);
+            assertThat(def.repeatable()).isFalse();
         }
 
         @Test

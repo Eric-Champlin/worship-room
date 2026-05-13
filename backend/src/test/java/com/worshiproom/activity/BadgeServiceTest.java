@@ -175,23 +175,27 @@ class BadgeServiceTest {
     }
 
     private ActivityCountsSnapshot countsWithPray(int pray) {
-        return new ActivityCountsSnapshot(pray, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new ActivityCountsSnapshot(pray, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     private ActivityCountsSnapshot countsWithJournal(int journal) {
-        return new ActivityCountsSnapshot(0, journal, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new ActivityCountsSnapshot(0, journal, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     private ActivityCountsSnapshot countsWithEncouragements(int encouragementsSent) {
-        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, encouragementsSent, 0, 0, 0, 0, 0);
+        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, encouragementsSent, 0, 0, 0, 0, 0, 0);
     }
 
     private ActivityCountsSnapshot countsWithIntercessions(int intercessions) {
-        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, intercessions, 0, 0);
+        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, intercessions, 0, 0, 0);
     }
 
     private ActivityCountsSnapshot countsWithPrayerWallPosts(int posts) {
-        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, posts);
+        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, posts, 0);
+    }
+
+    private ActivityCountsSnapshot countsWithQuickLifts(int quickLifts) {
+        return new ActivityCountsSnapshot(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, quickLifts);
     }
 
     /** Build a fully complete bible progress map (all 66 books with all chapters). */
@@ -642,6 +646,33 @@ class BadgeServiceTest {
             );
             assertThat(r.newlyEarnedBadgeIds()).contains("prayerwall_25_intercessions");
         }
+
+        @Test
+        void faithfulWatcher_firesAtTen() {
+            BadgeResult r = service.checkBadges(
+                withCounts(countsWithQuickLifts(10)),
+                Set.of()
+            );
+            assertThat(r.newlyEarnedBadgeIds()).contains("faithful_watcher");
+        }
+
+        @Test
+        void faithfulWatcher_doesNotFireAtNine() {
+            BadgeResult r = service.checkBadges(
+                withCounts(countsWithQuickLifts(9)),
+                Set.of()
+            );
+            assertThat(r.newlyEarnedBadgeIds()).doesNotContain("faithful_watcher");
+        }
+
+        @Test
+        void faithfulWatcher_doesNotRefireWhenAlreadyEarned() {
+            BadgeResult r = service.checkBadges(
+                withCounts(countsWithQuickLifts(11)),
+                Set.of("faithful_watcher")
+            );
+            assertThat(r.newlyEarnedBadgeIds()).doesNotContain("faithful_watcher");
+        }
     }
 
     // === Group J: Bible chapter milestones (3 tests) ===
@@ -881,7 +912,7 @@ class BadgeServiceTest {
             // Maxed-out context — all categories fire
             Set<ActivityType> allActivities = EnumSet.allOf(ActivityType.class);
             ActivityCountsSnapshot maxedCounts = new ActivityCountsSnapshot(
-                100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
+                100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100
             );
             List<ReadingPlanProgress> tenPlans = new ArrayList<>();
             for (int i = 0; i < 10; i++) {

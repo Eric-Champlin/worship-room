@@ -1,11 +1,13 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Bookmark, Check, HandHelping, Heart, MessageCircle, Plus, Share2 } from 'lucide-react'
+import { Bookmark, Check, HandHelping, Heart, Hourglass, MessageCircle, Plus, Share2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
+import { useFaithPoints } from '@/hooks/useFaithPoints'
 import { useAuthModal } from './AuthModalProvider'
 import { usePrayerCardPulse } from './PrayerCard'
+import { QuickLiftOverlay } from './QuickLiftOverlay'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ShareDropdown, getShareText } from './ShareDropdown'
 import type { PostType } from '@/constants/post-types'
@@ -63,11 +65,15 @@ export function InteractionBar({
   const authModal = useAuthModal()
   const { playSoundEffect } = useSoundEffects()
   const triggerPulse = usePrayerCardPulse()
+  const { recordActivity } = useFaithPoints()
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
 
   const [isAnimating, setIsAnimating] = useState(false)
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Spec 6.2 — Quick Lift overlay open state. Local-only; the session itself
+  // lives on the server.
+  const [quickLiftOpen, setQuickLiftOpen] = useState(false)
 
   const handlePrayClick = useCallback(() => {
     if (isPraying) {
@@ -135,7 +141,7 @@ export function InteractionBar({
       : `Pray for this request (${prayer.prayingCount} praying)`
 
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-white/10 pt-3 sm:gap-4">
+    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3 sm:gap-4">
       {/* Pray/Reaction button wrapper — relative for absolute-positioned animation elements */}
       <div className="relative">
         <button
@@ -155,7 +161,7 @@ export function InteractionBar({
             )}
             aria-hidden="true"
           />
-          <span>({prayer.prayingCount})</span>
+          <span className="hidden sm:inline">({prayer.prayingCount})</span>
         </button>
 
         {/* Ripple — absolutely positioned circle behind button */}
@@ -187,7 +193,7 @@ export function InteractionBar({
           aria-expanded={isCommentsOpen}
         >
           <MessageCircle className="h-4 w-4" aria-hidden="true" />
-          <span>({prayer.commentCount})</span>
+          <span className="hidden sm:inline">({prayer.commentCount})</span>
         </button>
       )}
 
@@ -265,6 +271,43 @@ export function InteractionBar({
           <span className="hidden sm:inline">Save</span>
         </button>
       )}
+
+      {/* Quick Lift button — Spec 6.2 */}
+      {isAuthenticated ? (
+        <button
+          type="button"
+          onClick={() => setQuickLiftOpen(true)}
+          className={cn(btnBase, 'text-white/50 hover:text-violet-300')}
+          aria-label="Quick Lift in prayer (30 seconds)"
+        >
+          <Hourglass className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Lift</span>
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => authModal?.openAuthModal('Sign in to Quick Lift')}
+          className={cn(btnBase, 'text-white/50 hover:text-violet-300')}
+          aria-label="Sign in to Quick Lift in prayer"
+        >
+          <Hourglass className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Lift</span>
+        </button>
+      )}
+
+      <QuickLiftOverlay
+        isOpen={quickLiftOpen}
+        postId={prayer.id}
+        postExcerpt={prayer.content}
+        onCancel={() => setQuickLiftOpen(false)}
+        onComplete={() => {
+          // Spec 6.2 — backend recorded the activity inside its /complete
+          // transaction (W7 atomicity). skipBackendDualWrite prevents the
+          // default postActivityToBackend() call from double-inserting.
+          recordActivity('quickLift', 'quickLift-overlay', { skipBackendDualWrite: true })
+          triggerPulse?.()
+        }}
+      />
     </div>
   )
 }

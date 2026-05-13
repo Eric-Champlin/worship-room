@@ -96,7 +96,7 @@ describe('useFaithPoints — unauthenticated', () => {
     expect(result.current.todayActivities).toEqual({
       mood: false, pray: false, listen: false,
       prayerWall: false, readingPlan: false, meditate: false, journal: false, gratitude: false, reflection: false,
-      challenge: false, localVisit: false, devotional: false, intercession: false,
+      challenge: false, localVisit: false, devotional: false, intercession: false, quickLift: false,
     });
   });
 
@@ -839,5 +839,72 @@ describe('useFaithPoints — backfill trigger (Spec 2.10)', () => {
     // Dual-write still fired alongside the failed backfill
     expect(apiFetch).toHaveBeenCalled();
     warnSpy.mockRestore();
+  });
+});
+
+describe('useFaithPoints — skipBackendDualWrite option (Spec 6.2)', () => {
+  // The Quick Lift /complete endpoint records the activity inside its own
+  // server-side transaction (W7). If the frontend then fired the default
+  // dual-write to /api/v1/activity, the activity_log row + faith points would
+  // double-insert. The skipBackendDualWrite option suppresses BOTH the
+  // dual-write POST and the one-time backfill trigger for that call.
+  beforeEach(() => {
+    simulateLogin();
+    vi.mocked(isBackendActivityEnabled).mockReturnValue(true);
+    vi.mocked(apiFetch).mockReset();
+    vi.mocked(apiFetch).mockResolvedValue(undefined as never);
+    vi.mocked(triggerBackfill).mockReset();
+    vi.mocked(markBackfillCompleted).mockReset();
+    vi.mocked(isBackfillCompleted).mockReset();
+    vi.mocked(isBackfillCompleted).mockReturnValue(true);
+  });
+
+  it('skipBackendDualWrite=true: apiFetch is NOT called even with flag on', async () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('quickLift', 'quickLift-overlay', {
+        skipBackendDualWrite: true,
+      });
+    });
+    // Microtask flush — if a dispatch were queued, it would surface here.
+    await Promise.resolve();
+    expect(apiFetch).not.toHaveBeenCalled();
+    // localStorage path still ran (this is the whole reason the option exists)
+    const stored = JSON.parse(localStorage.getItem('wr_daily_activities')!);
+    expect(stored['2026-03-16'].quickLift).toBe(true);
+  });
+
+  it('skipBackendDualWrite=true: backfill is NOT triggered', async () => {
+    // Force the backfill gate open — without the option, this would fire.
+    vi.mocked(isBackfillCompleted).mockReturnValue(false);
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('quickLift', 'quickLift-overlay', {
+        skipBackendDualWrite: true,
+      });
+    });
+    await Promise.resolve();
+    expect(triggerBackfill).not.toHaveBeenCalled();
+    expect(markBackfillCompleted).not.toHaveBeenCalled();
+  });
+
+  it('option omitted: apiFetch IS called (regression guard for the negation logic)', async () => {
+    // Negative case — without this test, flipping the `!options?.skipBackendDualWrite`
+    // condition would silently disable dual-write for every activity.
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('pray', 'daily_hub');
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
+  });
+
+  it('skipBackendDualWrite=false: behaves like the option was omitted (apiFetch fires)', async () => {
+    const { result } = renderHook(() => useFaithPoints(), { wrapper });
+    await act(async () => {
+      result.current.recordActivity('quickLift', 'quickLift-overlay', {
+        skipBackendDualWrite: false,
+      });
+    });
+    await vi.waitFor(() => expect(apiFetch).toHaveBeenCalledTimes(1));
   });
 });

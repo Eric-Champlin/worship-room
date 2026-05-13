@@ -10,6 +10,7 @@ export const ACTIVITY_MILESTONE_THRESHOLDS: Record<string, number[]> = {
   meditate: [1, 25],
   listen: [1, 50],
   prayerWall: [1],
+  quickLift: [10],
 };
 
 export const COMMUNITY_BADGE_THRESHOLDS = {
@@ -211,6 +212,7 @@ const prayerWallMilestoneBadges: BadgeDefinition[] = [
   { id: 'prayerwall_first_post', name: 'First Prayer Shared', description: 'You shared your heart with the community. That takes courage.', category: 'prayer-wall', celebrationTier: 'toast-confetti' },
   { id: 'prayerwall_10_posts', name: 'Prayer Warrior', description: 'You\'ve shared 10 prayers. You\'re building a community of faith.', category: 'prayer-wall', celebrationTier: 'toast-confetti' },
   { id: 'prayerwall_25_intercessions', name: 'Intercessor', description: 'You\'ve lifted 25 people in prayer. Heaven notices.', category: 'prayer-wall', celebrationTier: 'special-toast' },
+  { id: 'faithful_watcher', name: 'Faithful Watcher', description: 'Held space for ten others in prayer.', category: 'prayer-wall', celebrationTier: 'toast-confetti' },
 ];
 
 const bibleReadingMilestoneBadges: BadgeDefinition[] = [
@@ -280,6 +282,7 @@ export const FRESH_ACTIVITY_COUNTS: ActivityCounts = {
   intercessionCount: 0,
   bibleChaptersRead: 0,
   prayerWallPosts: 0,
+  quickLiftCount: 0,
 };
 
 export const FRESH_BADGE_DATA: BadgeData = {

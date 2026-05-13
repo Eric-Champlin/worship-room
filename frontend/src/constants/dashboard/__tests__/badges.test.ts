@@ -30,12 +30,12 @@ describe('BADGE_DEFINITIONS', () => {
     }
   });
 
-  it('total unique badge IDs count is 58', () => {
+  it('total unique badge IDs count is 59', () => {
     const ids = BADGE_DEFINITIONS.map((b) => b.id);
     // 7 streak + 6 level + 9 activity + 3 reading plan + 4 bible book + 1 full_worship_day
     // + 6 community + 7 challenge + 1 welcome
-    // + 3 meditation + 3 prayer-wall + 3 bible-reading + 3 gratitude + 1 local-support + 1 listening
-    expect(new Set(ids).size).toBe(58);
+    // + 3 meditation + 4 prayer-wall (incl. faithful_watcher, Spec 6.2) + 3 bible-reading + 3 gratitude + 1 local-support + 1 listening
+    expect(new Set(ids).size).toBe(59);
   });
 });
 
@@ -269,12 +269,13 @@ describe('FRESH_BADGE_DATA', () => {
       intercessionCount: 0,
       bibleChaptersRead: 0,
       prayerWallPosts: 0,
+      quickLiftCount: 0,
     });
   });
 
   it('FRESH_ACTIVITY_COUNTS has all zero values', () => {
     const keys = Object.keys(FRESH_ACTIVITY_COUNTS);
-    expect(keys).toHaveLength(14);
+    expect(keys).toHaveLength(15);
     for (const key of keys) {
       expect(FRESH_ACTIVITY_COUNTS[key as keyof typeof FRESH_ACTIVITY_COUNTS]).toBe(0);
     }
@@ -331,12 +332,18 @@ describe('meditation milestone badges', () => {
 });
 
 describe('prayer wall milestone badges', () => {
-  it('3 definitions with correct IDs', () => {
+  it('4 definitions with correct IDs', () => {
     const badges = BADGE_DEFINITIONS.filter(b => b.category === 'prayer-wall');
-    expect(badges).toHaveLength(3);
-    for (const id of ['prayerwall_first_post', 'prayerwall_10_posts', 'prayerwall_25_intercessions']) {
+    expect(badges).toHaveLength(4);
+    for (const id of ['prayerwall_first_post', 'prayerwall_10_posts', 'prayerwall_25_intercessions', 'faithful_watcher']) {
       expect(BADGE_MAP[id]).toBeDefined();
     }
+  });
+
+  it('faithful_watcher has Spec 6.2 metadata', () => {
+    expect(BADGE_MAP['faithful_watcher']).toBeDefined();
+    expect(BADGE_MAP['faithful_watcher'].name).toBe('Faithful Watcher');
+    expect(BADGE_MAP['faithful_watcher'].celebrationTier).toBe('toast-confetti');
   });
 });
 

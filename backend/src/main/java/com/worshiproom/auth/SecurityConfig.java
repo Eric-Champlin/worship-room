@@ -121,6 +121,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/sessions/all-others").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/sessions/*").authenticated()
 
+                // Spec 6.2 — Quick Lift endpoints require authentication.
+                // Nested path (/quick-lift/*/complete) needs its own explicit
+                // rule — AntPathMatcher's single-segment '*' does NOT match
+                // nested segments. Both rules ABOVE OPTIONAL_AUTH_PATTERNS per
+                // first-match-wins (Phase 3 Addendum #4).
+                .requestMatchers(HttpMethod.POST, "/api/v1/quick-lift/start").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/v1/quick-lift/*/complete").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

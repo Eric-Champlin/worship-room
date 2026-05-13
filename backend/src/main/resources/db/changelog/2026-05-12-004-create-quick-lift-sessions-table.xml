@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 6.2 — Quick Lift sessions. Persists a 30-second
+       server-authoritative prayer session bound to (user, post). started_at is
+       owned by Postgres via defaultValueComputed=NOW() so client time has no
+       influence on the dwell check. completed_at and cancelled_at are mutually
+       exclusive terminals; the CHECK constraint guards against both being set.
+       Partial indexes target the two hot read paths: active-session lookup at
+       /start (find by user+post WHERE both terminals NULL) and the abandoned-
+       session cleanup job (find by started_at WHERE both terminals NULL).
+       FK CASCADE on both user_id and post_id so deleting either purges the
+       session row — no orphan rows surface in /complete after a cascade. -->
+
+  <changeSet id="2026-05-12-004-create-quick-lift-sessions-table" author="worship-room">
+
+    <createTable tableName="quick_lift_sessions">
+      <column name="id" type="UUID">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pk_quick_lift_sessions"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="post_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="started_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="completed_at" type="TIMESTAMP WITH TIME ZONE"/>
+      <column name="cancelled_at" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="quick_lift_sessions"
+      baseColumnNames="user_id"
+      constraintName="fk_quick_lift_sessions_user"
+      referencedTableName="users"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint
+      baseTableName="quick_lift_sessions"
+      baseColumnNames="post_id"
+      constraintName="fk_quick_lift_sessions_post"
+      referencedTableName="posts"
+      referencedColumnNames="id"
+      onDelete="CASCADE"/>
+
+    <sql>
+      ALTER TABLE quick_lift_sessions ADD CONSTRAINT quick_lift_sessions_not_both_terminal
+      CHECK (NOT (completed_at IS NOT NULL AND cancelled_at IS NOT NULL));
+    </sql>
+
+    <!-- Active-session lookup: /start checks (user_id, post_id) for existing in-flight session. -->
+    <sql>
+      CREATE INDEX idx_quick_lift_sessions_active
+      ON quick_lift_sessions (user_id, post_id)
+      WHERE completed_at IS NULL AND cancelled_at IS NULL;
+    </sql>
+
+    <!-- Cleanup job: batched DELETE of sessions older than the 5-min TTL whose
+         neither terminal is set. Partial index keeps the scan bounded. -->
+    <sql>
+      CREATE INDEX idx_quick_lift_sessions_cleanup
+      ON quick_lift_sessions (started_at)
+      WHERE completed_at IS NULL AND cancelled_at IS NULL;
+    </sql>
+
+    <rollback>
+      <dropTable tableName="quick_lift_sessions"/>
+    </rollback>
+
+  </changeSet>
+
+</databaseChangeLog>

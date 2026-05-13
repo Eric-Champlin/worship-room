@@ -336,17 +336,18 @@ describe('freshDailyActivities', () => {
     expect(fresh.reflection).toBe(false);
   });
 
-  it('has all 13 activity boolean fields', () => {
+  it('has all 14 activity boolean fields', () => {
     const fresh = freshDailyActivities();
     const boolKeys = Object.entries(fresh)
       .filter(([_, v]) => typeof v === 'boolean')
       .map(([k]) => k);
-    expect(boolKeys).toHaveLength(13);
+    expect(boolKeys).toHaveLength(14);
     expect(boolKeys).toContain('reflection');
     expect(boolKeys).toContain('challenge');
     expect(boolKeys).toContain('localVisit');
     expect(boolKeys).toContain('devotional');
     expect(boolKeys).toContain('intercession');
+    expect(boolKeys).toContain('quickLift');
   });
 
   it('has localVisit: false by default', () => {
