@@ -29,7 +29,7 @@ User input: $ARGUMENTS
 # Route with query parameters
 /verify-with-playwright "/daily?tab=pray"
  
-# Plan-aware with auto-detected prod URL (from recon report)
+# Plan-aware with auto-detected prod URL (from the plan's Recon Context)
 /verify-with-playwright /daily _plans/2026-03-03-daily-experience.md
 ```
  
@@ -39,7 +39,7 @@ User input: $ARGUMENTS
 3. **Responsive breakpoints** — 6 viewports (375, 428, 768, 1024, 1440, 1920) + any recon-detected breakpoints
 4. **Console/network** — no uncaught errors, no failed requests, no CORS issues
 5. **Accessibility** — labels, keyboard nav, focus indicators, ARIA
-6. **Design compliance** — computed styles vs recon report or plan specs (if available)
+6. **Design compliance** — computed styles vs the plan's Recon Context or design specs (if available)
 7. **Inline positional alignment** — elements that should sit on the same row actually do (catches wrapping bugs CSS-only verification misses)
 8. **Prod comparison** — side-by-side style comparison against production (if --compare-prod)
  
@@ -71,7 +71,7 @@ User input: $ARGUMENTS
  
 **NEVER use "CLOSE", "APPROXIMATE", "SIMILAR", or any other soft verdict.** Report it as NO with a Fix Hint.
  
-**On comparison runs (where a recon report or --compare-prod was used): ANY mismatch of any type makes the overall verdict FAIL, not PARTIAL.** The whole point is accurate matching. "Close enough" is not passing.
+**On comparison runs (where the plan's Recon Context or --compare-prod was used): ANY mismatch of any type makes the overall verdict FAIL, not PARTIAL.** The whole point is accurate matching. "Close enough" is not passing.
  
 ---
  
@@ -117,7 +117,7 @@ From `$ARGUMENTS`, determine:
  
 Read the plan file and extract:
 - **Architecture Context** — target components, routes, hooks
-- **Recon Context (if present)** — CSS Mapping Table, Gradients, Vertical Rhythm, Image tables, Link inventory, States tables, Text Content Snapshot. This is your source of truth for all visual comparison values.
+- **Recon Context (if present)** — Recon Report path, Source URL (for auto `--compare-prod`), CSS Mapping Table, Gradient tables, Vertical Rhythm table, Image tables, Link inventory, States tables, Form Responsive Widths table, Intra-element text variation tables, Text Content Snapshot. This is your source of truth for all visual comparison values — every one of these has a matching Step 6 sub-check.
 - **Responsive Structure (if present)** — breakpoints, custom breakpoint mappings. Use these for responsive verification in Step 8.
 - **Inline Element Position Expectations (if present)** — element groups and expected y-alignment. Use these in Step 6l (Inline Element Positional Verification).
 - **Design Context** — expected layout, colors, typography, spacing, UI states
@@ -190,12 +190,12 @@ Load one of these? (path / none)
  
 If no plan is found at all, proceed without plan context.
  
-### Auto-detect --compare-prod URL from recon report
+### Auto-detect --compare-prod URL from the plan's Recon Context
  
-If a plan file references a recon report with a Source URL, and `--compare-prod` was NOT explicitly passed, automatically enable comparison mode:
+If the plan's Recon Context section has a Source URL field, and `--compare-prod` was NOT explicitly passed, automatically enable comparison mode:
  
 ```text
-Auto-detected prod URL from recon report: {source URL}
+Auto-detected prod URL from the plan's Recon Context: {source URL}
 Running in --compare-prod mode automatically.
 To skip, re-run with --no-compare-prod flag.
 ```
@@ -527,7 +527,7 @@ npx playwright test playwright-verify.spec.ts --reporter=list --headed=false
  
 ---
  
-## Step 6: Design Compliance Check (if recon report or plan with design specs)
+## Step 6: Design Compliance Check (if the plan has a Recon Context or design specs)
  
 **All comparisons in this step use the Comparison Rules defined at the top of this skill.** Do not redefine tolerances — reference them.
  
@@ -696,7 +696,7 @@ If no mixed-formatting text blocks exist, skip this check.
  
 ### 6j: Text Content Verification (if recon has Text Content Snapshot)
  
-If the recon report contains a **Text Content Snapshot**, extract the rendered text of key elements and compare:
+If the plan's Recon Context contains a **Text Content Snapshot**, extract the rendered text of key elements and compare:
  
 ```text
 ### Text Content Verification
@@ -749,7 +749,7 @@ If the recon has no Text Content Snapshot, skip this step.
 **When to run this check:**
  
 1. **If the plan contains an Inline Element Position Expectations table** — use that table directly. Run the verification for every element group at every listed breakpoint.
-2. **If the recon report documents an Inline Element Position table** — use it the same way.
+2. **If the plan's Recon Context documents an Inline Element Position table** — use it the same way.
 3. **If the spec or plan describes a layout with phrases like "inline with", "on the same row as", "label and input on the same line", "chip row", "pill row", or shows a horizontal layout in screenshots** — infer the element groups from the description and run the check, even if no formal table was provided. Document the inferred group in the verification report so the team can confirm the assumption.
 4. **If neither the plan nor recon documents inline-row layouts and the page has no obvious horizontal element groups** — skip this sub-step.
  
@@ -862,7 +862,7 @@ for (const breakpoint of [375, 768, 1440]) {
  
 ### 8a: Determine Breakpoints
  
-1. **If a recon report documents detected breakpoints:** Use those as the primary set, plus standard breakpoints below.
+1. **If the plan's Recon Context documents detected breakpoints:** Use those as the primary set, plus standard breakpoints below.
 2. **If `--compare-prod` detected breakpoints in Step 6b:** Use those, plus standard breakpoints.
 3. **Otherwise:** Use the standard breakpoints.
  
@@ -1125,7 +1125,7 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 - Slow requests: {count} — {URLs and durations}
  
 ## Design Compliance
-{from Step 6, or "No recon report / prod URL provided"}
+{from Step 6, or "No Recon Context / prod URL provided"}
  
 ## Inline Element Positional Verification
 {from Step 6l — full per-group, per-breakpoint table OR "No inline-row layouts in scope"}
@@ -1187,7 +1187,7 @@ If any failure seems intermittent, re-run 2-3 times. Document whether consistent
 | Form inputs stretching on mobile | Fix responsive width constraint, re-run `/verify-with-playwright` | Check design system or recon constraint method |
 | JavaScript console error | Investigate component, check state management | Check stack trace for originating component |
 | API/network failure | Check backend endpoint, verify API contract | Test endpoint directly with curl or Postman |
-| All checks pass | `/code-review` then commit | Proceed to pre-commit review |
+| All checks pass | Commit when satisfied | Verification is the final gate in the standard flow — `/code-review` already ran before this step. If it did NOT (verify run standalone), run `/code-review` now before committing. |
  
 - {specific investigation actions for issues found}
 - {whether to re-verify after fixes}
@@ -1304,8 +1304,10 @@ The browser is the ultimate test environment. Unit tests prove components work i
  
 ## See Also
  
-- `/playwright-recon` — Capture visual specs from live pages (`--internal` for design system, default for external recon)
-- `/plan` — Create implementation plan from a spec (provides plan context, including Inline Element Position Expectations table)
-- `/execute-plan` — Execute all steps from a generated plan (has its own visual verification checkpoints, including positional verification)
-- `/code-review` — Pre-commit code review (run AFTER this verification passes)
+The standard flow is `playwright-recon (optional) → spec → plan → execute-plan → code-review → verify-with-playwright`.
+ 
+- `/playwright-recon` — Capture visual specs from live pages (`--internal` for the design system, default mode for an external page being replicated)
 - `/spec` — Write a feature specification (upstream of /plan)
+- `/plan` — Create implementation plan from a spec (provides plan context, including the Recon Context and Inline Element Position Expectations sections)
+- `/execute-plan` — Execute all steps from a generated plan (has its own visual verification checkpoints, including positional verification)
+- `/code-review` — Pre-commit code review (run BEFORE this verification — the standard flow is `spec → plan → execute → code-review → verify`)

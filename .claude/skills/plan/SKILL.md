@@ -37,6 +37,21 @@ Run /spec <feature idea> first to generate a spec, or verify the path.
  
 **Stop immediately** if the file is not found.
  
+**Extract and internalize these sections from the spec** — they are the product contract this plan must fulfill, and every one of them maps to a downstream consumer:
+ 
+- **Affected Frontend Routes** — the user-facing routes this feature touches. The plan inherits this section *unchanged* (Step 3 template) so `/verify-with-playwright` can auto-derive its verification target. If the spec says "N/A — backend-only spec", carry that through verbatim.
+- **Overview & User Story** — the feature's purpose and the user role(s) involved. Grounds every implementation decision.
+- **Requirements** (Functional + Non-Functional) — the testable behaviors the Implementation Steps must cover. Performance and accessibility targets become test specs.
+- **Auth Gating table** — every interactive element's logged-out behavior, logged-in behavior, and exact auth modal message. Every row becomes an entry in the plan's Auth Gating Checklist AND an auth check in the relevant Implementation Step. A spec auth gate with no plan step is an incomplete plan.
+- **Responsive Behavior table** — the mobile/tablet/desktop layout behavior. Feeds the plan's Responsive Structure section and every UI step's "Responsive behavior" field.
+- **AI Safety Considerations** — crisis keyword handling, content filtering, guardrails. If the spec says "N/A", carry the reason through. If it specifies safety behavior, every step touching AI-generated content or free-text input must include the corresponding guardrail.
+- **Auth & Persistence** — demo-mode zero-persistence rules, what persists for logged-in users, which `wr_*` localStorage keys are touched. Feeds the plan's Shared Data Models section and the Architecture Context.
+- **Completion & Navigation** — for Daily Hub features: how completion signals to the tracking system, post-completion CTAs, context passing. For standalone features the spec says "N/A".
+- **Design Notes** — referenced existing components, referenced design system patterns, and any **NEW visual patterns flagged by the spec**. Spec-flagged new patterns MUST be marked `[UNVERIFIED]` in the plan until verified — the spec author has already told you these values aren't confirmed.
+- **Acceptance Criteria** — the checkbox list the spec ends with. These are consumed directly by `/code-review --spec` for feature-completeness verification, and the visual criteria are consumed by `/verify-with-playwright`. Every criterion must be traceable to an Implementation Step.
+ 
+If the spec is missing a section that should be present (e.g., a UI feature with no Responsive Behavior table, or interactive elements with no Auth Gating table), do not silently proceed — note it in the plan's Assumptions & Pre-Execution Checklist as a gap for the user to resolve before execution.
+ 
 ---
  
 ## Step 2: Codebase Reconnaissance
@@ -64,11 +79,12 @@ Discover:
 7. **Security rules** — read `.claude/rules/02-security.md` for auth gating requirements. Identify every action in the spec that requires login and ensure the plan includes auth checks for each one.
 8. **Design System Reference** — check if `_plans/recon/design-system.md` exists. If it does, read it for exact computed CSS values, color tokens, typography, spacing, and component patterns (heroes, cards, buttons, decorative elements). These exact values must be referenced in any UI step's Details section — not "match the hero" but "use `background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%)`, font: Inter 48px/1.2 bold, color: #FFFFFF`".
  
-   **Precedence rule** — these two design files have different roles and don't compete:
-   - **`_plans/recon/design-system.md`** (the live recon snapshot) **takes precedence** for visual property values: exact colors, gradients, spacing, font sizes, box-shadows, class lists. It's a computed extraction from the real pages, so it matches what users actually see.
+   **Precedence rule** — three design sources can be in play; they have different roles and don't compete:
+   - **The external Recon Report** (`_plans/recon/{slug}.md`, item 9 below — transported into this plan's `## Recon Context` section) **takes precedence for THIS feature's per-screen/per-component values**: the exact CSS Mapping Table values for the specific screens being replicated. It is the most specific source — when it covers a component, it wins for that component.
+   - **`_plans/recon/design-system.md`** (the live design-system snapshot from `--internal` mode) **takes precedence for design-system-wide visual values**: exact colors, gradients, spacing, font sizes, box-shadows, class lists shared across the whole app. Authoritative for any component the external Recon Report does not cover.
    - **`.claude/rules/09-design-system.md`** **takes precedence** for architectural patterns, component inventory, design principles, the Daily Hub Visual Architecture, the FrostedCard Tier System, the white pill CTA patterns, the textarea glow pattern, the deprecated patterns table, and the "why" behind the system (color semantics, accessibility floors, section heading treatment rules).
-   - If they disagree on a specific CSS value, trust the recon. If they disagree on a principle or component description, trust 09-design-system.md. If the recon doesn't cover a component, fall back to 09-design-system.md + codebase inspection and mark derived values `[UNVERIFIED]`.
-9. **External Recon Report** — check if the spec references a recon report (e.g., `_plans/recon/{slug}.md`). If it does, read it for per-screen CSS Mapping Tables, Gradient tables, Vertical Rhythm tables, Image tables, Link inventories, States tables, Text Content Snapshots, Inline Element Position tables (if present), and Responsive CSS Mapping Tables. These feed directly into implementation steps and are verified by `/verify-with-playwright`.
+   - Resolution order for a specific CSS value: external Recon Report → Design System Reference → 09-design-system.md + codebase inspection. For a principle or component description, trust 09-design-system.md. If no source covers a value, mark it `[UNVERIFIED]`.
+9. **Recon Report** — check if the spec references an external Recon Report (e.g., `_plans/recon/{slug}.md`). If it does, read it for per-screen CSS Mapping Tables, Gradient tables, Vertical Rhythm tables, Image tables, Link inventories, States tables, Form Responsive Widths tables, Intra-element text variation tables, Text Content Snapshots, Inline Element Position tables (if present), and Responsive CSS Mapping Tables. **Transport these tables into the plan's `## Recon Context` section** (Step 3 template) — that section is how the recon data reaches `/execute-plan` and `/verify-with-playwright` without them re-opening the recon file. Do not leave the recon data only in the external file; copy it into the plan.
 10. **Master Spec Plan** — check if the spec references a master plan (e.g., `dashboard-growth-spec-plan-v2.md`). Also check CLAUDE.md for a multi-spec phase listing the current spec. If a master plan exists, read it for:
     - Shared data models (TypeScript interfaces, localStorage keys)
     - Cross-spec integration points (what this spec produces/consumes)
@@ -81,7 +97,7 @@ Discover:
  
 If the Design System Reference does not exist, note it in the Assumptions section: "No design system reference found. UI styling values are based on codebase inspection and may not be pixel-perfect. Consider running `/playwright-recon --internal` before execution."
  
-**Recon staleness check:** If `_plans/recon/design-system.md` exists, check the date at the top of the file. Also compare the list of pages captured in the recon against current routes in CLAUDE.md — if new pages exist that weren't captured, or if CLAUDE.md mentions recent visual redesigns since the capture date (e.g., Round 3 Visual Rollout / `BackgroundCanvas` / FrostedCard tier system / violet-glow textareas / muted-white active-state), flag it: "⚠️ Design system recon may be stale (captured before recent changes: {list what changed}). Consider re-running `/playwright-recon --internal` to capture current values." A stale recon is worse than no recon — it gives false confidence in outdated values.
+**Recon staleness check:** If `_plans/recon/design-system.md` exists, check the date at the top of the file. Also compare the list of pages captured in the recon against current routes in CLAUDE.md — if new pages exist that weren't captured, or if CLAUDE.md mentions recent visual redesigns since the capture date (e.g., Round 3 Visual Rollout / `BackgroundCanvas` / FrostedCard tier system / violet-glow textareas / muted-white active-state), flag it: "⚠️ Design System Reference may be stale (captured before recent changes: {list what changed}). Consider re-running `/playwright-recon --internal` to capture current values." A stale recon is worse than no recon — it gives false confidence in outdated values.
  
 **[UNVERIFIED] value marking:** When the spec introduces visual patterns not covered by any recon report or design system reference, or when a value is derived from codebase inspection rather than computed extraction, mark it as `[UNVERIFIED]` in the plan. Include a verification method and correction method for each:
  
@@ -135,6 +151,31 @@ Use this exact structure:
 - Auth gating patterns (useAuth + useAuthModal pattern, which actions are gated)
 - Shared data models from master plan (if applicable)
 - Cross-spec dependencies from master plan (if applicable)
+ 
+---
+ 
+## Recon Context (if a Recon Report was loaded)
+ 
+> Populate this section ONLY if the spec referenced an external Recon Report (`_plans/recon/{slug}.md`) and it was loaded in Step 2 (reconnaissance item 9). This section is the **transport mechanism**: it copies the recon report's tables INTO the plan so `/execute-plan` and `/verify-with-playwright` can consume them without re-opening the recon file. If no Recon Report applies, write "N/A — no external Recon Report for this feature" and omit the sub-tables.
+ 
+- **Recon Report path:** `_plans/recon/{slug}.md`
+- **Source URL:** {the live URL the recon captured — `/verify-with-playwright` auto-detects this for `--compare-prod` mode}
+- **Screen Inventory:** {if the recon captured a multi-screen flow, copy the Screen Inventory table — screen count, flow type, per-screen navigation. The Implementation Steps below must be decomposable per screen, and any step touching a later screen carries that screen's recon data with it.}
+- **Per-Screen Component Audit:** {if the recon produced a component audit per screen, copy it — then use it as a completeness gate: every component listed in the audit MUST have a corresponding Implementation Step. A component in the audit with no plan step means the plan is incomplete.}
+- **Staleness:** {capture date, N days ago — "current" / "⚠️ may be stale, see Assumptions"}
+- **CSS Mapping Table:** {paste the full per-screen/per-component CSS Mapping Table from the recon report — exact Tailwind classes and computed values. This is the source of truth for all UI-step styling values. `/execute-plan` copies these verbatim; `/verify-with-playwright` Step 6a compares the built page against them.}
+- **Gradient tables:** {paste if the recon captured gradient backgrounds — exact gradient strings, angles, color stops, cutoff positions. Consumed by `/verify-with-playwright` Step 6c.}
+- **Vertical Rhythm table:** {paste if present — spacing between adjacent sections. NOTE: this is the same data as the plan's standalone Vertical Rhythm section below; when a recon report exists, the recon values are authoritative and the Vertical Rhythm section should reference this table rather than duplicate it.}
+- **Image tables:** {paste if present — rendered width/height/max-width per image. Consumed by `/verify-with-playwright` Step 6d.}
+- **Link inventory tables:** {paste if present — link text, href, target, color, text-decoration for inline links in body content. Consumed by `/verify-with-playwright` Step 6f.}
+- **States tables (hover/focus/active):** {paste if present — interactive-state styling for buttons, links, inputs. Consumed by `/execute-plan` Step 4g and `/verify-with-playwright` Step 6g.}
+- **Form Responsive Widths table:** {paste if present — form container width AND input width at every breakpoint. Consumed by `/verify-with-playwright` Step 6h. Without this, "full width" is ambiguous and inputs stretch incorrectly on mobile.}
+- **Intra-element text variation tables:** {paste if present — which phrases within a text block need `<strong>`/`<em>`/`<b>`/`<i>` wrapper tags. Consumed by `/verify-with-playwright` Step 6i.}
+- **Text Content Snapshot:** {paste if present — exact rendered copy per screen. Consumed by `/verify-with-playwright` Step 6j to catch hardcoded-text drift.}
+- **Inline Element Position tables:** {if the recon report documents inline-row layouts, note them here — they also feed the plan's standalone Inline Element Position Expectations section below.}
+- **Responsive CSS Mapping Table:** {paste if present — per-breakpoint class application. Feeds the plan's Responsive Structure section.}
+ 
+**Precedence:** the Recon Report (this section) is authoritative for per-screen/per-component CSS *values*. The Design System Reference (`_plans/recon/design-system.md`) is authoritative for design-system-wide patterns and tokens. `.claude/rules/09-design-system.md` is authoritative for architectural principles. See the precedence rule in Step 2 reconnaissance item 8.
  
 ---
  
@@ -195,7 +236,7 @@ This table is the executor's copy-paste reference for all styling. No guessing.
 - Mood colors: Struggling=#D97706, Heavy=#C2703E, Okay=#8B7FA8, Good=#2DD4BF, Thriving=#34D399.
 - Inline element layouts (chips and pills on a single row, label + input pairs): document expected y-coordinate alignment in the plan so `/verify-with-playwright` can compare `boundingBox().y` values between elements. CSS class verification alone misses wrapping bugs.
  
-**Source these from:** the design system recon, `.claude/rules/09-design-system.md` (especially the Round 3 Visual Patterns + Daily Hub Visual Architecture + Deprecated Patterns sections), AND recent plan Execution Logs where deviations were caused by design system misunderstandings. Patterns that caused past bugs are the most important to include here.
+**Source these from:** the Design System Reference, `.claude/rules/09-design-system.md` (especially the Round 3 Visual Patterns + Daily Hub Visual Architecture + Deprecated Patterns sections), AND recent plan Execution Logs where deviations were caused by design system misunderstandings. Patterns that caused past bugs are the most important to include here.
  
 This block is displayed verbatim by `/execute-plan` Step 4d before each UI step to prevent mid-implementation drift back to default assumptions.
  
@@ -257,7 +298,7 @@ Two distinct assertions, used in different contexts:
  
 ## Vertical Rhythm
  
-**Expected spacing between adjacent sections (from design system recon or codebase inspection):**
+**Expected spacing between adjacent sections (from the Recon Context table above, the Design System Reference, or codebase inspection):**
  
 | From → To | Expected Gap | Source |
 |-----------|-------------|--------|
@@ -383,8 +424,8 @@ Before executing this plan, confirm:
 13. [ ] Steps are ordered for safety — data models/API before UI, shared utilities before consumers
 14. [ ] AI Safety guardrails included in every step that touches AI-generated content
 15. [ ] Auth gate tests included for every step that implements a gated action (verify auth modal appears for logged-out users)
-16. [ ] Design System Reminder populated from: design system recon + rules files (especially `09-design-system.md` Round 3 Visual Patterns, Daily Hub Visual Architecture, and Deprecated Patterns) + deviations from recent Execution Logs
-17. [ ] Vertical Rhythm values included (from design system recon, if available)
+16. [ ] Design System Reminder populated from: the Design System Reference + rules files (especially `09-design-system.md` Round 3 Visual Patterns, Daily Hub Visual Architecture, and Deprecated Patterns) + deviations from recent Execution Logs
+17. [ ] Vertical Rhythm values included (from the Recon Context table or Design System Reference, if available)
 18. [ ] Inline Element Position Expectations table populated for any UI step with inline-row layouts (or marked N/A)
 19. [ ] If master spec plan exists: shared data models, localStorage keys, and cross-spec integration points are in Architecture Context
 20. [ ] Edge Cases & Decisions table is populated — at least the obvious edge cases are covered
@@ -408,8 +449,8 @@ Plan saved: _plans/YYYY-MM-DD-<feature_slug>.md
 Steps:      <N> steps
 Spec:       <path to spec>
 Auth gates: <N> actions gated
-Design ref: loaded / not found
-Recon:      loaded / not applicable
+Design System Reference: loaded / not found
+Recon Report: loaded / not applicable
 Master plan: loaded / not applicable
 [UNVERIFIED] values: <N> (will be flagged during execution and verification)
 Inline-row layouts: <N> (will be position-verified by /verify-with-playwright)
@@ -417,8 +458,8 @@ Inline-row layouts: <N> (will be position-verified by /verify-with-playwright)
 Pipeline:
   1. Review the plan
   2. /execute-plan _plans/YYYY-MM-DD-<feature_slug>.md
-  3. /verify-with-playwright {route} _plans/YYYY-MM-DD-<feature_slug>.md
-  4. /code-review _plans/YYYY-MM-DD-<feature_slug>.md
+  3. /code-review _plans/YYYY-MM-DD-<feature_slug>.md
+  4. /verify-with-playwright {route} _plans/YYYY-MM-DD-<feature_slug>.md
   5. Commit when satisfied
 ```
  
@@ -456,8 +497,10 @@ Do not repeat the full plan in chat unless the user asks. The plan file is the a
  
 ## See Also
  
+The standard flow is `playwright-recon (optional) → spec → plan → execute-plan → code-review → verify-with-playwright`.
+ 
+- `/playwright-recon` — Capture visual specs from live pages (`--internal` for the design system, default mode for an external page being replicated); its Recon Report is transported into this plan's `## Recon Context` section
 - `/spec` — Write a feature specification (produces the spec this skill consumes)
 - `/execute-plan` — Execute all steps from this plan
-- `/verify-with-playwright` — Runtime UI verification (consumes this plan for context + auto-detects recon)
 - `/code-review` — Pre-commit code review (cross-references this plan for compliance)
-- `/playwright-recon` — Capture visual specs from live pages (`--internal` for design system, default for external recon)
+- `/verify-with-playwright` — Runtime UI verification (consumes this plan for context, including the Recon Context section and its Source URL for `--compare-prod`)

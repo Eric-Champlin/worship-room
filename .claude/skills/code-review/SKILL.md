@@ -95,6 +95,13 @@ Classify every changed file into one of these risk tiers:
 If `$ARGUMENTS` contains a path to a plan file, read it and extract:
 - **Implementation Steps** — what was supposed to be built, with exact file paths, method signatures, and specifications
 - **Architecture Context** — patterns that should have been followed
+- **Auth Gating Checklist** — every action the plan committed to gating, the step it's planned in, and the auth-check method. Each row should be reflected in the diff (consumed in Step 7g security review and, with `--spec`, Step 4a).
+- **Recon Context (if present)** — the CSS Mapping Table, Gradient tables, Vertical Rhythm table, Image tables, Link inventory, States tables, Form Responsive Widths table, Intra-element text variation tables, and Text Content Snapshot transported from the external Recon Report. This is the source of truth the UI diff should match — referenced by the Step 8 visual verification gate.
+- **Design System Values table** — the exact computed styling values the plan distilled for this feature's UI steps. The diff's UI code should use these values, not approximations.
+- **Design System Reminder** — the project-specific visual quirks and deprecated-pattern warnings the plan front-loaded. The diff must not reintroduce anything this block flags (consumed in Step 8 and Step 10's deprecated-pattern check).
+- **Responsive Structure** — the breakpoints and per-breakpoint layout behavior the plan specified. UI changes should honor these.
+- **Vertical Rhythm table** — expected spacing between adjacent sections (consumed by the Step 8 visual verification gate).
+- **Inline Element Position Expectations** — element groups that must share a row and their wrap tolerances (informs the Step 8 visual verification gate; the actual positional check runs in `/verify-with-playwright`).
 - **DO NOT guardrails** — things that should NOT have been done
 - **Edge Cases & Decisions** — explicit decisions that should be reflected in the code
 - **Design Context** — UI specs that should be matched
@@ -182,7 +189,7 @@ Search the plan for any values marked `[UNVERIFIED]`. For each one, check:
 | {description} | {guess value} | YES — {file}:{line} | YES (visual checkpoint confirmed) / NO | {OK / Should Fix: verify before commit} |
 ```
  
-If the plan has no [UNVERIFIED] values: `**[UNVERIFIED] values:** None in plan — all values from recon.`
+If the plan has no [UNVERIFIED] values: `**[UNVERIFIED] values:** None in plan — all values from the Recon Context or Design System Reference.`
  
 ### 3e: Data Model Consistency
  
@@ -447,9 +454,9 @@ If all production files have tests: `**Test coverage:** All new production code 
  
 ## Step 8: Visual Verification Check (UI changes only)
  
-If the diff touches UI components or the plan references a recon report or design specs, include a visual verification gate.
+If the diff touches UI components or the plan has a Recon Context section or design specs, include a visual verification gate.
  
-**Note:** Visual verification (`/verify-with-playwright`) may run before or after this code review, depending on your workflow. This section documents what needs to be confirmed before committing — not necessarily before this review runs.
+**Note:** In the standard flow, visual verification (`/verify-with-playwright`) runs immediately AFTER this code review (`spec → plan → execute → code-review → verify`). This section documents what verify will check, so the reviewer can confirm visual aspects are in scope and that the diff doesn't preclude verification from succeeding (e.g., correct selectors, `data-testid` attributes the verify flows depend on are present).
  
 ```text
 ## Visual Verification Status
@@ -467,7 +474,7 @@ If the diff touches UI components or the plan references a recon report or desig
 - [ ] `prefers-reduced-motion` respected for all animations and video
 - [ ] No deprecated visual patterns from the post-Visual-Rollout era introduced in the diff (`09-design-system.md` § "Deprecated Patterns" — Step 10 gates this formally; this is a pre-commit spot-check)
  
-**If visual verification has NOT been run yet:** This code review can still proceed — it checks code accuracy, patterns, and cleanliness independently. But do NOT commit until `/verify-with-playwright` has been run and all items above are confirmed.
+**Visual verification normally has not run yet** when this review executes — that is expected in the standard flow. This code review checks code accuracy, patterns, and cleanliness independently and does not depend on verify having run. But do NOT commit until `/verify-with-playwright` has been run next and all items above are confirmed.
 ```
  
 **If the diff has NO UI changes:** Skip this step entirely.
@@ -854,10 +861,16 @@ grep -iE 'aiza|key=|signature=' /tmp/backend.log 2>/dev/null
 
 ## See Also
 
-- `/plan` — Create implementation plan from a spec (produces the plan this skill cross-references)
-- `/plan-forums` — Forums Wave implementation plans
+`/code-review` is shared by both flows. The standard flow is `playwright-recon (optional) → spec → plan → execute-plan → code-review → verify-with-playwright`; the forums flow is `spec-forums → plan-forums → execute-plan-forums → code-review → verify-with-playwright`.
+
+**Standard flow:**
+- `/playwright-recon` — Capture visual specs from live pages (`--internal` for the design system, default mode for an external page being replicated)
 - `/spec` — Write a feature specification (upstream of /plan)
-- `/spec-forums` — Forums Wave spec extraction from master plan
+- `/plan` — Create implementation plan from a spec (produces the plan this skill cross-references)
 - `/execute-plan` — Execute all steps from a generated plan (run before this review)
-- `/execute-plan-forums` — Forums Wave execution engine
-- `/verify-with-playwright` — Runtime UI verification with screenshots and computed style comparison
+- `/verify-with-playwright` — Runtime UI verification with screenshots and computed style comparison (run AFTER this review)
+
+**Forums flow:**
+- `/spec-forums` — Forums Wave spec extraction from master plan
+- `/plan-forums` — Forums Wave implementation plans
+- `/execute-plan-forums` — Forums Wave execution engine (run before this review)

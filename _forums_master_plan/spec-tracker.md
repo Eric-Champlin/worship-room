@@ -156,6 +156,18 @@ prevents a wasted deploy attempt.
 
 ## Phase 6 — Engagement Features (14 specs)
 
+> ---
+> **⚠️ BRIEF-DRIFT REMEDIATION — logged 2026-05-14**
+>
+> During Phase 6 brief authoring, all wave briefs were written from a **stale pristine-baseline copy** of `round3-master-plan.md` rather than the live master plan. The live stubs had since been patched/rewritten. This was not caught until after several specs had executed and merged. Summary of impact and resolution:
+>
+> - **6.5 (Intercessor Timeline) — CATASTROPHIC DRIFT, RESOLVED via Path B.** The brief described a *public per-card intercessor summary*; the live stub described a *private author-only aggregate page* (calendar heatmap, by-post/by-person views, Year-of-Prayer image). 6.5 had already executed + merged as the per-card summary. **Decision (Eric): Path B — shipped code is source of truth.** The 6.5 stub in `round3-master-plan.md` was amended 2026-05-14 with an AS-BUILT RECONCILIATION block; the original aggregate-page vision is preserved there as DEFERRED and may become a future spec. No code change. 6.5 is DONE.
+> - **6.6 (Answered Wall) — MATERIAL DRIFT, follow-up spec required.** 6.6 shipped (reviewed, merged) but the brief dropped real scope the live stub mandates: the `'celebrate'` reaction + Light-a-Candle→Celebrate swap, category filter chips (incl. the deliberate Mental-Health omission), the answered-text edit/un-mark flow, and — critically — the hero subhead (shipped "Prayers the community has watched God move in." vs. the live stub's "Gratitude, not comparison.", which the stub's own notes flag as the single most important copy). **Resolution:** follow-up spec `spec-6-6b` authored 2026-05-14 (`_plans/forums/spec-6-6b-brief.md`) to close these gaps. Not yet through pipeline. NOTE: the earlier execute-time decision to ship `'praising'`-only and exclude `'celebrate'` was made in good faith against the (drifted) brief — 6.6b reinstates `'celebrate'`.
+> - **6.7 (Shareable Testimony Cards) — MINOR GAP, one-shot fix.** Shipped correctly on 3 of 4 image-privacy ACs (2 exceed spec). The one gap: EXIF/metadata stripping is *incidentally* satisfied (canvas-to-PNG is EXIF-free by construction) but not documented in code and not asserted by a test. **Resolution:** a scoped one-shot CC task (add a clarifying comment at `imageGen.ts` + one test). Behavioral risk is nil; this is defensive hardening only.
+>
+> **Root-cause fix going forward:** every not-yet-executed Phase 6 brief (6.8, 6.9, 6.10, and the Prayer Wall Redesign side quest) is to be **re-validated against the LIVE master plan** before it goes to `/spec-forums`. No brief is authored or trusted from the pristine-baseline backup again.
+> ---
+
 | #   | Spec  | Title                         | Size | Risk     | Status |
 | --- | ----- | ----------------------------- | ---- | -------- | ------ |
 | 79  | 6.1   | Prayer Receipt                | L    | Medium   | ✅     |

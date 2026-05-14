@@ -8,6 +8,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { usePrayerReceipt } from '@/hooks/usePrayerReceipt'
 import { useSettings } from '@/hooks/useSettings'
 import { apiFetch } from '@/lib/api-client'
+import {
+  captureDomNodeAsPng,
+  sharePngOrDownload,
+} from '@/lib/prayer-wall/imageGen'
 import { cn } from '@/lib/utils'
 import { ApiError } from '@/types/auth'
 
@@ -243,58 +247,21 @@ export function PrayerReceipt({
       // (2) Mount the off-screen share card AFTER the rate-limit clears.
       setShareCardMounted(true)
 
-      // (3) Wait for the React commit + fonts to be ready BEFORE capture.
+      // (3) Wait one frame for the React commit so html2canvas can read the
+      // off-screen node. Font readiness + capture + share/download is owned
+      // by `imageGen.ts` (Spec 6.7 R6 narrow extraction).
       await new Promise((r) => requestAnimationFrame(() => r(null)))
-      if (typeof document !== 'undefined' && document.fonts?.ready) {
-        await document.fonts.ready
-      }
-
-      // (4) Dynamic import — keeps html2canvas out of the initial bundle (Gate-30).
-      const { default: html2canvas } = await import('html2canvas')
       const node = shareCardRef.current
       if (!node) return
 
-      const canvas = await html2canvas(node, {
-        backgroundColor: null,
-        scale: 2,
-        // logging false — keep console clean in prod.
-        logging: false,
-      })
+      // (4) Pure pipeline — captureDomNodeAsPng awaits document.fonts.ready
+      // (W33), dynamic-imports html2canvas (Gate-30), and applies the
+      // canonical scale:2 + backgroundColor:null options.
+      const blob = await captureDomNodeAsPng(node)
+      if (!blob) return
 
-      // (5) Capture to Blob and share / download.
-      await new Promise<void>((resolve) => {
-        canvas.toBlob((blob) => {
-          if (!blob) {
-            resolve()
-            return
-          }
-          const file = new File([blob], 'prayer-receipt.png', { type: 'image/png' })
-          // Web Share API path — mobile + supporting desktop browsers.
-          const navAny = navigator as Navigator & {
-            canShare?: (data: ShareData) => boolean
-          }
-          if (
-            typeof navigator.share === 'function' &&
-            navAny.canShare?.({ files: [file] })
-          ) {
-            navigator
-              .share({ files: [file] })
-              .catch(() => {
-                // User cancelled or share failed — fall back silently.
-              })
-              .finally(() => resolve())
-          } else {
-            // Download fallback.
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'prayer-receipt.png'
-            a.click()
-            URL.revokeObjectURL(url)
-            resolve()
-          }
-        }, 'image/png')
-      })
+      // (5) Web Share when supported, download fallback otherwise.
+      await sharePngOrDownload(blob, 'prayer-receipt.png')
     } finally {
       // (6) Always unmount the off-screen card and clear the in-flight flag.
       setShareCardMounted(false)

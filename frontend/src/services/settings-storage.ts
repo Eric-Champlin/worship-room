@@ -41,6 +41,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
     // Spec 6.4 — 3am Watch opt-in default. NEVER auto-enable (Gate-G-FAIL-CLOSED-OPT-IN).
     // Users must explicitly opt in via Settings; opt-in requires confirmation modal.
     watchEnabled: 'off',
+    // Spec 6.7 — Share-as-image warning is sticky-on-confirm. Default false so
+    // first-time sharers see the irreversibility modal; once confirmed, the
+    // modal does not re-appear.
+    dismissedShareWarning: false,
   },
 }
 

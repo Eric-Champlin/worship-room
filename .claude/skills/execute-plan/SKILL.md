@@ -42,25 +42,27 @@ Before doing anything, read and internalize:
  
 1. **Architecture Context** — Re-ground yourself in the codebase patterns, conventions, and related files documented during reconnaissance. If a Design Context section is present (from Figma or recon), internalize the exact design specifications — these are your source of truth for UI implementation.
  
-2. **Design System Reference** — Check if `_plans/recon/design-system.md` exists. If it does, read it and internalize the full design system: color tokens, typography scale, spacing values, component patterns (hero, card, button, section, decorative elements), and the CSS Mapping Table. **This is the single source of truth for all UI styling.** When the plan says "match the existing hero" or "use the same card style," look up the exact computed values from this file — do NOT inspect other components at build time or guess. If the design system file does not exist, proceed without it but flag to the user: "No design system reference found at `_plans/recon/design-system.md`. Consider running `/playwright-recon --internal` to generate one for more accurate UI implementation."
+2. **Design System Reference** — Check if `_plans/recon/design-system.md` exists. If it does, read it and internalize the full design system: color tokens, typography scale, spacing values, and design-system-wide component patterns (hero, card, button, section, decorative elements). **This is the source of truth for design-system-wide styling** — the tokens and patterns shared across the whole app. When the plan says "match the existing hero" or "use the same card style," look up the exact computed values from this file — do NOT inspect other components at build time or guess. (Per-screen/per-component exact values for *this feature* live in the plan's Recon Context section — see item 4 below.) If the design system file does not exist, proceed without it but flag to the user: "No Design System Reference found at `_plans/recon/design-system.md`. Consider running `/playwright-recon --internal` to generate one for more accurate UI implementation."
  
-3. **`.claude/rules/09-design-system.md`** — Read this for architectural patterns, the Round 3 Visual Patterns section, the BackgroundCanvas Atmospheric Layer section (which includes the Daily Hub-specific structure paragraph), the FrostedCard Tier System, the Button variant taxonomy, the Active-State and Selection Patterns, the Text-Button Pattern, the Tonal Icon Pattern, the white pill CTA patterns, the violet textarea glow pattern, the AlertDialog Pattern, the sticky FAB pattern, the drawer-aware visibility pattern, the inline element layout verification rule, and the Deprecated Patterns table. The recon snapshot wins on specific CSS values; this file wins on architectural principles and component patterns.
+3. **`.claude/rules/09-design-system.md`** — Read this for architectural patterns, the Round 3 Visual Patterns section, the BackgroundCanvas Atmospheric Layer section (which includes the Daily Hub-specific structure paragraph), the FrostedCard Tier System, the Button variant taxonomy, the Active-State and Selection Patterns, the Text-Button Pattern, the Tonal Icon Pattern, the white pill CTA patterns, the violet textarea glow pattern, the AlertDialog Pattern, the sticky FAB pattern, the drawer-aware visibility pattern, the inline element layout verification rule, and the Deprecated Patterns table. The Design System Reference wins on specific design-system-wide CSS values; this file wins on architectural principles and component patterns.
  
-4. **Master Spec Plan** — Check the plan header for a "Master Spec Plan" reference. If one exists, read it for shared data models, localStorage keys, cross-spec integration points, and constants. When implementing data models or storage keys, use the exact interfaces and key names from the master plan — do not invent alternatives.
+4. **Recon Context (if present)** — If the plan has a `## Recon Context` section, internalize it. This is the per-screen/per-component source of truth for this feature's visual values: the CSS Mapping Table, Gradient tables, Vertical Rhythm table, Image tables, Link inventory, States tables, Form Responsive Widths table, Intra-element text variation tables, and Text Content Snapshot. Every exact Tailwind class and pixel value in the UI implementation steps came from here. The Recon Context is authoritative for *this feature's* values; the Design System Reference (item 2) is authoritative for design-system-wide tokens and patterns. If the plan references a Recon Report but the Recon Context section is empty or missing, flag to the user: "Plan references a Recon Report but has no populated Recon Context section — visual verification will fall back to the Design System Reference and codebase inspection."
  
-5. **Assumptions & Pre-Execution Checklist** — If this is the first run (no steps marked [COMPLETE] in the Execution Log), verify the checklist:
+5. **Master Spec Plan** — Check the plan header for a "Master Spec Plan" reference. If one exists, read it for shared data models, localStorage keys, cross-spec integration points, and constants. When implementing data models or storage keys, use the exact interfaces and key names from the master plan — do not invent alternatives.
+ 
+6. **Assumptions & Pre-Execution Checklist** — If this is the first run (no steps marked [COMPLETE] in the Execution Log), verify the checklist:
    - Display the checklist to the user
    - Ask: "Have you reviewed and confirmed these assumptions? (yes/no)"
    - **DO NOT proceed until the user confirms**
    - If the user says an assumption is wrong, **STOP** and inform them to update the plan
  
-6. **Edge Cases & Decisions table** — Know the explicit decisions so you don't re-decide them during implementation.
+7. **Edge Cases & Decisions table** — Know the explicit decisions so you don't re-decide them during implementation.
  
-7. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
+8. **[UNVERIFIED] values** — Scan the plan for any `[UNVERIFIED]` flags. Know which values are provisional before you start implementing. These get extra scrutiny during visual verification (Step 4g).
  
-8. **Inline Element Position Expectations table** — If the plan contains inline-row layouts, internalize the expected y-coordinate alignments. These are checked in Step 4g (Inline Element Positional Verification).
+9. **Inline Element Position Expectations table** — If the plan contains inline-row layouts, internalize the expected y-coordinate alignments. These are checked in Step 4g (Inline Element Positional Verification).
  
-9. **Record the starting file set** — Run `git diff --name-only HEAD 2>/dev/null` and store the list of already-changed files. This is used in Step 4a to distinguish pre-existing changes from changes made by this execution session.
+10. **Record the starting file set** — Run `git diff --name-only HEAD 2>/dev/null` and store the list of already-changed files. This is used in Step 4a to distinguish pre-existing changes from changes made by this execution session.
  
 ---
  
@@ -84,8 +86,9 @@ All steps have been executed successfully.
 1. Review all changes
 2. Run full test suite: pnpm test
 3. Run /code-review for final quality check
-4. Commit and push when satisfied
-5. Plan retained at: <plan-path>
+4. For UI work: /verify-with-playwright {route} <plan-path> for comprehensive visual check
+5. Commit and push when satisfied
+6. Plan retained at: <plan-path>
 ```
  
 **Stop.**
@@ -130,7 +133,7 @@ git status --porcelain
  
 Compare the list of changed files against:
 1. Files listed in any completed step's "Files to create/modify" (changes from this session — expected)
-2. The starting file set recorded in Step 2.9 (changes that predate this session — unexpected)
+2. The starting file set recorded in Step 2.10 (changes that predate this session — unexpected)
  
 **If there are uncommitted changes to files NOT created/modified by any completed step in this session AND NOT in the starting file set:**
  
@@ -185,7 +188,7 @@ If the step contains any values marked `[UNVERIFIED]`, display them prominently 
 ```text
 ⚠️  UNVERIFIED VALUES IN THIS STEP:
  
-The following values were not confirmed by the recon report and may be wrong:
+The following values were not confirmed by the Recon Context or Design System Reference and may be wrong:
  
 - [UNVERIFIED] {description}: Best guess is {value}
   → To verify: {verification method from plan}
@@ -245,11 +248,12 @@ Execute the step following the plan's exact specifications.
  
 1. **The plan's explicit instructions** — file paths, method signatures, patterns, guardrails
 2. **Master Spec Plan** — shared data models, localStorage keys, cross-spec interfaces
-3. **Design System Reference** (`_plans/recon/design-system.md`) — exact computed CSS values, color tokens, typography, component patterns
-4. **`.claude/rules/09-design-system.md`** — architectural patterns, Round 3 Visual Patterns, Daily Hub Visual Architecture, deprecated patterns
-5. **Architecture Context** — patterns from reconnaissance
-6. **CLAUDE.md and `.claude/rules/`** — project standards
-7. **General best practices** — only when the above are silent
+3. **Recon Context** (the plan's `## Recon Context` section, transported from an external Recon Report) — per-screen/per-component exact CSS values for *this feature*. Most specific source: when it covers a component, it wins on that component's values.
+4. **Design System Reference** (`_plans/recon/design-system.md`) — design-system-wide computed CSS values, color tokens, typography, component patterns. Authoritative for any component the Recon Context does not cover.
+5. **`.claude/rules/09-design-system.md`** — architectural patterns, Round 3 Visual Patterns, Daily Hub Visual Architecture, deprecated patterns
+6. **Architecture Context** — patterns from reconnaissance
+7. **CLAUDE.md and `.claude/rules/`** — project standards
+8. **General best practices** — only when the above are silent
  
 **Requirements:**
  
@@ -300,7 +304,7 @@ This applies when:
 - The step creates a new React component
 - The step modifies styling, layout, or spacing
 - The step changes any visible UI element
-- The plan references a recon report or design specs
+- The plan has a Recon Context section or design specs
  
 **Skip visual verification for purely backend steps with no UI impact.**
  
@@ -309,8 +313,8 @@ This applies when:
 1. Start the dev server if not already running (`pnpm dev` from `/frontend`)
 2. **Wait for render:** After navigation, wait for `networkidle` AND verify key elements are visible before taking screenshots. For components with async data (Spotify embeds, API calls, lazy images), wait for the loading state to resolve. Do NOT screenshot a loading spinner or partially-rendered page.
 3. **Screenshot the built component at multiple breakpoints** using Playwright. Use breakpoints from the plan's Responsive Structure section, or defaults: 375px, 768px, 1440px.
-4. **Compare against the recon report screenshots** for that component (if available)
-5. **Extract computed styles** and compare against the CSS Mapping Table from the Design System Reference (if available). Use the **exhaustive property list** — compare ALL of these for every element:
+4. **Compare against the Recon Report screenshots** for that component (if the external Recon Report includes them)
+5. **Extract computed styles** and compare against the CSS Mapping Table from the plan's Recon Context section (if a Recon Report was loaded), falling back to the Design System Reference's design-system-wide values for any component the recon didn't cover. Use the **exhaustive property list** — compare ALL of these for every element:
    - Dimensions: width, height, max-width, min-width, min-height
    - Spacing: padding (all sides), margin (all sides), gap
    - Borders: border-top, border-right, border-bottom, border-left, border-radius
@@ -407,7 +411,7 @@ Options:
 5. Restore from backup: git reset --hard {BACKUP_BRANCH}
 ```
  
-**If no recon report or Design System Reference exists:** Do a basic browser sanity check instead — navigate to the page, verify key elements are visible, layout is correct, no console errors, interactions work. Check at mobile and desktop. If the step has inline-row layouts, still capture y-coordinates and verify alignment manually. This catches obvious visual/behavioral issues that unit tests miss.
+**If no Recon Context and no Design System Reference exists:** Do a basic browser sanity check instead — navigate to the page, verify key elements are visible, layout is correct, no console errors, interactions work. Check at mobile and desktop. If the step has inline-row layouts, still capture y-coordinates and verify alignment manually. This catches obvious visual/behavioral issues that unit tests miss.
  
 ### 4h: Verify Expected State
  
@@ -470,7 +474,19 @@ Loop back to 4a.
  
 ## Step 5: Final Summary
  
-After all steps are complete:
+**Before producing the summary, run the end-of-run completeness gate.** Per-step verification (4h) confirms each step in isolation; this gate confirms the run as a whole is sound. Check every item:
+ 
+- [ ] **Every step is `[COMPLETE]`** in the Execution Log — no step left `[NOT STARTED]` or `[IN PROGRESS]`. If any step is incomplete, execution stopped early; do not present a "complete" summary — report the stopping point instead.
+- [ ] **Every UI step ran its Step 4g visual verification checkpoint** — and each produced an all-match comparison table (no unresolved NO verdicts, no skipped checkpoints). A UI step marked `[COMPLETE]` with no visual verification in its Execution Log notes is a gap — flag it.
+- [ ] **Every `[UNVERIFIED]` value from the plan was resolved** — either confirmed correct during a Step 4g checkpoint (note which step), or escalated to the user. No `[UNVERIFIED]` value should reach code review still unverified and unflagged.
+- [ ] **Every inline-row layout passed Step 4g positional verification** at the breakpoints the plan's Inline Element Position Expectations table specifies — no unresolved wrapping bugs.
+- [ ] **The full test suite passes** (`pnpm test`) — not just the per-step tests run in isolation during 4h. Cross-step regressions only surface when the whole suite runs together.
+- [ ] **The app builds cleanly** — `pnpm build` (frontend) and `./mvnw compile` (backend) both succeed.
+- [ ] **No deprecated patterns were introduced** — a final spot-check against `09-design-system.md` § "Deprecated Patterns" across all modified UI files. (Per-step 4e already guards this; this is the whole-diff confirmation.)
+ 
+**If any gate item fails:** do NOT present the "Plan Execution Complete" summary. Report which gate item failed and stop — the user needs to resolve it before the work is ready for `/code-review`.
+ 
+**If all gate items pass**, produce the summary:
  
 ```
 # Plan Execution Complete
@@ -552,8 +568,10 @@ All <N> steps executed successfully.
  
 ## See Also
  
-- `/plan` — Create implementation plan from a spec (produces the plan this skill consumes)
-- `/code-review` — Review all code changes before committing (run after execute completes)
-- `/verify-with-playwright` — Runtime UI verification with screenshots and computed style comparison
-- `/playwright-recon` — Capture visual specs from live pages (external recon or `--internal` for design system)
+The standard flow is `playwright-recon (optional) → spec → plan → execute-plan → code-review → verify-with-playwright`.
+ 
+- `/playwright-recon` — Capture visual specs from live pages (`--internal` for the design system, default mode for an external page being replicated)
 - `/spec` — Write a feature specification (upstream of /plan)
+- `/plan` — Create implementation plan from a spec (produces the plan this skill consumes)
+- `/code-review` — Review all code changes (run immediately after this skill completes — the next step in the standard flow)
+- `/verify-with-playwright` — Runtime UI verification with screenshots and computed style comparison (runs after code-review)

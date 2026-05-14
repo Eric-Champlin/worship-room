@@ -5403,6 +5403,34 @@ Opting into 3am Watch is a deliberate choice the user makes in Settings, NOT som
 
 ### Spec 6.5 — Intercessor Timeline
 
+> ---
+> **⚠️ AS-BUILT RECONCILIATION — amended 2026-05-14**
+>
+> **What shipped does NOT match the original stub below.** Spec 6.5 was briefed, planned, executed, reviewed, and merged on `forums-wave-continued` as a *public, per-card intercessor summary* — NOT the private author-only aggregate page the original stub (preserved below) describes.
+>
+> **Root cause:** the 6.5 brief was authored from a stale pristine-baseline copy of this stub that predated the rewrite into the aggregate-page design. The drift was not caught until after execute/merge. See the brief-drift audit (2026-05-14) for the full criterion-by-criterion comparison.
+>
+> **Decision (Eric, 2026-05-14): Path B — the shipped code is the source of truth for 6.5.** The shipped per-card intercessor summary is a coherent, reviewed, tested feature (28 tests) and is kept as-is. This stub is amended to describe what was actually built. The original aggregate-page vision is NOT discarded — it is preserved verbatim below under "DEFERRED ORIGINAL VISION" and may become a future spec if desired.
+>
+> **AS-BUILT 6.5 — what actually shipped:**
+> - **ID:** `round3-phase06-spec05-intercessor-timeline`
+> - **Size:** L · **Risk:** Medium
+> - **Prerequisites:** 6.1 (Prayer Receipt — `post_reactions` infrastructure + anonymity model)
+> - **Goal:** Surface, inline on each public PrayerCard, a soft-type "intercessor summary" line below the post content — a quiet acknowledgment of who has been praying, visible to any authorized viewer of the card.
+> - **Shipped behavior:** a summary line on every PrayerCard with copy cases for 0 / 1-named / 1-anonymous / 2 / 3 / 4+ intercessors; tap-to-expand reveals up to 50 recent reactors with relative timestamps; anonymous reactions stay anonymous (each anonymous reaction is a non-aggregated individual entry); attribution resolved through the app's existing `DisplayNameResolver` anonymity mechanism.
+> - **Shipped surface:** `frontend/src/components/prayer-wall/IntercessorTimeline.tsx` (renders inside PrayerCard), `useIntercessors.ts`, `intercessor-summary.ts`; backend `IntercessorController` / `IntercessorService` / `IntercessorResponse` / `IntercessorSummary`; endpoint `GET /api/v1/posts/{id}/intercessors` plus an `intercessorSummary` field (with `firstThree`) on the feed endpoint; `IntercessorReadRateLimitService` (60/min/user, mirroring 6.1's pattern); no Redis caching; no DB migration.
+> - **Privacy posture:** the shipped feature is a *parallel reader* of `post_reactions` (not a wrapper of `PrayerReceiptService`); anonymous reactors are never deanonymized; the summary exposes only what a viewer of the card could already infer.
+> - **As-built brief of record:** `_plans/forums/spec-6-5-brief.md` (this brief describes the shipped feature accurately; it diverges from the *original* stub below by design-of-circumstance, now ratified by the Path B decision).
+>
+> **Known as-built gaps vs. the original vision (all DEFERRED, not bugs):** no private `/u/:username/intercessor-timeline` page; no by-day calendar heatmap; no by-post or by-person views; no Year-of-Prayer shareable image; no Redis caching; no block/unblock timeline semantics. If any of these are still wanted, they belong to a NEW future spec — see "DEFERRED ORIGINAL VISION" below.
+>
+> ---
+> **DEFERRED ORIGINAL VISION — the stub below is NOT what shipped.**
+> The original 6.5 design (private author-only aggregate timeline page with calendar heatmap, by-post/by-person views, and the Year-of-Prayer shareable image) is preserved verbatim below for the historical record and as the seed of a possible future spec. It has NOT been built. Do NOT plan or execute against the stub below as if it were 6.5 — 6.5 is done (see AS-BUILT above). If this vision is revived, it gets its own new spec ID.
+> ---
+
+_(Original stub preserved verbatim below — DEFERRED, not as-built. See reconciliation note above.)_
+
 - **ID:** `round3-phase06-spec05-intercessor-timeline`
 - **Size:** L
 - **Risk:** Medium-High (privacy model extends Prayer Receipt's author-only attribution across time — errors compound; aggregation performance is non-trivial at scale)

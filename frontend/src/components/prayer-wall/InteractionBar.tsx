@@ -9,6 +9,7 @@ import { useAuthModal } from './AuthModalProvider'
 import { usePrayerCardPulse, useIntercessorActions } from './PrayerCard'
 import { QuickLiftOverlay } from './QuickLiftOverlay'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
+import { useTestimonyShare } from '@/hooks/useTestimonyShare'
 import { ShareDropdown, getShareText } from './ShareDropdown'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
@@ -145,6 +146,17 @@ export function InteractionBar({
   }, [])
 
   const [shareOpen, setShareOpen] = useState(false)
+
+  // Spec 6.7 — testimony-share orchestration. The hook is invoked
+  // unconditionally per React's rules of hooks; the *gating* (whether a
+  // usable callback reaches ShareDropdown) is at the callback wiring below
+  // (`isTestimony ? testimonyShare.initiateShare : undefined`) and at the
+  // portal render (`isTestimony && testimonyShare.portal`). Non-testimony
+  // posts pay only the per-render setup cost — nothing renders, nothing
+  // fires until the menu item is tapped, which never happens for non-
+  // testimony surfaces because the menu item is absent.
+  const testimonyShare = useTestimonyShare(prayer)
+  const isTestimony = prayer.postType === 'testimony'
 
   const handleShareClick = useCallback(async () => {
     // Try native share on mobile devices only
@@ -309,7 +321,11 @@ export function InteractionBar({
           prayerContent={prayer.content}
           isOpen={shareOpen}
           onClose={() => setShareOpen(false)}
+          onShareAsImage={
+            isTestimony ? testimonyShare.initiateShare : undefined
+          }
         />
+        {isTestimony && testimonyShare.portal}
       </div>
 
       {/* Save button */}

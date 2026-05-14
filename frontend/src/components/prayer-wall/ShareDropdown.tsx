@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Copy, Mail, MessageSquare, Check } from 'lucide-react'
+import { Copy, ImageIcon, Mail, MessageSquare, Check } from 'lucide-react'
 import { FACEBOOK_SHARE_BASE, TWITTER_SHARE_BASE } from '@/constants/sharing'
 import { COPY_RESET_DELAY } from '@/constants/timing'
+import {
+  SHARE_AS_IMAGE_ARIA_LABEL,
+  SHARE_AS_IMAGE_LABEL,
+} from '@/constants/testimony-share-copy'
 import { useToastSafe } from '@/components/ui/Toast'
 
 interface ShareDropdownProps {
@@ -9,6 +13,14 @@ interface ShareDropdownProps {
   prayerContent: string
   isOpen: boolean
   onClose: () => void
+  /**
+   * Spec 6.7 — when defined, renders "Share as image" as the FIRST menu
+   * item. Caller decides whether to provide (testimony-gated in
+   * InteractionBar). Undefined → menu item is ABSENT from the DOM
+   * (Gate-G-TESTIMONY-ONLY: not rendered-then-disabled, not
+   * rendered-with-error).
+   */
+  onShareAsImage?: () => void
 }
 
 // eslint-disable-next-line react-refresh/only-export-components -- Utility co-located with ShareDropdown
@@ -21,6 +33,7 @@ export function ShareDropdown({
   prayerContent,
   isOpen,
   onClose,
+  onShareAsImage,
 }: ShareDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLElement | null>(null)
@@ -143,6 +156,26 @@ export function ShareDropdown({
       className="absolute right-0 z-50 mt-2 w-48 rounded-lg border border-white/10 bg-hero-bg py-2 shadow-xl shadow-black/40"
       onKeyDown={handleKeyDown}
     >
+      {onShareAsImage && (
+        <button
+          type="button"
+          role="menuitem"
+          tabIndex={-1}
+          onClick={() => {
+            // Close dropdown BEFORE initiating share flow so focus restoration
+            // (triggerRef) doesn't fight with the warning modal's focus trap.
+            onClose()
+            onShareAsImage()
+          }}
+          className={itemClass}
+          aria-label={SHARE_AS_IMAGE_ARIA_LABEL}
+          data-testid="share-as-image-menu-item"
+        >
+          <ImageIcon className="h-4 w-4" aria-hidden="true" />
+          {SHARE_AS_IMAGE_LABEL}
+        </button>
+      )}
+
       <button
         type="button"
         role="menuitem"

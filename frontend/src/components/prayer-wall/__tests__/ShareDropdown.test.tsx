@@ -43,4 +43,60 @@ describe('ShareDropdown', () => {
     expect(emailLink).toHaveAttribute('href', expect.stringContaining('mailto:'))
     expect(emailLink).toHaveAttribute('href', expect.stringContaining('Prayer%20Request'))
   })
+
+  // --- Spec 6.7 — "Share as image" gating ---
+
+  it('renders "Share as image" menu item when onShareAsImage is defined', () => {
+    render(
+      <ShareDropdown
+        prayerId="prayer-1"
+        prayerContent="Sample"
+        isOpen={true}
+        onClose={vi.fn()}
+        onShareAsImage={vi.fn()}
+      />,
+    )
+    expect(
+      screen.getByTestId('share-as-image-menu-item'),
+    ).toBeInTheDocument()
+  })
+
+  it('does NOT render "Share as image" when onShareAsImage is undefined', () => {
+    renderDropdown()
+    expect(
+      screen.queryByTestId('share-as-image-menu-item'),
+    ).not.toBeInTheDocument()
+  })
+
+  it('"Share as image" is the FIRST menu item', () => {
+    render(
+      <ShareDropdown
+        prayerId="prayer-1"
+        prayerContent="Sample"
+        isOpen={true}
+        onClose={vi.fn()}
+        onShareAsImage={vi.fn()}
+      />,
+    )
+    const items = screen.getAllByRole('menuitem')
+    expect(items[0]).toBe(screen.getByTestId('share-as-image-menu-item'))
+  })
+
+  it('clicking "Share as image" closes the dropdown and invokes onShareAsImage', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const onShareAsImage = vi.fn()
+    render(
+      <ShareDropdown
+        prayerId="prayer-1"
+        prayerContent="Sample"
+        isOpen={true}
+        onClose={onClose}
+        onShareAsImage={onShareAsImage}
+      />,
+    )
+    await user.click(screen.getByTestId('share-as-image-menu-item'))
+    expect(onClose).toHaveBeenCalled()
+    expect(onShareAsImage).toHaveBeenCalled()
+  })
 })

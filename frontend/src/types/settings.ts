@@ -62,6 +62,14 @@ export interface UserSettingsPrayerWall {
    * confirmation; opting out is friction-free.
    */
   watchEnabled: WatchPreference
+  /**
+   * Spec 6.7 — One-time "irreversibility" warning dismissal for the
+   * Share-as-image flow on testimony posts. `false` (default) = warning modal
+   * shows on first share; `true` after user confirms = subsequent shares
+   * skip the modal. Anti-pressure: silent default-off, no "you have not been
+   * warned" copy anywhere.
+   */
+  dismissedShareWarning: boolean
 }
 
 export interface UserSettings {
