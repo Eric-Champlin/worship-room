@@ -126,7 +126,7 @@ describe('AnsweredWall', () => {
     })
   })
 
-  it('renders heading and subhead from the Copy Deck (Spec acceptance A)', async () => {
+  it('renders heading and Spec 6.6b subhead + intro from the Copy Deck', async () => {
     vi.mocked(prayerWallApi.listPosts).mockResolvedValueOnce({
       posts: [],
       pagination: { page: 1, limit: 20, total: 0, hasMore: false },
@@ -135,8 +135,21 @@ describe('AnsweredWall', () => {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Answered' }),
     ).toBeInTheDocument()
+    // Spec 6.6b: the new load-bearing subhead replaces the shipped "Prayers
+    // the community has watched God move in.". Lora italic, <h2> within <main>.
     expect(
-      screen.getByText('Prayers the community has watched God move in.'),
+      screen.getByRole('heading', { level: 2, name: 'Gratitude, not comparison.' }),
+    ).toBeInTheDocument()
+    // The old shipped subhead string must be gone everywhere (the forwarding
+    // alias `ANSWERED_WALL_SUBHEAD` now resolves to the new string).
+    expect(
+      screen.queryByText('Prayers the community has watched God move in.'),
+    ).not.toBeInTheDocument()
+    // Spec 6.6b — intro paragraph mounted below the subhead. Verifies the
+    // survivorship-bias acknowledgment is on the wire so the wall doesn't
+    // read as a leaderboard of "winners".
+    expect(
+      screen.getByText(/This page is not the whole story/i),
     ).toBeInTheDocument()
   })
 

@@ -6,6 +6,7 @@ import {
   toggleBookmark,
   toggleCandle,
   togglePraising,
+  toggleCelebrate,
   configure,
   init,
 } from '@/lib/prayer-wall/reactionsStore'
@@ -25,6 +26,8 @@ export function usePrayerReactions(): {
   toggleCandle: (prayerId: string) => boolean
   /** Spec 6.6 — Answered Wall praising-reaction toggle. */
   togglePraising: (prayerId: string) => boolean
+  /** Spec 6.6b — Answered Wall celebrate-reaction toggle (warm sunrise affordance). */
+  toggleCelebrate: (prayerId: string) => boolean
 } {
   const reactions = useSyncExternalStore(
     subscribe,
@@ -56,5 +59,12 @@ export function usePrayerReactions(): {
     void init(user?.id ?? null)
   }, [user?.id])
 
-  return { reactions, togglePraying, toggleBookmark, toggleCandle, togglePraising }
+  return {
+    reactions,
+    togglePraying,
+    toggleBookmark,
+    toggleCandle,
+    togglePraising,
+    toggleCelebrate,
+  }
 }

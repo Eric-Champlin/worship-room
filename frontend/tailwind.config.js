@@ -366,6 +366,17 @@ export default {
           '0%, 100%': { opacity: '0.7' },
           '50%': { opacity: '1' },
         },
+        // Spec 6.6b — Celebrate reaction sparkle burst. Warm sunrise palette
+        // (amber drop-shadow), 600ms decelerate easing per plan ED-8. Distinct
+        // from `pray-icon-pulse` (violet, 250ms, no rotate) and from any
+        // Light-a-Candle / Praising treatment — rotate + amber shadow are the
+        // visual signature. Reduced-motion respected via the global rule in
+        // frontend/src/styles/animations.css.
+        'celebrate-sparkle': {
+          '0%': { transform: 'scale(1) rotate(0deg)', filter: 'drop-shadow(0 0 0px rgba(252, 211, 77, 0))' },
+          '50%': { transform: 'scale(1.25) rotate(15deg)', filter: 'drop-shadow(0 0 10px rgba(252, 211, 77, 0.7))' },
+          '100%': { transform: 'scale(1) rotate(0deg)', filter: 'drop-shadow(0 0 0px rgba(252, 211, 77, 0))' },
+        },
       },
       animation: {
         // --- Utility (keep as-is) ---
@@ -446,6 +457,8 @@ export default {
         'garden-element-fade': 'garden-element-fade 400ms cubic-bezier(0, 0, 0.2, 1) forwards',
         // Spec 6.3 — NightWatchChip breathing-glow.
         'night-pulse': 'night-pulse 3s cubic-bezier(0.4, 0, 0.2, 1) infinite',
+        // Spec 6.6b — Celebrate reaction sparkle burst (~600ms decelerate per plan ED-8).
+        'celebrate-sparkle': 'celebrate-sparkle 600ms cubic-bezier(0, 0, 0.2, 1) forwards',
       },
     },
   },

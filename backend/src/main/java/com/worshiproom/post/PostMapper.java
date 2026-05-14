@@ -133,6 +133,7 @@ public class PostMapper {
                 p.getPrayingCount(),
                 p.getCandleCount(),
                 p.getPraisingCount(),
+                p.getCelebrateCount(),
                 p.getCommentCount(),
                 p.getBookmarkCount(),
                 p.getCreatedAt(),

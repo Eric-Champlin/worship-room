@@ -273,7 +273,7 @@ public class PostController {
     public ResponseEntity<Void> removeReaction(
             @AuthenticationPrincipal AuthenticatedUser principal,
             @PathVariable UUID id,
-            @RequestParam @NotBlank @Pattern(regexp = "^(praying|candle|praising)$") String reactionType
+            @RequestParam @NotBlank @Pattern(regexp = "^(praying|candle|praising|celebrate)$") String reactionType
     ) {
         UUID userId = principal.userId();
         String requestId = MDC.get("requestId");

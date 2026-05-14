@@ -30,6 +30,7 @@ public record PostDto(
         int prayingCount,
         int candleCount,
         int praisingCount,
+        int celebrateCount,
         int commentCount,
         int bookmarkCount,
         OffsetDateTime createdAt,

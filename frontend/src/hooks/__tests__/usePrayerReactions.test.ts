@@ -136,3 +136,55 @@ describe('usePrayerReactions — auth state integration', () => {
     expect(getSnapshot()).toEqual({})
   })
 })
+
+// ─── Spec 6.6b T-A1 — cross-mount subscription test for toggleCelebrate ───────
+//
+// Universal Rule 8 + BB-45 anti-pattern guard. The store is Pattern A
+// (`useSyncExternalStore` via standalone hook). The contract: any component
+// that reads `reactions[id].isCelebrating` via the hook MUST re-render when
+// any OTHER surface calls `toggleCelebrate(id)`. This test mounts component A,
+// mutates the store from outside, and asserts A sees the new value — proving
+// the subscription is wired.
+//
+// IF THIS TEST FAILS: a future refactor likely broke the useSyncExternalStore
+// integration (forgot to call notify(), bypassed the snapshot, etc.). Do NOT
+// "fix" the test by mocking the hook — mocking destroys the contract this
+// test exists to enforce.
+
+describe('usePrayerReactions — Spec 6.6b T-A1 cross-mount subscription for toggleCelebrate', () => {
+  it('component reading isCelebrating re-renders when toggleCelebrate fires from outside', async () => {
+    mockUser('user-1')
+    // Backend toggleReaction stub returns "added" state immediately so the
+    // flag-on optimistic flip is followed by a no-op server-disagreement
+    // check (cached === server → no forceState).
+    vi.mocked(prayerWallApi.toggleReaction).mockResolvedValue({
+      reactionType: 'celebrate',
+      state: 'added',
+      prayingCount: 0,
+      candleCount: 0,
+      praisingCount: 0,
+      celebrateCount: 1,
+    })
+
+    const { result } = renderHook(() => usePrayerReactions())
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    // Initial state: nothing in the store for prayer-x.
+    expect(result.current.reactions['prayer-x']?.isCelebrating ?? false).toBe(false)
+
+    // Trigger the toggle from OUTSIDE this component (simulating another
+    // surface mutating the store). The Pattern A subscription must push the
+    // new value into the component's render.
+    await act(async () => {
+      result.current.toggleCelebrate('prayer-x')
+      // Allow microtasks to flush so the optimistic flip's notify() reaches
+      // the useSyncExternalStore subscription.
+      await Promise.resolve()
+    })
+
+    expect(result.current.reactions['prayer-x']?.isCelebrating).toBe(true)
+  })
+})

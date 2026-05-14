@@ -322,9 +322,21 @@ describe('getMyReactions', () => {
   it('issues GET /api/v1/users/me/reactions and returns mapped reactions record', async () => {
     const apiResponse: ReactionsResponseApi = {
       reactions: {
-        // Spec 6.6 — isPraising added.
-        'p1': { isPraying: true, isCandle: false, isPraising: false, isBookmarked: true },
-        'p2': { isPraying: false, isCandle: true, isPraising: false, isBookmarked: false },
+        // Spec 6.6b — isCelebrating added; backend returns all 5 reaction flags.
+        'p1': {
+          isPraying: true,
+          isCandle: false,
+          isPraising: false,
+          isCelebrating: false,
+          isBookmarked: true,
+        },
+        'p2': {
+          isPraying: false,
+          isCandle: true,
+          isPraising: false,
+          isCelebrating: false,
+          isBookmarked: false,
+        },
       },
     }
     vi.mocked(apiFetch).mockResolvedValueOnce(apiResponse)
@@ -336,6 +348,7 @@ describe('getMyReactions', () => {
       isBookmarked: true,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
     expect(result['p2'].isCandle).toBe(true)
   })

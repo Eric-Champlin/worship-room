@@ -67,6 +67,9 @@ export interface PrayerRequest {
   /** Spec 6.6 — count of 'praising' reactions (Answered Wall). Optional for
    *  back-compat with old-shape data; default 0 when absent. */
   praisingCount?: number
+  /** Spec 6.6b — count of 'celebrate' reactions (Answered Wall warm sunrise).
+   *  Optional for back-compat with old-shape data; default 0 when absent. */
+  celebrateCount?: number
   bookmarkCount?: number
   updatedAt?: string
   scriptureReference?: string
@@ -117,4 +120,9 @@ export interface PrayerReaction {
   /** Spec 6.6 — viewer has reacted with 'praising' on this prayer (Answered Wall).
    *  Default-filled to false on hydrate for old-shape data (additive migration). */
   isPraising: boolean
+  /** Spec 6.6b — viewer has reacted with 'celebrate' on this prayer (Answered Wall
+   *  warm sunrise affordance). Default-filled to false on hydrate (3-stage additive
+   *  migration: pre-3.7 → fill all three; post-3.7-pre-6.6 → fill praising + celebrate;
+   *  post-6.6-pre-6.6b → fill celebrate). */
+  isCelebrating: boolean
 }

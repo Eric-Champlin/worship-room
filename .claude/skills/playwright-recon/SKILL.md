@@ -67,15 +67,15 @@ Navigate to each URL provided. For each page:
  
 1. Wait for full load (network idle + animations settled)
 2. Dismiss any cookie banners or overlays
-3. Take a full-page screenshot at desktop (1440px) and mobile (375px). Save all screenshots under `_plans/recon/screenshots/` (run `mkdir -p _plans/recon/screenshots` first) — never write screenshots to bare relative paths, which land in the repo root.
+3. Take a full-page screenshot at desktop (1440px) and mobile (375px)
  
 ```text
 ## Pages Captured
  
 | Page | URL | Desktop Screenshot | Mobile Screenshot |
 |------|-----|--------------------|-------------------|
-| Homepage | http://localhost:5173/ | _plans/recon/screenshots/home-desktop.png | _plans/recon/screenshots/home-mobile.png |
-| Prayer Wall | http://localhost:5173/prayer-wall | _plans/recon/screenshots/prayer-wall-desktop.png | _plans/recon/screenshots/prayer-wall-mobile.png |
+| Homepage | http://localhost:5173/ | screenshots/home-desktop.png | screenshots/home-mobile.png |
+| Prayer Wall | http://localhost:5173/prayer-wall | screenshots/prayer-wall-desktop.png | screenshots/prayer-wall-mobile.png |
 | ... | ... | ... | ... |
 ```
  
@@ -981,30 +981,6 @@ If no forms on the page, skip this table.
 | Visual gap | {px} | {margin-bottom on A / margin-top on B / gap / padding} |
 ```
  
-**Inline Element Position tables (if the screen has inline-row layouts):**
- 
-Some layouts place multiple elements on the same visual row — chip rows, button groups, a label next to its input, an icon next to a multi-line title, breadcrumb segments. These elements can each have perfectly correct individual CSS and still **wrap to a second row** when their combined width exceeds the container at a given breakpoint. CSS-property capture alone reports every property as correct and misses the layout failure entirely. Capturing the expected positional relationship is what lets `/verify-with-playwright` Step 6l catch the wrapping bug.
- 
-**For every inline-row element group on this screen**, capture the `boundingBox().y` of each element at each breakpoint and document the expected alignment:
- 
-```text
-### Inline Element Positions: {group name, e.g. "Pray chip row"} (Screen {N})
-| Element | y at 375px | y at 768px | y at 1440px | Expected Alignment |
-|---------|-----------|-----------|-------------|--------------------|
-| {element 1} | {px} | {px} | {px} | {see "How to phrase" below} |
-| {element 2} | {px} | {px} | {px} | |
-| {element 3} | {px} | {px} | {px} | |
-```
- 
-**How to phrase the alignment expectation** — two distinct assertions:
- 
-1. **"No wrapping" — the right assertion for variable-height children.** When a row uses `flex items-center` with children of different intrinsic heights (a fixed-size icon next to a multi-line title next to a chip), each child's `boundingBox().y` legitimately differs by 16–30px while the row is correctly centered. A wrapping bug shows up as one child sitting an **entire row-height** (typically 40px+) below the others. Phrase it as the anti-state: "No element drops below the row's vertical span" plus the breakpoint.
-2. **"Matching top-y (±5px)" — only when children share intrinsic heights.** Use this only when every element in the row has the same height by construction (a row of equal-height pill buttons, a tab bar of identical-chrome tabs). If any child is variable-height, top-y matching produces false positives even on a correct layout.
- 
-**Default to "No wrapping".** Reserve "Matching top-y" for rows of structurally identical elements.
- 
-**If the screen has no inline-row layouts**, write "No inline-row layouts on this screen" and skip the table. This documentation feeds the plan's `## Inline Element Position Expectations` section and is verified by `/verify-with-playwright` Step 6l.
- 
 **Mapping rules:**
  
 - If a standard Tailwind class produces the EXACT computed value, use it (e.g., `p-10` = 40px)
@@ -1246,9 +1222,6 @@ For every component, visit each breakpoint and extract computed styles that CHAN
 - [ ] Gradient tables (if gradients exist)
 - [ ] Image tables (if images exist)
 - [ ] Link tables + inventory (if links in body content)
-- [ ] Intra-element text variation tables (if any text block has mixed formatting)
-- [ ] Form Responsive Widths table (if the screen has forms)
-- [ ] Inline Element Position tables (if the screen has inline-row layouts — or "No inline-row layouts on this screen")
 - [ ] Vertical Rhythm table
 - [ ] Text Content Snapshot
  
@@ -1308,24 +1281,21 @@ Then include all sections from Steps 2-9.
 ```text
 ## Plan Handoff Checklist
  
-The recon report feeds three downstream skills — `/plan` (transports these tables into its `## Recon Context` section), `/execute-plan` (copies exact values at build time), and `/verify-with-playwright` (compares the built page against them). The **Used By /plan For** column is the planning use; the **Also Used By** column names the other skills that depend on the same section. If a section is missing, the plan's Recon Context will have gaps AND verification will have nothing to check against — so this checklist gates the whole downstream chain, not just planning.
- 
 | Section | Present? | Used By /plan For | Also Used By |
-|---------|----------|-------------------|--------------|
-| Screen Inventory | {YES/NO} | Understanding flow structure; the plan must be decomposable per screen | /verify-with-playwright (per-screen verification) |
-| Per-Screen Component Audit | {YES/NO} | Completeness gate — every component in the audit must have an implementation step in the plan | — |
-| CSS Mapping Table (per component) | {YES/NO} | Exact Tailwind classes for every UI step | /execute-plan (copies verbatim), /verify-with-playwright (compares built vs recon) |
-| Gradient tables | {YES/NO} | Exact gradient strings, angles, color stops, cutoff positions | /verify-with-playwright (Step 6c gradient comparison) |
-| Vertical Rhythm tables | {YES/NO} | Spacing between adjacent sections | /execute-plan, /verify-with-playwright (Step 6e vertical rhythm comparison) |
-| Image tables | {YES/NO} | Rendered image dimensions | /verify-with-playwright (Step 6d image comparison) |
-| Link inventory tables | {YES/NO} | Ensuring links are `<a>` tags with correct href/styling | /verify-with-playwright (Step 6f link verification — catches `<a>` rendered as plain text) |
-| States tables (hover/focus) | {YES/NO} | Tailwind hover:/focus: variants | /verify-with-playwright (Step 6g hover/focus comparison) |
-| Form Responsive Widths | {YES/NO} | Per-breakpoint form container vs input constraint method | /verify-with-playwright (Step 6h form responsive width comparison) |
-| Intra-element text variations | {YES/NO} | Which phrases need `<strong>`/`<em>`/`<b>`/`<i>` wrapper tags | /verify-with-playwright (Step 6i intra-element formatting check) |
-| Inline Element Position tables | {YES/NO} | Element groups that must share a row + wrap tolerances — feeds the plan's Inline Element Position Expectations section | /verify-with-playwright (Step 6l inline positional verification — catches wrapping bugs CSS-only checks miss) |
-| Conditional/dynamic content | {YES/NO} | Conditional render logic in components | — |
-| Responsive CSS Mapping Table | {YES/NO} | Mobile-first implementation structure | /execute-plan (responsive class application) |
-| Text Content Snapshot | {YES/NO} | Exact rendered copy the plan must preserve | /verify-with-playwright (Step 6j text content verification) |
+|---------|----------|-------------------|
+| Screen Inventory | {YES/NO} | Understanding flow structure | /verify-with-playwright |
+| Per-Screen Component Audit | {YES/NO} | Ensuring plan covers every component | — |
+| CSS Mapping Table (per component) | {YES/NO} | Exact Tailwind classes for every step | /execute-plan, /verify-with-playwright |
+| Gradient tables | {YES/NO} | Exact gradient strings | /verify-with-playwright |
+| Vertical Rhythm tables | {YES/NO} | Spacing between sections | /execute-plan, /verify-with-playwright |
+| Image tables | {YES/NO} | Image dimensions | /verify-with-playwright |
+| Link inventory tables | {YES/NO} | Ensuring links are `<a>` tags with correct styling | /verify-with-playwright |
+| States tables (hover/focus) | {YES/NO} | Tailwind hover:/focus: variants | /verify-with-playwright |
+| Conditional/dynamic content | {YES/NO} | Conditional render logic | — |
+| Responsive CSS Mapping Table | {YES/NO} | Mobile-first implementation | /execute-plan |
+| Text Content Snapshot | {YES/NO} | Text content verification | /verify-with-playwright |
+| Form Responsive Widths | {YES/NO} | Per-breakpoint form constraint | /verify-with-playwright |
+| Intra-element text variations | {YES/NO} | Mixed-formatting HTML tags | /verify-with-playwright |
 ```
  
 Save the file and display:
@@ -1414,6 +1384,7 @@ Save the file and display:
 - The recon report feeds into `/plan` as design context. `/plan` checks the capture date and flags reports older than 30 days
 - After implementation, `/verify-with-playwright` compares the built version against these specs
 - `/verify-with-playwright` auto-detects the Source URL from this report for `--compare-prod` mode
+- `/verify-with-playwright` auto-detects the Source URL from this report for `--compare-prod` mode
 - The Plan Handoff Checklist lists every section downstream skills consume
  
 **Constraints:**
@@ -1438,10 +1409,8 @@ Save the file and display:
  
 ## See Also
  
-The standard flow is `playwright-recon (optional) → spec → plan → execute-plan → code-review → verify-with-playwright`.
- 
-- `/spec` — Write a feature specification (the recon report it produces is referenced by the spec, then inherited by the plan)
-- `/plan` — Create implementation plan from a spec (transports this recon report into its `## Recon Context` section)
-- `/execute-plan` — Execute all steps from a generated plan (copies the recon's exact CSS values at build time)
-- `/code-review` — Pre-commit code review (run BEFORE verification — the standard flow is `spec → plan → execute → code-review → verify`)
-- `/verify-with-playwright` — Runtime UI verification (consumes this recon report for `--compare-prod` and design-compliance comparison)
+- `/plan` — Create implementation plan from a spec (consumes this recon report)
+- `/execute-plan` — Execute all steps from a generated plan
+- `/verify-with-playwright` — Runtime UI verification (consumes this recon report for prod comparison)
+- `/code-review` — Pre-commit code review (run after verification passes)
+- `/spec` — Write a feature specification (upstream of /plan)

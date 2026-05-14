@@ -60,7 +60,8 @@ export interface AuthContextValue {
   refreshUser: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null)
+// eslint-disable-next-line react-refresh/only-export-components -- exported so components that need to handle the "no provider" case (e.g., PrayerCard inside legacy test fixtures) can read the context directly via useContext.
+export const AuthContext = createContext<AuthContextValue | null>(null)
 
 interface InternalState {
   isAuthenticated: boolean

@@ -105,6 +105,16 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
     @Query("UPDATE Post p SET p.praisingCount = p.praisingCount - 1 WHERE p.id = :postId AND p.praisingCount > 0")
     int decrementPraisingCount(@Param("postId") UUID postId);
 
+    /** SQL-side increment for celebrate counter (Spec 6.6b Answered Wall). NO {@code last_activity_at} bump. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.celebrateCount = p.celebrateCount + 1 WHERE p.id = :postId")
+    int incrementCelebrateCount(@Param("postId") UUID postId);
+
+    /** SQL-side decrement for celebrate counter with {@code > 0} guard (Spec 6.6b). NO {@code last_activity_at} bump. */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Post p SET p.celebrateCount = p.celebrateCount - 1 WHERE p.id = :postId AND p.celebrateCount > 0")
+    int decrementCelebrateCount(@Param("postId") UUID postId);
+
     /** SQL-side increment for bookmark counter (Spec 3.7). NO {@code last_activity_at} bump (private action). */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Post p SET p.bookmarkCount = p.bookmarkCount + 1 WHERE p.id = :postId")

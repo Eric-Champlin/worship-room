@@ -308,8 +308,14 @@ describe('reactionsResponseToReactionsMap (Phase 3 Addendum #10)', () => {
   it('produces exactly the wr_prayer_reactions field shape per post', () => {
     const response: ReactionsResponseApi = {
       reactions: {
-        // Spec 6.6 — isPraising added; mapper surfaces all four reaction-state flags.
-        'post-1': { isPraying: true, isCandle: false, isPraising: false, isBookmarked: true },
+        // Spec 6.6b — isCelebrating added; mapper surfaces all five reaction-state flags.
+        'post-1': {
+          isPraying: true,
+          isCandle: false,
+          isPraising: false,
+          isCelebrating: false,
+          isBookmarked: true,
+        },
       },
     }
     const result = reactionsResponseToReactionsMap(response)
@@ -319,6 +325,7 @@ describe('reactionsResponseToReactionsMap (Phase 3 Addendum #10)', () => {
       isBookmarked: true,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
   })
 

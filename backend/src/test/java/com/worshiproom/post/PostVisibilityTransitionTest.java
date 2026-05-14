@@ -51,6 +51,7 @@ class PostVisibilityTransitionTest {
     @Mock private ResolveRateLimitService resolveRateLimitService;
     @Mock private com.worshiproom.upload.UploadService uploadService;
     @Mock private IntercessorService intercessorService;
+    @Mock private AnsweredFeedCache answeredFeedCache;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -64,7 +65,7 @@ class PostVisibilityTransitionTest {
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
                 htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
-                uploadService, intercessorService);
+                uploadService, intercessorService, answeredFeedCache);
     }
 
     private static Post buildPost(UUID id, UUID userId,
@@ -93,7 +94,7 @@ class PostVisibilityTransitionTest {
                 id, "prayer_request", "x", "family",
                 false, null, null, null, null,
                 "public", false, null, null, "approved", false,
-                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test", null),
                 null,

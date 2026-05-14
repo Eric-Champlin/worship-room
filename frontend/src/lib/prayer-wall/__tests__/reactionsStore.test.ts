@@ -196,10 +196,10 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
     expect(getReaction('new-prayer-c3')!.isCandle).toBe(true) // still true
   })
 
-  it('hydrate from old-shape (3-field) localStorage default-fills isCandle AND isPraising to false', () => {
-    // Pre-seed localStorage with old-shape data — neither isCandle nor isPraising.
-    // Spec 6.6 extended the migration: any field absence (candle OR praising)
-    // default-fills both missing fields to false.
+  it('hydrate from old-shape (3-field) localStorage default-fills isCandle AND isPraising AND isCelebrating to false', () => {
+    // Pre-seed localStorage with old-shape data — none of isCandle, isPraising,
+    // or isCelebrating present. Spec 6.6b extended the migration to fill all
+    // three missing fields.
     const oldShape = {
       'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false },
       'prayer-2': { prayerId: 'prayer-2', isPraying: false, isBookmarked: true },
@@ -216,6 +216,7 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
       isBookmarked: false,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
     expect(snap['prayer-2']).toEqual({
       prayerId: 'prayer-2',
@@ -223,19 +224,23 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
       isBookmarked: true,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
 
-    // localStorage was rewritten with the new shape — every entry has all 5 fields.
+    // localStorage was rewritten with the new shape — every entry has all 6 fields.
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
     expect(stored['prayer-1'].isCandle).toBe(false)
     expect(stored['prayer-1'].isPraising).toBe(false)
+    expect(stored['prayer-1'].isCelebrating).toBe(false)
     expect(stored['prayer-2'].isCandle).toBe(false)
     expect(stored['prayer-2'].isPraising).toBe(false)
+    expect(stored['prayer-2'].isCelebrating).toBe(false)
   })
 
-  it('hydrate from 4-field localStorage (post-Spec-3.7, pre-6.6) default-fills isPraising to false', () => {
+  it('hydrate from 4-field localStorage (post-Spec-3.7, pre-6.6) default-fills isPraising AND isCelebrating to false', () => {
     // Spec 6.6 — second-wave migration: data that ran the 3.7 migration once
-    // has isCandle but not isPraising. Default-fill isPraising to false.
+    // has isCandle but not isPraising. Spec 6.6b extended to also fill
+    // isCelebrating.
     const fourFieldShape = {
       'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false, isCandle: true },
     }
@@ -250,14 +255,47 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
       isBookmarked: false,
       isCandle: true,
       isPraising: false,
+      isCelebrating: false,
     })
 
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
     expect(stored['prayer-1'].isPraising).toBe(false)
+    expect(stored['prayer-1'].isCelebrating).toBe(false)
+  })
+
+  it('hydrate from 5-field localStorage (post-6.6, pre-6.6b) default-fills isCelebrating to false', () => {
+    // Spec 6.6b — third-wave migration: data that ran the 6.6 migration once
+    // has isCandle + isPraising but not isCelebrating. Default-fill
+    // isCelebrating to false.
+    const fiveFieldShape = {
+      'prayer-1': {
+        prayerId: 'prayer-1',
+        isPraying: true,
+        isBookmarked: false,
+        isCandle: true,
+        isPraising: false,
+      },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fiveFieldShape))
+    _resetForTesting()
+
+    const snap = getReactions()
+
+    expect(snap['prayer-1']).toEqual({
+      prayerId: 'prayer-1',
+      isPraying: true,
+      isBookmarked: false,
+      isCandle: true,
+      isPraising: false,
+      isCelebrating: false,
+    })
+
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+    expect(stored['prayer-1'].isCelebrating).toBe(false)
   })
 
   it('hydration on already-migrated data does not re-write storage', () => {
-    // Pre-seed with new-shape (post-6.6) data.
+    // Pre-seed with new-shape (post-6.6b, 6-field) data.
     const newShape = {
       'prayer-1': {
         prayerId: 'prayer-1',
@@ -265,6 +303,7 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
         isBookmarked: false,
         isCandle: true,
         isPraising: false,
+        isCelebrating: false,
       },
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newShape))
@@ -329,6 +368,7 @@ describe('init() — hydration', () => {
       isBookmarked: true,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
     expect(getReaction('prayer-B')).toEqual({
       prayerId: 'prayer-B',
@@ -336,6 +376,7 @@ describe('init() — hydration', () => {
       isBookmarked: true,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
   })
 
@@ -359,6 +400,7 @@ describe('init() — hydration', () => {
       isBookmarked: true,
       isCandle: false,
       isPraising: false,
+      isCelebrating: false,
     })
     expect(showToast).toHaveBeenCalledWith(
       expect.stringContaining("couldn't refresh your reactions"),

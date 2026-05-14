@@ -40,6 +40,8 @@
   <include file="db/changelog/2026-05-12-004-create-quick-lift-sessions-table.xml"/>
   <include file="db/changelog/2026-05-14-001-add-praising-to-post-reactions-check.xml"/>
   <include file="db/changelog/2026-05-14-002-add-posts-praising-count-column.xml"/>
+  <include file="db/changelog/2026-05-14-003-add-celebrate-to-post-reactions-check.xml"/>
+  <include file="db/changelog/2026-05-14-004-add-posts-celebrate-count-column.xml"/>
   <include file="db/changelog/contexts/dev-seed.xml"/>
 
 </databaseChangeLog>

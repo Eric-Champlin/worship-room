@@ -11,6 +11,7 @@ import { QuickLiftOverlay } from './QuickLiftOverlay'
 import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { useTestimonyShare } from '@/hooks/useTestimonyShare'
 import { ShareDropdown, getShareText } from './ShareDropdown'
+import { CelebrateReaction } from './CelebrateReaction'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
 import {
@@ -59,6 +60,13 @@ interface InteractionBarProps {
   /** Spec 6.6 — called when the user taps the "Praising with you" button.
    *  Required when showPraising=true; caller wires to togglePraising(prayer.id). */
   onTogglePraising?: () => void
+  /** Spec 6.6b — Answered Wall: when true, render the Celebrate reaction
+   *  button. Explicit prop (callers MUST gate on prayer.isAnswered themselves
+   *  per W11 — celebrate is not surfaced on non-answered posts). */
+  showCelebrate?: boolean
+  /** Spec 6.6b — called when the user taps the Celebrate button.
+   *  Required when showCelebrate=true; caller wires to toggleCelebrate(prayer.id). */
+  onToggleCelebrate?: () => void
 }
 
 const btnBase =
@@ -75,6 +83,8 @@ export function InteractionBar({
   isSaved,
   showPraising = false,
   onTogglePraising,
+  showCelebrate = false,
+  onToggleCelebrate,
 }: InteractionBarProps) {
   const { isAuthenticated, user } = useAuth()
   const authModal = useAuthModal()
@@ -89,6 +99,7 @@ export function InteractionBar({
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
   const isPraising = reactions?.isPraising ?? false
+  const isCelebrating = reactions?.isCelebrating ?? false
 
   const [isAnimating, setIsAnimating] = useState(false)
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -261,6 +272,19 @@ export function InteractionBar({
             {PRAISING_LABEL} ({prayer.praisingCount ?? 0})
           </span>
         </button>
+      )}
+
+      {/* Spec 6.6b — Celebrate reaction (Answered Wall warm sunrise). Renders only
+          when the caller passes `showCelebrate={true}`; callers MUST gate on
+          prayer.isAnswered themselves per W11 (celebrate is not surfaced on
+          non-answered posts). Distinct from Praising — separate reaction type
+          with its own per-post counter on the backend. */}
+      {showCelebrate && (
+        <CelebrateReaction
+          isActive={isCelebrating}
+          count={prayer.celebrateCount ?? 0}
+          onToggle={() => onToggleCelebrate?.()}
+        />
       )}
 
       {/* Comment button — Spec 4.6: hidden entirely for encouragement (W6/D12) */}

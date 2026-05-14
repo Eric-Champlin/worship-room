@@ -65,6 +65,7 @@ class PostServiceWriteTest {
     @Mock private ResolveRateLimitService resolveRateLimitService;
     @Mock private com.worshiproom.upload.UploadService uploadService;
     @Mock private IntercessorService intercessorService;
+    @Mock private AnsweredFeedCache answeredFeedCache;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -78,7 +79,7 @@ class PostServiceWriteTest {
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
                 htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
-                uploadService, intercessorService);
+                uploadService, intercessorService, answeredFeedCache);
     }
 
     private CreatePostRequest sampleRequest() {
@@ -110,7 +111,7 @@ class PostServiceWriteTest {
                 id, "prayer_request", "Please pray for my family.", "family",
                 false, null, null, null, null,
                 "public", false, null, null, "approved", false,
-                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test User", null),
                 null,
@@ -612,7 +613,7 @@ class PostServiceWriteTest {
                 postId, "question", "what does this verse mean?", null,
                 false, null, null, null, null,
                 "public", false, null, null, "approved", false,
-                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Asker", null),
                 resolvedCommentId,

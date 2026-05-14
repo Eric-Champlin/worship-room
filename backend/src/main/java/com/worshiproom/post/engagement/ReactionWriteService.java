@@ -57,6 +57,7 @@ public class ReactionWriteService {
     private static final String PRAYING = "praying";
     private static final String CANDLE = "candle";
     private static final String PRAISING = "praising";
+    private static final String CELEBRATE = "celebrate";
 
     private final PostRepository postRepository;
     private final ReactionRepository reactionRepository;
@@ -93,8 +94,14 @@ public class ReactionWriteService {
      * @param postId        target post (must be visible to viewer)
      * @param userId        actor
      * @param reactionType  validated upstream by {@code @Pattern} —
-     *                      MUST be {@code "praying"}, {@code "candle"}, or
-     *                      {@code "praising"} (Spec 6.6 widened the set)
+     *                      MUST be {@code "praying"}, {@code "candle"},
+     *                      {@code "praising"} (Spec 6.6 widened the set),
+     *                      or {@code "celebrate"} (Spec 6.6b widened it
+     *                      further). Like {@code "candle"} and
+     *                      {@code "praising"}, {@code "celebrate"} does NOT
+     *                      fire {@code INTERCESSION} — it's a warm sunrise
+     *                      affirmation on an answered prayer, not an act of
+     *                      intercession.
      */
     @Transactional
     @CacheEvict(value = "prayer-receipt", key = "#postId")
@@ -152,7 +159,8 @@ public class ReactionWriteService {
                 state,
                 refreshed.getPrayingCount(),
                 refreshed.getCandleCount(),
-                refreshed.getPraisingCount()
+                refreshed.getPraisingCount(),
+                refreshed.getCelebrateCount()
         );
     }
 
@@ -190,6 +198,8 @@ public class ReactionWriteService {
             postRepository.incrementCandleCount(postId);
         } else if (PRAISING.equals(reactionType)) {
             postRepository.incrementPraisingCount(postId);
+        } else if (CELEBRATE.equals(reactionType)) {
+            postRepository.incrementCelebrateCount(postId);
         }
     }
 
@@ -200,6 +210,8 @@ public class ReactionWriteService {
             postRepository.decrementCandleCount(postId);
         } else if (PRAISING.equals(reactionType)) {
             postRepository.decrementPraisingCount(postId);
+        } else if (CELEBRATE.equals(reactionType)) {
+            postRepository.decrementCelebrateCount(postId);
         }
     }
 }

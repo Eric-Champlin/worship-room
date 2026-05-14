@@ -81,6 +81,9 @@ public class Post {
     @Column(name = "praising_count", nullable = false)
     private int praisingCount;
 
+    @Column(name = "celebrate_count", nullable = false)
+    private int celebrateCount;
+
     @Column(name = "comment_count", nullable = false)
     private int commentCount;
 
@@ -142,6 +145,7 @@ public class Post {
     public int getPrayingCount() { return prayingCount; }
     public int getCandleCount() { return candleCount; }
     public int getPraisingCount() { return praisingCount; }
+    public int getCelebrateCount() { return celebrateCount; }
     public int getCommentCount() { return commentCount; }
     public int getBookmarkCount() { return bookmarkCount; }
     public int getReportCount() { return reportCount; }
@@ -171,6 +175,7 @@ public class Post {
     public void setPostType(PostType postType) { this.postType = postType; }
     public void setPrayingCount(int prayingCount) { this.prayingCount = prayingCount; }
     public void setPraisingCount(int praisingCount) { this.praisingCount = praisingCount; }
+    public void setCelebrateCount(int celebrateCount) { this.celebrateCount = celebrateCount; }
     public void setQotdId(String qotdId) { this.qotdId = qotdId; }
     public void setReportCount(int reportCount) { this.reportCount = reportCount; }
     public void setScriptureReference(String scriptureReference) { this.scriptureReference = scriptureReference; }

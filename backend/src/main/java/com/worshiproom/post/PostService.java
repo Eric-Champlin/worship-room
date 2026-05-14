@@ -24,6 +24,7 @@ import jakarta.persistence.EntityManager;
 import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -77,6 +78,7 @@ public class PostService {
     private final ResolveRateLimitService resolveRateLimitService;
     private final UploadService uploadService;
     private final IntercessorService intercessorService;
+    private final AnsweredFeedCache answeredFeedCache;
 
     public PostService(PostRepository postRepository,
                        PostMapper postMapper,
@@ -93,7 +95,8 @@ public class PostService {
                        PostCommentRepository commentRepository,
                        ResolveRateLimitService resolveRateLimitService,
                        UploadService uploadService,
-                       IntercessorService intercessorService) {
+                       IntercessorService intercessorService,
+                       AnsweredFeedCache answeredFeedCache) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.userResolverService = userResolverService;
@@ -110,6 +113,7 @@ public class PostService {
         this.resolveRateLimitService = resolveRateLimitService;
         this.uploadService = uploadService;
         this.intercessorService = intercessorService;
+        this.answeredFeedCache = answeredFeedCache;
     }
 
     public PostListResponse listFeed(
@@ -121,22 +125,43 @@ public class PostService {
             SortKey sort,
             String requestId
     ) {
-        Specification<Post> spec = PostSpecifications.visibleTo(viewerId)
-                .and(PostSpecifications.notMutedBy(viewerId))
-                .and(PostSpecifications.byCategory(category))
-                .and(PostSpecifications.byPostType(postType))
-                .and(PostSpecifications.byQotdId(qotdId))
-                .and(PostSpecifications.notExpired()); // Spec 4.6 — encouragement 24h feed expiry
+        List<Post> posts;
+        long totalElements;
+
         if (sort == SortKey.ANSWERED) {
-            spec = spec.and(PostSpecifications.isAnswered());
+            // Spec 6.6b — Answered Wall feed: viewer-agnostic cache layer
+            // BELOW per-viewer enrichment (ED-5 Option (b)). Cache key is
+            // (category, postType, qotdId, page, limit) — no viewerId.
+            // intercessorSummary is per-viewer and is computed AFTER the
+            // cache read.
+            //
+            // The cached spec uses visibleTo(null) (public-only) +
+            // authorActive() (Spec 6.6b — exclude deleted/banned authors).
+            // Mute filter is intentionally NOT applied to the Answered Wall
+            // feed — see AnsweredFeedCache JavaDoc for the rationale.
+            AnsweredFeedCache.CachedAnsweredFeed cached =
+                    answeredFeedCache.loadAnsweredFeedPublic(category, postType, qotdId, page, limit);
+            posts = cached.posts();
+            totalElements = cached.totalElements();
+        } else {
+            Specification<Post> spec = PostSpecifications.visibleTo(viewerId)
+                    .and(PostSpecifications.notMutedBy(viewerId))
+                    .and(PostSpecifications.byCategory(category))
+                    .and(PostSpecifications.byPostType(postType))
+                    .and(PostSpecifications.byQotdId(qotdId))
+                    .and(PostSpecifications.notExpired()); // Spec 4.6 — encouragement 24h feed expiry
+            Pageable pageable = PageRequest.of(page - 1, limit, sortFor(sort));
+            Page<Post> resultPage = postRepository.findAll(spec, pageable);
+            posts = resultPage.getContent();
+            totalElements = resultPage.getTotalElements();
         }
-        Pageable pageable = PageRequest.of(page - 1, limit, sortFor(sort));
-        Page<Post> resultPage = postRepository.findAll(spec, pageable);
+
         // Spec 6.5 — attach per-post intercessor summary classified against the viewer's
         // friend set. Batched window-function query for the entire page (no N+1).
-        var summaries = intercessorService.buildFeedSummaries(resultPage.getContent(), viewerId);
-        List<PostDto> dtos = postMapper.toDtoList(resultPage.getContent(), summaries);
-        return new PostListResponse(dtos, buildMeta(page, limit, resultPage.getTotalElements(), requestId));
+        // Computed per-request; never enters the answered-feed cache (ED-5 Option (b)).
+        var summaries = intercessorService.buildFeedSummaries(posts, viewerId);
+        List<PostDto> dtos = postMapper.toDtoList(posts, summaries);
+        return new PostListResponse(dtos, buildMeta(page, limit, totalElements, requestId));
     }
 
     public PostDto getById(UUID postId, @Nullable UUID viewerId) {
@@ -367,12 +392,20 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "answered-feed", allEntries = true)
     public PostDto updatePost(
             UUID postId,
             AuthenticatedUser principal,
             UpdatePostRequest request,
             String requestId
     ) {
+        // Spec 6.6b — @CacheEvict fires on every updatePost call. The cache
+        // is populated only for sort=answered reads, and we cannot cheaply
+        // pre-check whether THIS update will affect the answered feed (it
+        // depends on isAnswered transitions, answered_text edits on already-
+        // answered posts, content edits that change crisis flag, etc.).
+        // updatePost is a per-author, low-frequency operation; over-evicting
+        // is acceptable. The 2-min TTL repopulates quickly on the next read.
         if (request.isEmpty()) {
             throw new EmptyPatchBodyException();
         }

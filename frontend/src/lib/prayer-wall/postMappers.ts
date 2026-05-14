@@ -196,6 +196,10 @@ export function reactionsResponseToReactionsMap(
       // Spec 6.6 — Answered Wall. Backend always returns isPraising; defensive
       // Boolean() coerces undefined to false for any in-flight transitional data.
       isPraising: Boolean((perPost as { isPraising?: boolean })?.isPraising),
+      // Spec 6.6b — Answered Wall warm sunrise. Backend always returns isCelebrating
+      // post-6.6b; defensive Boolean() coerces undefined to false for any in-flight
+      // transitional data (mid-rollout when backend is on 6.6 + frontend is on 6.6b).
+      isCelebrating: Boolean((perPost as { isCelebrating?: boolean })?.isCelebrating),
     }
   }
   return out

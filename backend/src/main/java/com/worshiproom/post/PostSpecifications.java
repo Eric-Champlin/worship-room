@@ -3,6 +3,7 @@ package com.worshiproom.post;
 import com.worshiproom.friends.FriendRelationship;
 import com.worshiproom.friends.FriendRelationshipStatus;
 import com.worshiproom.mute.UserMute;
+import com.worshiproom.user.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -142,6 +143,36 @@ public final class PostSpecifications {
 
     public static Specification<Post> isAnswered() {
         return (root, query, cb) -> cb.isTrue(root.get("isAnswered"));
+    }
+
+    /**
+     * Spec 6.6b — excludes posts whose author has {@code isDeleted=true}
+     * OR {@code isBanned=true}.
+     *
+     * <p>Composed ONLY into the {@code sort=answered} branch of
+     * {@code PostService.listFeed} (the Answered Wall feed). Do NOT
+     * generalize this into {@code visibleTo()} — that predicate is
+     * load-bearing across every post feed query (main feed, profile,
+     * prayer receipt, getById, etc.), and broadening its semantics
+     * would cause cross-spec drift (Gate-G-EXTEND-NOT-DUPLICATE).
+     *
+     * <p>Implemented as a correlated subquery over {@code User} so a
+     * deleted-or-banned author's already-celebrated answered post
+     * disappears from the wall the moment moderation acts. Mirrors the
+     * subquery JOIN style used in {@link #visibleTo(UUID)}'s FRIENDS
+     * branch — keeps the query shape uniform.
+     */
+    public static Specification<Post> authorActive() {
+        return (root, query, cb) -> {
+            Subquery<Integer> sub = query.subquery(Integer.class);
+            Root<User> u = sub.from(User.class);
+            sub.select(cb.literal(1)).where(
+                    cb.equal(u.get("id"), root.get("userId")),
+                    cb.isFalse(u.get("isDeleted")),
+                    cb.isFalse(u.get("isBanned"))
+            );
+            return cb.exists(sub);
+        };
     }
 
     /**

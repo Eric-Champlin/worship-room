@@ -384,3 +384,58 @@ describe('InteractionBar', () => {
     })
   })
 })
+
+// ─── Spec 6.6b — showCelebrate wiring ────────────────────────────────────────
+//
+// CelebrateReaction has its own unit tests (5 in CelebrateReaction.test.tsx).
+// These tests verify the InteractionBar WIRING — that showCelebrate=true
+// actually mounts the button, and that it stays hidden when showCelebrate=false
+// (the default). Caller responsibility per W11: callers MUST gate on
+// prayer.isAnswered themselves — InteractionBar does not auto-detect.
+
+describe('InteractionBar — Spec 6.6b showCelebrate wiring', () => {
+  beforeEach(() => {
+    mockAuthUser = null
+    mockAuthIsAuthenticated = false
+  })
+
+  it('renders the Celebrate button when showCelebrate=true', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <InteractionBar
+          prayer={mockPrayer}
+          reactions={mockReactions}
+          onTogglePraying={vi.fn()}
+          onToggleComments={vi.fn()}
+          onToggleBookmark={vi.fn()}
+          isCommentsOpen={false}
+          showCelebrate
+          onToggleCelebrate={vi.fn()}
+        />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByRole('button', {
+        name: /celebrate this answered prayer|you'?re celebrating this answered prayer/i,
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('does NOT render the Celebrate button by default (showCelebrate defaults to false)', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <InteractionBar
+          prayer={mockPrayer}
+          reactions={mockReactions}
+          onTogglePraying={vi.fn()}
+          onToggleComments={vi.fn()}
+          onToggleBookmark={vi.fn()}
+          isCommentsOpen={false}
+        />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.queryByRole('button', { name: /celebrate/i }),
+    ).not.toBeInTheDocument()
+  })
+})

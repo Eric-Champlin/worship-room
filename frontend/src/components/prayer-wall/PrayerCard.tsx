@@ -25,7 +25,13 @@ import { getPerTypeChromeClass } from '@/constants/post-type-chrome'
 import {
   ANSWER_TEXT_REGION_LABEL,
   ANSWERED_TIMESTAMP_PREFIX,
+  ANSWERED_TEXT_MISSING_FALLBACK,
+  SHARE_UPDATE_LABEL,
+  EDIT_UPDATE_LABEL,
 } from '@/constants/answered-wall-copy'
+import { AuthContext } from '@/contexts/AuthContext'
+import { MarkAsAnsweredForm } from './MarkAsAnsweredForm'
+import { UnmarkAnsweredDialog } from './UnmarkAnsweredDialog'
 
 const PulseContext = createContext<(() => void) | null>(null)
 // eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with PrayerCard
@@ -73,10 +79,35 @@ interface PrayerCardProps {
    *  region (eyebrow + answer text + relative timestamp). Default false; other
    *  surfaces (main feed, profile, dashboard) keep the inline pill. */
   answeredVariant?: boolean
+  /** Spec 6.6b — called when the author confirms un-mark via UnmarkAnsweredDialog.
+   *  The parent owns the API call (`prayerWallApi.updatePost({ isAnswered: false })`).
+   *  Only rendered when the viewer is the post author AND answeredVariant=true. */
+  onUnmark?: () => void
+  /** Spec 6.6b — called when the author saves an edited / shared answered_text
+   *  via the inline MarkAsAnsweredForm. The parent owns the API call
+   *  (`prayerWallApi.updatePost({ answeredText })`). Only rendered when the
+   *  viewer is the post author AND answeredVariant=true. */
+  onEditAnsweredText?: (text: string) => void
 }
 
-export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99, tier = 'feed', answeredVariant = false }: PrayerCardProps) {
+export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99, tier = 'feed', answeredVariant = false, onUnmark, onEditAnsweredText }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  // Spec 6.6b — author affordance state. `editMode` toggles MarkAsAnsweredForm
+  // (edit mode) inline below the answered region; the dialog state lives inside
+  // UnmarkAnsweredDialog itself.
+  const [editMode, setEditMode] = useState(false)
+  // Spec 6.6b — read AuthContext directly (not useAuth) so legacy PrayerCard
+  // tests that don't wrap in AuthProvider don't throw. `null` context resolves
+  // to "not authenticated" — the affordance row hides naturally.
+  const authCtx = useContext(AuthContext)
+  const authUser = authCtx?.user ?? null
+  // Spec 6.6b — author check for the affordance row. W26: never surface the
+  // affordances to non-authors; the backend's ownership gate is enforced at
+  // PATCH time but the UI must not display them. PrayerRequest.userId is null
+  // for anonymous posts — anonymous posts never surface author affordances on
+  // the Answered Wall (the author isn't displayed in any case).
+  const isAuthor =
+    authUser !== null && prayer.userId !== null && authUser.id === prayer.userId
   const articleRef = useRef<HTMLDivElement>(null)
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
   useEffect(() => {
@@ -291,11 +322,53 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
                   {prayer.answeredText}
                 </p>
               )}
+              {/* Spec 6.6b — missing-answer-text fallback. Renders when a post
+                  is marked answered but the author has not shared an update
+                  (or cleared the text). Quieter italic style than the answer
+                  itself — surfaces the state without competing visually. */}
+              {!prayer.answeredText && (
+                <p className="text-base italic leading-relaxed text-white/50">
+                  {ANSWERED_TEXT_MISSING_FALLBACK}
+                </p>
+              )}
               {prayer.answeredAt && (
                 <p className="mt-3 text-xs text-white/50">
                   {ANSWERED_TIMESTAMP_PREFIX}
                   {timeAgo(prayer.answeredAt)}
                 </p>
+              )}
+
+              {/* Spec 6.6b — author-only affordance row. Hidden when not the
+                  author (W26) and hidden when no callbacks are provided (other
+                  PrayerCard call sites are unaffected). When `editMode` is true,
+                  the form replaces the affordance row inline. */}
+              {isAuthor && (onUnmark || onEditAnsweredText) && (
+                <div className="mt-5 border-t border-white/[0.08] pt-4">
+                  {editMode && onEditAnsweredText ? (
+                    <MarkAsAnsweredForm
+                      mode="edit"
+                      initialText={prayer.answeredText ?? ''}
+                      onConfirm={(text) => {
+                        onEditAnsweredText(text)
+                        setEditMode(false)
+                      }}
+                      onCancel={() => setEditMode(false)}
+                    />
+                  ) : (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {onEditAnsweredText && (
+                        <button
+                          type="button"
+                          onClick={() => setEditMode(true)}
+                          className="inline-flex min-h-[44px] items-center rounded-full border border-white/[0.12] bg-white/[0.05] px-3 py-2 text-sm font-medium text-white/70 transition-colors duration-fast hover:bg-white/[0.10] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                        >
+                          {prayer.answeredText ? EDIT_UPDATE_LABEL : SHARE_UPDATE_LABEL}
+                        </button>
+                      )}
+                      {onUnmark && <UnmarkAnsweredDialog onConfirm={onUnmark} />}
+                    </div>
+                  )}
+                </div>
               )}
             </section>
           )}

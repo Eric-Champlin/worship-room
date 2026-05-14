@@ -652,3 +652,165 @@ describe('PrayerCard — Spec 5.5 tier prop', () => {
     expect(showMore.className).toContain('focus-visible:ring-white/50')
   })
 })
+
+// ─── Spec 6.6b — answered-text fallback + author affordances ─────────────────
+
+describe('PrayerCard — Spec 6.6b answered text fallback + author affordances', () => {
+  // ANSWERED_PRAYER with answeredText cleared — triggers the fallback path.
+  const ANSWERED_NO_TEXT: PrayerRequest = {
+    ...SHORT_PRAYER,
+    id: 'prayer-answered-no-text',
+    isAnswered: true,
+    answeredText: null,
+    answeredAt: '2026-02-20T16:00:00Z',
+  }
+
+  it('T13 — renders the missing-text fallback when isAnswered=true and answeredText is null (answeredVariant only)', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={ANSWERED_NO_TEXT} answeredVariant />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByText(
+        /This prayer was marked answered\. The author hasn'?t shared an update\./i,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('does NOT render the fallback when answeredText is present', () => {
+    const ANSWERED_WITH_TEXT: PrayerRequest = {
+      ...ANSWERED_NO_TEXT,
+      answeredText: 'Thank you Lord!',
+    }
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={ANSWERED_WITH_TEXT} answeredVariant />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.queryByText(
+        /This prayer was marked answered\. The author hasn'?t shared an update\./i,
+      ),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText('Thank you Lord!')).toBeInTheDocument()
+  })
+
+  it('T15 — non-author sees NEITHER "Share an update" NOR "Un-mark as answered" affordances (no auth context = treated as not-author)', () => {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard
+          prayer={ANSWERED_NO_TEXT}
+          answeredVariant
+          onUnmark={() => {}}
+          onEditAnsweredText={() => {}}
+        />
+      </MemoryRouter>,
+    )
+    // Without an AuthProvider in the test tree, the ownership check returns
+    // false. The affordance buttons MUST NOT render.
+    expect(
+      screen.queryByRole('button', { name: /share an update|edit your update/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /un-mark as answered/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('does NOT render the affordance row when callbacks are absent (other PrayerCard call sites unaffected)', () => {
+    // Even with author context, no callbacks = no row.
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <PrayerCard prayer={ANSWERED_NO_TEXT} answeredVariant />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.queryByRole('button', { name: /share an update|edit your update/i }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /un-mark as answered/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('T14 — author sees both "Share an update" and "Un-mark as answered" affordances when callbacks are passed', async () => {
+    const { AuthContext } = await import('@/contexts/AuthContext')
+    const mockUser = {
+      id: SHORT_PRAYER.userId as string, // matches prayer.userId
+      email: 'sarah@test.local',
+      displayName: 'Sarah',
+      isAdmin: false,
+      legalVersions: { termsVersion: '1', privacyVersion: '1' },
+    }
+    const mockAuthValue = {
+      isAuthenticated: true,
+      isAuthResolving: false,
+      user: mockUser,
+      login: async () => {},
+      register: async () => {},
+      logout: async () => {},
+      simulateLegacyAuth: () => {},
+      refreshUser: async () => {},
+    }
+    render(
+      <AuthContext.Provider value={mockAuthValue}>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PrayerCard
+            prayer={ANSWERED_NO_TEXT}
+            answeredVariant
+            onUnmark={() => {}}
+            onEditAnsweredText={() => {}}
+          />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    )
+    // No answeredText → label is "Share an update" (not "Edit your update").
+    expect(
+      screen.getByRole('button', { name: /share an update/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /un-mark as answered/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows "Edit your update" label when answeredText is present for the author', async () => {
+    const { AuthContext } = await import('@/contexts/AuthContext')
+    const ANSWERED_WITH_TEXT: PrayerRequest = {
+      ...ANSWERED_NO_TEXT,
+      answeredText: 'Praise God',
+    }
+    const mockAuthValue = {
+      isAuthenticated: true,
+      isAuthResolving: false,
+      user: {
+        id: SHORT_PRAYER.userId as string,
+        email: 'sarah@test.local',
+        displayName: 'Sarah',
+        isAdmin: false,
+        legalVersions: { termsVersion: '1', privacyVersion: '1' },
+      },
+      login: async () => {},
+      register: async () => {},
+      logout: async () => {},
+      simulateLegacyAuth: () => {},
+      refreshUser: async () => {},
+    }
+    render(
+      <AuthContext.Provider value={mockAuthValue}>
+        <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <PrayerCard
+            prayer={ANSWERED_WITH_TEXT}
+            answeredVariant
+            onUnmark={() => {}}
+            onEditAnsweredText={() => {}}
+          />
+        </MemoryRouter>
+      </AuthContext.Provider>,
+    )
+    expect(
+      screen.getByRole('button', { name: /edit your update/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /share an update/i }),
+    ).not.toBeInTheDocument()
+  })
+})

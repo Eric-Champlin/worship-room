@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
@@ -10,6 +11,7 @@ import { AnsweredCard } from '@/components/prayer-wall/AnsweredCard'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { PrayerWallViewTabs } from '@/components/prayer-wall/PrayerWallViewTabs'
 import { CrisisResourcesBanner } from '@/components/prayer-wall/CrisisResourcesBanner'
+import { AnsweredCategoryFilter } from '@/components/prayer-wall/AnsweredCategoryFilter'
 import { usePrayerReactions } from '@/hooks/usePrayerReactions'
 import { useWatchMode } from '@/hooks/useWatchMode'
 import { GRADIENT_TEXT_STYLE } from '@/constants/gradients'
@@ -17,7 +19,8 @@ import * as prayerWallApi from '@/services/api/prayer-wall-api'
 import type { PrayerRequest } from '@/types/prayer-wall'
 import {
   ANSWERED_WALL_HEADING,
-  ANSWERED_WALL_SUBHEAD,
+  ANSWERED_WALL_SUBHEAD_6_6B,
+  ANSWERED_WALL_INTRO,
   ANSWERED_WALL_EMPTY_STATE,
 } from '@/constants/answered-wall-copy'
 
@@ -35,7 +38,12 @@ export default function AnsweredWall() {
   const [prayers, setPrayers] = useState<PrayerRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { reactions, togglePraising, togglePraying, toggleBookmark } =
+  const [searchParams] = useSearchParams()
+  // Spec 6.6b — URL-driven category filter. Drives the GET /api/v1/posts request
+  // and reflects the active chip in AnsweredCategoryFilter. No localStorage write
+  // (ED-7) — URL IS the canonical state.
+  const category = searchParams.get('category') ?? undefined
+  const { reactions, togglePraising, toggleCelebrate, togglePraying, toggleBookmark } =
     usePrayerReactions()
   // Spec 6.4 Gate-G-CRISIS-RESOURCES-ALWAYS-VISIBLE: the crisis banner must
   // mount on every Prayer Wall family route (/prayer-wall, /prayer-wall/:id,
@@ -47,12 +55,14 @@ export default function AnsweredWall() {
 
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
     async function load() {
       try {
         const result = await prayerWallApi.listPosts({
           page: 1,
           limit: 20,
           sort: 'answered',
+          category,
         })
         if (cancelled) return
         setPrayers(result.posts)
@@ -72,7 +82,7 @@ export default function AnsweredWall() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [category])
 
   const handleTogglePraising = useCallback(
     (prayerId: string) => {
@@ -81,11 +91,62 @@ export default function AnsweredWall() {
     [togglePraising],
   )
 
+  const handleToggleCelebrate = useCallback(
+    (prayerId: string) => {
+      toggleCelebrate(prayerId)
+    },
+    [toggleCelebrate],
+  )
+
+  // Spec 6.6b — author affordance handlers. Both call the existing
+  // `updatePost` API helper (Step 21 — no new HTTP routes needed; PATCH
+  // /api/v1/posts/{id} handles both shapes). On success, optimistically
+  // update the local feed state.
+  const handleUnmark = useCallback(
+    async (prayerId: string) => {
+      try {
+        await prayerWallApi.updatePost(prayerId, { isAnswered: false })
+        // The un-marked post leaves the answered feed — filter it out of
+        // local state so the user sees the change immediately. The next
+        // refetch will confirm via the backend cache eviction.
+        setPrayers((prev) => prev.filter((p) => p.id !== prayerId))
+      } catch (err) {
+        // Silent failure — the post stays in the feed and the next refetch
+        // recovers the canonical state. Future spec can surface a toast.
+        console.warn('Un-mark answered failed:', err)
+      }
+    },
+    [],
+  )
+
+  const handleEditAnsweredText = useCallback(
+    async (prayerId: string, text: string) => {
+      try {
+        const updated = await prayerWallApi.updatePost(prayerId, {
+          answeredText: text,
+        })
+        // MERGE, do not replace. `prayerWallApi.updatePost` returns a
+        // single-post `PostDto` mapped via PostMapper.toDto, which does NOT
+        // populate `intercessorSummary` (only the feed endpoint's
+        // toDtoList does). A wholesale replace would silently drop the
+        // intercessor names on this card until the next paginated refetch.
+        // Spread preserves every field the update response doesn't
+        // re-send, including intercessorSummary, image, helpTags, etc.
+        setPrayers((prev) =>
+          prev.map((p) => (p.id === prayerId ? { ...p, ...updated } : p)),
+        )
+      } catch (err) {
+        console.warn('Edit answered text failed:', err)
+      }
+    },
+    [],
+  )
+
   return (
     <BackgroundCanvas className="flex min-h-screen flex-col font-sans">
       <SEO
         title="Answered Prayers"
-        description="Prayers the community has watched God move in. A quiet wall of answered prayer testimonies."
+        description="Answered prayers, shared as gratitude. A quiet wall of testimonies — not a leaderboard."
         ogImageAlt="The Worship Room Answered Wall — answered prayer testimonies"
       />
       <Navbar transparent />
@@ -105,13 +166,29 @@ export default function AnsweredWall() {
           >
             {ANSWERED_WALL_HEADING}
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-white/70 sm:text-lg">
-            {ANSWERED_WALL_SUBHEAD}
+          {/* Spec 6.6b — load-bearing subhead. Lora italic, <h2> within <main>.
+              Gate-G-COPY: the live Spec 6.6 master plan stub's own notes flag
+              this as the single most important copy on the page. */}
+          <h2 className="mt-2 font-serif text-lg italic text-white/80 sm:text-xl">
+            {ANSWERED_WALL_SUBHEAD_6_6B}
+          </h2>
+          {/* Spec 6.6b — intro paragraph. Calm context, NOT a CTA. Acknowledges
+              the survivorship-bias problem so the wall doesn't read as a
+              leaderboard of "winners". */}
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/60">
+            {ANSWERED_WALL_INTRO}
           </p>
         </section>
 
         <div className="mx-auto mt-8 max-w-[720px]">
           <PrayerWallViewTabs />
+        </div>
+
+        {/* Spec 6.6b — category filter chip row. URL-driven via ?category=.
+            Six chips (All + 5 categories); Mental Health is deliberately
+            omitted (Gate-G-MH-OMISSION — see AnsweredCategoryFilter comment). */}
+        <div className="mx-auto mt-6 max-w-[720px]">
+          <AnsweredCategoryFilter />
         </div>
 
         <section className="mx-auto mt-8 max-w-[720px]">
@@ -138,7 +215,15 @@ export default function AnsweredWall() {
           {!loading && !error && prayers.length > 0 && (
             <div className="space-y-6">
               {prayers.map((prayer, index) => (
-                <AnsweredCard key={prayer.id} prayer={prayer} index={index}>
+                <AnsweredCard
+                  key={prayer.id}
+                  prayer={prayer}
+                  index={index}
+                  onUnmark={() => void handleUnmark(prayer.id)}
+                  onEditAnsweredText={(text) =>
+                    void handleEditAnsweredText(prayer.id, text)
+                  }
+                >
                   <InteractionBar
                     prayer={prayer}
                     reactions={reactions[prayer.id]}
@@ -148,6 +233,8 @@ export default function AnsweredWall() {
                     isCommentsOpen={false}
                     showPraising
                     onTogglePraising={() => handleTogglePraising(prayer.id)}
+                    showCelebrate
+                    onToggleCelebrate={() => handleToggleCelebrate(prayer.id)}
                   />
                 </AnsweredCard>
               ))}

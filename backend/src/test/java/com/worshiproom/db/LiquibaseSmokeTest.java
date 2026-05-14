@@ -75,7 +75,9 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(32);
+        // Spec 6.6b (2026-05-14-003 + 004) added the celebrate CHECK widening and
+        // posts.celebrate_count column.
+        assertThat(rows).hasSize(34);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -571,7 +573,8 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             "ORDER BY ordinal_position"
         );
 
-        assertThat(columns).hasSize(31);
+        // Spec 6.6b (2026-05-14-004) added celebrate_count, mirroring praising_count.
+        assertThat(columns).hasSize(32);
         assertThat(columns).extracting("column_name")
             .containsExactly(
                 "id", "user_id", "post_type", "content", "category", "is_anonymous",
@@ -582,7 +585,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                 "report_count", "created_at", "updated_at", "last_activity_at",
                 "question_resolved_comment_id",
                 "image_url", "image_alt_text", "help_tags",
-                "praising_count"
+                "praising_count", "celebrate_count"
             );
 
         Map<String, Object> idColumn = columns.stream()
@@ -1146,15 +1149,16 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                         postId, userA, "test", true, null);
                 }
                 case "post_reactions_reaction_type_check" -> {
-                    // Post-Spec-6.6: 'praying', 'candle', and 'praising' are all
-                    // valid. 'celebrate' is the deferred master-plan-stub value
-                    // (MPD-1 narrowed 6.6 to 'praising' only) and remains
-                    // invalid until a future spec adds it. If a future spec adds
-                    // 'celebrate', this test will fail and signal the change.
+                    // Post-Spec-6.6b: 'praying', 'candle', 'praising', and
+                    // 'celebrate' are all valid (changeset 2026-05-14-003
+                    // widened the CHECK to add 'celebrate'). Use a known-
+                    // invalid placeholder to assert the CHECK still rejects
+                    // garbage. If a future spec widens the CHECK further,
+                    // this assertion will fail and signal the change.
                     UUID postId = insertTestPost(userA);
                     jdbcTemplate.update(
                         "INSERT INTO post_reactions (post_id, user_id, reaction_type) VALUES (?, ?, ?)",
-                        postId, userA, "celebrate");
+                        postId, userA, "invalid_reaction_type");
                 }
                 case "post_reports_target_xor_check_both_set" -> {
                     UUID postId = insertTestPost(userA);
