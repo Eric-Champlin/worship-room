@@ -12,6 +12,10 @@ import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentItem } from '@/components/prayer-wall/CommentItem'
 import { CommentInput } from '@/components/prayer-wall/CommentInput'
+import { VerseFindsYou } from '@/components/prayer-wall/VerseFindsYou'
+import { useVerseFindsYou } from '@/hooks/useVerseFindsYou'
+import { useSettings } from '@/hooks/useSettings'
+import { Button } from '@/components/ui/Button'
 import { MarkAsAnsweredForm } from '@/components/prayer-wall/MarkAsAnsweredForm'
 import { DeletePrayerDialog } from '@/components/prayer-wall/DeletePrayerDialog'
 import { ReportDialog } from '@/components/prayer-wall/ReportDialog'
@@ -56,6 +60,17 @@ function PrayerDetailContent() {
   const [reloadTrigger, setReloadTrigger] = useState(0)
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
   const [replyTo, setReplyTo] = useState('')
+
+  // Spec 6.8 — Verse-Finds-You. Comment trigger fires only on supportive
+  // comments to Mental Health / Grief / Health posts AND only in the
+  // commenter's own view (never the post author's). The category gate runs
+  // at the trigger call site below.
+  const verseFindsYou = useVerseFindsYou()
+  const { updateVerseFindsYou } = useSettings()
+  const [showOffRampPrompt, setShowOffRampPrompt] = useState(false)
+  const surfacedVerseId = verseFindsYou.verse?.verse?.reference
+    ? verseFindsYou.verse.verse.reference.toLowerCase().replace(/\s+/g, '-').replace(/:/g, '-')
+    : null
 
   useEffect(() => {
     if (!id) return
@@ -413,7 +428,78 @@ function PrayerDetailContent() {
                 onSubmit={handleSubmitComment}
                 initialValue={replyTo}
                 onLoginClick={() => authModal?.openAuthModal()}
+                onCommentSucceeded={() => {
+                  // Spec 6.8 — comment trigger is gated on:
+                  //   1. Parent post category in {health, mental-health, grief}
+                  //   2. Commenter is NOT the post author (encouraging someone else,
+                  //      not commenting on own post — would be weird).
+                  // Per Gate-G-NO-TEXT-FLOW: pass only category, NEVER comment text.
+                  const categoryEligible =
+                    prayer.category === 'health' ||
+                    prayer.category === 'mental-health' ||
+                    prayer.category === 'grief'
+                  const commenterIsAuthor = user?.id === prayer.userId
+                  if (categoryEligible && !commenterIsAuthor) {
+                    void verseFindsYou.trigger('comment', prayer.category ?? undefined)
+                  }
+                }}
               />
+
+              {/* Spec 6.8 — Verse-Finds-You card (commenter's view only by
+                  construction — verse renders client-side from this user's
+                  API response, no broadcast). */}
+              {verseFindsYou.verse?.verse && surfacedVerseId && (
+                <div className="mt-4">
+                  <VerseFindsYou
+                    verse={verseFindsYou.verse.verse}
+                    trigger="comment"
+                    verseId={surfacedVerseId}
+                    saved={verseFindsYou.wasSaved(surfacedVerseId)}
+                    onDismiss={() => {
+                      const result = verseFindsYou.dismiss()
+                      if (result.showOffRampPrompt) setShowOffRampPrompt(true)
+                    }}
+                    onSaved={() => verseFindsYou.markSaved(surfacedVerseId)}
+                  />
+                </div>
+              )}
+
+              {/* Spec 6.8 — 3-in-a-row off-ramp prompt. */}
+              {showOffRampPrompt && (
+                <div
+                  role="dialog"
+                  aria-modal="false"
+                  aria-labelledby="prayer-detail-off-ramp-heading"
+                  className="mt-4 rounded-2xl border border-white/[0.12] bg-white/[0.05] p-4"
+                >
+                  <p id="prayer-detail-off-ramp-heading" className="text-white/80">
+                    Want to turn this off? You can turn it back on anytime in settings.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        updateVerseFindsYou({ enabled: false })
+                        verseFindsYou.acknowledgePromptShown()
+                        setShowOffRampPrompt(false)
+                      }}
+                    >
+                      Turn off
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        verseFindsYou.acknowledgePromptShown()
+                        setShowOffRampPrompt(false)
+                      }}
+                    >
+                      Keep it on
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

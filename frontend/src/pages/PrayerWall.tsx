@@ -20,6 +20,10 @@ import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { SaveToPrayersForm } from '@/components/prayer-wall/SaveToPrayersForm'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
+import { VerseFindsYou } from '@/components/prayer-wall/VerseFindsYou'
+import { useVerseFindsYou } from '@/hooks/useVerseFindsYou'
+import { useActiveEngagement } from '@/hooks/useActiveEngagement'
+import { useSettings } from '@/hooks/useSettings'
 import { ComposerChooser } from '@/components/prayer-wall/ComposerChooser'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilters } from '@/components/prayer-wall/CategoryFilters'
@@ -98,6 +102,25 @@ function PrayerWallContent() {
   // Spec 6.3 — Night Mode (active state + source for chip aria-label).
   const { active: nightActive } = useNightMode()
   const watchMode = useWatchMode()
+
+  // Spec 6.8 — Verse-Finds-You. Single page-level hook instance shared by
+  // post-compose (Step 12), comment (Step 13), and reading-time (Step 14)
+  // triggers. Off-ramp prompt visibility lives in local state because the
+  // hook returns the trigger condition only at dismiss time.
+  const verseFindsYou = useVerseFindsYou()
+  const { updateVerseFindsYou } = useSettings()
+  const [showOffRampPrompt, setShowOffRampPrompt] = useState(false)
+  // Stable verseId for the surfaced verse — used by VerseFindsYou.tsx for
+  // dedup and as the saved-image filename. Derived from reference (kebab-cased)
+  // since VerseDto doesn't carry a server-side id on the wire.
+  const surfacedVerseId = verseFindsYou.verse?.verse?.reference
+    ? verseFindsYou.verse.verse.reference.toLowerCase().replace(/\s+/g, '-').replace(/:/g, '-')
+    : null
+  // Tracks the last-scrolled-into-view post category for the reading-time
+  // trigger. Plain ref — no state, no re-render. Plan-Time Divergence #10:
+  // single page-level IntersectionObserver queries by data-prayer-category
+  // attribute on each PrayerCard wrapper.
+  const lastViewedCategoryRef = useRef<string | undefined>(undefined)
   const allPrayers = useMemo(() => getMockPrayers(), [])
 
   // Flag-on uses initial empty state populated by the load effect; flag-off
@@ -299,6 +322,57 @@ function PrayerWallContent() {
     }
   }, [])
 
+  // Spec 6.8 — page-level IntersectionObserver tracking the most-recently
+  // scrolled-into-view PrayerCard's data-prayer-category attribute. The
+  // category is written to a ref (no state, no re-render). Re-attaches when
+  // the feed list mutates so newly-rendered cards are observed.
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            const category = e.target.getAttribute('data-prayer-category')
+            if (category) lastViewedCategoryRef.current = category
+          }
+        }
+      },
+      { threshold: 0.6 },
+    )
+    document.querySelectorAll('[data-prayer-category]').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+    // Re-run when the post list length changes so newly-rendered cards are
+    // observed. New posts within the same length count don't matter — the
+    // observer keeps observing the existing nodes.
+  }, [prayers.length])
+
+  // Spec 6.8 — reading-time trigger: 5 min foreground+scrolling on /prayer-wall.
+  // Plan-Time Divergence #5 limits this to /prayer-wall (NOT /prayer-wall/dashboard).
+  useActiveEngagement({
+    thresholdMs: 5 * 60 * 1000,
+    scrollWindowMs: 30 * 1000,
+    onActive: () => {
+      void verseFindsYou.trigger('reading_time', lastViewedCategoryRef.current)
+    },
+  })
+
+  // Spec 6.8 §4 — post-compose verse auto-dismisses after ~8 seconds (or until
+  // the user dismisses it manually). The 8s window matches the success-toast
+  // lifetime; the verse fades with the toast so the user can return to the
+  // feed. Asymmetric by design: comment and reading-time triggers persist
+  // until manual dismiss (D-Copy specifies the 8s window only for post-compose).
+  // The timer also calls `dismiss()` so session-suppression activates — a
+  // user who just saw a verse shouldn't see another one when they scroll for
+  // 5 minutes immediately after.
+  useEffect(() => {
+    if (!verseFindsYou.verse?.verse) return
+    if (verseFindsYou.lastTrigger !== 'post_compose') return
+    const timer = setTimeout(() => {
+      const result = verseFindsYou.dismiss()
+      if (result.showOffRampPrompt) setShowOffRampPrompt(true)
+    }, 8000)
+    return () => clearTimeout(timer)
+  }, [verseFindsYou.verse, verseFindsYou.lastTrigger, verseFindsYou])
+
   // Initial load: flag-off uses synchronous mock slice; flag-on fetches from backend.
   // Refetches only when the server-side filter (category) or retry trigger changes.
   // Challenge filter is applied client-side in `filteredPrayers`, so it does NOT
@@ -436,6 +510,10 @@ function PrayerWallContent() {
           },
         })
         showToast(successToastByType[postType])
+        // Spec 6.8 — fire post-compose trigger after successful submit.
+        // Pass only category (NO post body) per Gate-G-NO-TEXT-FLOW.
+        // Fire-and-forget — does not block the success toast UI.
+        void verseFindsYou.trigger('post_compose', category ?? undefined)
         return true
       }
       try {
@@ -464,6 +542,9 @@ function PrayerWallContent() {
         setPrayers((prev) => [created, ...prev])
         setComposerOpen(false)
         recordActivity('prayerWall', 'prayer_wall')
+        // Spec 6.8 — fire post-compose trigger after successful submit
+        // (flag-on path). Same Gate-G-NO-TEXT-FLOW contract as flag-off.
+        void verseFindsYou.trigger('post_compose', category ?? undefined)
         const badgeData = getBadgeData()
         saveBadgeData({
           ...badgeData,
@@ -484,7 +565,7 @@ function PrayerWallContent() {
         return false
       }
     },
-    [user, isAuthenticated, showToast, recordActivity, openAuthModal]
+    [user, isAuthenticated, showToast, recordActivity, openAuthModal, verseFindsYou]
   )
 
   // QOTD response count.
@@ -940,6 +1021,68 @@ function PrayerWallContent() {
               onSubmit={handleComposerSubmit}
               watchActive={watchMode.active}
             />
+
+            {/* Spec 6.8 — Verse-Finds-You card (page-level mount; the trigger
+                fires from handleComposerSubmit (post_compose) or the reading-time
+                hook (reading_time), and the verse renders once here regardless
+                of source). `trigger` MUST come from the hook's `lastTrigger`
+                state — hardcoding it would render the wrong prefix copy on the
+                reading-time path (Gate-G-COPY). */}
+            {verseFindsYou.verse?.verse
+              && surfacedVerseId
+              && verseFindsYou.lastTrigger !== null && (
+              <div className="mb-4">
+                <VerseFindsYou
+                  verse={verseFindsYou.verse.verse}
+                  trigger={verseFindsYou.lastTrigger}
+                  verseId={surfacedVerseId}
+                  saved={verseFindsYou.wasSaved(surfacedVerseId)}
+                  onDismiss={() => {
+                    const result = verseFindsYou.dismiss()
+                    if (result.showOffRampPrompt) setShowOffRampPrompt(true)
+                  }}
+                  onSaved={() => verseFindsYou.markSaved(surfacedVerseId)}
+                />
+              </div>
+            )}
+
+            {/* Spec 6.8 — 3-in-a-row off-ramp prompt. Surfaces once when
+                the user dismisses three verses without engagement. */}
+            {showOffRampPrompt && (
+              <div
+                role="dialog"
+                aria-modal="false"
+                aria-labelledby="verse-off-ramp-heading"
+                className="mb-4 rounded-2xl border border-white/[0.12] bg-white/[0.05] p-4"
+              >
+                <p id="verse-off-ramp-heading" className="text-white/80">
+                  Want to turn this off? You can turn it back on anytime in settings.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      updateVerseFindsYou({ enabled: false })
+                      verseFindsYou.acknowledgePromptShown()
+                      setShowOffRampPrompt(false)
+                    }}
+                  >
+                    Turn off
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      verseFindsYou.acknowledgePromptShown()
+                      setShowOffRampPrompt(false)
+                    }}
+                  >
+                    Keep it on
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* QOTD Card — visible <xl (mobile + tablet). At xl+ the right
                 sidebar holds the QOTD; the inline card hides. */}

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy, UserSettingsPrayerWall } from '@/types/settings'
+import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy, UserSettingsPrayerWall, UserSettingsVerseFindsYou } from '@/types/settings'
 import { getSettings, saveSettings, SETTINGS_KEY } from '@/services/settings-storage'
 
 export function useSettings(): {
@@ -9,6 +9,7 @@ export function useSettings(): {
   updatePrivacy: (updates: Partial<Omit<UserSettingsPrivacy, 'blockedUsers'>>) => void
   unblockUser: (userId: string) => void
   updatePrayerWall: (updates: Partial<UserSettingsPrayerWall>) => void
+  updateVerseFindsYou: (updates: Partial<UserSettingsVerseFindsYou>) => void
 } {
   const [settings, setSettings] = useState<UserSettings>(() => getSettings())
 
@@ -59,6 +60,15 @@ export function useSettings(): {
     })
   }, [])
 
+  // Spec 6.8 — Verse-Finds-You namespace updater (top-level).
+  const updateVerseFindsYou = useCallback((updates: Partial<UserSettingsVerseFindsYou>) => {
+    setSettings((prev) => {
+      const next = { ...prev, verseFindsYou: { ...prev.verseFindsYou, ...updates } }
+      saveSettings(next)
+      return next
+    })
+  }, [])
+
   // Cross-tab sync
   useEffect(() => {
     function handleStorage(e: StorageEvent) {
@@ -70,5 +80,5 @@ export function useSettings(): {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  return { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser, updatePrayerWall }
+  return { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser, updatePrayerWall, updateVerseFindsYou }
 }

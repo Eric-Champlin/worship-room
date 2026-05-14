@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -124,4 +125,16 @@ public interface PostRepository extends JpaRepository<Post, UUID>, JpaSpecificat
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Post p SET p.bookmarkCount = p.bookmarkCount - 1 WHERE p.id = :postId AND p.bookmarkCount > 0")
     int decrementBookmarkCount(@Param("postId") UUID postId);
+
+    /**
+     * Read-side count of crisis-flagged posts authored by a given user since a cutoff
+     * (Spec 6.8 — Verse-Finds-You crisis suppression gate). Consumed exclusively by
+     * {@link com.worshiproom.safety.PrePhase10CrisisFlagGate}; the broader Phase 10
+     * crisis-detection pipeline will replace that gate with a wider signal source.
+     *
+     * <p>Uses the entity's {@code userId} field (column {@code user_id}); the spec plan
+     * referenced {@code authorId} but the canonical Post entity field is {@code userId}.
+     */
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.userId = :userId AND p.crisisFlag = true AND p.createdAt >= :since")
+    long countCrisisFlaggedPostsByUserSince(@Param("userId") UUID userId, @Param("since") OffsetDateTime since);
 }

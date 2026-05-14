@@ -22,6 +22,13 @@ interface CommentInputProps {
   ) => boolean | Promise<boolean>
   initialValue?: string
   onLoginClick?: () => void
+  /**
+   * Spec 6.8 — fired AFTER a successful comment submit. Page-level wiring
+   * decides whether to surface a verse based on the parent post's category
+   * (Mental Health / Grief / Health only). Optional; absent on surfaces that
+   * don't participate in Verse-Finds-You.
+   */
+  onCommentSucceeded?: () => void
 }
 
 export function CommentInput({
@@ -29,6 +36,7 @@ export function CommentInput({
   onSubmit,
   initialValue = '',
   onLoginClick,
+  onCommentSucceeded,
 }: CommentInputProps) {
   const { isAuthenticated } = useAuth()
   const authModal = useAuthModal()
@@ -76,6 +84,10 @@ export function CommentInput({
       setIdempotencyKey(
         typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
       )
+      // Spec 6.8 — successful comment fires the optional callback. Parent
+      // surface decides whether to trigger Verse-Finds-You based on the
+      // parent post's category.
+      onCommentSucceeded?.()
     } finally {
       setIsSubmitting(false)
     }

@@ -76,8 +76,9 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
         // Spec 6.6b (2026-05-14-003 + 004) added the celebrate CHECK widening and
-        // posts.celebrate_count column.
-        assertThat(rows).hasSize(34);
+        // posts.celebrate_count column. Spec 6.8 (2026-05-14-005) added the
+        // verse_surfacing_log table for Verse-Finds-You cooldown tracking.
+        assertThat(rows).hasSize(35);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");

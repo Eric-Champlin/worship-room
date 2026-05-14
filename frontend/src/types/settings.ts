@@ -72,9 +72,26 @@ export interface UserSettingsPrayerWall {
   dismissedShareWarning: boolean
 }
 
+// Spec 6.8 — Verse-Finds-You settings namespace (top-level, NOT nested under
+// prayerWall). Verse-Finds-You is a cross-surface feature whose triggers fire
+// from Prayer Wall surfaces but the namespace is its own — future surfaces
+// will share the same toggle.
+export interface UserSettingsVerseFindsYou {
+  /**
+   * Top-level toggle for the Verse-Finds-You feature. Default `false` for ALL
+   * users (new and existing) per Gate-G-DEFAULT-OFF. When false, the
+   * useVerseFindsYou hook skips the API call entirely (W28). Single-tap
+   * enable/disable from the Settings → Gentle extras section — no confirmation
+   * modal (Brief §4: the protections are default-off + curation + cooldowns,
+   * not a confirmation gate).
+   */
+  enabled: boolean
+}
+
 export interface UserSettings {
   profile: UserSettingsProfile
   notifications: UserSettingsNotifications
   privacy: UserSettingsPrivacy
   prayerWall: UserSettingsPrayerWall
+  verseFindsYou: UserSettingsVerseFindsYou
 }

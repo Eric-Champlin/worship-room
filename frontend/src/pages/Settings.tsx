@@ -10,6 +10,7 @@ import { ProfileSection } from '@/components/settings/ProfileSection'
 import { NotificationsSection } from '@/components/settings/NotificationsSection'
 import { PrivacySection } from '@/components/settings/PrivacySection'
 import { SensitiveFeaturesSection } from '@/components/settings/SensitiveFeaturesSection'
+import { GentleExtrasSection } from '@/components/settings/GentleExtrasSection'
 import { AccountSection } from '@/components/settings/AccountSection'
 import { AppSection } from '@/components/settings/AppSection'
 import { DashboardSection } from '@/components/settings/DashboardSection'
@@ -26,6 +27,7 @@ type SettingsSection =
   | 'notifications'
   | 'privacy'
   | 'sensitive-features'
+  | 'gentle-extras'
   | 'account'
   | 'app'
 
@@ -37,6 +39,10 @@ const SECTIONS: { id: SettingsSection; label: string }[] = [
   // Spec 6.4 — Sensitive features section (MPD-11). Inserted between Privacy
   // and Account so Night Mode (in Privacy) sits adjacent to 3am Watch.
   { id: 'sensitive-features', label: 'Sensitive features' },
+  // Spec 6.8 — Gentle extras section. Hosts the Verse-Finds-You toggle and
+  // future low-pressure features. Sits next to Sensitive features so the two
+  // opt-in surfaces cluster.
+  { id: 'gentle-extras', label: 'Gentle extras' },
   { id: 'account', label: 'Account' },
   { id: 'app', label: 'App' },
 ]
@@ -47,6 +53,7 @@ const VALID_SECTIONS: SettingsSection[] = [
   'notifications',
   'privacy',
   'sensitive-features',
+  'gentle-extras',
   'account',
   'app',
 ]
@@ -61,6 +68,7 @@ export function Settings() {
     updatePrivacy,
     unblockUser: unblockSettings,
     updatePrayerWall,
+    updateVerseFindsYou,
   } = useSettings()
   const { blocked: friendsBlocked, unblockUser: unblockFriend } = useFriends()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -241,6 +249,12 @@ export function Settings() {
               <SensitiveFeaturesSection
                 prayerWall={settings.prayerWall}
                 onUpdatePrayerWall={updatePrayerWall}
+              />
+            )}
+            {activeSection === 'gentle-extras' && (
+              <GentleExtrasSection
+                verseFindsYou={settings.verseFindsYou}
+                onUpdateVerseFindsYou={updateVerseFindsYou}
               />
             )}
             {activeSection === 'account' && (

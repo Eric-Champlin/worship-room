@@ -135,6 +135,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/quick-lift/start").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/v1/quick-lift/*/complete").authenticated()
 
+                // Spec 6.8 — Verse-Finds-You endpoint requires authentication.
+                // ABOVE OPTIONAL_AUTH_PATTERNS per first-match-wins (Phase 3 Addendum #4).
+                .requestMatchers(HttpMethod.GET, "/api/v1/verse-finds-you").authenticated()
+
                 // Optional-auth routes (Spec 3.3) — permitAll() lets anonymous
                 // requests through, but JwtAuthenticationFilter still processes
                 // them so a valid token extracts a principal for personalization.

@@ -1,0 +1,2339 @@
+{
+  // ============================================================================
+  // Worship Room — Verse-Finds-You Curated Verse Set (Spec 6.8)
+  // ============================================================================
+  //
+  // CURATION RULES — every edit must respect these (Brief §2):
+  //
+  //   • Short passages only (target ~35 words; up to ~40 acceptable for
+  //     foundational comfort verses like Isaiah 41:10 — the brief's "~"
+  //     allows flex). Validation enforces ≤40.
+  //   • No "prosperity" passages (no "God will give you the desires of your heart"
+  //     surfaced as a promise).
+  //   • No guilt/shame verses (no "oh ye of little faith" or mustard-seed-as-lecture).
+  //   • No judgment verses outside explicit lament context.
+  //   • Prefer Psalms, Lamentations, Isaiah, Gospels of John and Matthew, Romans 8,
+  //     Philippians 4, 2 Corinthians — passages explicitly about God's presence in
+  //     difficulty.
+  //   • Every entry reviewed against the "pastor's wife test" before inclusion
+  //     (would this verse, at this moment, land as grace or as judgment?).
+  //   • Translation locked to WEB (World English Bible).
+  //   • Version-controlled — changes go through spec review, not hotfixes.
+  //   • "Fewer and safer beats more and dicey" — remove any verse you're unsure
+  //     about, even if it means fewer than 180.
+  //
+  // Schema per entry:
+  //   { "id": "kebab-case stable id (e.g. 'psalm-23-1' or 'romans-8-38-39')",
+  //     "reference": "Display reference (e.g. 'Psalm 23:1')",
+  //     "text": "Verse text (WEB, ≤40 words)",
+  //     "translation": "WEB",
+  //     "tags": ["one-or-more tags from known_tags below"],
+  //     "excluded_contexts": ["zero or more tag names OR category names to suppress"],
+  //     "approximate_length": <integer word count> }
+  //
+  // ============================================================================
+  // CATEGORY → TAG MAPPING (Brief §"D-CategoryTagMapping" + Gate-G-NOT-HOPE)
+  // ============================================================================
+  //
+  // The mapping below routes a post's category (the category the AUTHOR selected
+  // when composing the post) to the set of verse tags the selection engine filters
+  // against. Mapping uses Eric's pastoral tag vocabulary (see known_tags below).
+  //
+  // MENTAL-HEALTH AND GRIEF DELIBERATELY DO NOT MAP TO `hope`. This is not an
+  // accidental omission — it is a load-bearing pastoral decision. Read this
+  // BEFORE you "complete" either mapping by adding `hope`:
+  //
+  //   • For someone in acute depression, a hope-verse can land as a demand — "you
+  //     should feel better, why don't you?" Hope-verses can be cruel in acute
+  //     mental-health distress.
+  //   • For someone in fresh grief, hope-verses arrive too soon. The pastoral
+  //     work in grief is presence, not "look forward to better days." Lamentations 3,
+  //     Psalm 88 — the Bible's own grief grammar — does not lead with hope.
+  //   • The right tags for both are `comfort`, `lament`, `presence` — verses that
+  //     ACKNOWLEDGE darkness rather than skip past it.
+  //
+  // If a future contributor decides hope-verses belong here after all, it should
+  // come through a dedicated spec with explicit pastoral review — not a casual
+  // "completeness" edit. The omission is the design.
+  //
+  // ============================================================================
+  "category_tag_mapping": {
+    "health":         ["comfort", "presence", "hope", "fear", "waiting", "endurance"],
+    "mental-health":  ["comfort", "lament", "presence", "rest", "doubt", "fear", "loneliness", "uncertainty"],
+    "family":         ["presence", "comfort", "endurance", "waiting"],
+    "work":           ["endurance", "presence", "rest", "uncertainty"],
+    "grief":          ["lament", "presence", "comfort", "loneliness", "waiting", "grief"],
+    "gratitude":      ["gratitude", "hope", "presence"],
+    "praise":         ["gratitude", "hope", "presence"],
+    "relationships":  ["presence", "comfort", "endurance", "loneliness"],
+    "other":          ["presence", "comfort", "hope"]
+    // `discussion` is INTENTIONALLY ABSENT — Spec 6.8 Edge Case decision: posts
+    // with category=discussion return `verse: null, reason: 'no_match'` rather
+    // than receive a defensive default mapping. See plan Edge Cases & Decisions.
+  },
+
+  // ============================================================================
+  // KNOWN TAGS (the enum the validation test asserts against)
+  // ============================================================================
+  // Union of CC's original 12-tag enum + Eric's pastoral vocabulary additions
+  // (doubt, endurance, fear, gratitude, grief, loneliness, uncertainty, waiting).
+  // Tags retained from CC's original (love, patience, strength, healing,
+  // thanksgiving, praise, joy) for forward-compat — future curation may use them.
+  "known_tags": [
+    "comfort", "lament", "presence", "rest", "hope", "love", "patience",
+    "strength", "healing", "thanksgiving", "praise", "joy",
+    "doubt", "endurance", "fear", "gratitude", "grief", "loneliness",
+    "uncertainty", "waiting"
+  ],
+
+  // ============================================================================
+  // ENTRIES — Eric's curated 180-passage set (Gate-G-CURATION-PREREQ resolved 2026-05-14)
+  // ============================================================================
+  // Source of truth: this file. Validation tests in CuratedVerseSetValidationTest
+  // enforce the curation rules above (id format, ≤40 words, tag enum, NOT-hope
+  // mappings, ≥30-entry floor).
+  "entries": [
+    {
+      "id": "psalm-23-1",
+      "reference": "Psalm 23:1",
+      "text": "Yahweh is my shepherd: I shall lack nothing.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence",
+        "rest"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 8
+    },
+    {
+      "id": "psalm-23-2",
+      "reference": "Psalm 23:2",
+      "text": "He makes me lie down in green pastures. He leads me beside still waters.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "comfort",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-23-3",
+      "reference": "Psalm 23:3",
+      "text": "He restores my soul. He guides me in the paths of righteousness for his name's sake.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "rest",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 16
+    },
+    {
+      "id": "psalm-23-4",
+      "reference": "Psalm 23:4",
+      "text": "Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me. Your rod and your staff, they comfort me.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "comfort",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 30
+    },
+    {
+      "id": "psalm-34-18",
+      "reference": "Psalm 34:18",
+      "text": "Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 18
+    },
+    {
+      "id": "psalm-46-1",
+      "reference": "Psalm 46:1",
+      "text": "God is our refuge and strength, a very present help in trouble.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence",
+        "fear"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-73-23",
+      "reference": "Psalm 73:23",
+      "text": "Nevertheless, I am continually with you. You have held my right hand.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-73-24",
+      "reference": "Psalm 73:24",
+      "text": "You will guide me with your counsel, and afterward receive me to glory.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-73-25",
+      "reference": "Psalm 73:25",
+      "text": "Whom do I have in heaven? There is no one on earth whom I desire besides you.",
+      "translation": "WEB",
+      "tags": [
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "psalm-73-26",
+      "reference": "Psalm 73:26",
+      "text": "My flesh and my heart fails, but God is the strength of my heart and my portion forever.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "endurance",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 18
+    },
+    {
+      "id": "psalm-91-1",
+      "reference": "Psalm 91:1",
+      "text": "He who dwells in the secret place of the Most High will rest in the shadow of the Almighty.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-91-2",
+      "reference": "Psalm 91:2",
+      "text": "I will say of Yahweh, \"He is my refuge and my fortress; my God, in whom I trust.\"",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "fear",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 18
+    },
+    {
+      "id": "psalm-121-1",
+      "reference": "Psalm 121:1",
+      "text": "I will lift up my eyes to the hills. Where does my help come from?",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-121-2",
+      "reference": "Psalm 121:2",
+      "text": "My help comes from Yahweh, who made heaven and earth.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "psalm-139-7",
+      "reference": "Psalm 139:7",
+      "text": "Where could I go from your Spirit? Or where could I flee from your presence?",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-139-8",
+      "reference": "Psalm 139:8",
+      "text": "If I ascend up into heaven, you are there. If I make my bed in Sheol, behold, you are there!",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 20
+    },
+    {
+      "id": "psalm-139-9",
+      "reference": "Psalm 139:9",
+      "text": "If I take the wings of the dawn, and settle in the uttermost parts of the sea,",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "psalm-139-10",
+      "reference": "Psalm 139:10",
+      "text": "even there your hand will lead me, and your right hand will hold me.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "loneliness",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-145-18",
+      "reference": "Psalm 145:18",
+      "text": "Yahweh is near to all those who call on him, to all who call on him in truth.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 18
+    },
+    {
+      "id": "isaiah-41-10",
+      "reference": "Isaiah 41:10",
+      "text": "Don't you be afraid, for I am with you. Don't be dismayed, for I am your God. I will strengthen you. Yes, I will help you. Yes, I will uphold you with the right hand of my righteousness.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 38
+    },
+    {
+      "id": "isaiah-41-13",
+      "reference": "Isaiah 41:13",
+      "text": "For I, Yahweh your God, will hold your right hand, saying to you, 'Don't be afraid. I will help you.'",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 20
+    },
+    {
+      "id": "isaiah-41-14",
+      "reference": "Isaiah 41:14",
+      "text": "Don't be afraid, you worm Jacob, and you men of Israel. I will help you,\" says Yahweh. \"Your Redeemer is the Holy One of Israel.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 25
+    },
+    {
+      "id": "isaiah-43-1",
+      "reference": "Isaiah 43:1",
+      "text": "But now Yahweh who created you, Jacob, and he who formed you, Israel, says: \"Don't be afraid, for I have redeemed you. I have called you by your name. You are mine.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 32
+    },
+    {
+      "id": "isaiah-43-2",
+      "reference": "Isaiah 43:2",
+      "text": "When you pass through the waters, I will be with you, and through the rivers, they will not overflow you. When you walk through the fire, you will not be burned, and flame will not scorch you.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 37
+    },
+    {
+      "id": "isaiah-49-15",
+      "reference": "Isaiah 49:15",
+      "text": "\"Can a woman forget her nursing child, that she should not have compassion on the son of her womb? Yes, these may forget, yet I will not forget you!",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 29
+    },
+    {
+      "id": "isaiah-49-16",
+      "reference": "Isaiah 49:16",
+      "text": "Behold, I have engraved you on the palms of my hands. Your walls are continually before me.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "isaiah-66-13",
+      "reference": "Isaiah 66:13",
+      "text": "As one whom his mother comforts, so I will comfort you. You will be comforted in Jerusalem.\"",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "matthew-11-28",
+      "reference": "Matthew 11:28",
+      "text": "\"Come to me, all you who labor and are heavily burdened, and I will give you rest.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "matthew-11-29",
+      "reference": "Matthew 11:29",
+      "text": "Take my yoke upon you, and learn from me, for I am gentle and humble in heart; and you will find rest for your souls.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 25
+    },
+    {
+      "id": "matthew-11-30",
+      "reference": "Matthew 11:30",
+      "text": "For my yoke is easy, and my burden is light.\"",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "john-14-18",
+      "reference": "John 14:18",
+      "text": "I will not leave you orphans. I will come to you.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "loneliness",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 11
+    },
+    {
+      "id": "john-14-27",
+      "reference": "John 14:27",
+      "text": "Peace I leave with you. My peace I give to you; not as the world gives, I give to you. Don't let your heart be troubled, neither let it be fearful.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "2-corinthians-1-3",
+      "reference": "2 Corinthians 1:3",
+      "text": "Blessed be the God and Father of our Lord Jesus Christ, the Father of mercies and God of all comfort;",
+      "translation": "WEB",
+      "tags": [
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 20
+    },
+    {
+      "id": "2-corinthians-1-4",
+      "reference": "2 Corinthians 1:4",
+      "text": "who comforts us in all our affliction, that we may be able to comfort those who are in any affliction, through the comfort with which we ourselves are comforted by God.",
+      "translation": "WEB",
+      "tags": [
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "2-corinthians-1-5",
+      "reference": "2 Corinthians 1:5",
+      "text": "For as the sufferings of Christ abound to us, even so our comfort also abounds through Christ.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "romans-8-38",
+      "reference": "Romans 8:38",
+      "text": "For I am persuaded that neither death, nor life, nor angels, nor principalities, nor things present, nor things to come, nor powers,",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "fear",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 22
+    },
+    {
+      "id": "romans-8-39",
+      "reference": "Romans 8:39",
+      "text": "nor height, nor depth, nor any other created thing will be able to separate us from God's love which is in Christ Jesus our Lord.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "fear",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 25
+    },
+    {
+      "id": "deuteronomy-31-6",
+      "reference": "Deuteronomy 31:6",
+      "text": "Be strong and courageous. Don't be afraid or scared of them; for Yahweh your God himself is who goes with you. He will not fail you nor forsake you.\"",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 29
+    },
+    {
+      "id": "deuteronomy-31-8",
+      "reference": "Deuteronomy 31:8",
+      "text": "Yahweh himself is who goes before you. He will be with you. He will not fail you nor forsake you. Don't be afraid. Don't be discouraged.\"",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 26
+    },
+    {
+      "id": "zephaniah-3-17",
+      "reference": "Zephaniah 3:17",
+      "text": "Yahweh, your God, is among you, a mighty one who will save. He will rejoice over you with joy. He will calm you in his love. He will rejoice over you with singing.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 33
+    },
+    {
+      "id": "psalm-27-10",
+      "reference": "Psalm 27:10",
+      "text": "When my father and my mother forsake me, then Yahweh will take me up.",
+      "translation": "WEB",
+      "tags": [
+        "loneliness",
+        "comfort",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-56-8",
+      "reference": "Psalm 56:8",
+      "text": "You count my wanderings. You put my tears into your container. Aren't they in your book?",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 16
+    },
+    {
+      "id": "psalm-147-3",
+      "reference": "Psalm 147:3",
+      "text": "He heals the broken in heart, and binds up their wounds.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "grief",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 11
+    },
+    {
+      "id": "psalm-116-8",
+      "reference": "Psalm 116:8",
+      "text": "For you have delivered my soul from death, my eyes from tears, and my feet from falling.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "grief",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "psalm-41-3",
+      "reference": "Psalm 41:3",
+      "text": "Yahweh will sustain him on his sickbed, and restore him from his bed of illness.",
+      "translation": "WEB",
+      "tags": [
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "nahum-1-7",
+      "reference": "Nahum 1:7",
+      "text": "Yahweh is good, a stronghold in the day of trouble; and he knows those who take refuge in him.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "fear",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-13-1",
+      "reference": "Psalm 13:1",
+      "text": "How long, Yahweh? Will you forget me forever? How long will you hide your face from me?",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "doubt",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "psalm-13-2",
+      "reference": "Psalm 13:2",
+      "text": "How long shall I take counsel in my soul, having sorrow in my heart every day? How long shall my enemy triumph over me?",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 24
+    },
+    {
+      "id": "psalm-22-1",
+      "reference": "Psalm 22:1",
+      "text": "My God, my God, why have you forsaken me? Why are you so far from helping me, and from the words of my groaning?",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "doubt",
+        "loneliness"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 24
+    },
+    {
+      "id": "psalm-22-2",
+      "reference": "Psalm 22:2",
+      "text": "My God, I cry in the daytime, but you don't answer; in the night season, and am not silent.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-42-3",
+      "reference": "Psalm 42:3",
+      "text": "My tears have been my food day and night, while they continually ask me, \"Where is your God?\"",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief",
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 18
+    },
+    {
+      "id": "psalm-42-5",
+      "reference": "Psalm 42:5",
+      "text": "Why are you in despair, my soul? Why are you disturbed within me? Hope in God! For I shall still praise him for the saving help of his presence.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "hope",
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 29
+    },
+    {
+      "id": "psalm-42-11",
+      "reference": "Psalm 42:11",
+      "text": "Why are you in despair, my soul? Why are you disturbed within me? Hope in God! For I shall still praise him, the saving help of my countenance, and my God.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "hope",
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "psalm-88-1",
+      "reference": "Psalm 88:1",
+      "text": "Yahweh, the God of my salvation, I have cried day and night before you.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-88-2",
+      "reference": "Psalm 88:2",
+      "text": "Let my prayer enter into your presence. Turn your ear to my cry.",
+      "translation": "WEB",
+      "tags": [
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-88-3",
+      "reference": "Psalm 88:3",
+      "text": "For my soul is full of troubles. My life draws near to Sheol.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-88-9",
+      "reference": "Psalm 88:9",
+      "text": "My eyes are dim from grief. I have called on you daily, Yahweh. I have spread out my hands to you.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 21
+    },
+    {
+      "id": "psalm-88-13",
+      "reference": "Psalm 88:13",
+      "text": "But to you, Yahweh, I have cried. In the morning, my prayer comes before you.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-88-18",
+      "reference": "Psalm 88:18",
+      "text": "You have put lover and friend far from me, and my friends into darkness.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "loneliness",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-6-6",
+      "reference": "Psalm 6:6",
+      "text": "I am weary with my groaning. Every night I flood my bed. I drench my couch with my tears.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-6-7",
+      "reference": "Psalm 6:7",
+      "text": "My eye wastes away because of grief. It grows old because of all my adversaries.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-31-9",
+      "reference": "Psalm 31:9",
+      "text": "Have mercy on me, Yahweh, for I am in distress. My eye, my soul, and my body waste away with grief.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 21
+    },
+    {
+      "id": "psalm-31-10",
+      "reference": "Psalm 31:10",
+      "text": "For my life is spent with sorrow, my years with sighing. My strength fails because of my iniquity. My bones are wasted away.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 23
+    },
+    {
+      "id": "lamentations-3-1",
+      "reference": "Lamentations 3:1",
+      "text": "I am the man who has seen affliction by the rod of his wrath.",
+      "translation": "WEB",
+      "tags": [
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "lamentations-3-2",
+      "reference": "Lamentations 3:2",
+      "text": "He has led me and caused me to walk in darkness, and not in light.",
+      "translation": "WEB",
+      "tags": [
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "lamentations-3-19",
+      "reference": "Lamentations 3:19",
+      "text": "Remember my affliction and my misery, the wormwood and the bitterness.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 11
+    },
+    {
+      "id": "lamentations-3-20",
+      "reference": "Lamentations 3:20",
+      "text": "My soul still remembers them, and is bowed down within me.",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 11
+    },
+    {
+      "id": "job-1-21",
+      "reference": "Job 1:21",
+      "text": "He said, \"Naked I came out of my mother's womb, and naked will I return there. Yahweh gave, and Yahweh has taken away. Blessed be Yahweh's name.\"",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 27
+    },
+    {
+      "id": "ecclesiastes-3-4",
+      "reference": "Ecclesiastes 3:4",
+      "text": "a time to weep, and a time to laugh; a time to mourn, and a time to dance;",
+      "translation": "WEB",
+      "tags": [
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 18
+    },
+    {
+      "id": "john-11-35",
+      "reference": "John 11:35",
+      "text": "Jesus wept.",
+      "translation": "WEB",
+      "tags": [
+        "grief",
+        "lament",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 2
+    },
+    {
+      "id": "psalm-30-5",
+      "reference": "Psalm 30:5",
+      "text": "For his anger is but for a moment. His favor is for a lifetime. Weeping may stay for the night, but joy comes in the morning.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "hope",
+        "lament"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 26
+    },
+    {
+      "id": "psalm-126-5",
+      "reference": "Psalm 126:5",
+      "text": "Those who sow in tears will reap in joy.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "lament"
+      ],
+      "excluded_contexts": [
+        "grief"
+      ],
+      "approximate_length": 9
+    },
+    {
+      "id": "psalm-126-6",
+      "reference": "Psalm 126:6",
+      "text": "He who goes out weeping, carrying seed for sowing, will certainly come again with joy, carrying his sheaves.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "lament"
+      ],
+      "excluded_contexts": [
+        "grief"
+      ],
+      "approximate_length": 18
+    },
+    {
+      "id": "isaiah-53-3",
+      "reference": "Isaiah 53:3",
+      "text": "He was despised and rejected by men, a man of suffering and acquainted with disease. He was despised as one from whom men hide their face; and we didn't respect him.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "grief",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "isaiah-53-4",
+      "reference": "Isaiah 53:4",
+      "text": "Surely he has borne our sickness and carried our suffering; yet we considered him plagued, struck by God, and afflicted.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "grief",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 20
+    },
+    {
+      "id": "matthew-5-4",
+      "reference": "Matthew 5:4",
+      "text": "Blessed are those who mourn, for they shall be comforted.",
+      "translation": "WEB",
+      "tags": [
+        "comfort",
+        "grief",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "psalm-62-1",
+      "reference": "Psalm 62:1",
+      "text": "My soul rests in God alone. My salvation is from him.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 11
+    },
+    {
+      "id": "psalm-62-2",
+      "reference": "Psalm 62:2",
+      "text": "He alone is my rock, my salvation, and my fortress. I will never be greatly shaken.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "presence",
+        "fear"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 16
+    },
+    {
+      "id": "psalm-62-5",
+      "reference": "Psalm 62:5",
+      "text": "My soul, wait in silence for God alone, for my expectation is from him.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-116-7",
+      "reference": "Psalm 116:7",
+      "text": "Return to your rest, my soul, for Yahweh has dealt bountifully with you.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-127-2",
+      "reference": "Psalm 127:2",
+      "text": "It is vain for you to rise up early, to stay up late, eating the bread of toil, for he gives sleep to his loved ones.",
+      "translation": "WEB",
+      "tags": [
+        "rest"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 26
+    },
+    {
+      "id": "psalm-4-8",
+      "reference": "Psalm 4:8",
+      "text": "In peace I will both lay myself down and sleep, for you, Yahweh alone, make me live in safety.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "fear"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-131-2",
+      "reference": "Psalm 131:2",
+      "text": "Surely I have stilled and quieted my soul, like a weaned child with his mother, like a weaned child is my soul within me.",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 24
+    },
+    {
+      "id": "mark-6-31",
+      "reference": "Mark 6:31",
+      "text": "He said to them, \"You come apart into a deserted place, and rest awhile.\" For there were many coming and going, and they had no leisure so much as to eat.",
+      "translation": "WEB",
+      "tags": [
+        "rest"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "exodus-33-14",
+      "reference": "Exodus 33:14",
+      "text": "He said, \"My presence will go with you, and I will give you rest.\"",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "isaiah-30-15",
+      "reference": "Isaiah 30:15",
+      "text": "For thus said the Lord Yahweh, the Holy One of Israel, \"You will be saved in returning and rest. Your strength will be in quietness and in confidence.\" You refused,",
+      "translation": "WEB",
+      "tags": [
+        "rest",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 30
+    },
+    {
+      "id": "romans-5-3",
+      "reference": "Romans 5:3",
+      "text": "Not only this, but we also rejoice in our sufferings, knowing that suffering produces perseverance;",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 15
+    },
+    {
+      "id": "romans-5-4",
+      "reference": "Romans 5:4",
+      "text": "and perseverance, proven character; and proven character, hope:",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 8
+    },
+    {
+      "id": "romans-5-5",
+      "reference": "Romans 5:5",
+      "text": "and hope doesn't disappoint us, because God's love has been poured into our hearts through the Holy Spirit who was given to us.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "endurance"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 23
+    },
+    {
+      "id": "romans-8-18",
+      "reference": "Romans 8:18",
+      "text": "For I consider that the sufferings of this present time are not worthy to be compared with the glory which will be revealed toward us.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 25
+    },
+    {
+      "id": "romans-8-28",
+      "reference": "Romans 8:28",
+      "text": "We know that all things work together for good for those who love God, for those who are called according to his purpose.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 23
+    },
+    {
+      "id": "2-corinthians-4-8",
+      "reference": "2 Corinthians 4:8",
+      "text": "We are pressed on every side, yet not crushed; perplexed, yet not to despair;",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "2-corinthians-4-9",
+      "reference": "2 Corinthians 4:9",
+      "text": "pursued, yet not forsaken; struck down, yet not destroyed;",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 9
+    },
+    {
+      "id": "2-corinthians-4-16",
+      "reference": "2 Corinthians 4:16",
+      "text": "Therefore we don't faint, but though our outward man is decaying, yet our inward man is renewed day by day.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 20
+    },
+    {
+      "id": "2-corinthians-4-17",
+      "reference": "2 Corinthians 4:17",
+      "text": "For our light affliction, which is for the moment, works for us more and more exceedingly an eternal weight of glory,",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 21
+    },
+    {
+      "id": "2-corinthians-4-18",
+      "reference": "2 Corinthians 4:18",
+      "text": "while we don't look at the things which are seen, but at the things which are not seen. For the things which are seen are temporal, but the things which are not seen are eternal.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 35
+    },
+    {
+      "id": "2-corinthians-12-9",
+      "reference": "2 Corinthians 12:9",
+      "text": "He has said to me, \"My grace is sufficient for you, for my power is made perfect in weakness.\" Most gladly therefore I will rather glory in my weaknesses, that the power of Christ may rest on me.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 38
+    },
+    {
+      "id": "philippians-4-13",
+      "reference": "Philippians 4:13",
+      "text": "I can do all things through Christ, who strengthens me.",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "isaiah-40-29",
+      "reference": "Isaiah 40:29",
+      "text": "He gives power to the weak. He increases the strength of him who has no might.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 16
+    },
+    {
+      "id": "isaiah-40-30",
+      "reference": "Isaiah 40:30",
+      "text": "Even the youths faint and get weary, and the young men utterly fall;",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "isaiah-40-31",
+      "reference": "Isaiah 40:31",
+      "text": "but those who wait for Yahweh will renew their strength. They will mount up with wings like eagles. They will run, and not be weary. They will walk, and not faint.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "waiting",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "galatians-6-9",
+      "reference": "Galatians 6:9",
+      "text": "Let's not be weary in doing good, for we will reap in due season, if we don't give up.",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-18-32",
+      "reference": "Psalm 18:32",
+      "text": "the God who arms me with strength, and makes my way perfect?",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-18-33",
+      "reference": "Psalm 18:33",
+      "text": "He makes my feet like deer's feet, and sets me on my high places.",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "1-peter-5-10",
+      "reference": "1 Peter 5:10",
+      "text": "But may the God of all grace, who called you to his eternal glory by Christ Jesus, after you have suffered a little while, perfect, establish, strengthen, and settle you.",
+      "translation": "WEB",
+      "tags": [
+        "endurance",
+        "hope",
+        "comfort"
+      ],
+      "excluded_contexts": [
+        "grief"
+      ],
+      "approximate_length": 30
+    },
+    {
+      "id": "james-1-12",
+      "reference": "James 1:12",
+      "text": "Blessed is a person who endures temptation, for when he has been approved, he will receive the crown of life, which the Lord promised to those who love him.",
+      "translation": "WEB",
+      "tags": [
+        "endurance"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 29
+    },
+    {
+      "id": "psalm-27-14",
+      "reference": "Psalm 27:14",
+      "text": "Wait for Yahweh. Be strong, and let your heart take courage. Yes, wait for Yahweh.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-37-7",
+      "reference": "Psalm 37:7",
+      "text": "Rest in Yahweh, and wait patiently for him. Don't fret because of him who prospers in his way, because of the man who makes wicked plots happen.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "rest"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 27
+    },
+    {
+      "id": "psalm-40-1",
+      "reference": "Psalm 40:1",
+      "text": "I waited patiently for Yahweh. He turned to me, and heard my cry.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-40-2",
+      "reference": "Psalm 40:2",
+      "text": "He brought me up also out of a horrible pit, out of the miry clay. He set my feet on a rock, and gave me a firm place to stand.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "waiting",
+        "comfort"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 30
+    },
+    {
+      "id": "psalm-130-5",
+      "reference": "Psalm 130:5",
+      "text": "I wait for Yahweh. My soul waits. I hope in his word.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-130-6",
+      "reference": "Psalm 130:6",
+      "text": "My soul longs for the Lord more than watchmen long for the morning, more than watchmen for the morning.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-25-4",
+      "reference": "Psalm 25:4",
+      "text": "Show me your ways, Yahweh. Teach me your paths.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "uncertainty"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 9
+    },
+    {
+      "id": "psalm-25-5",
+      "reference": "Psalm 25:5",
+      "text": "Guide me in your truth, and teach me, For you are the God of my salvation, I wait for you all day long.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "uncertainty"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 23
+    },
+    {
+      "id": "proverbs-3-5",
+      "reference": "Proverbs 3:5",
+      "text": "Trust in Yahweh with all your heart, and don't lean on your own understanding.",
+      "translation": "WEB",
+      "tags": [
+        "uncertainty",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "proverbs-3-6",
+      "reference": "Proverbs 3:6",
+      "text": "In all your ways acknowledge him, and he will make your paths straight.",
+      "translation": "WEB",
+      "tags": [
+        "uncertainty",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "isaiah-30-21",
+      "reference": "Isaiah 30:21",
+      "text": "and when you turn to the right hand, and when you turn to the left, your ears will hear a voice behind you, saying, \"This is the way. Walk in it.\"",
+      "translation": "WEB",
+      "tags": [
+        "uncertainty",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 31
+    },
+    {
+      "id": "isaiah-43-19",
+      "reference": "Isaiah 43:19",
+      "text": "Behold, I will do a new thing. It springs out now. Don't you know it? I will even make a way in the wilderness, and rivers in the desert.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "uncertainty"
+      ],
+      "excluded_contexts": [
+        "grief"
+      ],
+      "approximate_length": 29
+    },
+    {
+      "id": "jeremiah-29-11",
+      "reference": "Jeremiah 29:11",
+      "text": "For I know the thoughts that I think toward you,\" says Yahweh, \"thoughts of peace, and not of evil, to give you hope and a future.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "waiting",
+        "uncertainty"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 26
+    },
+    {
+      "id": "lamentations-3-25",
+      "reference": "Lamentations 3:25",
+      "text": "Yahweh is good to those who wait for him, to the soul who seeks him.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "lamentations-3-26",
+      "reference": "Lamentations 3:26",
+      "text": "It is good that a man should hope and quietly wait for the salvation of Yahweh.",
+      "translation": "WEB",
+      "tags": [
+        "waiting",
+        "rest"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 16
+    },
+    {
+      "id": "psalm-27-1",
+      "reference": "Psalm 27:1",
+      "text": "Yahweh is my light and my salvation. Whom shall I fear? Yahweh is the strength of my life. Of whom shall I be afraid?",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 24
+    },
+    {
+      "id": "psalm-56-3",
+      "reference": "Psalm 56:3",
+      "text": "When I am afraid, I will put my trust in you.",
+      "translation": "WEB",
+      "tags": [
+        "fear"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 11
+    },
+    {
+      "id": "psalm-94-19",
+      "reference": "Psalm 94:19",
+      "text": "In the multitude of my thoughts within me, your comforts delight my soul.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-34-4",
+      "reference": "Psalm 34:4",
+      "text": "I sought Yahweh, and he answered me, and delivered me from all my fears.",
+      "translation": "WEB",
+      "tags": [
+        "fear"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "2-timothy-1-7",
+      "reference": "2 Timothy 1:7",
+      "text": "For God didn't give us a spirit of fear, but of power, love, and self-control.",
+      "translation": "WEB",
+      "tags": [
+        "fear"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "philippians-4-6",
+      "reference": "Philippians 4:6",
+      "text": "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God.",
+      "translation": "WEB",
+      "tags": [
+        "fear"
+      ],
+      "excluded_contexts": [
+        "mental-health"
+      ],
+      "approximate_length": 21
+    },
+    {
+      "id": "philippians-4-7",
+      "reference": "Philippians 4:7",
+      "text": "And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus.",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "rest",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "joshua-1-9",
+      "reference": "Joshua 1:9",
+      "text": "Haven't I commanded you? Be strong and courageous. Don't be afraid. Don't be dismayed, for Yahweh your God is with you wherever you go.\"",
+      "translation": "WEB",
+      "tags": [
+        "fear",
+        "presence",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 24
+    },
+    {
+      "id": "1-john-4-18",
+      "reference": "1 John 4:18",
+      "text": "There is no fear in love; but perfect love casts out fear, because fear has punishment. He who fears is not made perfect in love.",
+      "translation": "WEB",
+      "tags": [
+        "fear"
+      ],
+      "excluded_contexts": [
+        "mental-health",
+        "grief"
+      ],
+      "approximate_length": 25
+    },
+    {
+      "id": "psalm-25-16",
+      "reference": "Psalm 25:16",
+      "text": "Turn to me, and have mercy on me, for I am desolate and afflicted.",
+      "translation": "WEB",
+      "tags": [
+        "loneliness",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-68-6",
+      "reference": "Psalm 68:6",
+      "text": "God sets the lonely in families. He brings out the prisoners with singing, but the rebellious dwell in a sun-scorched land.",
+      "translation": "WEB",
+      "tags": [
+        "loneliness",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 21
+    },
+    {
+      "id": "hebrews-13-5",
+      "reference": "Hebrews 13:5",
+      "text": "Be free from the love of money, content with such things as you have, for he has said, \"I will in no way leave you, neither will I in any way forsake you.\"",
+      "translation": "WEB",
+      "tags": [
+        "loneliness",
+        "presence"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 33
+    },
+    {
+      "id": "matthew-28-20",
+      "reference": "Matthew 28:20",
+      "text": "teaching them to observe all things that I commanded you. Behold, I am with you always, even to the end of the age.\" Amen.",
+      "translation": "WEB",
+      "tags": [
+        "presence",
+        "loneliness",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 24
+    },
+    {
+      "id": "mark-9-24",
+      "reference": "Mark 9:24",
+      "text": "Immediately the father of the child cried out with tears, \"I believe. Help my unbelief!\"",
+      "translation": "WEB",
+      "tags": [
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-73-16",
+      "reference": "Psalm 73:16",
+      "text": "When I tried to understand this, it was too painful for me,",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-73-17",
+      "reference": "Psalm 73:17",
+      "text": "until I entered God's sanctuary, and considered their latter end.",
+      "translation": "WEB",
+      "tags": [
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "psalm-77-1",
+      "reference": "Psalm 77:1",
+      "text": "My cry goes to God! Indeed, I cry to God for help, and for him to listen to me.",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-77-2",
+      "reference": "Psalm 77:2",
+      "text": "In the day of my trouble I sought the Lord. My hand was stretched out in the night, and didn't get tired. My soul refused to be comforted.",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "lament",
+        "grief"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 28
+    },
+    {
+      "id": "psalm-77-3",
+      "reference": "Psalm 77:3",
+      "text": "I remember God, and I groan. I complain, and my spirit is overwhelmed.",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "john-20-27",
+      "reference": "John 20:27",
+      "text": "Then he said to Thomas, \"Reach here your finger, and see my hands. Reach here your hand, and put it into my side. Don't be unbelieving, but believing.\"",
+      "translation": "WEB",
+      "tags": [
+        "doubt"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 28
+    },
+    {
+      "id": "john-20-28",
+      "reference": "John 20:28",
+      "text": "Thomas answered him, \"My Lord and my God!\"",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 8
+    },
+    {
+      "id": "john-20-29",
+      "reference": "John 20:29",
+      "text": "Jesus said to him, \"Because you have seen me, you have believed. Blessed are those who have not seen, and have believed.\"",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "hope"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 22
+    },
+    {
+      "id": "jude-1-22",
+      "reference": "Jude 1:22",
+      "text": "On some have compassion, making a distinction,",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 7
+    },
+    {
+      "id": "lamentations-3-21",
+      "reference": "Lamentations 3:21",
+      "text": "This I recall to my mind; therefore I have hope.",
+      "translation": "WEB",
+      "tags": [
+        "doubt",
+        "hope",
+        "lament"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "lamentations-3-22",
+      "reference": "Lamentations 3:22",
+      "text": "It is because of Yahweh's loving kindnesses that we are not consumed, because his compassion doesn't fail.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 17
+    },
+    {
+      "id": "lamentations-3-23",
+      "reference": "Lamentations 3:23",
+      "text": "They are new every morning. Great is your faithfulness.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "comfort",
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 9
+    },
+    {
+      "id": "lamentations-3-24",
+      "reference": "Lamentations 3:24",
+      "text": "\"Yahweh is my portion,\" says my soul. \"Therefore I will hope in him.\"",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-100-4",
+      "reference": "Psalm 100:4",
+      "text": "Enter into his gates with thanksgiving, and into his courts with praise. Give thanks to him, and bless his name.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 20
+    },
+    {
+      "id": "psalm-100-5",
+      "reference": "Psalm 100:5",
+      "text": "For Yahweh is good. His loving kindness endures forever, his faithfulness to all generations.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-103-1",
+      "reference": "Psalm 103:1",
+      "text": "Praise Yahweh, my soul! All that is within me, praise his holy name!",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-103-2",
+      "reference": "Psalm 103:2",
+      "text": "Praise Yahweh, my soul, and don't forget all his benefits,",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 10
+    },
+    {
+      "id": "psalm-103-3",
+      "reference": "Psalm 103:3",
+      "text": "who forgives all your sins, who heals all your diseases,",
+      "translation": "WEB",
+      "tags": [
+        "gratitude",
+        "comfort"
+      ],
+      "excluded_contexts": [
+        "health"
+      ],
+      "approximate_length": 10
+    },
+    {
+      "id": "psalm-103-4",
+      "reference": "Psalm 103:4",
+      "text": "who redeems your life from destruction, who crowns you with loving kindness and tender mercies,",
+      "translation": "WEB",
+      "tags": [
+        "gratitude",
+        "comfort"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-103-5",
+      "reference": "Psalm 103:5",
+      "text": "who satisfies your desire with good things, so that your youth is renewed like the eagle's.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 16
+    },
+    {
+      "id": "psalm-107-1",
+      "reference": "Psalm 107:1",
+      "text": "Give thanks to Yahweh, for he is good, for his loving kindness endures forever.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-136-1",
+      "reference": "Psalm 136:1",
+      "text": "Give thanks to Yahweh, for he is good; for his loving kindness endures forever.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-118-24",
+      "reference": "Psalm 118:24",
+      "text": "This is the day that Yahweh has made. We will rejoice and be glad in it!",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 16
+    },
+    {
+      "id": "psalm-116-12",
+      "reference": "Psalm 116:12",
+      "text": "What will I give to Yahweh for all his benefits toward me?",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-116-13",
+      "reference": "Psalm 116:13",
+      "text": "I will take the cup of salvation, and call on Yahweh's name.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 12
+    },
+    {
+      "id": "psalm-116-14",
+      "reference": "Psalm 116:14",
+      "text": "I will pay my vows to Yahweh, yes, in the presence of all his people.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 15
+    },
+    {
+      "id": "psalm-30-11",
+      "reference": "Psalm 30:11",
+      "text": "You have turned my mourning into dancing for me. You have removed my sackcloth, and clothed me with gladness,",
+      "translation": "WEB",
+      "tags": [
+        "gratitude",
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief"
+      ],
+      "approximate_length": 19
+    },
+    {
+      "id": "psalm-30-12",
+      "reference": "Psalm 30:12",
+      "text": "to the end that my heart may sing praise to you, and not be silent. Yahweh my God, I will give thanks to you forever!",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [
+        "grief"
+      ],
+      "approximate_length": 25
+    },
+    {
+      "id": "1-thessalonians-5-16",
+      "reference": "1 Thessalonians 5:16",
+      "text": "Always rejoice.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 2
+    },
+    {
+      "id": "1-thessalonians-5-17",
+      "reference": "1 Thessalonians 5:17",
+      "text": "Pray without ceasing.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 3
+    },
+    {
+      "id": "1-thessalonians-5-18",
+      "reference": "1 Thessalonians 5:18",
+      "text": "In everything give thanks, for this is the will of God in Christ Jesus toward you.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 16
+    },
+    {
+      "id": "philippians-4-4",
+      "reference": "Philippians 4:4",
+      "text": "Rejoice in the Lord always! Again I will say, \"Rejoice!\"",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 10
+    },
+    {
+      "id": "james-1-17",
+      "reference": "James 1:17",
+      "text": "Every good gift and every perfect gift is from above, coming down from the Father of lights, with whom can be no variation, nor turning shadow.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 26
+    },
+    {
+      "id": "colossians-3-15",
+      "reference": "Colossians 3:15",
+      "text": "And let the peace of God rule in your hearts, to which also you were called in one body, and be thankful.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude",
+        "rest"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 22
+    },
+    {
+      "id": "colossians-3-16",
+      "reference": "Colossians 3:16",
+      "text": "Let the word of Christ dwell in you richly; in all wisdom teaching and admonishing one another with psalms, hymns, and spiritual songs, singing with grace in your heart to the Lord.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 32
+    },
+    {
+      "id": "colossians-3-17",
+      "reference": "Colossians 3:17",
+      "text": "Whatever you do, in word or in deed, do all in the name of the Lord Jesus, giving thanks to God the Father, through him.",
+      "translation": "WEB",
+      "tags": [
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 25
+    },
+    {
+      "id": "romans-8-24",
+      "reference": "Romans 8:24",
+      "text": "For we were saved in hope, but hope that is seen is not hope. For who hopes for that which he sees?",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "waiting"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 22
+    },
+    {
+      "id": "romans-8-25",
+      "reference": "Romans 8:25",
+      "text": "But if we hope for that which we don't see, we wait for it with patience.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "waiting",
+        "endurance"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 16
+    },
+    {
+      "id": "romans-15-13",
+      "reference": "Romans 15:13",
+      "text": "Now may the God of hope fill you with all joy and peace in believing, that you may abound in hope, in the power of the Holy Spirit.",
+      "translation": "WEB",
+      "tags": [
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 28
+    },
+    {
+      "id": "psalm-33-20",
+      "reference": "Psalm 33:20",
+      "text": "Our soul has waited for Yahweh. He is our help and our shield.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "psalm-33-21",
+      "reference": "Psalm 33:21",
+      "text": "For our heart rejoices in him, because we have trusted in his holy name.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "gratitude"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-33-22",
+      "reference": "Psalm 33:22",
+      "text": "Let your loving kindness be on us, Yahweh, since we have hoped in you.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "waiting"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 14
+    },
+    {
+      "id": "psalm-71-14",
+      "reference": "Psalm 71:14",
+      "text": "But I will always hope, and will add to all of your praise.",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "endurance"
+      ],
+      "excluded_contexts": [],
+      "approximate_length": 13
+    },
+    {
+      "id": "1-peter-1-3",
+      "reference": "1 Peter 1:3",
+      "text": "Blessed be the God and Father of our Lord Jesus Christ, who according to his great mercy caused us to be born again to a living hope through the resurrection of Jesus Christ from the dead,",
+      "translation": "WEB",
+      "tags": [
+        "hope"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 36
+    },
+    {
+      "id": "hebrews-6-19",
+      "reference": "Hebrews 6:19",
+      "text": "This hope we have as an anchor of the soul, a hope both sure and steadfast and entering into that which is within the veil;",
+      "translation": "WEB",
+      "tags": [
+        "hope",
+        "endurance"
+      ],
+      "excluded_contexts": [
+        "grief",
+        "mental-health"
+      ],
+      "approximate_length": 25
+    }
+  ]
+}

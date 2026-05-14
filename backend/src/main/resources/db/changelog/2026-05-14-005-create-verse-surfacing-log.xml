@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 6.8 — Verse-Finds-You cooldown + 3-in-a-row source of
+       truth. Append-only log: one row per surfaced verse, indexed by user_id +
+       surfaced_at DESC for per-user cooldown and 30-day retention scans. The
+       Redis cooldown key (verse:cooldown:<userId>) is the hot-path read; this
+       table backs cooldown when Redis is offline (fail-CLOSED — DENY surfacing,
+       not bypass) and supports 3-in-a-row analytics + retention.
+
+       trigger_type CHECK constraint enforces the three trigger surfaces from
+       Spec 6.8: post_compose, comment, reading_time. ON DELETE CASCADE to
+       users(id) ensures account deletion (Spec 10.11) sweeps the log.
+
+       dismissed_at column from Brief §11 deliberately omitted — cooldown lives
+       in Redis, 3-in-a-row dismissal lives in wr_verse_dismissals localStorage,
+       no server-side path writes or reads dismissed_at. See Plan-Time
+       Divergence #9 in 2026-05-14-spec-6-8.md plan. -->
+  <changeSet id="2026-05-14-005-create-verse-surfacing-log" author="worship-room">
+    <sql>
+      CREATE TABLE verse_surfacing_log (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL,
+        verse_id VARCHAR(64) NOT NULL,
+        surfaced_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        trigger_type VARCHAR(20) NOT NULL,
+        CONSTRAINT fk_verse_surfacing_log_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        CONSTRAINT chk_verse_surfacing_log_trigger CHECK (trigger_type IN ('post_compose','comment','reading_time'))
+      );
+      CREATE INDEX idx_verse_surfacing_log_user_surfaced_desc ON verse_surfacing_log (user_id, surfaced_at DESC);
+    </sql>
+    <rollback>
+      <sql>DROP TABLE verse_surfacing_log;</sql>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>

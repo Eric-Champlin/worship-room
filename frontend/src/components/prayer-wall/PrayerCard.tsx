@@ -172,7 +172,10 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
   return (
     <PulseContext.Provider value={triggerPulse}>
      <IntercessorActionsContext.Provider value={intercessorActions}>
-      <div ref={articleRef}>
+      {/* Spec 6.8 — data-prayer-category attribute consumed by PrayerWall.tsx
+          IntersectionObserver to track the last-viewed post's category for
+          the reading-time trigger. Plain HTML attribute, no behavior change. */}
+      <div ref={articleRef} data-prayer-category={prayer.category ?? ''}>
         <FrostedCard
           variant={tier === 'detail' ? 'accent' : 'default'}
           as="article"

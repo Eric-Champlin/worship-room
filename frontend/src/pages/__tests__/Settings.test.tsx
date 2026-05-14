@@ -119,7 +119,8 @@ describe('Settings Page', () => {
 
   // --- Tab Pattern Unification ---
   // Spec 6.4 (MPD-11) added a "Sensitive features" section between Privacy and
-  // Account, bringing the total to 7. Tab counts updated accordingly.
+  // Account. Spec 6.8 added "Gentle extras" between Sensitive features and
+  // Account. Total tabs is now 8.
 
   it('tab pattern: both contexts use role="tab" inside role="tablist"', () => {
     renderSettings()
@@ -127,7 +128,7 @@ describe('Settings Page', () => {
     expect(tablists).toHaveLength(2)
     tablists.forEach((tablist) => {
       const tabs = tablist.querySelectorAll('[role="tab"]')
-      expect(tabs).toHaveLength(7)
+      expect(tabs).toHaveLength(8)
     })
   })
 
@@ -136,24 +137,25 @@ describe('Settings Page', () => {
     expect(container.querySelector('nav[role="navigation"]')).toBeNull()
   })
 
-  it('desktop: sidebar with 7 tab items', () => {
+  it('desktop: sidebar with 8 tab items', () => {
     renderSettings()
     const desktopTablist = getDesktopTablist()
     const buttons = desktopTablist.querySelectorAll('[role="tab"]')
-    expect(buttons).toHaveLength(7)
+    expect(buttons).toHaveLength(8)
     expect(buttons[0]).toHaveTextContent('Profile')
     expect(buttons[1]).toHaveTextContent('Dashboard')
     expect(buttons[2]).toHaveTextContent('Notifications')
     expect(buttons[3]).toHaveTextContent('Privacy')
     expect(buttons[4]).toHaveTextContent('Sensitive features')
-    expect(buttons[5]).toHaveTextContent('Account')
-    expect(buttons[6]).toHaveTextContent('App')
+    expect(buttons[5]).toHaveTextContent('Gentle extras')
+    expect(buttons[6]).toHaveTextContent('Account')
+    expect(buttons[7]).toHaveTextContent('App')
   })
 
-  it('mobile: tab bar with 7 tabs', () => {
+  it('mobile: tab bar with 8 tabs', () => {
     renderSettings()
     const tabs = screen.getAllByRole('tab')
-    expect(tabs).toHaveLength(14) // 7 mobile + 7 desktop (both in jsdom)
+    expect(tabs).toHaveLength(16) // 8 mobile + 8 desktop (both in jsdom)
   })
 
   it('active tab has aria-selected true for profile by default', () => {
@@ -418,9 +420,10 @@ describe('Settings Page', () => {
     renderSettings()
 
     // Go to Account section. Spec 6.4 inserted "Sensitive features" at index 4,
-    // shifting Account from 4 → 5.
+    // shifting Account from 4 → 5. Spec 6.8 inserted "Gentle extras" at
+    // index 5, shifting Account from 5 → 6.
     const desktopTablist = getDesktopTablist()
-    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[5] as HTMLElement)
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[6] as HTMLElement)
 
     // Click Delete Account
     await user.click(screen.getByRole('button', { name: 'Delete Account' }))

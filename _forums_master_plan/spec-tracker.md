@@ -182,12 +182,14 @@ prevents a wasted deploy attempt.
 | 84  | 6.5   | Intercessor Timeline          | L    | Med-High | ✅     |
 | 85  | 6.6   | Answered Wall                 | L    | Medium   | ✅     |
 | 86  | 6.7   | Shareable Testimony Cards     | L    | Medium   | ✅     |
-| 87  | 6.8   | Verse-Finds-You               | L    | HIGH     | ⬜     |
+| 87  | 6.8   | Verse-Finds-You               | L    | HIGH     | ✅     |
 | 88  | 6.9   | Prayer Wall Composer Drafts   | M    | Low      | ⬜     |
 | 89  | 6.10  | Prayer Wall Search by Author  | S    | Low      | ⬜     |
 | 90  | 6.11  | Sound Effects Settings Polish | S    | Low      | ⬜     |
 | 91  | 6.11b | Live Presence Component       | M    | Medium   | ⬜     |
 | 92  | 6.12  | Phase 6 Cutover               | S    | Low      | ⬜     |
+
+** Don't forget spec clean up (above) called spec-6-6b-deferred-2 **
 
 ## Phase 7 — Cross-Feature Integration (8 specs)
 

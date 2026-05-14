@@ -3146,6 +3146,107 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ProxyError' }
 
+  /api/v1/verse-finds-you:
+    get:
+      summary: Conditionally surface a curated verse to the caller (Spec 6.8)
+      description: |
+        The Verse-Finds-You endpoint. Auth required, per-user 10/hr rate limit.
+
+        Always returns 200 unless auth (401) or rate limit (429) trips. When no
+        verse surfaces, the response body has `verse: null` and a `reason` code
+        from the enum `cooldown | crisis_suppression | disabled | no_match`
+        (Gate-G-SILENT-FAILURE).
+
+        The `enabled` query param is the pre-Phase-12 client-side settings flag.
+        When `enabled=false` (the default), the response is `verse: null,
+        reason: "disabled"` immediately — no other gates run.
+
+        Response shape uses camelCase per project convention (see
+        `PrayerReceiptResponse` for precedent).
+      tags: [VerseFindsYou]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: trigger
+          required: true
+          schema: { type: string, enum: [post_compose, comment, reading_time] }
+          description: Which surface fired the request.
+        - in: query
+          name: context
+          required: false
+          schema: { type: string }
+          description: |
+            Post category (e.g. "grief", "mental-health"). Drives tag mapping.
+            Omitted or unknown categories yield `reason: "no_match"`.
+        - in: query
+          name: enabled
+          required: false
+          schema: { type: boolean, default: false }
+          description: |
+            User's settings toggle. Default false honors Gate-G-DEFAULT-OFF.
+      responses:
+        '200':
+          description: |
+            Surfacing decision (verse may be null per Gate-G-SILENT-FAILURE).
+
+            Note: this endpoint does NOT emit `X-RateLimit-Limit` /
+            `X-RateLimit-Remaining` / `X-RateLimit-Reset` headers on success
+            responses. The 429 response's `Retry-After` header is the only
+            rate-limit signal currently surfaced. Matches the existing
+            `PostsRateLimitService` precedent; promoting success-headers
+            across all Forums Wave per-feature rate limiters is tracked as
+            a future cross-cutting spec.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [verse, cooldownUntil, reason]
+                properties:
+                  verse:
+                    nullable: true
+                    type: object
+                    required: [reference, text]
+                    properties:
+                      reference:
+                        type: string
+                        description: Display reference, e.g. "Psalm 23:1"
+                      text:
+                        type: string
+                        description: WEB translation verse text (≤ 35 words per curation rule)
+                  cooldownUntil:
+                    nullable: true
+                    type: string
+                    format: date-time
+                    description: ISO-8601 timestamp when the 24-hour cooldown expires (only set when reason="cooldown")
+                  reason:
+                    nullable: true
+                    type: string
+                    enum: [cooldown, crisis_suppression, disabled, no_match]
+                    description: |
+                      Non-null only when verse is null. One of:
+                      - cooldown: user surfaced a verse in the last 24 hours
+                      - crisis_suppression: user has crisis-flagged content in the last 48 hours
+                      - disabled: enabled=false on the request
+                      - no_match: no curated verse matches the requested context tags
+        '400':
+          description: INVALID_INPUT — unknown trigger value
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '401':
+          description: Unauthenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+        '429':
+          description: Rate-limited (10/hr per user)
+          headers:
+            Retry-After:
+              schema: { type: integer }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProxyError' }
+
 components:
   schemas:
     ProxyResponse:

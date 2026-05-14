@@ -46,6 +46,14 @@ export const DEFAULT_SETTINGS: UserSettings = {
     // modal does not re-appear.
     dismissedShareWarning: false,
   },
+  verseFindsYou: {
+    // Spec 6.8 — Verse-Finds-You default OFF for new AND existing users
+    // (Gate-G-DEFAULT-OFF). deepMerge below propagates this default to any
+    // pre-existing wr_settings localStorage entry that lacks the namespace,
+    // satisfying W27 (existing users land on false). Toggle exposed in the
+    // Settings → Gentle extras section.
+    enabled: false,
+  },
 }
 
 function deepMerge<T extends object>(defaults: T, partial: DeepPartial<T>): T {
@@ -80,12 +88,12 @@ export function getSettings(): UserSettings {
     if (raw === null) return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
     const parsed = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall } }
+      return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall }, verseFindsYou: { ...DEFAULT_SETTINGS.verseFindsYou } }
     }
     return deepMerge(DEFAULT_SETTINGS, parsed)
   } catch (_e) {
     // localStorage may be unavailable or data malformed
-    return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall } }
+    return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall }, verseFindsYou: { ...DEFAULT_SETTINGS.verseFindsYou } }
   }
 }
 
