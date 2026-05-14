@@ -67,7 +67,7 @@ class PostsIdempotencyServiceTest {
                 UUID.randomUUID(), "prayer_request", "test", "health",
                 false, null, null, null, null,
                 "public", false, null, null, "approved", false,
-                0, 0, 0, 0,
+                0, 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(), null,
                 null,
                 null,

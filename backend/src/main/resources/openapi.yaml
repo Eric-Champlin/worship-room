@@ -2220,18 +2220,21 @@ paths:
   /api/v1/posts/{id}/reactions:
     post:
       tags: [Posts]
-      summary: Toggle a reaction (praying or candle) on a post (Spec 3.7)
+      summary: Toggle a reaction (praying, candle, or praising) on a post (Spec 3.7 + 6.6)
       description: |
         Toggles the (postId, viewerId, reactionType) reaction row. If the row
         does not exist, it is inserted and the response carries `state="added"`
         with HTTP 201. If the row exists, it is deleted and the response
-        carries `state="removed"` with HTTP 200. The post's praying_count and
-        candle_count are returned in the body so the frontend can update its
-        local cache without a re-read.
+        carries `state="removed"` with HTTP 200. The post's praying_count,
+        candle_count, and praising_count are returned in the body so the
+        frontend can update its local cache without a re-read.
 
-        Reaction add fires an INTERCESSION activity event (faith points
+        Praying-add fires an INTERCESSION activity event (faith points
         credited per the activity engine's per-user-per-day idempotency).
-        Reaction remove does NOT fire an activity event — no negative points.
+        Candle-add and praising-add do NOT fire INTERCESSION — candle is
+        silent remembrance, praising (Spec 6.6) is celebration of an
+        answered prayer; neither is intercession. Reaction remove does NOT
+        fire an activity event — no negative points.
 
         **Toggle retry semantic (Spec 3.7 R16):** On a network drop where the
         client retries the same POST, the second call inverts the toggle
@@ -2318,7 +2321,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [praying, candle]
+            enum: [praying, candle, praising]
       responses:
         '204':
           description: Reaction removed (or already absent)
@@ -2699,15 +2702,16 @@ paths:
       summary: Viewer's reactions across all posts (flat map)
       description: |
         Returns a flat map keyed by post UUID, where each value is a
-        `{isPraying, isCandle, isBookmarked}` triple. Posts where the viewer
-        has neither reacted (praying or candle) nor bookmarked are NOT in
-        the map (frontend treats absence as all-false). Map iteration order
-        is not guaranteed.
+        `{isPraying, isCandle, isPraising, isBookmarked}` quadruple. Posts
+        where the viewer has neither reacted (praying, candle, or praising)
+        nor bookmarked are NOT in the map (frontend treats absence as
+        all-false). Map iteration order is not guaranteed.
 
         Spec 3.7 extended the value type with `isCandle`; the read-side now
         reflects both reaction types (Spec 3.4 Divergence 3 — candle
-        excluded — is superseded). Phase 6.6 Answered Wall will extend
-        further with `praising` and `celebrate`.
+        excluded — is superseded). Spec 6.6 Answered Wall added
+        `isPraising` for the praising reaction; future `celebrate` support
+        is deferred.
 
         No pagination — the response is bounded by the viewer's actual
         engagement count. Per-user data only; reactions and bookmarks made
@@ -4201,6 +4205,7 @@ components:
         - crisisFlag
         - prayingCount
         - candleCount
+        - praisingCount
         - commentCount
         - bookmarkCount
         - createdAt
@@ -4235,6 +4240,7 @@ components:
         crisisFlag: { type: boolean }
         prayingCount: { type: integer, minimum: 0 }
         candleCount: { type: integer, minimum: 0 }
+        praisingCount: { type: integer, minimum: 0, description: "Spec 6.6 — count of 'praising' reactions on the post (Answered Wall)." }
         commentCount: { type: integer, minimum: 0 }
         bookmarkCount: { type: integer, minimum: 0 }
         createdAt: { type: string, format: date-time }
@@ -4650,22 +4656,24 @@ components:
     PerPostReaction:
       description: |
         Per-post engagement summary for the viewer. Spec 3.7 added `isCandle`
-        alongside `isPraying` and `isBookmarked`. Future reaction types
-        (Phase 6.6 Answered Wall) will extend this DTO further.
+        alongside `isPraying` and `isBookmarked`. Spec 6.6 Answered Wall added
+        `isPraising`. Future `celebrate` support is deferred.
       type: object
-      required: [isPraying, isCandle, isBookmarked]
+      required: [isPraying, isCandle, isPraising, isBookmarked]
       properties:
         isPraying: { type: boolean }
         isCandle: { type: boolean }
+        isPraising: { type: boolean, description: "Spec 6.6 — viewer has reacted with 'praising' on this post." }
         isBookmarked: { type: boolean }
 
     ReactionsResponse:
       description: |
         Flat map keyed by post UUID. Posts where the viewer has neither
-        reacted (praying or candle) nor bookmarked are not in the map.
-        Map iteration order is not guaranteed. Spec 3.7 extended the value
-        type with `isCandle`; the read-side now reflects both reaction types
-        (Spec 3.4 Divergence 3 — candle excluded — is superseded).
+        reacted (praying, candle, or praising) nor bookmarked are not in
+        the map. Map iteration order is not guaranteed. Spec 3.7 extended
+        the value type with `isCandle`; Spec 6.6 Answered Wall added
+        `isPraising` (Spec 3.4 Divergence 3 — candle excluded — was
+        superseded by 3.7).
       type: object
       required: [reactions]
       properties:
@@ -4676,28 +4684,28 @@ components:
 
     ToggleReactionRequest:
       description: |
-        Request body for `POST /api/v1/posts/{id}/reactions` (Spec 3.7).
+        Request body for `POST /api/v1/posts/{id}/reactions` (Spec 3.7 + 6.6).
       type: object
       required: [reactionType]
       properties:
         reactionType:
           type: string
-          enum: [praying, candle]
+          enum: [praying, candle, praising]
           description: |
-            The reaction type to toggle. Future reaction types (Phase 6.6
-            Answered Wall: praising, celebrate) will extend this enum.
+            The reaction type to toggle. Spec 6.6 Answered Wall added
+            `praising`; future `celebrate` support is deferred.
 
     ToggleReactionResponse:
       description: |
-        Response data for `POST /api/v1/posts/{id}/reactions` (Spec 3.7 D11).
-        Status disambiguates `state`: 201 on add, 200 on remove. Both counters
-        are returned regardless of which type was toggled.
+        Response data for `POST /api/v1/posts/{id}/reactions` (Spec 3.7 D11 + 6.6).
+        Status disambiguates `state`: 201 on add, 200 on remove. All three
+        counters are returned regardless of which type was toggled.
       type: object
-      required: [reactionType, state, prayingCount, candleCount]
+      required: [reactionType, state, prayingCount, candleCount, praisingCount]
       properties:
         reactionType:
           type: string
-          enum: [praying, candle]
+          enum: [praying, candle, praising]
         state:
           type: string
           enum: [added, removed]
@@ -4712,6 +4720,10 @@ components:
           type: integer
           minimum: 0
           description: Post-mutation candle count for the parent post.
+        praisingCount:
+          type: integer
+          minimum: 0
+          description: Post-mutation praising count for the parent post (Spec 6.6).
 
     PrayerReceiptResponse:
       description: |

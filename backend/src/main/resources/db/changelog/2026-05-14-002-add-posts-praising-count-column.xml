@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 6.6 — Answered Wall.
+
+       Adds praising_count denormalized counter to posts table, mirroring
+       the existing praying_count and candle_count columns from changeset
+       2026-04-27-014 (lines 59-62). Pattern parity is the rationale:
+       computing 'praising' counts per read via SELECT COUNT(*) would
+       introduce a parallel path the Spec 6.6 Gate-G-REACTION-REUSE
+       forbids. Per Phase 3 Execution Reality Addendum item 5: all
+       counter mutations route through SQL-side @Modifying UPDATE
+       methods on PostRepository.
+
+       No backfill needed — answered prayers have zero 'praising'
+       reactions until 6.6 ships, so the DEFAULT 0 on existing rows is
+       correct. -->
+  <changeSet id="2026-05-14-002-add-posts-praising-count-column" author="worship-room">
+
+    <addColumn tableName="posts">
+      <column name="praising_count" type="INTEGER" defaultValueNumeric="0">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+
+    <rollback>
+      <dropColumn tableName="posts" columnName="praising_count"/>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

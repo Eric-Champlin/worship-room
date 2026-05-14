@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { Bookmark, Check, HandHelping, Heart, Hourglass, MessageCircle, Plus, Share2 } from 'lucide-react'
+import { Bookmark, Check, HandHelping, Heart, Hourglass, MessageCircle, Plus, Share2, Sparkles } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ANIMATION_DURATIONS } from '@/constants/animation'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,11 @@ import { useSoundEffects } from '@/hooks/useSoundEffects'
 import { ShareDropdown, getShareText } from './ShareDropdown'
 import type { PostType } from '@/constants/post-types'
 import type { PrayerRequest, PrayerReaction } from '@/types/prayer-wall'
+import {
+  PRAISING_LABEL,
+  PRAISING_ACTIVE_ARIA_LABEL,
+  PRAISING_INACTIVE_ARIA_LABEL,
+} from '@/constants/answered-wall-copy'
 
 // Spec 4.6 — per-type reaction labels and icons. Module-scope (stable across
 // renders, O(1) lookup at render time, no memoization needed). Encouragement
@@ -46,6 +51,13 @@ interface InteractionBarProps {
   isCommentsOpen: boolean
   onToggleSave?: () => void
   isSaved?: boolean
+  /** Spec 6.6 — Answered Wall: when true, render the "Praising with you"
+   *  button alongside the praying button. Explicit prop (not auto-detected
+   *  from prayer.isAnswered) so the rendering surface stays in caller control. */
+  showPraising?: boolean
+  /** Spec 6.6 — called when the user taps the "Praising with you" button.
+   *  Required when showPraising=true; caller wires to togglePraising(prayer.id). */
+  onTogglePraising?: () => void
 }
 
 const btnBase =
@@ -60,6 +72,8 @@ export function InteractionBar({
   isCommentsOpen,
   onToggleSave,
   isSaved,
+  showPraising = false,
+  onTogglePraising,
 }: InteractionBarProps) {
   const { isAuthenticated, user } = useAuth()
   const authModal = useAuthModal()
@@ -73,6 +87,7 @@ export function InteractionBar({
   const { recordActivity } = useFaithPoints()
   const isPraying = reactions?.isPraying ?? false
   const isBookmarked = reactions?.isBookmarked ?? false
+  const isPraising = reactions?.isPraising ?? false
 
   const [isAnimating, setIsAnimating] = useState(false)
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -205,6 +220,36 @@ export function InteractionBar({
           </span>
         )}
       </div>
+
+      {/* Spec 6.6 — "Praising with you" button (Answered Wall). Renders only when
+          the caller passes `showPraising={true}`. Auth-gated like the other write
+          actions; falls back to the auth modal when logged-out. Uses the same
+          reactionsStore as praying/candle via `onTogglePraising` from the caller. */}
+      {showPraising && (
+        <button
+          type="button"
+          onClick={() => {
+            if (!isAuthenticated) {
+              authModal?.openAuthModal('Sign in to praise with the community.')
+              return
+            }
+            onTogglePraising?.()
+            triggerPulse?.()
+            playSoundEffect('sparkle')
+          }}
+          className={cn(
+            btnBase,
+            isPraising ? 'font-medium text-violet-300' : 'text-white/50 hover:text-violet-300',
+          )}
+          aria-label={isPraising ? PRAISING_ACTIVE_ARIA_LABEL : PRAISING_INACTIVE_ARIA_LABEL}
+          aria-pressed={isPraising}
+        >
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          <span className="hidden sm:inline">
+            {PRAISING_LABEL} ({prayer.praisingCount ?? 0})
+          </span>
+        </button>
+      )}
 
       {/* Comment button — Spec 4.6: hidden entirely for encouragement (W6/D12) */}
       {!isEncouragement && (

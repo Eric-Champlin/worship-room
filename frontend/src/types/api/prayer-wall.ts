@@ -39,7 +39,7 @@ export type PostVisibilityApi = 'public' | 'friends' | 'private'
 
 export type ModerationStatusApi = 'approved' | 'flagged' | 'hidden' | 'removed'
 
-export type ReactionTypeApi = 'praying' | 'candle'
+export type ReactionTypeApi = 'praying' | 'candle' | 'praising'
 
 export type ToggleStateApi = 'added' | 'removed'
 
@@ -98,6 +98,8 @@ export interface PostDto {
   crisisFlag: boolean
   prayingCount: number
   candleCount: number
+  /** Spec 6.6 — count of 'praising' reactions on the post (Answered Wall). */
+  praisingCount: number
   commentCount: number
   bookmarkCount: number
   createdAt: string
@@ -162,6 +164,8 @@ export interface CommentListResponseRaw {
 export interface PerPostReactionApi {
   isPraying: boolean
   isCandle: boolean
+  /** Spec 6.6 — viewer has reacted with 'praising' on this post (Answered Wall). */
+  isPraising: boolean
   isBookmarked: boolean
 }
 
@@ -179,6 +183,8 @@ export interface ToggleReactionResponse {
   state: ToggleStateApi
   prayingCount: number
   candleCount: number
+  /** Spec 6.6 — post-mutation praising count for the parent post. */
+  praisingCount: number
 }
 
 export interface BookmarkResponse {

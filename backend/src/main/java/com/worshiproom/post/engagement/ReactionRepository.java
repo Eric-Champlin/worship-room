@@ -14,8 +14,9 @@ import java.util.UUID;
 public interface ReactionRepository extends JpaRepository<PostReaction, PostReactionId> {
 
     // Returns rows for the viewer's reactions of one type — ReactionsResponse
-    // builder queries both 'praying' and 'candle' as of Spec 3.7
-    // (Spec 3.4 Divergence 3 was: candle excluded — superseded).
+    // builder queries 'praying', 'candle', and 'praising' as of Spec 6.6
+    // (Spec 3.4 Divergence 3 was: candle excluded — superseded by Spec 3.7;
+    // 'praising' added by Spec 6.6 Answered Wall).
     List<PostReaction> findByUserIdAndReactionType(UUID userId, String reactionType);
 
     /** Spec 3.7 — existence check for toggle/explicit-remove paths. */

@@ -37,6 +37,7 @@ public class EngagementService {
 
     private static final String PRAYING = "praying";
     private static final String CANDLE = "candle";
+    private static final String PRAISING = "praising";
 
     private final ReactionRepository reactionRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -55,6 +56,8 @@ public class EngagementService {
         // Spec 3.7 — candle reactions now included in the read-side map (was excluded per
         // Spec 3.4 Divergence 3; that exclusion is superseded now that 3.7 ships the write-side).
         List<PostReaction> candles = reactionRepository.findByUserIdAndReactionType(viewerId, CANDLE);
+        // Spec 6.6 — praising reactions for the Answered Wall.
+        List<PostReaction> praisings = reactionRepository.findByUserIdAndReactionType(viewerId, PRAISING);
         List<PostBookmark> bookmarks = bookmarkRepository.findByUserId(viewerId);
 
         Map<UUID, PerPostReactionMutable> accum = new HashMap<>();
@@ -64,13 +67,16 @@ public class EngagementService {
         for (PostReaction r : candles) {
             accum.computeIfAbsent(r.getPostId(), k -> new PerPostReactionMutable()).isCandle = true;
         }
+        for (PostReaction r : praisings) {
+            accum.computeIfAbsent(r.getPostId(), k -> new PerPostReactionMutable()).isPraising = true;
+        }
         for (PostBookmark b : bookmarks) {
             accum.computeIfAbsent(b.getPostId(), k -> new PerPostReactionMutable()).isBookmarked = true;
         }
 
         Map<UUID, PerPostReaction> finalMap = new HashMap<>(accum.size());
         accum.forEach((postId, m) -> finalMap.put(postId,
-                new PerPostReaction(m.isPraying, m.isCandle, m.isBookmarked)));
+                new PerPostReaction(m.isPraying, m.isCandle, m.isPraising, m.isBookmarked)));
         return new ReactionsResponse(finalMap);
     }
 
@@ -92,6 +98,7 @@ public class EngagementService {
     private static final class PerPostReactionMutable {
         boolean isPraying;
         boolean isCandle;
+        boolean isPraising;
         boolean isBookmarked;
     }
 }

@@ -24,6 +24,7 @@ import { ComposerChooser } from '@/components/prayer-wall/ComposerChooser'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilters } from '@/components/prayer-wall/CategoryFilters'
 import { PrayerWallLeftSidebar } from '@/components/prayer-wall/PrayerWallLeftSidebar'
+import { PrayerWallViewTabs } from '@/components/prayer-wall/PrayerWallViewTabs'
 import { PrayerWallRightSidebar } from '@/components/prayer-wall/PrayerWallRightSidebar'
 import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
 import { QotdComposer } from '@/components/prayer-wall/QotdComposer'
@@ -898,6 +899,13 @@ function PrayerWallContent() {
         </div>
 
         <main id="main-content" className="mx-auto w-full max-w-[720px] py-6 sm:py-8">
+        {/* Spec 6.6 — cross-navigation tab strip to the Answered Wall. Lives
+            at the top of the main column so it's mobile-safe (the left sidebar
+            is xl:block only and would hide on mobile). */}
+        <div className="mb-6">
+          <PrayerWallViewTabs />
+        </div>
+
         {isLoading ? (
           <PrayerWallSkeleton />
         ) : fetchError ? (

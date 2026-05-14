@@ -5,6 +5,7 @@ import {
   togglePraying,
   toggleBookmark,
   toggleCandle,
+  togglePraising,
   _resetForTesting,
 } from '@/lib/prayer-wall/reactionsStore'
 
@@ -35,6 +36,7 @@ function HookConsumer({ prayerId }: { prayerId: string }) {
       <span data-testid="praying">{String(reaction?.isPraying ?? false)}</span>
       <span data-testid="bookmarked">{String(reaction?.isBookmarked ?? false)}</span>
       <span data-testid="candle">{String(reaction?.isCandle ?? false)}</span>
+      <span data-testid="praising">{String(reaction?.isPraising ?? false)}</span>
     </div>
   )
 }
@@ -97,5 +99,41 @@ describe('usePrayerReactions subscription', () => {
     // Failing this assertion would mean the hook skipped the subscription
     // (BB-45 anti-pattern: snapshot without subscribe) OR toggleCandle didn't notify.
     expect(screen.getByTestId('candle').textContent).toBe('true')
+  })
+
+  it('praising toggle from outside the component re-renders consumers (BB-45 guard, Spec 6.6)', () => {
+    // Critical BB-45 subscription test for the new Spec 6.6 praising reaction.
+    // Mirrors the candle test above — proves that AnsweredWall's AnsweredCard
+    // will re-render when the praising state mutates from any other surface.
+    render(<HookConsumer prayerId="test-prayer-praising" />)
+    expect(screen.getByTestId('praising').textContent).toBe('false')
+
+    act(() => {
+      togglePraising('test-prayer-praising')
+    })
+
+    expect(screen.getByTestId('praising').textContent).toBe('true')
+  })
+
+  it('praising toggle: two mounts of the same prayer stay in sync (Spec 6.6)', () => {
+    // Cross-mount subscription test: an AnsweredCard rendered in one place
+    // and an AnsweredCard rendered in another (or a PrayerCard rendered
+    // alongside it) must both reflect the new praising state when the
+    // store mutates.
+    render(
+      <>
+        <HookConsumer prayerId="test-prayer-praising-2" />
+        <HookConsumer prayerId="test-prayer-praising-2" />
+      </>,
+    )
+
+    act(() => {
+      togglePraising('test-prayer-praising-2')
+    })
+
+    const praisingSpans = screen.getAllByTestId('praising')
+    expect(praisingSpans).toHaveLength(2)
+    expect(praisingSpans[0].textContent).toBe('true')
+    expect(praisingSpans[1].textContent).toBe('true')
   })
 })

@@ -188,7 +188,11 @@ export interface ListPostsParams {
   category?: string
   postType?: PostTypeApi
   qotdId?: string
-  sort?: 'bumped' | 'recent'
+  /** Spec 6.6 added 'answered' for the Answered Wall feed. Filters
+   *  is_answered=TRUE posts and sorts by answered_at DESC. Backend infra
+   *  (SortKey.ANSWERED + PostSpecifications.isAnswered) has shipped since
+   *  Phase 3; 6.6 is a frontend consumer of the existing endpoint. */
+  sort?: 'bumped' | 'recent' | 'answered'
 }
 
 /** GET /api/v1/posts — paginated public feed (optional auth). */
@@ -462,8 +466,10 @@ export async function resolveQuestion(
 // --- REACTION WRITES ---
 
 /**
- * POST /api/v1/posts/{id}/reactions — toggle praying or candle.
- * Returns {state: 'added' | 'removed', prayingCount, candleCount}.
+ * POST /api/v1/posts/{id}/reactions — toggle praying, candle, or praising.
+ * Returns {state: 'added' | 'removed', prayingCount, candleCount, praisingCount}.
+ * Spec 6.6 added 'praising' for the Answered Wall; all three post-mutation
+ * counters are returned regardless of which reactionType was toggled.
  */
 export async function toggleReaction(
   postId: string,
@@ -472,6 +478,7 @@ export async function toggleReaction(
   state: 'added' | 'removed'
   prayingCount: number
   candleCount: number
+  praisingCount: number
 }> {
   assertCanWrite('toggleReaction')
   const body: ToggleReactionRequest = { reactionType }
@@ -486,6 +493,7 @@ export async function toggleReaction(
     state: response.state,
     prayingCount: response.prayingCount,
     candleCount: response.candleCount,
+    praisingCount: response.praisingCount,
   }
 }
 

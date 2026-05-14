@@ -132,6 +132,7 @@ public class PostMapper {
                 p.isCrisisFlag(),
                 p.getPrayingCount(),
                 p.getCandleCount(),
+                p.getPraisingCount(),
                 p.getCommentCount(),
                 p.getBookmarkCount(),
                 p.getCreatedAt(),

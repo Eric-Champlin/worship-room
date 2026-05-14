@@ -196,8 +196,10 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
     expect(getReaction('new-prayer-c3')!.isCandle).toBe(true) // still true
   })
 
-  it('hydrate from old-shape (3-field) localStorage default-fills isCandle to false', () => {
-    // Pre-seed localStorage with old-shape data — no isCandle field.
+  it('hydrate from old-shape (3-field) localStorage default-fills isCandle AND isPraising to false', () => {
+    // Pre-seed localStorage with old-shape data — neither isCandle nor isPraising.
+    // Spec 6.6 extended the migration: any field absence (candle OR praising)
+    // default-fills both missing fields to false.
     const oldShape = {
       'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false },
       'prayer-2': { prayerId: 'prayer-2', isPraying: false, isBookmarked: true },
@@ -213,24 +215,57 @@ describe('Spec 3.7 — toggleCandle and shape migration', () => {
       isPraying: true,
       isBookmarked: false,
       isCandle: false,
+      isPraising: false,
     })
     expect(snap['prayer-2']).toEqual({
       prayerId: 'prayer-2',
       isPraying: false,
       isBookmarked: true,
       isCandle: false,
+      isPraising: false,
     })
 
-    // localStorage was rewritten with the new shape — both entries now have isCandle.
+    // localStorage was rewritten with the new shape — every entry has all 5 fields.
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
     expect(stored['prayer-1'].isCandle).toBe(false)
+    expect(stored['prayer-1'].isPraising).toBe(false)
     expect(stored['prayer-2'].isCandle).toBe(false)
+    expect(stored['prayer-2'].isPraising).toBe(false)
+  })
+
+  it('hydrate from 4-field localStorage (post-Spec-3.7, pre-6.6) default-fills isPraising to false', () => {
+    // Spec 6.6 — second-wave migration: data that ran the 3.7 migration once
+    // has isCandle but not isPraising. Default-fill isPraising to false.
+    const fourFieldShape = {
+      'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false, isCandle: true },
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fourFieldShape))
+    _resetForTesting()
+
+    const snap = getReactions()
+
+    expect(snap['prayer-1']).toEqual({
+      prayerId: 'prayer-1',
+      isPraying: true,
+      isBookmarked: false,
+      isCandle: true,
+      isPraising: false,
+    })
+
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+    expect(stored['prayer-1'].isPraising).toBe(false)
   })
 
   it('hydration on already-migrated data does not re-write storage', () => {
-    // Pre-seed with new-shape data.
+    // Pre-seed with new-shape (post-6.6) data.
     const newShape = {
-      'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: false, isCandle: true },
+      'prayer-1': {
+        prayerId: 'prayer-1',
+        isPraying: true,
+        isBookmarked: false,
+        isCandle: true,
+        isPraising: false,
+      },
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newShape))
     _resetForTesting()
@@ -293,12 +328,14 @@ describe('init() — hydration', () => {
       isPraying: true,
       isBookmarked: true,
       isCandle: false,
+      isPraising: false,
     })
     expect(getReaction('prayer-B')).toEqual({
       prayerId: 'prayer-B',
       isPraying: false,
       isBookmarked: true,
       isCandle: false,
+      isPraising: false,
     })
   })
 
@@ -321,6 +358,7 @@ describe('init() — hydration', () => {
       isPraying: false,
       isBookmarked: true,
       isCandle: false,
+      isPraising: false,
     })
     expect(showToast).toHaveBeenCalledWith(
       expect.stringContaining("couldn't refresh your reactions"),

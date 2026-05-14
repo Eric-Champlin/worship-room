@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+  <!-- Forums Wave Spec 6.6 — Answered Wall.
+
+       Widens post_reactions.reaction_type CHECK constraint to accept
+       'praising' in addition to the existing 'praying' and 'candle'.
+
+       The original changeset 2026-04-27-016 anticipated this widening at
+       its comment lines 54-57: "Phase 6.6 Answered Wall ALTERs the
+       constraint to add 'praising' and 'celebrate'." Per Spec 6.6 brief
+       MPD-1 the scope here is 'praising' ONLY — 'celebrate' is deferred
+       to a future spec because it has no consumer in 6.6 and speculative
+       schema for an unbuilt feature would be a liability rather than a
+       head start.
+
+       APPEND-ONLY: NEVER edit 2026-04-27-016. Its MD5 is permanent in
+       DATABASECHANGELOG and any edit causes a Liquibase checksum failure
+       on deploy. Schema widening goes in a new changeset.
+
+       PATTERN: PostgreSQL cannot widen a CHECK in place — the canonical
+       pattern is DROP + ADD CONSTRAINT inside a single changeset so a
+       failure leaves the constraint in a known-good state. -->
+  <changeSet id="2026-05-14-001-add-praising-to-post-reactions-check" author="worship-room">
+
+    <sql>
+      ALTER TABLE post_reactions DROP CONSTRAINT post_reactions_reaction_type_check;
+      ALTER TABLE post_reactions ADD CONSTRAINT post_reactions_reaction_type_check
+      CHECK (reaction_type IN ('praying', 'candle', 'praising'));
+    </sql>
+
+    <rollback>
+      <!-- Rollback: revert the CHECK to ('praying', 'candle'). Will fail
+           loudly via the CHECK if any 'praising' rows exist at rollback
+           time — by design. Liquibase contract: a rollback that would
+           orphan data should fail rather than silently lose data. The
+           operator must DELETE 'praising' rows first if the table was
+           populated, OR accept the failure. -->
+      <sql>
+        ALTER TABLE post_reactions DROP CONSTRAINT post_reactions_reaction_type_check;
+        ALTER TABLE post_reactions ADD CONSTRAINT post_reactions_reaction_type_check
+        CHECK (reaction_type IN ('praying', 'candle'));
+      </sql>
+    </rollback>
+
+  </changeSet>
+</databaseChangeLog>

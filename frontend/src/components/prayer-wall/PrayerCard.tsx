@@ -18,10 +18,14 @@ import { CategoryBadge } from './CategoryBadge'
 import { QotdBadge } from './QotdBadge'
 import { ScriptureChip } from './ScriptureChip'
 import { IntercessorTimeline } from './IntercessorTimeline'
-import { formatFullDate } from '@/lib/time'
+import { formatFullDate, timeAgo } from '@/lib/time'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { cn } from '@/lib/utils'
 import { getPerTypeChromeClass } from '@/constants/post-type-chrome'
+import {
+  ANSWER_TEXT_REGION_LABEL,
+  ANSWERED_TIMESTAMP_PREFIX,
+} from '@/constants/answered-wall-copy'
 
 const PulseContext = createContext<(() => void) | null>(null)
 // eslint-disable-next-line react-refresh/only-export-components -- Hook co-located with PrayerCard
@@ -64,9 +68,14 @@ interface PrayerCardProps {
   index?: number
   /** Spec 5.5 — Tier 1 elevation for PrayerDetail's main card; Tier 2 default for feed/dashboard/profile. */
   tier?: 'feed' | 'detail'
+  /** Spec 6.6 — Answered Wall variant. When true AND prayer.isAnswered, the small
+   *  inline AnsweredBadge is replaced with a prominent "How this was answered"
+   *  region (eyebrow + answer text + relative timestamp). Default false; other
+   *  surfaces (main feed, profile, dashboard) keep the inline pill. */
+  answeredVariant?: boolean
 }
 
-export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99, tier = 'feed' }: PrayerCardProps) {
+export function PrayerCard({ prayer, showFull = false, onCategoryClick, children, index = 99, tier = 'feed', answeredVariant = false }: PrayerCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const articleRef = useRef<HTMLDivElement>(null)
   const pulseTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
@@ -266,7 +275,32 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
 
           {children}
 
-          {prayer.isAnswered && (
+          {prayer.isAnswered && answeredVariant && (
+            // Spec 6.6 — AnsweredCard prominent treatment. Eyebrow + answer text
+            // + relative timestamp. Replaces the small inline AnsweredBadge so
+            // the testimony of the answered prayer is the focal point of the card.
+            <section
+              aria-label={ANSWER_TEXT_REGION_LABEL}
+              className="mt-4 rounded-xl border-l-4 border-l-primary/60 bg-white/[0.04] px-5 py-6 sm:px-7 sm:py-7"
+            >
+              <p className="mb-3 text-xs font-medium tracking-[0.15em] text-white/50">
+                HOW THIS WAS ANSWERED
+              </p>
+              {prayer.answeredText && (
+                <p className="whitespace-pre-wrap text-[17px] leading-[1.75] text-white sm:text-lg">
+                  {prayer.answeredText}
+                </p>
+              )}
+              {prayer.answeredAt && (
+                <p className="mt-3 text-xs text-white/50">
+                  {ANSWERED_TIMESTAMP_PREFIX}
+                  {timeAgo(prayer.answeredAt)}
+                </p>
+              )}
+            </section>
+          )}
+
+          {prayer.isAnswered && !answeredVariant && (
             <AnsweredBadge
               answeredText={prayer.answeredText}
               answeredAt={prayer.answeredAt}

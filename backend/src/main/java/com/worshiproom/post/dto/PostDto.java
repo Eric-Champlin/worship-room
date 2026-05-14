@@ -29,6 +29,7 @@ public record PostDto(
         boolean crisisFlag,
         int prayingCount,
         int candleCount,
+        int praisingCount,
         int commentCount,
         int bookmarkCount,
         OffsetDateTime createdAt,

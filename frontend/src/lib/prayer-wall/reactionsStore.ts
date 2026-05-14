@@ -20,8 +20,9 @@ const listeners = new Set<() => void>()
 // --- Spec 3.11 module-scoped state ---------------------------------------
 //
 // pendingMutations: Set of `${prayerId}:${concern}` keys (concern ∈ 'praying'
-//   | 'bookmark' | 'candle'). Per-prayer + per-concern locks for double-tap
-//   coalescing in flag-on mode.
+//   | 'bookmark' | 'candle' | 'praising'). Per-prayer + per-concern locks for
+//   double-tap coalescing in flag-on mode. Spec 6.6 added 'praising' for the
+//   Answered Wall.
 // hydrationGeneration: monotonic counter incremented at every init() entry.
 //   Each commit/defer call captures the generation it started under and
 //   aborts if a newer init() has superseded it. Prevents the concurrent-
@@ -34,13 +35,13 @@ let toastFn: ((msg: string) => void) | null = null
 let openAuthModalFn: ((subtitle?: string) => void) | null = null
 
 /**
- * Loosened guard (Spec 3.7): `isCandle` is treated as optional during
- * the shape transition. Missing `isCandle` is default-filled to `false`
- * in `readFromStorage` and written back, completing a one-way migration
- * for users who upgrade with old-shape (3-field) data in localStorage.
+ * Loosened guard (Spec 3.7 + 6.6): `isCandle` and `isPraising` are treated
+ * as optional during the shape transition. Missing fields are default-filled
+ * to `false` in `readFromStorage` and written back, completing a one-way
+ * migration for users who upgrade with old-shape data in localStorage.
  *
- * After the migration runs once, all stored entries are 4-field. Future
- * reads encounter only 4-field data.
+ * After the migration runs once, all stored entries carry the current 5-field
+ * shape. Future reads encounter only 5-field data.
  */
 function isValidReaction(value: unknown): value is PrayerReaction {
   if (typeof value !== 'object' || value === null) return false
@@ -49,8 +50,8 @@ function isValidReaction(value: unknown): value is PrayerReaction {
     typeof r.prayerId === 'string' &&
     typeof r.isPraying === 'boolean' &&
     typeof r.isBookmarked === 'boolean'
-    // NOTE: isCandle deliberately NOT validated here — old-shape data
-    // missing isCandle should pass the guard so we can default-fill.
+    // NOTE: isCandle and isPraising deliberately NOT validated here — old-shape
+    // data missing them should pass the guard so we can default-fill.
   )
 }
 
@@ -68,10 +69,18 @@ function readFromStorage(): Record<string, PrayerReaction> | null {
     let migrationOccurred = false
     for (const [key, value] of Object.entries(parsed)) {
       if (!isValidReaction(value)) return null
-      const v = value as PrayerReaction & { isCandle?: boolean }
-      if (typeof v.isCandle !== 'boolean') {
-        // Default-fill old-shape data (Spec 3.7 migration).
-        result[key] = { ...v, isCandle: false }
+      const v = value as PrayerReaction & { isCandle?: boolean; isPraising?: boolean }
+      const missingCandle = typeof v.isCandle !== 'boolean'
+      const missingPraising = typeof v.isPraising !== 'boolean'
+      if (missingCandle || missingPraising) {
+        // Default-fill old-shape data (Spec 3.7 migration for isCandle; Spec 6.6
+        // migration for isPraising). Both default to false; no version key
+        // required because the additive shape is safe.
+        result[key] = {
+          ...v,
+          isCandle: missingCandle ? false : v.isCandle!,
+          isPraising: missingPraising ? false : v.isPraising!,
+        }
         migrationOccurred = true
       } else {
         result[key] = v
@@ -139,6 +148,7 @@ function applyPrayingFlip(prayerId: string): boolean {
     isPraying: !wasPraying,
     isBookmarked: current?.isBookmarked ?? false,
     isCandle: current?.isCandle ?? false,
+    isPraising: current?.isPraising ?? false,
   }
   cache = { ...getCache(), [prayerId]: next }
   notify()
@@ -153,6 +163,7 @@ function applyBookmarkFlip(prayerId: string): boolean {
     isPraying: current?.isPraying ?? false,
     isBookmarked: !wasBookmarked,
     isCandle: current?.isCandle ?? false,
+    isPraising: current?.isPraising ?? false,
   }
   cache = { ...getCache(), [prayerId]: next }
   notify()
@@ -167,10 +178,28 @@ function applyCandleFlip(prayerId: string): boolean {
     isPraying: current?.isPraying ?? false,
     isBookmarked: current?.isBookmarked ?? false,
     isCandle: !wasCandle,
+    isPraising: current?.isPraising ?? false,
   }
   cache = { ...getCache(), [prayerId]: next }
   notify()
   return wasCandle
+}
+
+// Spec 6.6 — Answered Wall praising-reaction flip. Mirrors applyCandleFlip
+// exactly; pendingMutations key is `${prayerId}:praising`.
+function applyPraisingFlip(prayerId: string): boolean {
+  const current = getCache()[prayerId]
+  const wasPraising = current?.isPraising ?? false
+  const next: PrayerReaction = {
+    prayerId,
+    isPraying: current?.isPraying ?? false,
+    isBookmarked: current?.isBookmarked ?? false,
+    isCandle: current?.isCandle ?? false,
+    isPraising: !wasPraising,
+  }
+  cache = { ...getCache(), [prayerId]: next }
+  notify()
+  return wasPraising
 }
 
 /**
@@ -191,6 +220,7 @@ function forceState(
     isPraying: partial.isPraying ?? current?.isPraying ?? false,
     isBookmarked: partial.isBookmarked ?? current?.isBookmarked ?? false,
     isCandle: partial.isCandle ?? current?.isCandle ?? false,
+    isPraising: partial.isPraising ?? current?.isPraising ?? false,
   }
   cache = { ...getCache(), [prayerId]: next }
   notify()
@@ -323,6 +353,7 @@ function commitHydration(
         isPraying: existing?.isPraying ?? false,
         isBookmarked: true,
         isCandle: existing?.isCandle ?? false,
+        isPraising: existing?.isPraising ?? false,
       }
     }
   } else {
@@ -555,6 +586,44 @@ export function toggleCandle(prayerId: string): boolean {
     })
 
   return wasCandle
+}
+
+/** Toggles isPraising for prayerId. Returns the PREVIOUS isPraising value. Spec 6.6 (Answered Wall). */
+export function togglePraising(prayerId: string): boolean {
+  if (!isBackendPrayerWallEnabled()) {
+    const wasPraising = applyPraisingFlip(prayerId)
+    writeToStorage(getCache())
+    return wasPraising
+  }
+
+  // Pending-mutation guard fires BEFORE the optimistic flip — see
+  // togglePraying for the rationale.
+  const key = `${prayerId}:praising`
+  if (pendingMutations.has(key)) {
+    return getCache()[prayerId]?.isPraising ?? false
+  }
+
+  const wasPraising = applyPraisingFlip(prayerId)
+  pendingMutations.add(key)
+
+  void prayerWallApi
+    .toggleReaction(prayerId, 'praising')
+    .then((result) => {
+      const serverIsPraising = result.state === 'added'
+      const cachedIsPraising = getCache()[prayerId]?.isPraising ?? false
+      if (serverIsPraising !== cachedIsPraising) {
+        forceState(prayerId, { isPraising: serverIsPraising })
+      }
+    })
+    .catch((err) => {
+      applyPraisingFlip(prayerId) // rollback
+      handleToggleError(err)
+    })
+    .finally(() => {
+      pendingMutations.delete(key)
+    })
+
+  return wasPraising
 }
 
 /**

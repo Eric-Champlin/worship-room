@@ -322,4 +322,142 @@ class ReactionWriteIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
     }
+
+    // ─── Spec 6.6 — 'praising' reaction write paths ────────────────────────────
+
+    @Test
+    void togglePraising_addPath_returns201WithStateAddedAndAllThreeCounts() throws Exception {
+        // ADD path: insert reaction, increment praising_count, return all three counters.
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("praising")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.reactionType").value("praising"))
+                .andExpect(jsonPath("$.data.state").value("added"))
+                .andExpect(jsonPath("$.data.prayingCount").value(0))
+                .andExpect(jsonPath("$.data.candleCount").value(0))
+                .andExpect(jsonPath("$.data.praisingCount").value(1));
+
+        Integer rows = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM post_reactions WHERE post_id = ? AND user_id = ? AND reaction_type = 'praising'",
+                Integer.class, alicePostId, alice.getId());
+        assertThat(rows).isEqualTo(1);
+
+        Integer praisingCount = jdbc.queryForObject(
+                "SELECT praising_count FROM posts WHERE id = ?", Integer.class, alicePostId);
+        assertThat(praisingCount).isEqualTo(1);
+    }
+
+    @Test
+    void togglePraising_removePath_returns200WithStateRemovedAndDecrementsCounter() throws Exception {
+        // ADD then toggle again → REMOVE.
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("praising")))
+                .andExpect(status().isCreated());
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("praising")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state").value("removed"))
+                .andExpect(jsonPath("$.data.praisingCount").value(0));
+
+        Integer rows = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM post_reactions WHERE post_id = ? AND user_id = ? AND reaction_type = 'praising'",
+                Integer.class, alicePostId, alice.getId());
+        assertThat(rows).isEqualTo(0);
+
+        Integer praisingCount = jdbc.queryForObject(
+                "SELECT praising_count FROM posts WHERE id = ?", Integer.class, alicePostId);
+        assertThat(praisingCount).isEqualTo(0);
+    }
+
+    @Test
+    void deleteReactionPraising_explicit_isIdempotent() throws Exception {
+        // DELETE on non-existent row → 204 (idempotent).
+        mvc.perform(delete("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .param("reactionType", "praising"))
+                .andExpect(status().isNoContent());
+
+        // ADD then DELETE → 204, counter back to 0.
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("praising")))
+                .andExpect(status().isCreated());
+        mvc.perform(delete("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .param("reactionType", "praising"))
+                .andExpect(status().isNoContent());
+
+        Integer praisingCount = jdbc.queryForObject(
+                "SELECT praising_count FROM posts WHERE id = ?", Integer.class, alicePostId);
+        assertThat(praisingCount).isEqualTo(0);
+    }
+
+    @Test
+    void togglePraising_onNonAnsweredPost_succeeds_dbPermissive() throws Exception {
+        // Spec 6.6 D-PraisingScope (R7): the CHECK constraint allows 'praising' on
+        // any post; UI gates the affordance to answered posts but the backend does
+        // NOT validate post.isAnswered. Cheapest possible policy — fewest moving parts.
+        // alicePostId is NOT answered (is_answered defaults to false).
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("praising")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.state").value("added"));
+    }
+
+    // ─── Spec 6.6 — INTERCESSION activity boundary ─────────────────────────────
+    // Option A: gate INTERCESSION to praying-only. Candle-add and praising-add
+    // deliberately do NOT fire INTERCESSION. The pre-6.6 candle behavior fired
+    // INTERCESSION on every reaction-add — that drift is corrected here.
+    // The existing togglePraying_addPath_firesIntercessionActivity (above) stays
+    // green to prove praying behavior is unchanged.
+
+    @Test
+    void togglePraising_addPath_doesNotFireIntercessionActivity() throws Exception {
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("praising")))
+                .andExpect(status().isCreated());
+
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM activity_log WHERE user_id = ? " +
+                "AND activity_type = 'intercession' AND source_feature = 'prayer-wall-reaction'",
+                Integer.class, alice.getId());
+        assertThat(count)
+                .as("praising-add is celebration, not intercession — must not fire INTERCESSION (Spec 6.6 Option A)")
+                .isEqualTo(0);
+    }
+
+    @Test
+    void toggleCandle_addPath_doesNotFireIntercessionActivity() throws Exception {
+        // BEHAVIOR CHANGE (Spec 6.6 Option A): candle-add no longer fires INTERCESSION.
+        // Pre-6.6, ReactionWriteService fired INTERCESSION on every reaction-add — the
+        // implementation generalized over praying|candle without semantic justification.
+        // Candle is silent remembrance/solidarity, not intercession. Decoupling fixes
+        // miscategorization (faith point inflation + 25-intercessions badge eligibility
+        // padding). Forward-looking only — historical activity_log INTERCESSION rows
+        // from prior candle reactions persist (no retroactive recompute).
+        mvc.perform(post("/api/v1/posts/{id}/reactions", alicePostId)
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body("candle")))
+                .andExpect(status().isCreated());
+
+        Integer count = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM activity_log WHERE user_id = ? " +
+                "AND activity_type = 'intercession' AND source_feature = 'prayer-wall-reaction'",
+                Integer.class, alice.getId());
+        assertThat(count)
+                .as("candle-add is silent remembrance, not intercession — must not fire INTERCESSION (Spec 6.6 corrected Spec 3.7 drift)")
+                .isEqualTo(0);
+    }
 }

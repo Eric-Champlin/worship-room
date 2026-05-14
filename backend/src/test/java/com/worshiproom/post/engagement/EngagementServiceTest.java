@@ -124,10 +124,12 @@ class EngagementServiceTest extends AbstractIntegrationTest {
         // should appear (the prior expectation of size=3 with postD absent reflected the
         // pre-3.7 Spec 3.4 Divergence 3 behavior, which is now superseded).
         assertThat(resp.reactions()).hasSize(4);
-        assertThat(resp.reactions().get(postA)).isEqualTo(new PerPostReaction(true, false, false));
-        assertThat(resp.reactions().get(postB)).isEqualTo(new PerPostReaction(false, false, true));
-        assertThat(resp.reactions().get(postC)).isEqualTo(new PerPostReaction(true, false, true));
-        assertThat(resp.reactions().get(postD)).isEqualTo(new PerPostReaction(false, true, false));
+        // Spec 6.6 — PerPostReaction now carries `isPraising` between `isCandle` and
+        // `isBookmarked`. None of these fixture posts have a praising reaction.
+        assertThat(resp.reactions().get(postA)).isEqualTo(new PerPostReaction(true, false, false, false));
+        assertThat(resp.reactions().get(postB)).isEqualTo(new PerPostReaction(false, false, false, true));
+        assertThat(resp.reactions().get(postC)).isEqualTo(new PerPostReaction(true, false, false, true));
+        assertThat(resp.reactions().get(postD)).isEqualTo(new PerPostReaction(false, true, false, false));
     }
 
     @Test
@@ -143,7 +145,37 @@ class EngagementServiceTest extends AbstractIntegrationTest {
         assertThat(reaction).isNotNull();
         assertThat(reaction.isPraying()).isFalse();
         assertThat(reaction.isCandle()).isTrue();
+        assertThat(reaction.isPraising()).isFalse();
         assertThat(reaction.isBookmarked()).isFalse();
+    }
+
+    @Test
+    void reactionsFor_includesPraisingReactions_perSpec66() {
+        // Spec 6.6 — praising reactions are surfaced on /users/me/reactions so
+        // the AnsweredWall can render "You're praising with this" state.
+        UUID postId = seedPost(bob.getId(), "public", false);
+        seedReaction(postId, alice.getId(), "praising");
+
+        ReactionsResponse resp = engagementService.reactionsFor(alice.getId());
+
+        PerPostReaction reaction = resp.reactions().get(postId);
+        assertThat(reaction).isNotNull();
+        assertThat(reaction.isPraying()).isFalse();
+        assertThat(reaction.isCandle()).isFalse();
+        assertThat(reaction.isPraising()).isTrue();
+        assertThat(reaction.isBookmarked()).isFalse();
+    }
+
+    @Test
+    void reactionsFor_otherUserPraisingReaction_excluded() {
+        // Spec 6.6 — viewer-scoped privacy: only the viewer's own praising
+        // reactions are surfaced. Bob's praising on a public post does NOT
+        // leak into Alice's reactionsFor map.
+        UUID postId = seedPost(bob.getId(), "public", false);
+        seedReaction(postId, bob.getId(), "praising");
+
+        ReactionsResponse resp = engagementService.reactionsFor(alice.getId());
+        assertThat(resp.reactions()).isEmpty();
     }
 
     @Test

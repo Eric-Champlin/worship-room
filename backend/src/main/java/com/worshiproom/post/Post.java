@@ -78,6 +78,9 @@ public class Post {
     @Column(name = "candle_count", nullable = false)
     private int candleCount;
 
+    @Column(name = "praising_count", nullable = false)
+    private int praisingCount;
+
     @Column(name = "comment_count", nullable = false)
     private int commentCount;
 
@@ -138,6 +141,7 @@ public class Post {
     public OffsetDateTime getDeletedAt() { return deletedAt; }
     public int getPrayingCount() { return prayingCount; }
     public int getCandleCount() { return candleCount; }
+    public int getPraisingCount() { return praisingCount; }
     public int getCommentCount() { return commentCount; }
     public int getBookmarkCount() { return bookmarkCount; }
     public int getReportCount() { return reportCount; }
@@ -166,6 +170,7 @@ public class Post {
     public void setModerationStatus(ModerationStatus status) { this.moderationStatus = status; }
     public void setPostType(PostType postType) { this.postType = postType; }
     public void setPrayingCount(int prayingCount) { this.prayingCount = prayingCount; }
+    public void setPraisingCount(int praisingCount) { this.praisingCount = praisingCount; }
     public void setQotdId(String qotdId) { this.qotdId = qotdId; }
     public void setReportCount(int reportCount) { this.reportCount = reportCount; }
     public void setScriptureReference(String scriptureReference) { this.scriptureReference = scriptureReference; }

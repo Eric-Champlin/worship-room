@@ -65,6 +65,7 @@ const ExamenReflection = lazy(() => import('./pages/meditate/ExamenReflection').
 const SharedVerse = lazy(() => import('./pages/SharedVerse').then((m) => ({ default: m.SharedVerse })))
 const SharedPrayer = lazy(() => import('./pages/SharedPrayer').then((m) => ({ default: m.SharedPrayer })))
 const PrayerWall = lazy(() => import('./pages/PrayerWall').then((m) => ({ default: m.PrayerWall })))
+const AnsweredWall = lazy(() => import('./pages/AnsweredWall'))
 const PrayerDetail = lazy(() => import('./pages/PrayerDetail').then((m) => ({ default: m.PrayerDetail })))
 const PrayerWallProfile = lazy(() => import('./pages/PrayerWallProfile').then((m) => ({ default: m.PrayerWallProfile })))
 const PrayerWallDashboard = lazy(() => import('./pages/PrayerWallDashboard').then((m) => ({ default: m.PrayerWallDashboard })))
@@ -301,7 +302,8 @@ function App() {
           <Route path="/music/sleep" element={<Navigate to="/music?tab=sleep" replace />} />
           <Route path="/music/routines" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><RoutinesPage /></Suspense></RouteErrorBoundary>} />
           <Route path="/prayer-wall" element={<RouteErrorBoundary><Suspense fallback={<PrayerWallSkeleton />}><PrayerWall /></Suspense></RouteErrorBoundary>} />
-          {/* Static segments must precede :id to avoid matching "dashboard"/"user" as a prayer ID */}
+          {/* Static segments must precede :id to avoid matching "dashboard"/"user"/"answered" as a prayer ID */}
+          <Route path="/prayer-wall/answered" element={<RouteErrorBoundary><Suspense fallback={<PrayerWallSkeleton />}><AnsweredWall /></Suspense></RouteErrorBoundary>} />
           <Route path="/prayer-wall/dashboard" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><PrayerWallDashboard /></Suspense></RouteErrorBoundary>} />
           <Route path="/prayer-wall/user/:id" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><PrayerWallProfile /></Suspense></RouteErrorBoundary>} />
           <Route path="/prayer-wall/:id" element={<RouteErrorBoundary><Suspense fallback={<RouteLoadingFallback />}><PrayerDetail /></Suspense></RouteErrorBoundary>} />

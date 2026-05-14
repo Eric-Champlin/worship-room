@@ -93,7 +93,7 @@ class PostVisibilityTransitionTest {
                 id, "prayer_request", "x", "family",
                 false, null, null, null, null,
                 "public", false, null, null, "approved", false,
-                0, 0, 0, 0,
+                0, 0, 0, 0, 0,
                 OffsetDateTime.now(), OffsetDateTime.now(), OffsetDateTime.now(),
                 new AuthorDto(UUID.randomUUID(), "Test", null),
                 null,

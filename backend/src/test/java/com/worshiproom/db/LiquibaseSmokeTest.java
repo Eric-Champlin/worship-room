@@ -75,7 +75,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(
             "SELECT id, author, filename FROM databasechangelog ORDER BY orderexecuted"
         );
-        assertThat(rows).hasSize(30);
+        assertThat(rows).hasSize(32);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");
@@ -571,7 +571,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             "ORDER BY ordinal_position"
         );
 
-        assertThat(columns).hasSize(30);
+        assertThat(columns).hasSize(31);
         assertThat(columns).extracting("column_name")
             .containsExactly(
                 "id", "user_id", "post_type", "content", "category", "is_anonymous",
@@ -581,7 +581,8 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                 "praying_count", "candle_count", "comment_count", "bookmark_count",
                 "report_count", "created_at", "updated_at", "last_activity_at",
                 "question_resolved_comment_id",
-                "image_url", "image_alt_text", "help_tags"
+                "image_url", "image_alt_text", "help_tags",
+                "praising_count"
             );
 
         Map<String, Object> idColumn = columns.stream()
@@ -1145,12 +1146,15 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                         postId, userA, "test", true, null);
                 }
                 case "post_reactions_reaction_type_check" -> {
-                    // 'praising' is rejected per Spec Divergence 3 — Phase 6.6
-                    // adds it via an ALTER changeset; Phase 3 must reject it.
+                    // Post-Spec-6.6: 'praying', 'candle', and 'praising' are all
+                    // valid. 'celebrate' is the deferred master-plan-stub value
+                    // (MPD-1 narrowed 6.6 to 'praising' only) and remains
+                    // invalid until a future spec adds it. If a future spec adds
+                    // 'celebrate', this test will fail and signal the change.
                     UUID postId = insertTestPost(userA);
                     jdbcTemplate.update(
                         "INSERT INTO post_reactions (post_id, user_id, reaction_type) VALUES (?, ?, ?)",
-                        postId, userA, "praising");
+                        postId, userA, "celebrate");
                 }
                 case "post_reports_target_xor_check_both_set" -> {
                     UUID postId = insertTestPost(userA);

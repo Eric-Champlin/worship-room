@@ -1354,12 +1354,12 @@ const MOCK_COMMENTS: PrayerComment[] = [
 // --- Mock Reactions (for mock logged-in user, keyed by prayerId) ---
 
 const MOCK_REACTIONS: Record<string, PrayerReaction> = {
-  'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: true, isCandle: true },
-  'prayer-3': { prayerId: 'prayer-3', isPraying: true, isBookmarked: false, isCandle: false },
-  'prayer-5': { prayerId: 'prayer-5', isPraying: true, isBookmarked: true, isCandle: false },
-  'prayer-8': { prayerId: 'prayer-8', isPraying: false, isBookmarked: false, isCandle: true },
-  'prayer-12': { prayerId: 'prayer-12', isPraying: true, isBookmarked: true, isCandle: false },
-  'prayer-18': { prayerId: 'prayer-18', isPraying: true, isBookmarked: false, isCandle: true },
+  'prayer-1': { prayerId: 'prayer-1', isPraying: true, isBookmarked: true, isCandle: true, isPraising: false },
+  'prayer-3': { prayerId: 'prayer-3', isPraying: true, isBookmarked: false, isCandle: false, isPraising: false },
+  'prayer-5': { prayerId: 'prayer-5', isPraying: true, isBookmarked: true, isCandle: false, isPraising: false },
+  'prayer-8': { prayerId: 'prayer-8', isPraying: false, isBookmarked: false, isCandle: true, isPraising: false },
+  'prayer-12': { prayerId: 'prayer-12', isPraying: true, isBookmarked: true, isCandle: false, isPraising: false },
+  'prayer-18': { prayerId: 'prayer-18', isPraying: true, isBookmarked: false, isCandle: true, isPraising: false },
 }
 
 // --- Mock current user (for dashboard testing) ---

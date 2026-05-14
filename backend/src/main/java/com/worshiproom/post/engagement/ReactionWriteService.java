@@ -19,12 +19,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
- * Spec 3.7 — toggle reaction (POST) and explicit remove (DELETE) on
+ * Spec 3.7 + 6.6 — toggle reaction (POST) and explicit remove (DELETE) on
  * {@code /api/v1/posts/{id}/reactions}.
  *
  * <p>Toggle semantics: POST flips the (postId, userId, reactionType) row.
  * If the row exists, it's deleted ({@code state="removed"}). If it doesn't,
- * it's inserted ({@code state="added"}) and {@code INTERCESSION} fires.
+ * it's inserted ({@code state="added"}).
+ *
+ * <p><b>INTERCESSION activity event fires on praying-add ONLY.</b> Candle
+ * and praising adds deliberately do NOT fire {@code INTERCESSION}. Both are
+ * social signals on a Prayer Wall post, but neither is intercession:
+ * "Light a Candle" is silent remembrance/solidarity, and "Praising with you"
+ * (Spec 6.6) is celebration of an answered prayer. Re-using the
+ * {@code INTERCESSION} activity event for either would miscategorize them
+ * and inflate downstream counters (faith points, the 25-intercessions
+ * badge eligibility). The pre-6.6 implementation fired INTERCESSION on every
+ * reaction-add — Spec 6.6 corrected that drift (see the inline comment at
+ * the conditional below for the per-call-site rule).
  *
  * <p>DELETE is explicit — caller passes the {@code reactionType} as a query
  * param. Idempotent (204 whether the row existed or not). NO activity event.
@@ -45,6 +56,7 @@ public class ReactionWriteService {
     private static final String INTERCESSION_SOURCE_FEATURE = "prayer-wall-reaction";
     private static final String PRAYING = "praying";
     private static final String CANDLE = "candle";
+    private static final String PRAISING = "praising";
 
     private final PostRepository postRepository;
     private final ReactionRepository reactionRepository;
@@ -81,7 +93,8 @@ public class ReactionWriteService {
      * @param postId        target post (must be visible to viewer)
      * @param userId        actor
      * @param reactionType  validated upstream by {@code @Pattern} —
-     *                      MUST be {@code "praying"} or {@code "candle"}
+     *                      MUST be {@code "praying"}, {@code "candle"}, or
+     *                      {@code "praising"} (Spec 6.6 widened the set)
      */
     @Transactional
     @CacheEvict(value = "prayer-receipt", key = "#postId")
@@ -106,11 +119,21 @@ public class ReactionWriteService {
             reactionRepository.save(new PostReaction(postId, userId, reactionType));
             incrementReactionCounter(postId, reactionType);
 
-            // Activity event inside the same transaction.
-            activityService.recordActivity(
-                    userId,
-                    new ActivityRequest(ActivityType.INTERCESSION, INTERCESSION_SOURCE_FEATURE, null)
-            );
+            // INTERCESSION fires for praying-add ONLY. Candle and praising are
+            // deliberately excluded — candle is silent remembrance, praising is
+            // celebration of an answered prayer (Spec 6.6). Neither is
+            // intercession, and re-using INTERCESSION for them would
+            // miscategorize them and inflate the 25-intercessions badge
+            // eligibility + downstream faith points. This is a Spec 6.6
+            // correction of pre-existing drift from Spec 3.7, which fired
+            // INTERCESSION on every reaction-add. Do NOT "helpfully"
+            // re-generalize this conditional in a future refactor.
+            if (PRAYING.equals(reactionType)) {
+                activityService.recordActivity(
+                        userId,
+                        new ActivityRequest(ActivityType.INTERCESSION, INTERCESSION_SOURCE_FEATURE, null)
+                );
+            }
             state = "added";
         }
 
@@ -128,7 +151,8 @@ public class ReactionWriteService {
                 reactionType,
                 state,
                 refreshed.getPrayingCount(),
-                refreshed.getCandleCount()
+                refreshed.getCandleCount(),
+                refreshed.getPraisingCount()
         );
     }
 
@@ -164,6 +188,8 @@ public class ReactionWriteService {
             postRepository.incrementPrayingCount(postId);
         } else if (CANDLE.equals(reactionType)) {
             postRepository.incrementCandleCount(postId);
+        } else if (PRAISING.equals(reactionType)) {
+            postRepository.incrementPraisingCount(postId);
         }
     }
 
@@ -172,6 +198,8 @@ public class ReactionWriteService {
             postRepository.decrementPrayingCount(postId);
         } else if (CANDLE.equals(reactionType)) {
             postRepository.decrementCandleCount(postId);
+        } else if (PRAISING.equals(reactionType)) {
+            postRepository.decrementPraisingCount(postId);
         }
     }
 }

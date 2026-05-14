@@ -64,6 +64,9 @@ export interface PrayerRequest {
   // that don't read them are unaffected.
   postType: PostType
   candleCount?: number
+  /** Spec 6.6 — count of 'praising' reactions (Answered Wall). Optional for
+   *  back-compat with old-shape data; default 0 when absent. */
+  praisingCount?: number
   bookmarkCount?: number
   updatedAt?: string
   scriptureReference?: string
@@ -111,4 +114,7 @@ export interface PrayerReaction {
   isPraying: boolean
   isBookmarked: boolean
   isCandle: boolean
+  /** Spec 6.6 — viewer has reacted with 'praising' on this prayer (Answered Wall).
+   *  Default-filled to false on hydrate for old-shape data (additive migration). */
+  isPraising: boolean
 }

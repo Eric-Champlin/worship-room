@@ -47,14 +47,17 @@ class EngagementSchemaInvariantTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void postReactions_checkConstraint_restrictsToPrayingAndCandle() {
+    void postReactions_checkConstraint_restrictsToPrayingCandleAndPraising() {
         // pg_get_constraintdef returns the constraint clause for inspection.
+        // Spec 6.6 — widened to include 'praising' (changeset 2026-05-14-001).
+        // 'celebrate' is intentionally absent (MPD-1 deferred it).
         String checkClause = jdbc.queryForObject(
                 "SELECT pg_get_constraintdef(c.oid) " +
                 "FROM pg_constraint c " +
                 "WHERE c.conname = 'post_reactions_reaction_type_check'",
                 String.class);
-        assertThat(checkClause).contains("'praying'").contains("'candle'");
+        assertThat(checkClause).contains("'praying'").contains("'candle'").contains("'praising'");
+        assertThat(checkClause).doesNotContain("'celebrate'");
     }
 
     @Test
@@ -63,6 +66,19 @@ class EngagementSchemaInvariantTest extends AbstractIntegrationTest {
                 "SELECT data_type, is_nullable, column_default " +
                 "FROM information_schema.columns " +
                 "WHERE table_name = 'posts' AND column_name = 'candle_count'");
+        assertThat(row.get("data_type")).isEqualTo("integer");
+        assertThat(row.get("is_nullable")).isEqualTo("NO");
+        assertThat(row.get("column_default")).asString().contains("0");
+    }
+
+    @Test
+    void posts_praisingCount_isIntNotNullDefault0() {
+        // Spec 6.6 — denormalized counter mirroring praying_count and candle_count
+        // (changeset 2026-05-14-002).
+        var row = jdbc.queryForMap(
+                "SELECT data_type, is_nullable, column_default " +
+                "FROM information_schema.columns " +
+                "WHERE table_name = 'posts' AND column_name = 'praising_count'");
         assertThat(row.get("data_type")).isEqualTo("integer");
         assertThat(row.get("is_nullable")).isEqualTo("NO");
         assertThat(row.get("column_default")).asString().contains("0");

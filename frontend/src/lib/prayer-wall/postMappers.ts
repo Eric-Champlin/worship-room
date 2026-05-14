@@ -193,6 +193,9 @@ export function reactionsResponseToReactionsMap(
       isPraying: Boolean(perPost?.isPraying),
       isBookmarked: Boolean(perPost?.isBookmarked),
       isCandle: Boolean((perPost as { isCandle?: boolean })?.isCandle),
+      // Spec 6.6 — Answered Wall. Backend always returns isPraising; defensive
+      // Boolean() coerces undefined to false for any in-flight transitional data.
+      isPraising: Boolean((perPost as { isPraising?: boolean })?.isPraising),
     }
   }
   return out
