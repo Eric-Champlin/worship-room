@@ -6,10 +6,14 @@ interface BackgroundCanvasProps {
   className?: string
   /**
    * Spec 6.3 — Night Mode marker. When provided, the outer div receives
-   * `data-night-mode={value}`. Used only by `/prayer-wall` to scope night-mode
-   * CSS to the Prayer Wall surface. Always passed as `'on'` or `'off'` (never
-   * undefined when active) so CSS rules under `[data-night-mode='on']` fire
-   * while keeping the off-state attribute as a stable hook for E2E tests.
+   * `data-night-mode={value}`. Used only by `/prayer-wall`.
+   *
+   * Post Prayer Wall Redesign (2026-05-13): the `[data-night-mode='on']`
+   * CSS palette block was removed; no CSS rule consumes this attribute today.
+   * The attribute is preserved as (a) a forward-compat signal for any future
+   * non-brown night-mode styling, (b) an E2E test hook, and (c) a behavioral
+   * signal for hooks (Spec 6.4 `useWatchMode` and the `useNightMode` consumer
+   * graph). Always pass `'on'` or `'off'` (never undefined).
    */
   nightMode?: 'on' | 'off'
 }

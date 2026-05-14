@@ -9,8 +9,10 @@ interface PageShellProps {
 }
 
 export function PageShell({ children }: PageShellProps) {
-  // Spec 6.3 — Apply night-mode attribute always (off when day, on when night)
-  // so CSS rules under [data-night-mode='on'] can fire without a wrapper swap.
+  // Spec 6.3 — Apply night-mode attribute always (off when day, on when night).
+  // Post Prayer Wall Redesign (2026-05-13) no CSS consumes this attribute;
+  // it remains as a forward-compat signal + a behavioral hook for
+  // useWatchMode (Spec 6.4) and tests.
   const { active } = useNightMode()
   // Spec 6.4 — Crisis banner mounts here so all 4 prayer-wall family routes
   // (/prayer-wall, /prayer-wall/:id, /prayer-wall/dashboard, /prayer-wall/user/:id)

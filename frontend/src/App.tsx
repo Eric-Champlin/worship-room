@@ -180,9 +180,15 @@ function ReadingPlansRedirect() {
  * reconciliation (cleaner — chosen)" — this is the cleanup.
  *
  * Removing on every non-PW route is safe: the pending attribute exists only
- * to paint the body backdrop in the warm dim color BEFORE React mounts, and
- * after React mounts the canonical `[data-night-mode='on']` rules on the
- * canvas/PageShell wrapper take over for the visible night palette.
+ * to paint the body backdrop in the warm dim color BEFORE React mounts.
+ *
+ * Post Prayer Wall Redesign (2026-05-13): the body-backdrop CSS rule and the
+ * `[data-night-mode='on']` palette block were both removed from index.css.
+ * The cleanup still runs because the pending attribute (set by the inline
+ * `index.html` script) would otherwise persist on `<html>` across SPA
+ * navigation. The `data-night-mode` attribute on `BackgroundCanvas`/`PageShell`
+ * is preserved as a forward-compat signal and as a test/hook for `useWatchMode`
+ * — no CSS currently consumes it.
  */
 function NightModePendingCleanup() {
   const location = useLocation()

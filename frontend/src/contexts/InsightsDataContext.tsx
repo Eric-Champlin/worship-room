@@ -32,6 +32,7 @@ export function InsightsDataProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- Consumer hook colocated with its provider is the canonical context+hook pattern (same precedent as Navbar.tsx's isNavActive). Splitting harms readability without affecting Fast Refresh in practice — when the context shape changes both export are touched together anyway.
 export function useInsightsData(): InsightsDataContextValue {
   const ctx = useContext(InsightsDataContext)
   if (!ctx) {

@@ -10,6 +10,7 @@ import { LocalSupportDropdown } from '@/components/LocalSupportDropdown'
 import { MobileDrawer, MobileNotificationSheet } from '@/components/MobileDrawer'
 import { DesktopUserActions } from '@/components/DesktopUserActions'
 import { SeasonalBanner } from '@/components/SeasonalBanner'
+import { NightModeBadge } from '@/components/prayer-wall/NightModeBadge'
 
 const NAV_LINKS: ReadonlyArray<{ label: string; to: string; icon: LucideIcon }> = [
   { label: 'Daily Hub', to: '/daily', icon: Calendar },
@@ -196,10 +197,21 @@ export function Navbar({ transparent = false, hideBanner = false }: NavbarProps)
             <NavbarLogo transparent={transparent} />
             <DesktopNav transparent={transparent} />
             {isAuthenticated ? (
-              <DesktopUserActions />
+              <div className="hidden items-center gap-3 md:flex">
+                <NightModeBadge />
+                <DesktopUserActions />
+              </div>
             ) : (
-              <DesktopAuthActions transparent={transparent} />
+              <div className="hidden items-center gap-3 md:flex">
+                <NightModeBadge />
+                <DesktopAuthActions transparent={transparent} />
+              </div>
             )}
+
+            {/* NightModeBadge: mobile mount adjacent to hamburger (md:hidden). */}
+            <div className="md:hidden">
+              <NightModeBadge />
+            </div>
 
             {/* Hamburger button — visible below lg */}
             <button

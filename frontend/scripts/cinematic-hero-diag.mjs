@@ -1,5 +1,4 @@
 import { chromium } from '@playwright/test'
-import fs from 'node:fs/promises'
 
 const URL = 'http://localhost:5173/daily'
 const SCREENSHOTS_DIR = '/Users/Eric/worship-room/frontend/playwright-screenshots'
@@ -198,7 +197,6 @@ async function main() {
   results.greeting = await page.evaluate(() => {
     const el = document.getElementById('daily-hub-heading')
     if (!el) return { error: 'no greeting' }
-    const cs = getComputedStyle(el)
     const rect = el.getBoundingClientRect()
     const parent = el.parentElement
     const parentCS = parent ? getComputedStyle(parent) : null
@@ -301,7 +299,6 @@ async function main() {
       clip: { x: 0, y: yStart, width: 1280, height: 60 },
     })
     const img = sharp(cropPath)
-    const meta = await img.metadata()
     const { data, info } = await img.raw().toBuffer({ resolveWithObject: true })
     // info.width, info.height, info.channels
     const sample = (xPx, yPx) => {

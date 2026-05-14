@@ -68,6 +68,19 @@ vi.mock('@/hooks/useNightMode', () => ({
   }),
 }))
 
+// Spec 6.4 — useWatchMode also runs its OWN 60s setInterval (per its
+// Plan-Time Divergence #1; it doesn't share useNightMode's tick). Same
+// runAllTimers risk as useNightMode above — mocking it with a static
+// inactive state keeps `vi.runAllTimers()` from looping the watch interval.
+vi.mock('@/hooks/useWatchMode', () => ({
+  useWatchMode: () => ({
+    active: false,
+    source: 'auto' as const,
+    userPreference: 'off' as const,
+    degraded: true,
+  }),
+}))
+
 // Mock prayer data: set prayer-1 userId to match mockUser and clear its initial praying state
 vi.mock('@/mocks/prayer-wall-mock-data', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/mocks/prayer-wall-mock-data')>()

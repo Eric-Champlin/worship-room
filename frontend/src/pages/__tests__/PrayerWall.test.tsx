@@ -129,47 +129,99 @@ describe('PrayerWall', () => {
     expect(screen.getByText('Skip to content')).toBeInTheDocument()
   })
 
-  it('renders filter bar with "All" and category pills', () => {
+  // Prayer Wall Redesign (2026-05-13) — the legacy CategoryFilterBar toolbar
+  // (role="toolbar", name "Filter prayers by category") was replaced by the
+  // new CategoryFilters nav (role="navigation", name "Filter prayer wall posts").
+  // Tests migrated to the new selectors; behavioral coverage is preserved.
+  it('renders filter nav with All posts and topic pills', () => {
     renderPage()
-    const categoryToolbar = screen.getByRole('toolbar', {
-      name: /filter prayers by category/i,
+    const navs = screen.getAllByRole('navigation', {
+      name: /filter prayer wall posts/i,
     })
-    expect(categoryToolbar).toBeInTheDocument()
-    expect(within(categoryToolbar).getByRole('button', { name: 'All' })).toBeInTheDocument()
+    expect(navs.length).toBeGreaterThan(0)
+    // At least one nav contains the "All posts" desktop label or "All" chip.
+    const found = navs.some((nav) =>
+      within(nav).queryByRole('button', { name: /^all(\s+posts)?$/i }),
+    )
+    expect(found).toBe(true)
   })
 
-  it('clicking a filter pill reduces visible prayer cards', async () => {
+  it('clicking a topic filter reduces visible prayer cards', async () => {
     const user = userEvent.setup()
     renderPage()
     const allArticlesBefore = screen.getAllByRole('article').length
 
-    // Click "Health" filter — should show only health prayers (2 out of 18)
-    await user.click(screen.getByRole('button', { name: 'Health' }))
+    // Click "Health" filter — multiple instances exist (desktop + mobile);
+    // click the first.
+    const healthButtons = screen.getAllByRole('button', { name: 'Health' })
+    await user.click(healthButtons[0])
     const allArticlesAfter = screen.getAllByRole('article').length
     expect(allArticlesAfter).toBeLessThan(allArticlesBefore)
   })
 
-  it('filter bar pills include "All"', () => {
+  it('All filter is pressed by default', () => {
     renderPage()
-    const categoryToolbar = screen.getByRole('toolbar', {
-      name: /filter prayers by category/i,
-    })
-    const allBtn = within(categoryToolbar).getByRole('button', { name: 'All' })
-    expect(allBtn).toBeInTheDocument()
-    expect(allBtn).toHaveAttribute('aria-pressed', 'true')
+    const allButtons = screen.getAllByRole('button', { name: /^all(\s+posts)?$/i })
+    expect(allButtons.length).toBeGreaterThan(0)
+    expect(allButtons[0]).toHaveAttribute('aria-pressed', 'true')
   })
 
-  it('URL param pre-selects filter', () => {
+  it('URL ?category=health pre-selects Health filter', () => {
     renderPage('/prayer-wall?category=health')
-    const categoryToolbar = screen.getByRole('toolbar', {
-      name: /filter prayers by category/i,
-    })
-    const healthPill = within(categoryToolbar).getByRole('button', {
-      name: /^Health(\s|$)/i,
-    })
-    expect(healthPill).toHaveAttribute('aria-pressed', 'true')
-    const allPill = within(categoryToolbar).getByRole('button', { name: 'All' })
-    expect(allPill).toHaveAttribute('aria-pressed', 'false')
+    const healthButtons = screen.getAllByRole('button', { name: /^Health$/i })
+    expect(healthButtons.length).toBeGreaterThan(0)
+    expect(healthButtons[0]).toHaveAttribute('aria-pressed', 'true')
+    const allButtons = screen.getAllByRole('button', { name: /^all(\s+posts)?$/i })
+    expect(allButtons[0]).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  // Prayer Wall Redesign (2026-05-13) — page-level integration coverage for the
+  // unified CategoryFilters component (replaces the skipped Spec 4.8 dual-filter
+  // tests, which assumed multi-axis preservation that contradicts the new
+  // D-CategorySingleSelect contract). Component-level coverage lives in
+  // CategoryFilters.test.tsx; these tests verify the end-to-end wiring (filter
+  // click → handleSelectCategory/PostType → URL params + feed filter).
+  it('clicking a post-type filter pre-selects via URL param', () => {
+    renderPage('/prayer-wall?postType=testimony')
+    const testimoniesBtns = screen.getAllByRole('button', { name: /^Testimonies$/i })
+    expect(testimoniesBtns[0]).toHaveAttribute('aria-pressed', 'true')
+    const allBtns = screen.getAllByRole('button', { name: /^all(\s+posts)?$/i })
+    expect(allBtns[0]).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('clicking a topic filter while a post-type is active clears the post-type axis (single-select)', async () => {
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?postType=prayer_request')
+    // Pre-condition: prayer_request pressed.
+    const prayerReqBtns = screen.getAllByRole('button', { name: /^Prayer requests$/i })
+    expect(prayerReqBtns[0]).toHaveAttribute('aria-pressed', 'true')
+
+    // Click a topic — single-select policy clears the post-type axis.
+    const familyBtns = screen.getAllByRole('button', { name: /^Family$/i })
+    await user.click(familyBtns[0])
+
+    expect(familyBtns[0]).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      screen.getAllByRole('button', { name: /^Prayer requests$/i })[0],
+    ).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('clicking "All posts" clears both filter axes', async () => {
+    const user = userEvent.setup()
+    renderPage('/prayer-wall?category=health')
+    expect(
+      screen.getAllByRole('button', { name: /^Health$/i })[0],
+    ).toHaveAttribute('aria-pressed', 'true')
+
+    const allBtns = screen.getAllByRole('button', { name: /^all(\s+posts)?$/i })
+    await user.click(allBtns[0])
+
+    expect(
+      screen.getAllByRole('button', { name: /^all(\s+posts)?$/i })[0],
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      screen.getAllByRole('button', { name: /^Health$/i })[0],
+    ).toHaveAttribute('aria-pressed', 'false')
   })
 })
 
@@ -427,7 +479,17 @@ describe('PrayerWall — Spec 4.7 Composer Chooser integration', () => {
   })
 })
 
-describe('Spec 4.8 — RoomSelector + dual filters', () => {
+// Prayer Wall Redesign (2026-05-13) — the Spec 4.8 RoomSelector + dual-filter
+// UI was replaced by the unified CategoryFilters component. Several tests in
+// this block ALSO contradict the new D-CategorySingleSelect behavior (e.g.
+// "selecting All clears postType but preserves category" — the redesign
+// clears BOTH axes on All; "selecting a category preserves an existing
+// postType" — the redesign clears postType when a topic is selected).
+// Component-level coverage of the new behavior lives in
+// CategoryFilters.test.tsx. Page-level integration coverage will be added in
+// Step 12 (Playwright). Skipping the block here per Plan-Time Divergence
+// philosophy (cf. Plan-Time Divergence #2 — NightWatchChip.test.tsx deletion).
+describe.skip('Spec 4.8 — RoomSelector + dual filters (DEPRECATED — see Prayer Wall Redesign 2026-05-13)', () => {
   // Restore `getMockPrayers` to its delegating implementation after each test
   // so a `mockReturnValue([])` set inside one test (e.g. the empty-state copy
   // assertion below) does not bleed into the next test or describe block.
@@ -605,22 +667,28 @@ describe('PrayerWall — Spec 6.3 Night Mode', () => {
     expect(canvas!.getAttribute('data-night-mode')).toBe('on')
   })
 
-  it('renders <NightWatchChip /> when nightActive=true', () => {
+  // Prayer Wall Redesign (2026-05-13) — NightWatchChip in PrayerWallHero was
+  // replaced by NightModeBadge mounted in the global Navbar. Aria-label changed
+  // from "Night Mode active" to "Night Mode is {Off|Auto|On}. Tap to change."
+  it('renders NightModeBadge when nightActive=true', () => {
     vi.mocked(useNightMode).mockReturnValue({
       active: true,
       source: 'auto',
       userPreference: 'auto',
     })
     renderPage()
-    expect(
-      screen.getByRole('button', { name: /night mode active/i }),
-    ).toBeInTheDocument()
+    const badges = screen.getAllByRole('button', {
+      name: /night mode is (off|auto|on)/i,
+    })
+    expect(badges.length).toBeGreaterThan(0)
   })
 
-  it('does NOT render <NightWatchChip /> when nightActive=false', () => {
+  it('does NOT render NightModeBadge when nightActive=false', () => {
     renderPage()
     expect(
-      screen.queryByRole('button', { name: /night mode active/i }),
+      screen.queryByRole('button', {
+        name: /night mode is (off|auto|on)/i,
+      }),
     ).not.toBeInTheDocument()
   })
 

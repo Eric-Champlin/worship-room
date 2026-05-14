@@ -118,6 +118,8 @@ describe('Settings Page', () => {
   })
 
   // --- Tab Pattern Unification ---
+  // Spec 6.4 (MPD-11) added a "Sensitive features" section between Privacy and
+  // Account, bringing the total to 7. Tab counts updated accordingly.
 
   it('tab pattern: both contexts use role="tab" inside role="tablist"', () => {
     renderSettings()
@@ -125,7 +127,7 @@ describe('Settings Page', () => {
     expect(tablists).toHaveLength(2)
     tablists.forEach((tablist) => {
       const tabs = tablist.querySelectorAll('[role="tab"]')
-      expect(tabs).toHaveLength(6)
+      expect(tabs).toHaveLength(7)
     })
   })
 
@@ -134,23 +136,24 @@ describe('Settings Page', () => {
     expect(container.querySelector('nav[role="navigation"]')).toBeNull()
   })
 
-  it('desktop: sidebar with 6 tab items', () => {
+  it('desktop: sidebar with 7 tab items', () => {
     renderSettings()
     const desktopTablist = getDesktopTablist()
     const buttons = desktopTablist.querySelectorAll('[role="tab"]')
-    expect(buttons).toHaveLength(6)
+    expect(buttons).toHaveLength(7)
     expect(buttons[0]).toHaveTextContent('Profile')
     expect(buttons[1]).toHaveTextContent('Dashboard')
     expect(buttons[2]).toHaveTextContent('Notifications')
     expect(buttons[3]).toHaveTextContent('Privacy')
-    expect(buttons[4]).toHaveTextContent('Account')
-    expect(buttons[5]).toHaveTextContent('App')
+    expect(buttons[4]).toHaveTextContent('Sensitive features')
+    expect(buttons[5]).toHaveTextContent('Account')
+    expect(buttons[6]).toHaveTextContent('App')
   })
 
-  it('mobile: tab bar with 6 tabs', () => {
+  it('mobile: tab bar with 7 tabs', () => {
     renderSettings()
     const tabs = screen.getAllByRole('tab')
-    expect(tabs).toHaveLength(12) // 6 mobile + 6 desktop (both in jsdom)
+    expect(tabs).toHaveLength(14) // 7 mobile + 7 desktop (both in jsdom)
   })
 
   it('active tab has aria-selected true for profile by default', () => {
@@ -414,9 +417,10 @@ describe('Settings Page', () => {
 
     renderSettings()
 
-    // Go to Account section
+    // Go to Account section. Spec 6.4 inserted "Sensitive features" at index 4,
+    // shifting Account from 4 → 5.
     const desktopTablist = getDesktopTablist()
-    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[4] as HTMLElement)
+    await user.click(desktopTablist.querySelectorAll('[role="tab"]')[5] as HTMLElement)
 
     // Click Delete Account
     await user.click(screen.getByRole('button', { name: 'Delete Account' }))

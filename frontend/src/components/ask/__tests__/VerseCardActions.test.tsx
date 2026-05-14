@@ -10,7 +10,7 @@ import type { ParsedVerseReference } from '@/lib/parse-verse-references'
 import type { AuthContextValue } from '@/contexts/AuthContext'
 import type { Note } from '@/types/bible'
 import { NoteStorageFullError } from '@/lib/bible/notes/store'
-import { addCard, removeCard, _resetForTesting } from '@/lib/memorize'
+import { addCard, _resetForTesting } from '@/lib/memorize'
 
 const { mockAuthFn } = vi.hoisted(() => {
   const mockAuthFn = vi.fn((): AuthContextValue => ({

@@ -281,14 +281,16 @@ describe('PrivacySection', () => {
 
   // --- Spec 6.3 — Night Mode preference UI ---
 
+  // Prayer Wall Redesign (2026-05-13) — labels aligned to Off / Auto / On
+  // (no "Always" verb). Order matches NightModeBadge tap cycle.
   it('Night Mode RadioPillGroup renders with 3 options', () => {
     renderPrivacy()
     const nightGroup = screen.getByRole('radiogroup', { name: 'Night Mode' })
     const radios = nightGroup.querySelectorAll('[role="radio"]')
     expect(radios).toHaveLength(3)
-    expect(radios[0]).toHaveTextContent('Auto (9pm – 6am)')
-    expect(radios[1]).toHaveTextContent('Always on')
-    expect(radios[2]).toHaveTextContent('Always off')
+    expect(radios[0]).toHaveTextContent('Off')
+    expect(radios[1]).toHaveTextContent('Auto (9pm – 6am)')
+    expect(radios[2]).toHaveTextContent('On')
   })
 
   it('Night Mode defaults to auto (matches DEFAULT_SETTINGS)', () => {
@@ -298,13 +300,22 @@ describe('PrivacySection', () => {
     expect(selected).toHaveTextContent('Auto (9pm – 6am)')
   })
 
-  it('selecting "Always on" calls onUpdatePrayerWall with nightMode="on"', async () => {
+  it('selecting "On" calls onUpdatePrayerWall with nightMode="on"', async () => {
     const user = userEvent.setup()
     const { onUpdatePrayerWall } = renderPrivacy()
     const nightGroup = screen.getByRole('radiogroup', { name: 'Night Mode' })
-    const onBtn = within(nightGroup).getByRole('radio', { name: 'Always on' })
+    const onBtn = within(nightGroup).getByRole('radio', { name: 'On' })
     await user.click(onBtn)
     expect(onUpdatePrayerWall).toHaveBeenCalledWith({ nightMode: 'on' })
+  })
+
+  it('selecting "Off" calls onUpdatePrayerWall with nightMode="off"', async () => {
+    const user = userEvent.setup()
+    const { onUpdatePrayerWall } = renderPrivacy()
+    const nightGroup = screen.getByRole('radiogroup', { name: 'Night Mode' })
+    const offBtn = within(nightGroup).getByRole('radio', { name: 'Off' })
+    await user.click(offBtn)
+    expect(onUpdatePrayerWall).toHaveBeenCalledWith({ nightMode: 'off' })
   })
 
   it('Prayer Wall sub-section has id="night-mode" anchor for chip popover deep link', () => {

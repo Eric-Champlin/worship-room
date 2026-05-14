@@ -36,13 +36,20 @@ test.describe('Sticky descendants of BackgroundCanvas engage on scroll', () => {
     })
   }
 
-  test('/prayer-wall — RoomSelector + CategoryFilterBar wrapper sticks (Spec 4.8)', async ({
+  test('/prayer-wall — sticky descendants of BackgroundCanvas engage on scroll', async ({
     page,
   }) => {
+    // Prayer Wall Redesign (2026-05-13) — the old RoomSelector + CategoryFilterBar
+    // wrapper (top-0) was replaced by:
+    //   • desktop (≥1280px): left + right sidebars with `sticky top-16` (64px)
+    //   • mobile/tablet  (<1280px): horizontal category filter row with `sticky top-0`
+    // The regression contract (sticky-not-broken-by-BackgroundCanvas-overflow)
+    // is preserved as long as SOME sticky descendant clamps near the viewport
+    // top after scrolling. Threshold widened from 50 → 100 to admit top-16.
     await gotoAndScroll(page, '/prayer-wall')
     const top = await topOfFirstSticky(page)
     expect(top, 'no sticky element found on /prayer-wall').not.toBeNull()
-    expect(top!).toBeLessThan(50)
+    expect(top!).toBeLessThan(100)
     expect(top!).toBeGreaterThanOrEqual(-10)
   })
 

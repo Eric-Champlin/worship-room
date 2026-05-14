@@ -46,10 +46,6 @@ async function interceptAsk(page: Page) {
   )
 }
 
-async function mkdir(page: Page) {
-  // Ensure screenshot dir exists via evaluate — we just need the path to work
-}
-
 // ---------------------------------------------------------------------------
 // CONCERN 2 — Textarea violet glow inspection
 // ---------------------------------------------------------------------------

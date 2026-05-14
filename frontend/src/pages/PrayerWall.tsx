@@ -9,7 +9,7 @@ import { Navbar } from '@/components/Navbar'
 import { SiteFooter } from '@/components/SiteFooter'
 import { BackgroundCanvas } from '@/components/ui/BackgroundCanvas'
 import { PrayerWallHero } from '@/components/prayer-wall/PrayerWallHero'
-import { NightWatchChip } from '@/components/prayer-wall/NightWatchChip'
+// Prayer Wall Redesign (2026-05-13): NightWatchChip retired; NightModeBadge lives in the global Navbar.
 import { useNightMode } from '@/hooks/useNightMode'
 import { useWatchMode } from '@/hooks/useWatchMode'
 import { WatchIndicator } from '@/components/prayer-wall/WatchIndicator'
@@ -22,8 +22,9 @@ import { SaveToPrayersForm } from '@/components/prayer-wall/SaveToPrayersForm'
 import { InlineComposer } from '@/components/prayer-wall/InlineComposer'
 import { ComposerChooser } from '@/components/prayer-wall/ComposerChooser'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
-import { CategoryFilterBar } from '@/components/prayer-wall/CategoryFilterBar'
-import { RoomSelector } from '@/components/prayer-wall/RoomSelector'
+import { CategoryFilters } from '@/components/prayer-wall/CategoryFilters'
+import { PrayerWallLeftSidebar } from '@/components/prayer-wall/PrayerWallLeftSidebar'
+import { PrayerWallRightSidebar } from '@/components/prayer-wall/PrayerWallRightSidebar'
 import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
 import { QotdComposer } from '@/components/prayer-wall/QotdComposer'
 import { Button } from '@/components/ui/Button'
@@ -47,7 +48,6 @@ import { TOOLTIP_DEFINITIONS } from '@/constants/tooltips'
 import { setGettingStartedFlag, isGettingStartedComplete } from '@/services/getting-started-storage'
 import {
   isValidCategory,
-  PRAYER_CATEGORIES,
   CATEGORY_LABELS,
   type PrayerCategory,
 } from '@/constants/prayer-categories'
@@ -95,7 +95,7 @@ function PrayerWallContent() {
   const authModal = useAuthModal()
   const openAuthModal = authModal?.openAuthModal
   // Spec 6.3 — Night Mode (active state + source for chip aria-label).
-  const { active: nightActive, source: nightSource } = useNightMode()
+  const { active: nightActive } = useNightMode()
   const watchMode = useWatchMode()
   const allPrayers = useMemo(() => getMockPrayers(), [])
 
@@ -154,12 +154,15 @@ function PrayerWallContent() {
         : null,
     [activeChallenge]
   )
-  const [isChallengeFilterActive, setIsChallengeFilterActive] = useState(
+  // Prayer Wall Redesign (2026-05-13): the challenge-filter toggle handler was
+  // wired to CategoryFilterBar (deprecated). The URL-param-derived initial
+  // state is retained so deep links like `?filter=challenge` continue to filter
+  // the feed; the screen-reader announcement and filteredPrayers branch both
+  // consume it. A future spec can re-wire toggling if challenge filtering
+  // returns as a first-class UI in the new layout.
+  const [isChallengeFilterActive] = useState(
     () => searchParams.get('filter') === 'challenge'
   )
-  const handleToggleChallengeFilter = useCallback(() => {
-    setIsChallengeFilterActive((prev) => !prev)
-  }, [])
 
   const filteredPrayers = useMemo(() => {
     // Flag-on: server-side filtering already applied via listPosts params.
@@ -199,14 +202,9 @@ function PrayerWallContent() {
   const { containerRef: prayerListRef, getStaggerProps: getPrayerStaggerProps } =
     useStaggeredEntrance({ staggerDelay: 50, itemCount: filteredPrayers.length })
 
-  const categoryCounts = useMemo(() => {
-    const counts = {} as Record<PrayerCategory, number>
-    for (const cat of PRAYER_CATEGORIES) counts[cat] = 0
-    for (const p of allPrayers) {
-      if (p.category) counts[p.category]++
-    }
-    return counts
-  }, [allPrayers])
+  // Prayer Wall Redesign (2026-05-13): per-category counts were consumed only
+  // by CategoryFilterBar's count badges (deprecated; Gate-G-NO-METRICS-IN-SIDEBARS).
+  // Removed alongside the filter bar.
 
   // Spec 4.8 D11 — empty-state heading adapts to combined filter state.
   const emptyHeading = useMemo(() => {
@@ -838,9 +836,7 @@ function PrayerWallContent() {
       )}
       <PrayerWallHero
         subtitle={getNightModeCopy('heroSubtitle', nightActive)}
-        nightWatchChip={
-          nightActive ? <NightWatchChip source={nightSource} /> : null
-        }
+        nightWatchChip={null}
         watchIndicator={watchMode.active ? <WatchIndicator /> : null}
         action={
           isAuthenticated ? (
@@ -888,7 +884,20 @@ function PrayerWallContent() {
         }
       />
 
-      <main id="main-content" className="mx-auto w-full max-w-[720px] flex-1 px-4 py-6 sm:py-8">
+      <div className="prayer-wall-grid mx-auto w-full max-w-[1240px] flex-1 px-4">
+        {/* Left sidebar: visible at md+ (768px), matches `.prayer-wall-grid`'s
+            64px-rail CSS rule. At md-xl it's the icon-only nav rail; at xl+ it
+            expands to nav + CategoryFilters in the 240px column. */}
+        <div className="hidden md:block">
+          <PrayerWallLeftSidebar
+            activeCategory={activeCategory}
+            activePostType={activePostType}
+            onSelectCategory={handleSelectCategory}
+            onSelectPostType={handleSelectPostType}
+          />
+        </div>
+
+        <main id="main-content" className="mx-auto w-full max-w-[720px] py-6 sm:py-8">
         {isLoading ? (
           <PrayerWallSkeleton />
         ) : fetchError ? (
@@ -924,44 +933,47 @@ function PrayerWallContent() {
               watchActive={watchMode.active}
             />
 
-            {/* QOTD Card — above filters, visible in any filter state */}
-            <div className="mb-4">
+            {/* QOTD Card — visible <xl (mobile + tablet). At xl+ the right
+                sidebar holds the QOTD; the inline card hides. */}
+            <div className="mb-4 xl:hidden">
               <QuestionOfTheDay
                 responseCount={qotdResponseCount}
                 isComposerOpen={qotdComposerOpen}
                 onToggleComposer={handleToggleQotdComposer}
                 onScrollToResponses={handleScrollToQotdResponses}
               />
-              <QotdComposer
-                isOpen={qotdComposerOpen}
-                onClose={() => setQotdComposerOpen(false)}
-                onSubmit={handleQotdSubmit}
-              />
             </div>
 
-            {/* Sentinel for sticky filter bar */}
-            <div ref={filterSentinelRef} aria-hidden="true" />
+            {/* Single QotdComposer mount — renders inline when isOpen=true,
+                returns null otherwise. Triggered by mobile/tablet inline QOTD
+                card OR by the desktop right-sidebar QOTD button (both share
+                qotdComposerOpen state). Previously duplicated across two
+                breakpoint wrappers; that caused per-instance useState forks
+                and lost-content on viewport resize. */}
+            <QotdComposer
+              isOpen={qotdComposerOpen}
+              onClose={() => setQotdComposerOpen(false)}
+              onSubmit={handleQotdSubmit}
+            />
 
-            {/* Sticky Filter Bar — RoomSelector + CategoryFilterBar together (Spec 4.8) */}
-            <div
-              className={cn(
-                'sticky top-0 z-30 transition-shadow motion-reduce:transition-none',
-                isFilterSticky && 'shadow-md'
-              )}
-            >
-              <RoomSelector
-                activePostType={activePostType}
-                onSelectPostType={handleSelectPostType}
-              />
-              <CategoryFilterBar
-                activeCategory={activeCategory}
-                onSelectCategory={handleSelectCategory}
-                categoryCounts={categoryCounts}
-                showCounts={activeCategory !== null}
-                challengeFilter={challengeFilter}
-                isChallengeFilterActive={isChallengeFilterActive}
-                onToggleChallengeFilter={handleToggleChallengeFilter}
-              />
+            {/* Horizontal category filter row — visible <xl (mobile + tablet).
+                At xl+ the left-sidebar's desktop CategoryFilters renders. */}
+            <div className="xl:hidden">
+              <div ref={filterSentinelRef} aria-hidden="true" />
+              <div
+                className={cn(
+                  'sticky top-0 z-30 -mx-4 transition-shadow motion-reduce:transition-none bg-hero-mid/90 backdrop-blur-sm border-b border-white/[0.12]',
+                  isFilterSticky && 'shadow-md',
+                )}
+              >
+                <CategoryFilters
+                  variant="mobile"
+                  activeCategory={activeCategory}
+                  activePostType={activePostType}
+                  onSelectCategory={handleSelectCategory}
+                  onSelectPostType={handleSelectPostType}
+                />
+              </div>
             </div>
 
             {/* Screen reader announcement for filter changes */}
@@ -1104,6 +1116,19 @@ function PrayerWallContent() {
           </>
         )}
       </main>
+
+        {/* Right sidebar: visible at xl+ (1280px), matches `.prayer-wall-grid`'s
+            240px 1fr 280px CSS rule. Hidden at md-xl per spec acceptance
+            criterion M (tablet 2-col with right hidden + QOTD inlined). */}
+        <div className="hidden xl:block">
+          <PrayerWallRightSidebar
+            qotdResponseCount={qotdResponseCount}
+            qotdComposerOpen={qotdComposerOpen}
+            onToggleQotdComposer={handleToggleQotdComposer}
+            onScrollToQotdResponses={handleScrollToQotdResponses}
+          />
+        </div>
+      </div>
       <SiteFooter />
       {composerTooltip.shouldShow && (
         <TooltipCallout

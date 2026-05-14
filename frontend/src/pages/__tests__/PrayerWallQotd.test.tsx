@@ -49,18 +49,26 @@ function renderPage(initialEntry = '/prayer-wall') {
   )
 }
 
+// Prayer Wall Redesign (2026-05-13) — QuestionOfTheDay now renders in two
+// breakpoint-gated locations in the same DOM: the mobile/tablet inline mount
+// (`xl:hidden` in main) AND the right-sidebar mount (`hidden xl:block` via
+// QotdSidebar). Both are in the DOM at jsdom's default viewport (display:none
+// doesn't remove elements). Tests below use getAllBy* + index-0 to assert on
+// the first instance — same pattern used in PrayerWall.test.tsx for filter
+// buttons.
+
 describe('PrayerWall QOTD Integration', () => {
   it('QOTD card renders on Prayer Wall', () => {
     renderPage()
     const question = getTodaysQuestion()
-    expect(screen.getByText(question.text)).toBeInTheDocument()
-    expect(screen.getByText('Question of the Day')).toBeInTheDocument()
+    expect(screen.getAllByText(question.text).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Question of the Day').length).toBeGreaterThan(0)
   })
 
   it('QOTD card visible when category filter is active', () => {
     renderPage('/prayer-wall?category=health')
     const question = getTodaysQuestion()
-    expect(screen.getByText(question.text)).toBeInTheDocument()
+    expect(screen.getAllByText(question.text).length).toBeGreaterThan(0)
   })
 
   it('"Discussion" filter shows QOTD responses', () => {
@@ -86,12 +94,13 @@ describe('PrayerWall QOTD Integration', () => {
     // Mock data has 4 prayers with qotdId === todaysQuestionId (a 4th was
     // added during Spec 4.5; the test expectation went stale and surfaced
     // when the full test suite was run during Spec 4.6b cleanup).
-    expect(screen.getByText('4 responses')).toBeInTheDocument()
+    expect(screen.getAllByText('4 responses').length).toBeGreaterThan(0)
   })
 
   it('"Share Your Thoughts" button is visible on QOTD card', () => {
     renderPage()
-    expect(screen.getByRole('button', { name: 'Share Your Thoughts' })).toBeInTheDocument()
+    const buttons = screen.getAllByRole('button', { name: 'Share Your Thoughts' })
+    expect(buttons.length).toBeGreaterThan(0)
   })
 })
 
@@ -100,7 +109,8 @@ describe('PrayerWall QOTD Auth Gating (logged out)', () => {
     const user = userEvent.setup()
     renderPage()
 
-    await user.click(screen.getByRole('button', { name: 'Share Your Thoughts' }))
+    const buttons = screen.getAllByRole('button', { name: 'Share Your Thoughts' })
+    await user.click(buttons[0])
 
     // Auth modal should appear with the sign-in message
     expect(screen.getByText(/sign in/i)).toBeInTheDocument()

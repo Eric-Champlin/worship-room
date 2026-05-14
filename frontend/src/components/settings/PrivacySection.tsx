@@ -37,10 +37,12 @@ const STREAK_OPTIONS = [
 ]
 
 // Spec 6.3 — Night Mode 3-state preference.
+// Prayer Wall Redesign (2026-05-13) — labels aligned with NightModeBadge cycle:
+// Off / Auto / On. No "Always" verb. Order matches the badge tap cycle.
 const NIGHT_MODE_OPTIONS = [
+  { value: 'off', label: 'Off' },
   { value: 'auto', label: 'Auto (9pm – 6am)' },
-  { value: 'on', label: 'Always on' },
-  { value: 'off', label: 'Always off' },
+  { value: 'on', label: 'On' },
 ]
 
 function getMockUserName(userId: string): string {

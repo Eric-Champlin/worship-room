@@ -16,7 +16,6 @@ const r = await page.evaluate(() => {
   const cb = document.querySelector('section[aria-labelledby="daily-hub-heading"] > div[aria-hidden="true"]')
   const layers = cb ? Array.from(cb.children) : []
   const lastLayer = layers[layers.length - 1]
-  const lastLayerCS = lastLayer ? getComputedStyle(lastLayer) : null
   const lastLayerStyle = lastLayer ? lastLayer.getAttribute('style') : null
 
   return {
