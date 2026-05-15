@@ -36,7 +36,7 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
             "ORDER BY ordinal_position"
         );
 
-        assertThat(columns).hasSize(27);
+        assertThat(columns).hasSize(28);
         assertThat(columns).extracting("column_name")
             .containsExactly(
                 "id", "email", "password_hash", "first_name", "last_name",
@@ -48,7 +48,8 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
                 "timezone",
                 "terms_version", "privacy_version",
                 "failed_login_count", "failed_login_window_start", "locked_until",
-                "session_generation"
+                "session_generation",
+                "presence_opted_out"
             );
 
         Map<String, Object> idColumn = columns.stream()
@@ -78,7 +79,9 @@ class LiquibaseSmokeTest extends AbstractIntegrationTest {
         // Spec 6.6b (2026-05-14-003 + 004) added the celebrate CHECK widening and
         // posts.celebrate_count column. Spec 6.8 (2026-05-14-005) added the
         // verse_surfacing_log table for Verse-Finds-You cooldown tracking.
-        assertThat(rows).hasSize(35);
+        // Spec 6.11b (2026-05-15-001) added users.presence_opted_out for the
+        // Live Presence opt-out preference.
+        assertThat(rows).hasSize(36);
 
         Map<String, Object> first = rows.get(0);
         assertThat(first.get("id")).isEqualTo("2026-04-23-001-create-users-table");

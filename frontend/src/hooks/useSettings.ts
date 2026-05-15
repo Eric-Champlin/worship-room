@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy, UserSettingsPrayerWall, UserSettingsVerseFindsYou } from '@/types/settings'
+import type { UserSettings, UserSettingsProfile, UserSettingsNotifications, UserSettingsPrivacy, UserSettingsPrayerWall, UserSettingsVerseFindsYou, UserSettingsPresence } from '@/types/settings'
 import { getSettings, saveSettings, SETTINGS_KEY } from '@/services/settings-storage'
+import { getStoredToken } from '@/lib/auth-storage'
+import { patchCurrentUser } from '@/services/auth-service'
 
 export function useSettings(): {
   settings: UserSettings
@@ -10,6 +12,7 @@ export function useSettings(): {
   unblockUser: (userId: string) => void
   updatePrayerWall: (updates: Partial<UserSettingsPrayerWall>) => void
   updateVerseFindsYou: (updates: Partial<UserSettingsVerseFindsYou>) => void
+  updatePresence: (updates: Partial<UserSettingsPresence>) => void
 } {
   const [settings, setSettings] = useState<UserSettings>(() => getSettings())
 
@@ -69,6 +72,25 @@ export function useSettings(): {
     })
   }, [])
 
+  // Spec 6.11b — Live Presence namespace updater. localStorage write is the
+  // user-visible source of truth for the toggle UI; backend PATCH is fire-and-forget
+  // for the count-exclusion filter. Failure leaves localStorage updated and logs a
+  // warning — next toggle re-attempts.
+  const updatePresence = useCallback((updates: Partial<UserSettingsPresence>) => {
+    setSettings((prev) => {
+      const next = { ...prev, presence: { ...prev.presence, ...updates } }
+      saveSettings(next)
+      return next
+    })
+    // Backend mirror — only when the user is authenticated and only when the
+    // optedOut field is part of the update.
+    if (typeof updates.optedOut === 'boolean' && getStoredToken()) {
+      void patchCurrentUser({ presenceOptedOut: updates.optedOut }).catch((err) => {
+        console.warn('presence opt-out backend sync failed', err)
+      })
+    }
+  }, [])
+
   // Cross-tab sync
   useEffect(() => {
     function handleStorage(e: StorageEvent) {
@@ -80,5 +102,5 @@ export function useSettings(): {
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  return { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser, updatePrayerWall, updateVerseFindsYou }
+  return { settings, updateProfile, updateNotifications, updatePrivacy, unblockUser, updatePrayerWall, updateVerseFindsYou, updatePresence }
 }

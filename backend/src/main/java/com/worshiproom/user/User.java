@@ -100,6 +100,15 @@ public class User {
     @Column(name = "session_generation", nullable = false)
     private int sessionGeneration = 0;
 
+    /**
+     * Spec 6.11b — Live Presence opt-out preference. When true, the user is
+     * excluded from the Prayer Wall presence count. Defaults to false (counted).
+     * Mirrored to localStorage (`wr_settings.presence.optedOut`) for fast client read;
+     * backend value is authoritative for the count-exclusion filter.
+     */
+    @Column(name = "presence_opted_out", nullable = false)
+    private boolean presenceOptedOut = false;
+
     protected User() {}
 
     public User(String email, String passwordHash, String firstName, String lastName, String timezone) {
@@ -148,6 +157,7 @@ public class User {
     public OffsetDateTime getFailedLoginWindowStart() { return failedLoginWindowStart; }
     public OffsetDateTime getLockedUntil() { return lockedUntil; }
     public int getSessionGeneration() { return sessionGeneration; }
+    public boolean isPresenceOptedOut() { return presenceOptedOut; }
 
     public void setEmail(String email) { this.email = email; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
@@ -172,6 +182,7 @@ public class User {
     public void setFailedLoginCount(int failedLoginCount) { this.failedLoginCount = failedLoginCount; }
     public void setFailedLoginWindowStart(OffsetDateTime t) { this.failedLoginWindowStart = t; }
     public void setLockedUntil(OffsetDateTime t) { this.lockedUntil = t; }
+    public void setPresenceOptedOut(boolean v) { this.presenceOptedOut = v; }
 
     @Override
     public String toString() {

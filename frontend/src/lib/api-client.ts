@@ -72,6 +72,11 @@ export async function apiFetch<T>(
       ...rest,
       headers: mergedHeaders,
       signal: controller.signal,
+      // Spec 6.11b — include the anonymous-session cookie (wr_presence_session)
+      // on cross-origin requests so the presence interceptor can read/issue it
+      // in dev (`:5173` ↔ `:8080`) and prod (Vercel ↔ Railway). Cookie scope is
+      // server-side via `Path=/api/v1`, so this is uniform across all apiFetch calls.
+      credentials: 'include',
     })
   } catch {
     clearTimeout(timer)

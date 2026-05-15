@@ -78,10 +78,11 @@ describe('PrayerDetail — flag-on', () => {
     })
   })
 
-  it('calls getPostById and renders post', async () => {
-    vi.mocked(prayerWallApi.getPostById).mockResolvedValue(
-      makePost({ id: 'real-id', content: 'Real backend prayer text here' })
-    )
+  it('calls getPostByIdWithCrisisFlag and renders post', async () => {
+    vi.mocked(prayerWallApi.getPostByIdWithCrisisFlag).mockResolvedValue({
+      prayer: makePost({ id: 'real-id', content: 'Real backend prayer text here' }),
+      crisisFlag: false,
+    })
     vi.mocked(prayerWallApi.listComments).mockResolvedValue({
       comments: [],
       pagination: { page: 1, limit: 50, total: 0, hasMore: false },
@@ -91,11 +92,11 @@ describe('PrayerDetail — flag-on', () => {
     // both the breadcrumb (truncated) and the PrayerCard body, so use findAllByText.
     const matches = await screen.findAllByText('Real backend prayer text here')
     expect(matches.length).toBeGreaterThan(0)
-    expect(prayerWallApi.getPostById).toHaveBeenCalledWith('real-id')
+    expect(prayerWallApi.getPostByIdWithCrisisFlag).toHaveBeenCalledWith('real-id')
   })
 
   it('renders Prayer not found UI on 404', async () => {
-    vi.mocked(prayerWallApi.getPostById).mockRejectedValueOnce(
+    vi.mocked(prayerWallApi.getPostByIdWithCrisisFlag).mockRejectedValueOnce(
       new ApiError('NOT_FOUND', 404, 'Post not found', null)
     )
     vi.mocked(prayerWallApi.listComments).mockRejectedValueOnce(
@@ -105,11 +106,11 @@ describe('PrayerDetail — flag-on', () => {
     expect(await screen.findByText('Prayer not found')).toBeInTheDocument()
   })
 
-  it('flag-off regression — does not call getPostById', async () => {
+  it('flag-off regression — does not call getPostByIdWithCrisisFlag', async () => {
     vi.mocked(isBackendPrayerWallEnabled).mockReturnValue(false)
     renderDetail('prayer-1')
     // Wait for sync render path to settle.
     await screen.findByRole('main')
-    expect(prayerWallApi.getPostById).not.toHaveBeenCalled()
+    expect(prayerWallApi.getPostByIdWithCrisisFlag).not.toHaveBeenCalled()
   })
 })

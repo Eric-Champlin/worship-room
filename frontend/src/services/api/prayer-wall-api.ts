@@ -30,6 +30,10 @@ import {
   mapCommentDtos,
   reactionsResponseToReactionsMap,
 } from '@/lib/prayer-wall/postMappers'
+import {
+  hasAnyCrisisFlag,
+  isCrisisFlagged,
+} from '@/lib/prayer-wall/crisisFlagDetection'
 import type {
   PostDto,
   CommentDto,
@@ -64,6 +68,20 @@ export interface PaginationInfo {
 export interface PostListResult {
   posts: PrayerRequest[]
   pagination: PaginationInfo
+  /**
+   * Spec 6.11b — Gate-G-CRISIS-SUPPRESSION. True if any post in the raw DTO
+   * response had `crisisFlag: true` BEFORE the mapper stripped it. Drives
+   * the PresenceIndicator suppression at the page level. The mapper continues
+   * to drop `crisisFlag` from `PrayerRequest` per Phase 3 Addendum #7; this
+   * is the canonical alternative read path.
+   */
+  hasCrisisFlag: boolean
+}
+
+export interface SinglePostResult {
+  /** Spec 6.11b — surfaces `crisisFlag` from the raw DTO so single-post pages can suppress the indicator. */
+  prayer: PrayerRequest
+  crisisFlag: boolean
 }
 
 export interface CommentListResult {
@@ -206,6 +224,8 @@ export async function listPosts(
     const result: PostListResult = {
       posts: mapPostDtos(env.data),
       pagination: metaToPagination(env.meta),
+      // Spec 6.11b — derive crisis-flag presence from raw DTOs BEFORE mapper strip.
+      hasCrisisFlag: hasAnyCrisisFlag(env.data),
     }
     cacheSet(cacheKey, result)
     return result
@@ -247,6 +267,32 @@ export async function getPostById(id: string): Promise<PrayerRequest> {
   }
 }
 
+/**
+ * Spec 6.11b — sibling to {@link getPostById} that also surfaces `crisisFlag`
+ * from the raw DTO so PrayerDetail can suppress the PresenceIndicator on a
+ * flagged post. The mapper continues to strip `crisisFlag` from `PrayerRequest`
+ * (Phase 3 Addendum #7); this helper exposes both pieces independently.
+ */
+export async function getPostByIdWithCrisisFlag(id: string): Promise<SinglePostResult> {
+  const url = `/api/v1/posts/${encodeURIComponent(id)}`
+  const cacheKey = `GET ${url}+crisis`
+  try {
+    const dto = await apiFetch<PostDto>(url)
+    const result: SinglePostResult = {
+      prayer: postDtoToPrayerRequest(dto),
+      crisisFlag: isCrisisFlagged(dto),
+    }
+    cacheSet(cacheKey, result)
+    return result
+  } catch (e) {
+    if (e instanceof ApiError && e.code === 'NETWORK_ERROR') {
+      const cached = cacheGet<SinglePostResult>(cacheKey)
+      if (cached) return cached
+    }
+    throw e
+  }
+}
+
 export interface ListAuthorPostsParams {
   page: number
   limit: number
@@ -270,6 +316,8 @@ export async function listAuthorPosts(
     const result: PostListResult = {
       posts: mapPostDtos(env.data),
       pagination: metaToPagination(env.meta),
+      // Spec 6.11b — derive crisis-flag presence from raw DTOs.
+      hasCrisisFlag: hasAnyCrisisFlag(env.data),
     }
     cacheSet(cacheKey, result)
     return result
@@ -351,6 +399,8 @@ export async function listMyBookmarks(
     const result: PostListResult = {
       posts: mapPostDtos(env.data),
       pagination: metaToPagination(env.meta),
+      // Spec 6.11b — derive crisis-flag presence from raw DTOs.
+      hasCrisisFlag: hasAnyCrisisFlag(env.data),
     }
     cacheSet(cacheKey, result)
     return result

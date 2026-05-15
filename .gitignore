@@ -55,6 +55,9 @@ frontend/playwright-report/
 # Local screenshots/images
 screenshots/
 frontend/playwright-screenshots/
+# Catch-all for screenshots that land at repo root due to Playwright CWD drift
+# (verification skill canonical location is frontend/playwright-screenshots/)
+playwright-screenshots/
 *.png
 !frontend/public/icon-*.png
 !frontend/public/apple-touch-icon.png

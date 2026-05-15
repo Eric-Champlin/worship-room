@@ -8,6 +8,7 @@ import { PRAYER_WALL_DASHBOARD_METADATA } from '@/lib/seo/routeMetadata'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
+import { PresenceIndicator } from '@/components/prayer-wall/PresenceIndicator'
 import { PrayerReceiptMini } from '@/components/prayer-wall/PrayerReceiptMini'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
@@ -107,6 +108,9 @@ function DashboardContent() {
   } | null>(null)
   const [prayersReloadTrigger, setPrayersReloadTrigger] = useState(0)
   const [bookmarksReloadTrigger, setBookmarksReloadTrigger] = useState(0)
+  // Spec 6.11b — Gate-G-CRISIS-SUPPRESSION. OR'd across both tabs' fetches —
+  // any flagged post in either set suppresses the indicator for the whole page.
+  const [hasCrisisFlag, setHasCrisisFlag] = useState(false)
 
   // Fetch prayers tab data when activated in flag-on mode.
   // TODO(Phase 8.1): swap to prayerWallApi.listAuthorPosts(myUsername, ...)
@@ -124,6 +128,9 @@ function DashboardContent() {
         if (cancelled) return
         const filtered = user ? result.posts.filter((p) => p.userId === user.id) : []
         setApiMyPrayers(filtered)
+        // Spec 6.11b — surface flag from raw fetch (conservative: any flagged
+        // post anywhere in the response triggers suppression).
+        if (result.hasCrisisFlag) setHasCrisisFlag(true)
       } catch (err) {
         if (cancelled) return
         if (err instanceof ApiError) {
@@ -156,6 +163,7 @@ function DashboardContent() {
         const result = await prayerWallApi.listMyBookmarks({ page: 1, limit: 50 })
         if (cancelled) return
         setApiBookmarkedPrayers(result.posts)
+        if (result.hasCrisisFlag) setHasCrisisFlag(true)
       } catch (err) {
         if (cancelled) return
         if (err instanceof ApiError) {
@@ -347,12 +355,14 @@ function DashboardContent() {
   return (
     <PageShell>
       <SEO {...PRAYER_WALL_DASHBOARD_METADATA} />
-      <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6 sm:py-8">
-        <div className="mb-6">
+      <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6 sm:pb-8">
+        <div className="mb-6 flex flex-col items-start gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4" data-testid="feed-header">
           <Breadcrumb
             items={[{ label: 'Prayer Wall', href: '/prayer-wall' }, { label: 'My Dashboard' }]}
             maxWidth="max-w-[720px]"
           />
+          {/* Spec 6.11b — Live Presence indicator. Suppressed when any rendered post on this dashboard is flagged. */}
+          <PresenceIndicator suppressed={hasCrisisFlag} />
         </div>
 
         {/* Editable profile header */}

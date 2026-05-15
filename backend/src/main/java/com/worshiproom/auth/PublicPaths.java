@@ -62,6 +62,10 @@ public final class PublicPaths {
         "/api/v1/posts/*/comments",
         "/api/v1/users/*/posts",
         "/api/v1/qotd/today",
+        // Spec 6.11b — Live Presence count: public read; auth principal extracted if present
+        // (auth callers go through the higher per-user rate-limit bucket, anonymous through
+        // the per-IP bucket).
+        "/api/v1/prayer-wall/presence",
         // Spec 1.10e — DevStorageController is @Profile("dev"), so this pattern is
         // unreachable under test/prod (no controller listens, request 404s via the MVC
         // dispatcher). The HMAC signature check inside the controller is the actual

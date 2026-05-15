@@ -138,6 +138,7 @@ Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` +
   - **Future Enhancement**: Migrate to httpOnly cookie + CSRF protection for persistent sessions
 - **CSRF Protection**: Not needed for in-memory JWT; required if migrating to cookie-based JWT
 - **Token Expiration**: Short-lived tokens (1 hour), refresh token mechanism (future enhancement)
+- **Spec 6.11b note**: Spec 6.11b enabled CORS `allowCredentials(true)` for the anonymous presence cookie (`wr_presence_session`); this does NOT change JWT storage (still in-memory React state). The presence cookie is an opaque UUID with zero identity — see CORS Policy section above.
  
 ### Password Policy (MVP)
  
@@ -168,7 +169,7 @@ Spec 1 Round 2 caught this on the rate-limit bucket map (`maximumSize(10_000)` +
 - **Allowed Methods**: `GET, POST, PUT, PATCH, DELETE, OPTIONS` — PATCH is REQUIRED (Forums Wave endpoints use PATCH for partial updates)
 - **Allowed Headers**: `Content-Type, Authorization, X-Request-Id`
 - **Exposed Headers** (MANDATORY — without these, browsers hide them from frontend JavaScript even though they arrive on the wire): `X-Request-Id, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After`
-- **Credentials**: `false` for MVP (in-memory JWT, no cookies). Set to `true` only if migrating to cookie-based JWT in the future.
+- **Credentials**: `true` (post-Spec-6.11b — was `false` previously). The flip enables the anonymous-session cookie (`wr_presence_session`, 90-day, HttpOnly + Secure + SameSite=Lax + Path=/api/v1) issued by `PresenceTrackingInterceptor` to round-trip cross-origin (frontend on Vercel / Vite dev server, backend on Railway). JWT remains in-memory React state — this flip does NOT migrate auth to cookie-based JWT. Origin allowlist remains specific (no `*` permitted with credentials on, already true in our config).
 - **Implementation**: Global `CorsConfig` with `WebMvcConfigurer.addCorsMappings`, `@Value("${proxy.cors.allowed-origins}")`-bound `String[]`. No inline `@Value` defaults (they duplicate `application.properties` and create drift).
  
 ### X-Forwarded-For Trust Policy

@@ -8,6 +8,7 @@ import { PRAYER_DETAIL_METADATA } from '@/lib/seo/routeMetadata'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
+import { PresenceIndicator } from '@/components/prayer-wall/PresenceIndicator'
 import { PrayerReceipt } from '@/components/prayer-wall/PrayerReceipt'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentItem } from '@/components/prayer-wall/CommentItem'
@@ -60,6 +61,8 @@ function PrayerDetailContent() {
   const [reloadTrigger, setReloadTrigger] = useState(0)
   const { reactions, togglePraying, toggleBookmark } = usePrayerReactions()
   const [replyTo, setReplyTo] = useState('')
+  // Spec 6.11b — Gate-G-CRISIS-SUPPRESSION. Surfaced from raw DTO via getPostByIdWithCrisisFlag.
+  const [crisisFlag, setCrisisFlag] = useState(false)
 
   // Spec 6.8 — Verse-Finds-You. Comment trigger fires only on supportive
   // comments to Mental Health / Grief / Health posts AND only in the
@@ -85,11 +88,12 @@ function PrayerDetailContent() {
       setFetchError(null)
       try {
         const [postResult, commentsResult] = await Promise.all([
-          prayerWallApi.getPostById(id!),
+          prayerWallApi.getPostByIdWithCrisisFlag(id!),
           prayerWallApi.listComments(id!, { page: 1, limit: 50 }),
         ])
         if (cancelled) return
-        setPrayer(postResult)
+        setPrayer(postResult.prayer)
+        setCrisisFlag(postResult.crisisFlag)
         setComments(commentsResult.comments)
       } catch (err) {
         if (cancelled) return
@@ -292,7 +296,7 @@ function PrayerDetailContent() {
   if (isLoading) {
     return (
       <PageShell>
-        <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6" aria-busy="true">
+        <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6" aria-busy="true">
           <span className="sr-only">Loading</span>
           <div className="mb-6">
             <Breadcrumb
@@ -311,7 +315,7 @@ function PrayerDetailContent() {
   if (fetchError) {
     return (
       <PageShell>
-        <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
+        <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6">
           <div className="mb-6">
             <Breadcrumb
               items={[{ label: 'Prayer Wall', href: '/prayer-wall' }, { label: 'Prayer Request' }]}
@@ -336,7 +340,7 @@ function PrayerDetailContent() {
   if (notFound || !prayer) {
     return (
       <PageShell>
-        <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
+        <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6">
           <div className="mb-6">
             <Breadcrumb
               items={[{ label: 'Prayer Wall', href: '/prayer-wall' }, { label: 'Prayer Request' }]}
@@ -358,9 +362,9 @@ function PrayerDetailContent() {
   return (
     <PageShell>
       <SEO {...PRAYER_DETAIL_METADATA} />
-      <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6 sm:py-8">
+      <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6 sm:pb-8">
         <h1 className="sr-only">Prayer Detail</h1>
-        <div className="mb-6">
+        <div className="mb-6 flex flex-col items-start gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4" data-testid="feed-header">
           <Breadcrumb
             items={[
               { label: 'Prayer Wall', href: '/prayer-wall' },
@@ -373,6 +377,8 @@ function PrayerDetailContent() {
             ]}
             maxWidth="max-w-[720px]"
           />
+          {/* Spec 6.11b \u2014 Live Presence indicator. Suppressed when this single post is crisis-flagged. */}
+          <PresenceIndicator suppressed={crisisFlag} />
         </div>
 
         <PrayerCard prayer={prayer} showFull tier="detail">

@@ -53,5 +53,11 @@ public record UpdateUserRequest(
     JsonNullable<String> favoriteVerseText,
 
     @Size(max = 50, message = "timezone must be at most 50 characters")
-    JsonNullable<String> timezone
+    JsonNullable<String> timezone,
+
+    // Spec 6.11b — Live Presence opt-out preference. JsonNullable per the
+    // three-state convention: undefined = no change; absent valid Boolean
+    // never reaches us via Jackson (no `null` value semantically valid for
+    // a non-nullable column), but the wrapper preserves field-presence detection.
+    JsonNullable<Boolean> presenceOptedOut
 ) {}

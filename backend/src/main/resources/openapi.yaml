@@ -2697,6 +2697,55 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
         '429': { $ref: '#/components/responses/RateLimited' }
 
+  /api/v1/prayer-wall/presence:
+    get:
+      tags: [Posts]
+      summary: Live Presence count for the Prayer Wall (Spec 6.11b)
+      description: |
+        Returns the count of "present" users on the Prayer Wall — members of
+        the Redis sorted set with score newer than 60 minutes, minus users who
+        have opted out via the `presenceOptedOut` user setting.
+
+        Public endpoint — both authenticated and anonymous callers may invoke.
+        Response is server-cached for 30 seconds (single global cache entry,
+        not per-user).
+
+        On anonymous requests without an existing `wr_presence_session` cookie,
+        the server-side interceptor on the read paths to `/api/v1/posts/**`
+        also issues one (HttpOnly; Secure in prod; SameSite=Lax; Path=/api/v1;
+        Max-Age 90 days) — this endpoint itself does NOT issue the cookie
+        (calling /presence does not contribute to the count).
+
+        Rate limits:
+          - Authenticated: 120 requests per minute per user
+          - Anonymous: 60 requests per minute per IP
+      security:
+        - bearerAuth: []
+        - {}  # optional auth
+      responses:
+        '200':
+          description: Current count
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: object
+                    required: [count]
+                    properties:
+                      count:
+                        type: integer
+                        minimum: 0
+                        description: Count of present users on the Prayer Wall.
+                  meta:
+                    type: object
+                    required: [requestId]
+                    properties:
+                      requestId: { type: string }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
   /api/v1/users/me/reactions:
     get:
       tags: [Posts]
@@ -3764,6 +3813,12 @@ components:
           nullable: true
           pattern: '^\d{4}-\d{2}-\d{2}$'
           description: Spec 1.10f. ISO-8601 date of the last accepted Privacy Policy version. Null for users created before Spec 1.10f shipped.
+        presenceOptedOut:
+          type: boolean
+          description: |
+            Spec 6.11b — Live Presence opt-out preference. When true, the user is
+            excluded from the Prayer Wall presence count returned by
+            GET /api/v1/prayer-wall/presence. Defaults to false (counted).
 
     LegalVersionsResponse:
       type: object
@@ -3826,6 +3881,12 @@ components:
         favoriteVerseReference: { type: string, maxLength: 50, nullable: true }
         favoriteVerseText: { type: string, maxLength: 500, nullable: true }
         timezone: { type: string, maxLength: 50 }
+        presenceOptedOut:
+          type: boolean
+          description: |
+            Spec 6.11b — Live Presence opt-out preference. When true, the user is
+            excluded from the Prayer Wall presence count. Three-state: absent =
+            no change; explicit null is rejected (non-nullable column).
 
     ActivityRequest:
       description: |

@@ -185,4 +185,28 @@ describe('settings-storage', () => {
     expect(settings.prayerWall.nightMode).toBe('on')
     expect(settings.prayerWall.prayerReceiptsVisible).toBe(true)
   })
+
+  // --- Spec 6.11b — Live Presence opt-out default + back-compat migration ---
+
+  it('presence default is optedOut: false (Gate-G-DEFAULT-ON-FOR-COUNTING)', () => {
+    expect(DEFAULT_SETTINGS.presence.optedOut).toBe(false)
+    const settings = getSettings()
+    expect(settings.presence.optedOut).toBe(false)
+  })
+
+  it('existing settings without presence namespace get presence default-filled via deepMerge', () => {
+    localStorage.setItem(
+      SETTINGS_KEY,
+      JSON.stringify({ prayerWall: { prayerReceiptsVisible: true } }),
+    )
+    const settings = getSettings()
+    expect(settings.presence.optedOut).toBe(false)
+    expect(settings.prayerWall.prayerReceiptsVisible).toBe(true)
+  })
+
+  it('updateSettings persists presence.optedOut = true', () => {
+    const updated = updateSettings({ presence: { optedOut: true } })
+    expect(updated.presence.optedOut).toBe(true)
+    expect(getSettings().presence.optedOut).toBe(true)
+  })
 })

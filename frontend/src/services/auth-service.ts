@@ -157,3 +157,23 @@ export async function getCurrentUser(): Promise<AuthUser> {
   })
   return toAuthUserFromResponse(data)
 }
+
+/**
+ * Spec 6.11b — minimal PATCH /users/me wrapper. Currently used only by the
+ * Live Presence opt-out toggle (fire-and-forget on click). Other PATCH-able
+ * fields (firstName, lastName, etc.) are not yet wired through a frontend
+ * surface; when they ship, this function can be extended.
+ */
+export interface PatchCurrentUserRequest {
+  presenceOptedOut?: boolean
+}
+
+export async function patchCurrentUser(
+  body: PatchCurrentUserRequest,
+): Promise<UserResponseWire> {
+  return apiFetch<UserResponseWire>('/api/v1/users/me', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}

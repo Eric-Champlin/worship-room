@@ -54,6 +54,12 @@ export const DEFAULT_SETTINGS: UserSettings = {
     // Settings → Gentle extras section.
     enabled: false,
   },
+  presence: {
+    // Spec 6.11b — Live Presence opt-out default false (user is counted by
+    // default per Gate-G-DEFAULT-ON-FOR-COUNTING). Toggle in Settings →
+    // Gentle extras flips this to true. Mirrored to backend via PATCH /users/me.
+    optedOut: false,
+  },
 }
 
 function deepMerge<T extends object>(defaults: T, partial: DeepPartial<T>): T {
@@ -88,12 +94,12 @@ export function getSettings(): UserSettings {
     if (raw === null) return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] } }
     const parsed = JSON.parse(raw)
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall }, verseFindsYou: { ...DEFAULT_SETTINGS.verseFindsYou } }
+      return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall }, verseFindsYou: { ...DEFAULT_SETTINGS.verseFindsYou }, presence: { ...DEFAULT_SETTINGS.presence } }
     }
     return deepMerge(DEFAULT_SETTINGS, parsed)
   } catch (_e) {
     // localStorage may be unavailable or data malformed
-    return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall }, verseFindsYou: { ...DEFAULT_SETTINGS.verseFindsYou } }
+    return { ...DEFAULT_SETTINGS, profile: { ...DEFAULT_SETTINGS.profile }, notifications: { ...DEFAULT_SETTINGS.notifications }, privacy: { ...DEFAULT_SETTINGS.privacy, blockedUsers: [...DEFAULT_SETTINGS.privacy.blockedUsers] }, prayerWall: { ...DEFAULT_SETTINGS.prayerWall }, verseFindsYou: { ...DEFAULT_SETTINGS.verseFindsYou }, presence: { ...DEFAULT_SETTINGS.presence } }
   }
 }
 

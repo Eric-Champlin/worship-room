@@ -17,6 +17,32 @@ Both forms work against any Redis provider (Upstash, Redis Cloud, Railway, Elast
 self-hosted, Docker). Production deployment uses Upstash free tier by default; see
 "Provider choice" below.
 
+### Dev port
+
+The worship-room `redis` service in `docker-compose.yml` binds to **host port `6380`**
+(not the default `6379`). Container-internal port stays `6379`. This avoids the
+silent port collision that happens when a sibling project's Redis container has
+already claimed `6379` on the dev workstation — `docker compose up -d redis` does
+NOT error; it brings the worship-room Redis up with no host port at all, and Spring
+silently connects to the sibling project's Redis instead. The collision was caught
+during Spec 6.11b live verification (2026-05-15) when `bumpAnon` writes landed in
+the wrong container.
+
+The fallback `REDIS_PORT` in `application.properties` is now `6380`, matching the
+host port in `docker-compose.yml`. `redis-cli` debugging from outside the container
+uses `redis-cli -p 6380`; inside the container, it's still `redis-cli` (default 6379).
+
+**Troubleshooting:** if backend boot fails with `Connection refused` or a presence-
+related sanity check shows `ZCARD` mismatching what the app reports, verify:
+
+```bash
+docker ps --format '{{.Names}}: {{.Ports}}' | grep redis
+```
+
+The worship-room container should show `0.0.0.0:6380->6379/tcp`. If a sibling
+project is also listening on `6380`, change worship-room's host port to a different
+free port in `docker-compose.yml` AND `application.properties` together.
+
 ## Key namespaces
 
 All keys are prefixed by domain. Keys without a documented prefix are not allowed.

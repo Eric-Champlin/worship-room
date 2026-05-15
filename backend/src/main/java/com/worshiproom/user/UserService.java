@@ -91,6 +91,16 @@ public class UserService {
             }
         }
 
+        // Spec 6.11b — Live Presence opt-out preference. Boolean column with NOT
+        // NULL default false; rejects an explicit null payload.
+        if (request.presenceOptedOut() != null && request.presenceOptedOut().isPresent()) {
+            Boolean value = request.presenceOptedOut().get();
+            if (value == null) {
+                throw UserException.nonNullableFieldNull("presenceOptedOut");
+            }
+            user.setPresenceOptedOut(value);
+        }
+
         // Custom-display-name constraint: if preference is now 'custom' and
         // customDisplayName is null after the update, reject. Per spec § Decision 7.
         if (user.getDisplayNamePreference() == DisplayNamePreference.CUSTOM

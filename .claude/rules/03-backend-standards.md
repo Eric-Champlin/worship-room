@@ -328,7 +328,7 @@ http.authorizeHttpRequests(auth -> auth
 - **Methods:** GET, POST, PUT, PATCH, DELETE, OPTIONS
 - **Headers:** Content-Type, Authorization, X-Request-Id
 - **Exposed Headers** (MANDATORY): `X-Request-Id, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After` — without `exposedHeaders`, browsers hide these from frontend JavaScript even though they arrive on the wire.
-- **Credentials:** `false` for MVP (in-memory JWT, no cookies)
+- **Credentials:** `true` (post-Spec-6.11b — was `false` previously). The flip enables the anonymous-session cookie (`wr_presence_session`, 90-day, HttpOnly + Secure + SameSite=Lax + Path=/api/v1) issued by `PresenceTrackingInterceptor` to round-trip cross-origin. JWT remains in-memory React state — this flip does NOT migrate auth to cookie-based JWT. Origin allowlist remains specific (no `*` permitted with credentials on, already true in our config). See `02-security.md` § CORS Policy for the canonical posture.
 - **Configuration:** `proxy.cors.allowed-origins` (comma-separated) in `application-{profile}.properties`, bound via `@Value("${proxy.cors.allowed-origins}")` into `CorsConfig`. No inline `@Value` defaults (they duplicate `application.properties` and create drift).
 
 ### OpenAPI Spec and Type Generation (Universal Rule 4)

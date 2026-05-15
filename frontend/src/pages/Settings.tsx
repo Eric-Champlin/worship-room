@@ -69,6 +69,7 @@ export function Settings() {
     unblockUser: unblockSettings,
     updatePrayerWall,
     updateVerseFindsYou,
+    updatePresence,
   } = useSettings()
   const { blocked: friendsBlocked, unblockUser: unblockFriend } = useFriends()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -255,6 +256,8 @@ export function Settings() {
               <GentleExtrasSection
                 verseFindsYou={settings.verseFindsYou}
                 onUpdateVerseFindsYou={updateVerseFindsYou}
+                presence={settings.presence}
+                onUpdatePresence={updatePresence}
               />
             )}
             {activeSection === 'account' && (

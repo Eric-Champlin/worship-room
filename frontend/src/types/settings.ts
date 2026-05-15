@@ -88,10 +88,23 @@ export interface UserSettingsVerseFindsYou {
   enabled: boolean
 }
 
+// Spec 6.11b — Live Presence settings namespace (top-level, NOT nested under
+// prayerWall). Presence triggers fire from Prayer Wall surfaces today but the
+// namespace is its own — future cross-surface presence work shares the same toggle.
+export interface UserSettingsPresence {
+  /**
+   * When true, the user is excluded from the Prayer Wall presence count.
+   * Defaults to false (counted) per Gate-G-DEFAULT-ON-FOR-COUNTING.
+   * Mirrored to backend via PATCH /users/me presenceOptedOut.
+   */
+  optedOut: boolean
+}
+
 export interface UserSettings {
   profile: UserSettingsProfile
   notifications: UserSettingsNotifications
   privacy: UserSettingsPrivacy
   prayerWall: UserSettingsPrayerWall
   verseFindsYou: UserSettingsVerseFindsYou
+  presence: UserSettingsPresence
 }

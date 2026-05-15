@@ -63,7 +63,16 @@ public class CorsConfig {
         "Retry-After"
     );
 
-    private static final boolean ALLOW_CREDENTIALS = false;
+    /**
+     * Spec 6.11b — flipped from {@code false} to {@code true} so the
+     * anonymous-session cookie ({@code wr_presence_session}, HttpOnly +
+     * Secure + SameSite=Lax + Path=/api/v1 + 90-day) issued by
+     * {@code PresenceTrackingInterceptor} can round-trip cross-origin
+     * (frontend on Vercel / Vite dev server, backend on Railway). JWT
+     * remains in-memory React state — this flip does NOT migrate auth to
+     * cookie-based JWT. See {@code .claude/rules/02-security.md} § CORS Policy.
+     */
+    private static final boolean ALLOW_CREDENTIALS = true;
     private static final long MAX_AGE_SECONDS = 3600L;
     private static final String API_PATH_PATTERN = "/api/**";
 

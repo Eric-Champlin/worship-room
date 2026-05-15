@@ -1,62 +1,4 @@
 {
-  // ============================================================================
-  // Worship Room — Verse-Finds-You Curated Verse Set (Spec 6.8)
-  // ============================================================================
-  //
-  // CURATION RULES — every edit must respect these (Brief §2):
-  //
-  //   • Short passages only (target ~35 words; up to ~40 acceptable for
-  //     foundational comfort verses like Isaiah 41:10 — the brief's "~"
-  //     allows flex). Validation enforces ≤40.
-  //   • No "prosperity" passages (no "God will give you the desires of your heart"
-  //     surfaced as a promise).
-  //   • No guilt/shame verses (no "oh ye of little faith" or mustard-seed-as-lecture).
-  //   • No judgment verses outside explicit lament context.
-  //   • Prefer Psalms, Lamentations, Isaiah, Gospels of John and Matthew, Romans 8,
-  //     Philippians 4, 2 Corinthians — passages explicitly about God's presence in
-  //     difficulty.
-  //   • Every entry reviewed against the "pastor's wife test" before inclusion
-  //     (would this verse, at this moment, land as grace or as judgment?).
-  //   • Translation locked to WEB (World English Bible).
-  //   • Version-controlled — changes go through spec review, not hotfixes.
-  //   • "Fewer and safer beats more and dicey" — remove any verse you're unsure
-  //     about, even if it means fewer than 180.
-  //
-  // Schema per entry:
-  //   { "id": "kebab-case stable id (e.g. 'psalm-23-1' or 'romans-8-38-39')",
-  //     "reference": "Display reference (e.g. 'Psalm 23:1')",
-  //     "text": "Verse text (WEB, ≤40 words)",
-  //     "translation": "WEB",
-  //     "tags": ["one-or-more tags from known_tags below"],
-  //     "excluded_contexts": ["zero or more tag names OR category names to suppress"],
-  //     "approximate_length": <integer word count> }
-  //
-  // ============================================================================
-  // CATEGORY → TAG MAPPING (Brief §"D-CategoryTagMapping" + Gate-G-NOT-HOPE)
-  // ============================================================================
-  //
-  // The mapping below routes a post's category (the category the AUTHOR selected
-  // when composing the post) to the set of verse tags the selection engine filters
-  // against. Mapping uses Eric's pastoral tag vocabulary (see known_tags below).
-  //
-  // MENTAL-HEALTH AND GRIEF DELIBERATELY DO NOT MAP TO `hope`. This is not an
-  // accidental omission — it is a load-bearing pastoral decision. Read this
-  // BEFORE you "complete" either mapping by adding `hope`:
-  //
-  //   • For someone in acute depression, a hope-verse can land as a demand — "you
-  //     should feel better, why don't you?" Hope-verses can be cruel in acute
-  //     mental-health distress.
-  //   • For someone in fresh grief, hope-verses arrive too soon. The pastoral
-  //     work in grief is presence, not "look forward to better days." Lamentations 3,
-  //     Psalm 88 — the Bible's own grief grammar — does not lead with hope.
-  //   • The right tags for both are `comfort`, `lament`, `presence` — verses that
-  //     ACKNOWLEDGE darkness rather than skip past it.
-  //
-  // If a future contributor decides hope-verses belong here after all, it should
-  // come through a dedicated spec with explicit pastoral review — not a casual
-  // "completeness" edit. The omission is the design.
-  //
-  // ============================================================================
   "category_tag_mapping": {
     "health":         ["comfort", "presence", "hope", "fear", "waiting", "endurance"],
     "mental-health":  ["comfort", "lament", "presence", "rest", "doubt", "fear", "loneliness", "uncertainty"],
@@ -67,18 +9,8 @@
     "praise":         ["gratitude", "hope", "presence"],
     "relationships":  ["presence", "comfort", "endurance", "loneliness"],
     "other":          ["presence", "comfort", "hope"]
-    // `discussion` is INTENTIONALLY ABSENT — Spec 6.8 Edge Case decision: posts
-    // with category=discussion return `verse: null, reason: 'no_match'` rather
-    // than receive a defensive default mapping. See plan Edge Cases & Decisions.
   },
 
-  // ============================================================================
-  // KNOWN TAGS (the enum the validation test asserts against)
-  // ============================================================================
-  // Union of CC's original 12-tag enum + Eric's pastoral vocabulary additions
-  // (doubt, endurance, fear, gratitude, grief, loneliness, uncertainty, waiting).
-  // Tags retained from CC's original (love, patience, strength, healing,
-  // thanksgiving, praise, joy) for forward-compat — future curation may use them.
   "known_tags": [
     "comfort", "lament", "presence", "rest", "hope", "love", "patience",
     "strength", "healing", "thanksgiving", "praise", "joy",
@@ -86,12 +18,6 @@
     "uncertainty", "waiting"
   ],
 
-  // ============================================================================
-  // ENTRIES — Eric's curated 180-passage set (Gate-G-CURATION-PREREQ resolved 2026-05-14)
-  // ============================================================================
-  // Source of truth: this file. Validation tests in CuratedVerseSetValidationTest
-  // enforce the curation rules above (id format, ≤40 words, tag enum, NOT-hope
-  // mappings, ≥30-entry floor).
   "entries": [
     {
       "id": "psalm-23-1",

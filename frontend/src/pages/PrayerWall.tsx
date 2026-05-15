@@ -29,6 +29,7 @@ import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { CategoryFilters } from '@/components/prayer-wall/CategoryFilters'
 import { PrayerWallLeftSidebar } from '@/components/prayer-wall/PrayerWallLeftSidebar'
 import { PrayerWallViewTabs } from '@/components/prayer-wall/PrayerWallViewTabs'
+import { PresenceIndicator } from '@/components/prayer-wall/PresenceIndicator'
 import { PrayerWallRightSidebar } from '@/components/prayer-wall/PrayerWallRightSidebar'
 import { QuestionOfTheDay } from '@/components/prayer-wall/QuestionOfTheDay'
 import { QotdComposer } from '@/components/prayer-wall/QotdComposer'
@@ -137,6 +138,8 @@ function PrayerWallContent() {
   const [hasMoreFromServer, setHasMoreFromServer] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [reloadTrigger, setReloadTrigger] = useState(0)
+  // Spec 6.11b — Gate-G-CRISIS-SUPPRESSION. Page-level boolean drives PresenceIndicator suppression.
+  const [hasCrisisFlag, setHasCrisisFlag] = useState(false)
   // Per-prayer comment cache populated lazily on expand (flag-on only).
   const [fetchedComments, setFetchedComments] = useState<Record<string, PrayerComment[]>>({})
   const fetchingCommentsRef = useRef<Set<string>>(new Set())
@@ -400,6 +403,7 @@ function PrayerWallContent() {
         setPrayers(result.posts)
         setHasMoreFromServer(result.pagination.hasMore)
         setCurrentPage(1)
+        setHasCrisisFlag(result.hasCrisisFlag)
         // Drop both comment caches on a feed refetch — stale comment lists
         // for posts that may no longer be in the loaded set are not useful.
         setFetchedComments({})
@@ -446,6 +450,10 @@ function PrayerWallContent() {
       setPrayers((prev) => [...prev, ...result.posts])
       setHasMoreFromServer(result.pagination.hasMore)
       setCurrentPage(nextPage)
+      // Spec 6.11b — load-more pages may introduce a flagged post; if any newly-loaded
+      // post is flagged, suppress immediately. We never *unset* this flag from load-more
+      // (a previously-flagged page stays suppressed once seen).
+      if (result.hasCrisisFlag) setHasCrisisFlag(true)
     } catch (err) {
       if (err instanceof ApiError) {
         const descriptor = mapApiErrorToToast(err)
@@ -982,9 +990,12 @@ function PrayerWallContent() {
         <main id="main-content" className="mx-auto w-full max-w-[720px] py-6 sm:py-8">
         {/* Spec 6.6 — cross-navigation tab strip to the Answered Wall. Lives
             at the top of the main column so it's mobile-safe (the left sidebar
-            is xl:block only and would hide on mobile). */}
-        <div className="mb-6">
+            is xl:block only and would hide on mobile).
+            Spec 6.11b — Live Presence indicator sits to the right of the tab
+            strip. Suppressed when any rendered post has crisisFlag=true. */}
+        <div className="mb-6 flex flex-col items-start gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4" data-testid="feed-header">
           <PrayerWallViewTabs />
+          <PresenceIndicator suppressed={hasCrisisFlag} />
         </div>
 
         {isLoading ? (

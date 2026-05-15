@@ -180,6 +180,7 @@ class UserServiceTest extends AbstractDataJpaTest {
         private JsonNullable<String> favoriteVerseReference = JsonNullable.undefined();
         private JsonNullable<String> favoriteVerseText = JsonNullable.undefined();
         private JsonNullable<String> timezone = JsonNullable.undefined();
+        private JsonNullable<Boolean> presenceOptedOut = JsonNullable.undefined();
 
         Builder firstName(String v) { firstName = JsonNullable.of(v); return this; }
         Builder lastName(String v) { lastName = JsonNullable.of(v); return this; }
@@ -190,10 +191,11 @@ class UserServiceTest extends AbstractDataJpaTest {
         Builder favoriteVerseReference(String v) { favoriteVerseReference = JsonNullable.of(v); return this; }
         Builder favoriteVerseText(String v) { favoriteVerseText = JsonNullable.of(v); return this; }
         Builder timezone(String v) { timezone = JsonNullable.of(v); return this; }
+        Builder presenceOptedOut(Boolean v) { presenceOptedOut = JsonNullable.of(v); return this; }
 
         UpdateUserRequest done() {
             return new UpdateUserRequest(firstName, lastName, displayNamePreference, customDisplayName,
-                avatarUrl, bio, favoriteVerseReference, favoriteVerseText, timezone);
+                avatarUrl, bio, favoriteVerseReference, favoriteVerseText, timezone, presenceOptedOut);
         }
     }
 }

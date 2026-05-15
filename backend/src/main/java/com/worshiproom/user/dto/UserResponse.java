@@ -36,7 +36,8 @@ public record UserResponse(
     boolean isEmailVerified,
     OffsetDateTime joinedAt,
     String termsVersion,
-    String privacyVersion
+    String privacyVersion,
+    boolean presenceOptedOut
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -56,7 +57,8 @@ public record UserResponse(
             user.isEmailVerified(),
             user.getJoinedAt(),
             user.getTermsVersion(),
-            user.getPrivacyVersion()
+            user.getPrivacyVersion(),
+            user.isPresenceOptedOut()
         );
     }
 }

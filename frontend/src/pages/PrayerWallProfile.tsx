@@ -9,6 +9,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PageShell } from '@/components/prayer-wall/PageShell'
 import { Avatar } from '@/components/prayer-wall/Avatar'
 import { PrayerCard } from '@/components/prayer-wall/PrayerCard'
+import { PresenceIndicator } from '@/components/prayer-wall/PresenceIndicator'
 import { InteractionBar } from '@/components/prayer-wall/InteractionBar'
 import { CommentsSection } from '@/components/prayer-wall/CommentsSection'
 import { FeatureEmptyState } from '@/components/ui/FeatureEmptyState'
@@ -89,6 +90,9 @@ function PrayerWallProfileContent() {
     severity: 'error' | 'warning' | 'info'
   } | null>(null)
   const [prayersReloadTrigger, setPrayersReloadTrigger] = useState(0)
+  // Spec 6.11b — Gate-G-CRISIS-SUPPRESSION. Suppresses PresenceIndicator if any
+  // post on the rendered profile feed has crisisFlag=true.
+  const [hasCrisisFlag, setHasCrisisFlag] = useState(false)
 
   // Fetch user's prayers in flag-on mode.
   // TODO(Phase 8.1): swap to prayerWallApi.listAuthorPosts(username, ...)
@@ -106,6 +110,10 @@ function PrayerWallProfileContent() {
         if (cancelled) return
         const filtered = result.posts.filter((p) => p.userId === id && !p.isAnonymous)
         setApiUserPrayers(filtered)
+        // Spec 6.11b — page-level suppression flag. Conservative: any flagged post
+        // anywhere in the response (NOT just the filtered subset) triggers suppression
+        // because the helper looked at the raw fetched DTOs.
+        setHasCrisisFlag(result.hasCrisisFlag)
       } catch (err) {
         if (cancelled) return
         if (err instanceof ApiError) {
@@ -205,7 +213,7 @@ function PrayerWallProfileContent() {
   if (!flagOn && !mockProfileUser) {
     return (
       <PageShell>
-        <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6">
+        <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6">
           <div className="mb-6">
             <Breadcrumb
               items={[{ label: 'Prayer Wall', href: '/prayer-wall' }, { label: 'User Profile' }]}
@@ -247,8 +255,8 @@ function PrayerWallProfileContent() {
             : 'A profile on the Worship Room community prayer wall.'
         }
       />
-      <main id="main-content" className="mx-auto max-w-[720px] px-4 py-6 sm:py-8">
-        <div className="mb-6">
+      <main id="main-content" className="mx-auto max-w-[720px] px-4 pt-28 pb-6 sm:pb-8">
+        <div className="mb-6 flex flex-col items-start gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-4" data-testid="feed-header">
           <Breadcrumb
             items={[
               { label: 'Prayer Wall', href: '/prayer-wall' },
@@ -256,6 +264,8 @@ function PrayerWallProfileContent() {
             ]}
             maxWidth="max-w-[720px]"
           />
+          {/* Spec 6.11b — Live Presence indicator. Suppressed on profiles with any flagged post. */}
+          <PresenceIndicator suppressed={hasCrisisFlag} />
         </div>
 
         {/* Profile header */}
