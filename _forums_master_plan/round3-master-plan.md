@@ -6183,6 +6183,28 @@ When a verse surfaces, a small "Save this" button lets users screenshot-save or 
 - [ ] Default: on for new users
 - [ ] At least 4 tests
 
+**AS-BUILT RECONCILIATION (2026-05-15):**
+
+The "exposed in settings" framing of this stub was already satisfied on disk before Spec 6.11 entered the work queue. The "Sound Effects" toggle shipped pre-2026-05-15 at `frontend/src/components/settings/NotificationsSection.tsx:150-157` (label "Sound Effects", description "Play subtle sounds on achievements and milestones.", id `notif-sound-effects`) inside the Notifications → Sound subsection. The toggle persists to `wr_sound_effects_enabled` localStorage with `!== 'false'` default-true semantics. New users default to ON; existing users undisturbed.
+
+The full sound-effects system gates at THREE call paths, all reading the same localStorage key:
+
+1. `useSoundEffects().playSoundEffect` (central hook, 17+ production consumers) — `frontend/src/hooks/useSoundEffects.ts:8-16`
+2. `quickLiftSound.playWindChime` (feature-specific Quick Lift chime) — `frontend/src/lib/quickLiftSound.ts:11-19`
+3. `EveningReflection.tsx:107` direct localStorage read (architectural inconsistency — bypasses the hook; documented for future cleanup spec)
+
+Eric's 2026-05-15 path decision collapsed Spec 6.11 from "build a toggle" to "audit + coverage test + as-built docs." The headline AC ("Single 'Sound effects' toggle in settings") and 3 of 4 stub bullets are pre-satisfied. The only new work was:
+
+- A cross-cutting coverage test at `frontend/src/__tests__/sound-effects-toggle-coverage.test.tsx` asserting all three gate layers respect the toggle (load-bearing — `vi.mock` on `useSoundEffects` was forbidden because it would miss two of the three gates)
+- This AS-BUILT reconciliation note
+- A sibling line in `_forums_master_plan/spec-tracker.md`
+
+The PrayCeremony "runaway-timer adjacency" gate (originally Gate-G-DO-NOT-MASK-PRAYCEREMONY-BUG in the brief) was DROPPED on 2026-05-15: no production `PrayCeremony.tsx` component exists; the test-file failure that triggered the sanity-sweep classification is real test debt for a future cleanup spec but is NOT a production concern. Watch-for W4 and Test T6 in the brief are moot under Path A.
+
+Out-of-scope (locked by Eric, 2026-05-15): rebuilding the toggle, relocating it to "Gentle extras," refactoring `EveningReflection`'s direct localStorage read, fixing the PrayCeremony test-file failure, adding volume control / per-effect toggles / `prefers-reduced-motion` integration, mocking `useSoundEffects` in the coverage test.
+
+Original "build a toggle" framing preserved above for history.
+
 ### Spec 6.11b — Live Presence Component
 
 - **ID:** `round3-phase06-spec11b-live-presence-component`

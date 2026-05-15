@@ -188,7 +188,7 @@ prevents a wasted deploy attempt.
 | 87  | 6.8   | Verse-Finds-You               | L    | HIGH     | ✅     |
 | 88  | 6.9   | Prayer Wall Composer Drafts   | M    | Low      | ✅     |
 | 89  | 6.10  | Prayer Wall Search by Author  | S    | Low      | ‼️     |
-| 90  | 6.11  | Sound Effects Settings Polish | S    | Low      | ⬜     |
+| 90  | 6.11  | Sound Effects Settings Polish | S    | Low      | ✅     |
 | 91  | 6.11b | Live Presence Component       | M    | Medium   | ⬜     |
 | 92  | 6.12  | Phase 6 Cutover               | S    | Low      | ⬜     |
 
