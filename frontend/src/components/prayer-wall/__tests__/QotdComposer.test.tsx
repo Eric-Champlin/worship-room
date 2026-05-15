@@ -2,6 +2,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QotdComposer } from '../QotdComposer'
+import {
+  setDraft,
+  getDraft,
+  COMPOSER_DRAFTS_KEY,
+} from '@/services/composer-drafts-storage'
 
 const defaultProps = {
   isOpen: true,
@@ -141,5 +146,51 @@ describe('QotdComposer — accessibility', () => {
     // CharacterCount component defaults warningAt to 80% of max = 400
     // At exactly 400 chars, zone is warning → text-amber-400
     expect(screen.getByText('400 / 500')).toHaveClass('text-amber-400')
+  })
+})
+
+// Spec 6.9 — composer drafts: cross-composer independence (T4 component side).
+// Verifies the synthetic 'qotd' key does not collide with the 'discussion' or
+// other PostType keys. The success-clear test uses `userEvent.setup({ delay:
+// null })` so the hook's real 5-second auto-save interval cannot fire during
+// the test (preventing future flakes from longer user-event delays).
+describe('QotdComposer — composer drafts (Spec 6.9)', () => {
+  beforeEach(() => {
+    localStorage.removeItem(COMPOSER_DRAFTS_KEY)
+  })
+
+  it('T4: prayer_request draft does NOT surface in QotdComposer', () => {
+    setDraft('prayer_request', 'a prayer draft from elsewhere')
+    renderComposer()
+    // The QOTD composer keys on 'qotd', so the 'prayer_request' draft is
+    // invisible here.
+    expect(
+      screen.queryByRole('button', { name: /restore draft/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("QotdComposer surfaces a 'qotd'-keyed draft", () => {
+    setDraft('qotd', 'something I started typing yesterday')
+    renderComposer()
+    expect(
+      screen.getByRole('button', { name: /restore draft/i }),
+    ).toBeInTheDocument()
+  })
+
+  it('successful QOTD submit clears the qotd draft', async () => {
+    setDraft('qotd', 'pre-existing qotd draft')
+    const user = userEvent.setup({ delay: null })
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    render(<QotdComposer isOpen={true} onClose={vi.fn()} onSubmit={onSubmit} />)
+    // Dismiss the restore prompt first.
+    await user.click(screen.getByRole('button', { name: /start fresh/i }))
+    expect(getDraft('qotd')).toBeNull()
+    await user.type(
+      screen.getByLabelText('Your response to the question of the day'),
+      'My response',
+    )
+    await user.click(screen.getByText('Post Response'))
+    await screen.findByLabelText('Your response to the question of the day')
+    expect(getDraft('qotd')).toBeNull()
   })
 })

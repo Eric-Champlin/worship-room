@@ -191,6 +191,31 @@ describe('AuthContext', () => {
       expect(logoutCall).toBeTruthy()
       expect(logoutCall?.[1].method).toBe('POST')
     })
+
+    // Spec 6.9 — clear composer drafts on logout. R6 decision: drafts are
+    // per-device (no userId tagging); on a shared device, logout is the
+    // mechanism that protects account isolation.
+    it('T13: logout clears wr_composer_drafts', async () => {
+      localStorage.setItem(
+        'wr_composer_drafts',
+        JSON.stringify({
+          prayer_request: { content: 'in progress', updatedAt: Date.now() },
+        }),
+      )
+
+      const { result } = renderHook(() => useAuth(), { wrapper })
+      act(() => {
+        result.current.simulateLegacyAuth('Eric')
+      })
+      expect(result.current.isAuthenticated).toBe(true)
+
+      fetchSpy.mockResolvedValueOnce(emptyResponse(204))
+      await act(async () => {
+        await result.current.logout()
+      })
+
+      expect(localStorage.getItem('wr_composer_drafts')).toBeNull()
+    })
   })
 
   describe('cross-tab sync', () => {

@@ -42,6 +42,7 @@ import {
   registerUser,
   getCurrentUser,
 } from '@/services/auth-service'
+import { clearAllComposerDrafts } from '@/services/composer-drafts-storage'
 
 export interface AuthContextValue {
   isAuthenticated: boolean
@@ -224,6 +225,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const logout = useCallback(async () => {
+    // Spec 6.9 — clear composer drafts on logout. Per the R6 decision
+    // (clear-on-logout), draft slots are per-device and untagged by userId;
+    // wiping the localStorage entry here is the only mechanism that protects
+    // account isolation on a shared device. Done FIRST so a failure in the
+    // network logoutUser() call doesn't skip the local wipe.
+    clearAllComposerDrafts()
     await logoutUser()
     clearStoredLegacyAuth()
     setState({ isAuthenticated: false, isAuthResolving: false, user: null })

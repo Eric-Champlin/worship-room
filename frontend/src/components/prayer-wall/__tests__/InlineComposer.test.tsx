@@ -4,6 +4,11 @@ import { MemoryRouter } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { InlineComposer } from '../InlineComposer'
 import type { PrayerCategory } from '@/constants/prayer-categories'
+import {
+  getDraft,
+  setDraft,
+  COMPOSER_DRAFTS_KEY,
+} from '@/services/composer-drafts-storage'
 
 vi.mock('@/lib/challenge-calendar', () => ({
   getActiveChallengeInfo: () => null,
@@ -1221,5 +1226,91 @@ describe('InlineComposer — Spec 6.4 Watch placeholder', () => {
     expect(
       screen.queryByPlaceholderText("Write what's on your mind tonight..."),
     ).not.toBeInTheDocument()
+  })
+})
+
+// Spec 6.9 — composer drafts (auto-save + restore prompt + clear-on-success).
+// Uses the REAL useComposerDraft hook + REAL localStorage, NOT a vi.mock of the
+// hook (mocking would bypass the subscription mechanism the spec is testing).
+// `userEvent.setup({ delay: null })` keeps typing synchronous so the hook's
+// real 5-second auto-save interval cannot fire during the test (preventing
+// future flakes from longer user-event delays).
+describe('InlineComposer — composer drafts (Spec 6.9)', () => {
+  beforeEach(() => {
+    localStorage.removeItem(COMPOSER_DRAFTS_KEY)
+  })
+
+  it('T9: successful submission clears the prayer_request draft', async () => {
+    setDraft('prayer_request', 'pre-existing draft content')
+    const user = userEvent.setup({ delay: null })
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderComposer({ onSubmit })
+    // Dismiss the restore prompt by clicking "Start fresh" so we start clean.
+    await user.click(screen.getByRole('button', { name: /start fresh/i }))
+    expect(getDraft('prayer_request')).toBeNull()
+    // Re-seed: the user types fresh content and submits successfully.
+    setDraft('prayer_request', 'this will be cleared on success')
+    await user.type(
+      screen.getByLabelText('Prayer request'),
+      'My freshly typed prayer',
+    )
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Submit Prayer Request'))
+    // Wait a tick for the async submit to resolve.
+    await screen.findByLabelText('Prayer request')
+    expect(getDraft('prayer_request')).toBeNull()
+  })
+
+  it('T10: a failed submission does NOT clear the draft', async () => {
+    const user = userEvent.setup({ delay: null })
+    const onSubmit = vi.fn().mockResolvedValue(false) // submit returns false
+    renderComposer({ onSubmit })
+    // Seed a draft AFTER mount so we don't have to dismiss the prompt.
+    // The hook does not re-read while open, so this draft survives outside
+    // its view; clearDraft is the only path to remove it.
+    setDraft('prayer_request', 'survives a failed submit')
+    await user.type(screen.getByLabelText('Prayer request'), 'Some prayer')
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByText('Submit Prayer Request'))
+    await screen.findByLabelText('Prayer request')
+    expect(getDraft('prayer_request')?.content).toBe(
+      'survives a failed submit',
+    )
+  })
+
+  it('T11: postType change in same component instance picks up the right draft', () => {
+    setDraft('prayer_request', 'pray draft')
+    setDraft('testimony', 'testimony draft')
+    const { rerender } = render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen={true}
+          onClose={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          postType="prayer_request"
+        />
+      </MemoryRouter>,
+    )
+    // The prayer_request draft surfaces in the restore prompt.
+    expect(
+      screen.getByRole('button', { name: /restore draft/i }),
+    ).toBeInTheDocument()
+    // Switch postType — same component instance, new prop.
+    rerender(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen={true}
+          onClose={vi.fn()}
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          postType="testimony"
+        />
+      </MemoryRouter>,
+    )
+    // The testimony draft is now surfaced (a single restore prompt visible).
+    expect(
+      screen.getByRole('button', { name: /restore draft/i }),
+    ).toBeInTheDocument()
+    // The textarea aria-label has switched to "Testimony".
+    expect(screen.getByLabelText('Testimony')).toBeInTheDocument()
   })
 })

@@ -5,6 +5,8 @@ import { CharacterCount } from '@/components/ui/CharacterCount'
 import { FrostedCard } from '@/components/homepage/FrostedCard'
 import { containsCrisisKeyword, CRISIS_RESOURCES } from '@/constants/crisis-resources'
 import { QOTD_MAX_LENGTH, QOTD_WARNING_THRESHOLD } from '@/constants/content-limits'
+import { RestoreDraftPrompt } from './RestoreDraftPrompt'
+import { useComposerDraft } from '@/hooks/useComposerDraft'
 
 interface QotdComposerProps {
   isOpen: boolean
@@ -20,6 +22,29 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
     typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
   )
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Spec 6.9 — composer drafts. Synthetic 'qotd' key keeps QOTD response drafts
+  // independent of 'discussion' post drafts (both submit as postType:'discussion'
+  // on the wire but are conceptually separate user-facing surfaces).
+  const { draftToRestore, restoreDraft, discardDraft, clearDraft } =
+    useComposerDraft({
+      draftKey: 'qotd',
+      content,
+      isOpen,
+    })
+
+  const handleRestoreDraft = useCallback(() => {
+    setContent(restoreDraft())
+    // Defer height recalc until after React commits the new value. Reading
+    // scrollHeight synchronously here would size the textarea for the
+    // pre-restore (empty) content.
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+        textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px'
+      }
+    })
+  }, [restoreDraft])
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value)
@@ -41,6 +66,8 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
     try {
       const success = await onSubmit(content.trim(), idempotencyKey)
       if (!success) return
+      // Spec 6.9 — success-only draft clear (W4).
+      clearDraft()
       setContent('')
       setCrisisDetected(false)
       setIdempotencyKey(
@@ -52,7 +79,7 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
     } finally {
       setIsSubmitting(false)
     }
-  }, [content, onSubmit, idempotencyKey])
+  }, [clearDraft, content, idempotencyKey, onSubmit])
 
   const handleCancel = useCallback(() => {
     setContent('')
@@ -74,6 +101,14 @@ export function QotdComposer({ isOpen, onClose, onSubmit }: QotdComposerProps) {
     >
       <FrostedCard variant="default" as="div">
         <h3 className="mb-3 text-base font-semibold text-white">Share Your Thoughts</h3>
+
+        {draftToRestore && (
+          <RestoreDraftPrompt
+            draftTimestamp={draftToRestore.updatedAt}
+            onRestore={handleRestoreDraft}
+            onDiscard={discardDraft}
+          />
+        )}
 
         <textarea
           ref={textareaRef}

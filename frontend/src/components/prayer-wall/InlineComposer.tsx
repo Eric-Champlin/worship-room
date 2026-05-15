@@ -27,6 +27,8 @@ import type { HelpTag } from '@/constants/ways-to-help'
 import { ScriptureReferenceInput } from './ScriptureReferenceInput'
 import { ImageUpload } from './ImageUpload'
 import { WaysToHelpPicker } from './WaysToHelpPicker'
+import { RestoreDraftPrompt } from './RestoreDraftPrompt'
+import { useComposerDraft } from '@/hooks/useComposerDraft'
 
 interface ComposerCopy {
   header: string
@@ -260,6 +262,31 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { showModal, confirmLeave, cancelLeave } = useUnsavedChanges(content.length > 0)
 
+  // Spec 6.9 — composer drafts (auto-save every 5s while dirty + restore prompt
+  // on reopen). The draft key is `postType` so a draft in `prayer_request` does
+  // not clobber a draft in `testimony` (and vice versa). The hook resets dirty
+  // state when `postType` changes mid-lifecycle (same instance, new prop value).
+  const { draftToRestore, restoreDraft, discardDraft, clearDraft } =
+    useComposerDraft({
+      draftKey: postType,
+      content,
+      isOpen,
+    })
+
+  const handleRestoreDraft = useCallback(() => {
+    setContent(restoreDraft())
+    // Defer height recalc until after React commits the new value. State
+    // updates are batched in event handlers, so reading scrollHeight
+    // synchronously here would size the textarea for the pre-restore (empty)
+    // content and the restored draft would overflow into a tiny box.
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto'
+        textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px'
+      }
+    })
+  }, [restoreDraft])
+
   // Challenge prayer checkbox
   const activeChallengeInfo = getActiveChallengeInfo()
   const activeChallenge = activeChallengeInfo ? getChallenge(activeChallengeInfo.challengeId) : null
@@ -345,6 +372,10 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
         postType === 'prayer_request' && helpTags.length > 0 ? helpTags : null,
       )
       if (!success) return
+      // Spec 6.9 — success-only draft clear. Failed submits (success === false
+      // or an exception in the finally block) leave the draft intact so the
+      // user can retry without losing work.
+      clearDraft()
       setContent('')
       setIsAnonymous(false)
       setSelectedCategory(null)
@@ -370,22 +401,23 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       setIsSubmitting(false)
     }
   }, [
-    content,
-    isAnonymous,
-    selectedCategory,
-    onSubmit,
-    isChallengePrayer,
     activeChallenge,
-    idempotencyKey,
-    postType,
+    clearDraft,
+    content,
     copy.showCategoryFieldset,
     copy.submitsAsCategory,
+    helpTags,
+    idempotencyKey,
+    imageAltText,
+    imageUploadId,
+    isAnonymous,
+    isChallengePrayer,
+    onSubmit,
+    postType,
+    scriptureFieldHasError,
     scriptureRef,
     scriptureText,
-    scriptureFieldHasError,
-    imageUploadId,
-    imageAltText,
-    helpTags,
+    selectedCategory,
   ])
 
   const handleCancel = useCallback(() => {
@@ -454,6 +486,14 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
             <Clock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
             <p>{copy.expiryWarning}</p>
           </div>
+        )}
+
+        {draftToRestore && (
+          <RestoreDraftPrompt
+            draftTimestamp={draftToRestore.updatedAt}
+            onRestore={handleRestoreDraft}
+            onDiscard={discardDraft}
+          />
         )}
 
         <textarea
