@@ -186,8 +186,8 @@ prevents a wasted deploy attempt.
 | 85  | 6.6   | Answered Wall                 | L    | Medium   | ✅     |
 | 86  | 6.7   | Shareable Testimony Cards     | L    | Medium   | ✅     |
 | 87  | 6.8   | Verse-Finds-You               | L    | HIGH     | ✅     |
-| 88  | 6.9   | Prayer Wall Composer Drafts   | M    | Low      | ⬜     |
-| 89  | 6.10  | Prayer Wall Search by Author  | S    | Low      | ⬜     |
+| 88  | 6.9   | Prayer Wall Composer Drafts   | M    | Low      | ✅     |
+| 89  | 6.10  | Prayer Wall Search by Author  | S    | Low      | ‼️     |
 | 90  | 6.11  | Sound Effects Settings Polish | S    | Low      | ⬜     |
 | 91  | 6.11b | Live Presence Component       | M    | Medium   | ⬜     |
 | 92  | 6.12  | Phase 6 Cutover               | S    | Low      | ⬜     |
@@ -220,6 +220,8 @@ prevents a wasted deploy attempt.
 | 107 | 8.7  | Profile Friends Tab                | M    | Low    | ⬜     |
 | 108 | 8.8  | Name Canonicalization Migration    | XL   | High   | ⬜     |
 | 109 | 8.9  | Phase 8 Cutover                    | S    | Low    | ⬜     |
+
+** REVISIT 6.10 afte Phase 8 is done**
 
 ## Phase 9 — Seasonal & Liturgical (5 specs)
 
