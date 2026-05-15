@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -508,22 +509,11 @@ public class PostService {
                 ? htmlSanitizerPolicy.sanitize(request.scriptureText()).trim()
                 : null;
 
-        // Step 8: crisis re-detection on content change.
-        boolean newCrisisFlag = post.isCrisisFlag();
-        boolean fireCrisisEvent = false;
-        if (wantsContentEdit) {
-            boolean detected = PostCrisisDetector.detectsCrisis(sanitizedContent);
-            if (detected) {
-                // Set flag if not already set; if already set, NO change but listener
-                // dedups via the 1h cache so a second event is harmless.
-                if (!post.isCrisisFlag()) {
-                    newCrisisFlag = true;
-                }
-                fireCrisisEvent = true;
-            }
-            // NOTE: crisisFlag NEVER cleared by author edit — once flagged, stays flagged
-            // for moderator review (per spec body).
-        }
+        // Step 8: snapshot pre-mutation answered_text for the deferred crisis
+        // re-detection (Step 9b). Spec 6.6b-deferred-2 moves detection AFTER
+        // mutations so the trigger gate is a simple before/after comparison
+        // rather than a re-derivation of the four-branch write logic.
+        String preMutationAnsweredText = post.getAnsweredText();
 
         // Step 9: apply mutations.
         if (wantsContentEdit) post.setContent(sanitizedContent);
@@ -534,7 +524,6 @@ public class PostService {
         if (request.scriptureReference() != null) post.setScriptureReference(request.scriptureReference());
         if (request.scriptureText() != null) post.setScriptureText(sanitizedScriptureText);
         if (wantsHelpTagsEdit) post.setHelpTagsRaw(newHelpTagsRaw);
-        if (newCrisisFlag != post.isCrisisFlag()) post.setCrisisFlag(newCrisisFlag);
 
         // Special case: is_answered transitions.
         if (wantsAnsweredEdit) {
@@ -556,6 +545,35 @@ public class PostService {
         } else if (wantsAnsweredTextEdit && post.isAnswered()) {
             // answeredText edit alone without isAnswered toggle — allowed for already-answered posts.
             post.setAnsweredText(sanitizedAnsweredText);
+        }
+
+        // Step 9b: crisis re-detection on the post's about-to-be-committed state.
+        // Spec 6.6b-deferred-2 — answered_text enters the detection input alongside
+        // content via concat, matching the Spec 4.6b createPost imageAltText
+        // precedent (lines 297-300). Single detector call → at most one
+        // AFTER_COMMIT event per commit, even when both fields trip the detector.
+        // One-way ratchet (R-FINDING-B): detection true → set the flag if not
+        // already set + fire event; detection false → no change, NEVER clear
+        // an existing flag (preserves moderator-review state after author edits).
+        boolean newCrisisFlag = post.isCrisisFlag();
+        boolean fireCrisisEvent = false;
+        boolean answeredTextChanged = !Objects.equals(preMutationAnsweredText, post.getAnsweredText());
+        if (wantsContentEdit || answeredTextChanged) {
+            String detectionInput = post.getAnsweredText() != null
+                    ? post.getContent() + " " + post.getAnsweredText()
+                    : post.getContent();
+            boolean detected = PostCrisisDetector.detectsCrisis(detectionInput);
+            if (detected) {
+                if (!post.isCrisisFlag()) {
+                    newCrisisFlag = true;
+                }
+                fireCrisisEvent = true;
+            }
+            // NOTE: crisisFlag NEVER cleared by author edit — once flagged, stays flagged
+            // for moderator review (per spec body).
+        }
+        if (newCrisisFlag != post.isCrisisFlag()) {
+            post.setCrisisFlag(newCrisisFlag);
         }
 
         // Always bump updated_at on a successful PATCH.

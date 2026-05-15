@@ -72,6 +72,29 @@ The plan-survey agent flagged that Spec 8C (`spec-8c-bible-plans.md`) included a
 
 ---
 
+### D6 — Settings mobile tab strip crowds at 375px with 8 tabs
+
+**Surfaced by:** Spec 6.8 (`/verify-with-playwright` run, 2026-05-14). Pre-existing condition, NOT introduced by Spec 6.8 — but tightened by it: Spec 6.8 added the 8th tab ("Gentle extras") to the existing `SECTIONS` array, and the responsive ceiling that was already strained at 7 tabs now spills.
+
+**File:** `frontend/src/pages/Settings.tsx:158-184` (mobile tab strip — `sm:hidden` branch).
+
+**Reality:** the mobile pattern is a single horizontal flex row (`flex` + `flex-1` per tab) with `mx-auto max-w-4xl px-4`. At 375px viewport / 8 tabs / 32px page padding, each tab gets ~43px of width. Labels like `"Notifications"`, `"Sensitive features"`, and `"Gentle extras"` cannot fit and the text wraps/overflows visibly (verified screenshot: `frontend/playwright-screenshots/settings-gentle-extras-off-375x812.png`). 7 tabs already crowded; 8 tabs makes the seams obvious.
+
+**Why not in scope for 6.8:** Spec 6.8 conformed to the existing `SECTIONS`-array pattern verbatim (Step 16). Refactoring the responsive layout of the entire Settings page is out of brief. The existing visual condition was an accepted state at 7 tabs and the Settings test suite was updated 7→8 / 14→16 (Step 16 Execution Log) — the regression bar was test-count, not visual-density.
+
+**Recommended remediation (future polish spec):** one of:
+1. Horizontal scroll the mobile tab strip (`overflow-x-auto` + `whitespace-nowrap` per tab, snap-scroll for nicer feel).
+2. Switch the mobile pattern to a `<select>` dropdown or a collapsible accordion at `<sm` breakpoints (matches the canonical Settings-as-mobile-list pattern other apps use).
+3. Two-row grid at `<sm` (4 tabs per row × 2 rows).
+
+Option 1 is the smallest change. Option 2 is the most semantically clean for mobile. Option 3 preserves visibility but doubles vertical space.
+
+**Severity:** Low — non-blocking. The toggle is still operable (tab-clickable, accessible name intact, focus management intact). Visual polish only.
+
+**Status:** documented gap, deferred — NOT a Spec 6.8 regression.
+
+---
+
 ## Out of Scope (for this audit)
 
 - Backend code review
