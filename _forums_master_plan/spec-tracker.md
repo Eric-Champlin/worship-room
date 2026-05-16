@@ -205,8 +205,8 @@ Phase 6 cutover complete 2026-05-15. 11 specs shipped, 1 deferred to Phase 8 (6.
 | #   | Spec | Title                                        | Size | Risk   | Status |
 | --- | ---- | -------------------------------------------- | ---- | ------ | ------ |
 | 93  | 7.1  | Bible to Prayer Wall Bridge                  | L    | Medium | ✅     |
-| 94  | 7.2  | Prayer Wall to Bible Bridge                  | S    | Low    | ⬜     |
-| 95  | 7.3  | Music During Prayer Wall                     | S    | Low    | ⬜     |
+| 94  | 7.2  | Prayer Wall to Bible Bridge                  | S    | Low    | ✅     |
+| 95  | 7.3  | Music During Prayer Wall                     | S    | Low    | ✅     |
 | 96  | 7.4  | Daily Hub Pray Tab Friend Surfacing          | M    | Medium | ⬜     |
 | 97  | 7.5  | Local Support Bridges on Mental Health Posts | M    | Medium | ⬜     |
 | 98  | 7.6  | Friends Pin to Top of Feed                   | L    | Medium | ⬜     |
