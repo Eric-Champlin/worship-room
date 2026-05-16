@@ -81,6 +81,27 @@ vi.mock('@/hooks/useWatchMode', () => ({
   }),
 }))
 
+// Spec 6.8 — useActiveEngagement runs a 1s setInterval to accumulate
+// foreground+scroll time for the Verse-Finds-You reading-time trigger.
+// At 1s cadence this is the fastest path to the 10K-iteration abort under
+// `vi.runAllTimers()`. Mock as a no-op so the engagement interval never
+// arms.
+vi.mock('@/hooks/useActiveEngagement', () => ({
+  useActiveEngagement: () => {},
+}))
+
+// Spec 6.11b — usePresence polls /api/v1/prayer-wall/presence on a 30s
+// setInterval while the tab is visible. PresenceIndicator mounts it
+// unconditionally on PrayerWall, so `vi.runAllTimers()` would loop the
+// poll interval the same way. Mock with the suppressed-state shape
+// (`count: null`, `paused: true`) so PresenceIndicator renders inert.
+vi.mock('@/hooks/usePresence', () => ({
+  usePresence: () => ({
+    count: null,
+    paused: true,
+  }),
+}))
+
 // Mock prayer data: set prayer-1 userId to match mockUser and clear its initial praying state
 vi.mock('@/mocks/prayer-wall-mock-data', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/mocks/prayer-wall-mock-data')>()
