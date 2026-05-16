@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -69,8 +69,15 @@ describe('Warm Empty States — Dashboard Coordination', () => {
 
   it('FriendsPreview shows "Faith grows stronger together"', () => {
     renderGrid()
+    // The "Faith grows stronger together" copy is shared by FriendsPreview and
+    // WeeklyRecap (Decision 8). Scope the assertion to the FriendsPreview card
+    // by its heading so the test asserts what its name claims.
+    const friendsCard = screen
+      .getByRole('heading', { name: 'Friends & Leaderboard' })
+      .closest('section')
+    expect(friendsCard).not.toBeNull()
     expect(
-      screen.getByText('Faith grows stronger together'),
+      within(friendsCard as HTMLElement).getByText('Faith grows stronger together'),
     ).toBeInTheDocument()
   })
 

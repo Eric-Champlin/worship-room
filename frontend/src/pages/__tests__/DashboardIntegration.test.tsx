@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -96,11 +96,12 @@ describe('Dashboard', () => {
     expect(screen.getByText(/Good morning|Good afternoon|Good evening/)).toBeInTheDocument()
   })
 
-  it('has skip-to-content link', () => {
+  it('has skip-to-content link', async () => {
     seedTodayMoodEntry()
     renderDashboard()
-    const skipLink = document.querySelector('a[href="#main-content"]')
-    expect(skipLink).toBeInTheDocument()
+    await waitFor(() => {
+      expect(document.querySelector('a[href="#main-content"]')).toBeInTheDocument()
+    })
   })
 
   it('has dark background', () => {

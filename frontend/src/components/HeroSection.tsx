@@ -6,6 +6,7 @@ import { WHITE_PURPLE_GRADIENT } from '@/constants/gradients'
 
 const VIDEO_MAX_OPACITY = 0.4
 const VIDEO_URL =
+  import.meta.env.VITE_HERO_VIDEO_URL ||
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260308_114720_3dabeb9e-2c39-4907-b747-bc3544e2d5b7.mp4'
 
 function usePrefersReducedMotion(): boolean {
