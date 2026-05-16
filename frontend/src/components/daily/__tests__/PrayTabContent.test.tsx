@@ -109,6 +109,17 @@ vi.mock('@/components/daily/GuidedPrayerPlayer', () => ({
   ),
 }))
 
+// Spec 7.4 — FriendPrayersToday is mounted inside PrayTabContent. Stub it
+// here so this test file doesn't have to wire up the auth context, friend
+// data fetch, or QuickLiftOverlay. FriendPrayersToday has its own dedicated
+// test file (FriendPrayersToday.test.tsx) — the structural mount integration
+// is covered by Step 13's manual verification.
+vi.mock('@/components/daily/FriendPrayersToday', () => ({
+  FriendPrayersToday: () => (
+    <div data-testid="mock-friend-prayers-today" />
+  ),
+}))
+
 // --- Helpers ---
 interface MockAudioState {
   activeSounds: { id: string }[]

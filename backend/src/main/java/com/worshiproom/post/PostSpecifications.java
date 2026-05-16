@@ -3,6 +3,7 @@ package com.worshiproom.post;
 import com.worshiproom.friends.FriendRelationship;
 import com.worshiproom.friends.FriendRelationshipStatus;
 import com.worshiproom.mute.UserMute;
+import com.worshiproom.quicklift.QuickLiftSession;
 import com.worshiproom.user.User;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
@@ -172,6 +173,72 @@ public final class PostSpecifications {
                     cb.isFalse(u.get("isBanned"))
             );
             return cb.exists(sub);
+        };
+    }
+
+    /**
+     * Spec 7.4 — restrict to posts whose author has an ACTIVE friend relationship
+     * with the viewer. Subquery EXISTS over friend_relationships; the direction is
+     * {@code fr.user_id = post.user_id} (post author) AND
+     * {@code fr.friend_user_id = :viewerId} (the viewer is in the author's friends
+     * list). Reversing leaks posts to non-friends — same load-bearing direction
+     * documented in {@link #visibleTo(UUID)}'s FRIENDS branch.
+     *
+     * <p>{@code viewerId} must be non-null at the call site — the FriendPrayersService
+     * endpoint is auth-required (JwtAuthenticationFilter populates the principal
+     * upstream). Documenting non-null contract; null-guarding would silently mask a
+     * misconfigured SecurityConfig rule.
+     */
+    public static Specification<Post> byActiveFriendsOf(UUID viewerId) {
+        return (root, query, cb) -> {
+            Subquery<Integer> sub = query.subquery(Integer.class);
+            Root<FriendRelationship> fr = sub.from(FriendRelationship.class);
+            sub.select(cb.literal(1)).where(
+                    cb.equal(fr.get("userId"), root.get("userId")),
+                    cb.equal(fr.get("friendUserId"), viewerId),
+                    cb.equal(fr.get("status"), FriendRelationshipStatus.ACTIVE)
+            );
+            return cb.exists(sub);
+        };
+    }
+
+    /**
+     * Spec 7.4 — restrict to posts created within the last 24 hours.
+     * Cutoff computed at query time (now - 24h) — always accurate, no clock drift.
+     *
+     * <p>Boundary semantics: a post created exactly at the cutoff is INCLUDED
+     * ({@code >=}, not {@code >}). Consistent with the boundary semantics of
+     * {@link #notExpired()} which uses {@code lessThan} for the exclusion direction.
+     */
+    public static Specification<Post> createdInLast24h() {
+        return (root, query, cb) -> {
+            OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC).minusHours(24);
+            return cb.greaterThanOrEqualTo(root.get("createdAt"), cutoff);
+        };
+    }
+
+    /**
+     * Spec 7.4 — exclude posts the viewer has already completed a Quick Lift
+     * session for ({@code quick_lift_sessions.completed_at IS NOT NULL}).
+     * A started-but-not-completed session (started_at set, completed_at null)
+     * does NOT exclude — only fully completed sessions count as "prayed for"
+     * per MPD-1 and spec Recon Addendum item 2.
+     *
+     * <p>Direction: {@code qs.user_id = :viewerId}, {@code qs.post_id = post.id}.
+     * Subquery EXISTS over quick_lift_sessions — folds into a single SELECT, no N+1.
+     *
+     * <p>{@code viewerId} must be non-null at the call site (see {@link #byActiveFriendsOf}).
+     */
+    public static Specification<Post> notCompletedQuickLiftBy(UUID viewerId) {
+        return (root, query, cb) -> {
+            Subquery<Integer> sub = query.subquery(Integer.class);
+            Root<QuickLiftSession> qs = sub.from(QuickLiftSession.class);
+            sub.select(cb.literal(1)).where(
+                    cb.equal(qs.get("userId"), viewerId),
+                    cb.equal(qs.get("postId"), root.get("id")),
+                    cb.isNotNull(qs.get("completedAt"))
+            );
+            return cb.not(cb.exists(sub));
         };
     }
 

@@ -5,6 +5,7 @@ import { PrayerInput } from '@/components/daily/PrayerInput'
 import { PrayerResponse } from '@/components/daily/PrayerResponse'
 import { GuidedPrayerSection } from '@/components/daily/GuidedPrayerSection'
 import { GuidedPrayerPlayer } from '@/components/daily/GuidedPrayerPlayer'
+import { FriendPrayersToday } from '@/components/daily/FriendPrayersToday'
 import { saveMeditationSession } from '@/services/meditation-storage'
 import { getLocalDateString } from '@/utils/date'
 import { useAuth } from '@/hooks/useAuth'
@@ -256,6 +257,11 @@ export function PrayTabContent({ onSwitchToJournal, initialContext, prayContext 
           )}
 
         </div>
+
+        {/* Spec 7.4 — Friend prayer surfacing. Component handles its own auth gate
+            and empty states. Mounts between PrayerInput and the Guided Prayer
+            Sessions. */}
+        <FriendPrayersToday />
 
         {/* Guided Prayer Sessions — wider container for square cards */}
         <div className="mx-auto mt-6 max-w-4xl px-4 pb-10 sm:pb-14">

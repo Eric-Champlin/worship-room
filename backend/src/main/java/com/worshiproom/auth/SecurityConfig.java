@@ -98,6 +98,14 @@ public class SecurityConfig {
                 // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins.
                 .requestMatchers(HttpMethod.POST, "/api/v1/users/me/legal/accept").authenticated()
 
+                // Spec 7.4 — GET /api/v1/users/me/friend-prayers-today requires authentication.
+                // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins.
+                // Single segment after /users/me; AntPathMatcher matches cleanly (no nested
+                // path concern). Anonymous reads on this endpoint would be useless (no friend
+                // graph for null viewerId) AND a security regression (principal.userId() NPE
+                // at the controller boundary).
+                .requestMatchers(HttpMethod.GET, "/api/v1/users/me/friend-prayers-today").authenticated()
+
                 // Spec 4.6b — POST /api/v1/uploads/post-image requires authentication.
                 // MUST come BEFORE OPTIONAL_AUTH_PATTERNS so the method-specific rule wins
                 // (first-match-wins). Anonymous uploads are an abuse vector and the spec

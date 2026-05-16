@@ -73,6 +73,19 @@ public class PostExceptionHandler {
                 .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
     }
 
+    // Spec 7.4 — Daily Hub friend-prayers-today READ rate limit. Same
+    // Retry-After header pattern as 6.1 and 6.5. Most-specific-handler dispatch
+    // picks this before the catch-all handlePost branch.
+    @ExceptionHandler(FriendPrayersRateLimitedException.class)
+    public ResponseEntity<ProxyError> handleFriendPrayersRateLimit(FriendPrayersRateLimitedException ex) {
+        var requestId = MDC.get("requestId");
+        log.info("Friend prayers rate limit hit retryAfter={}s", ex.getRetryAfterSeconds());
+        return ResponseEntity
+                .status(ex.getStatus())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ProxyError.of(ex.getCode(), ex.getMessage(), requestId));
+    }
+
     // Spec 4.6b — InvalidAltTextException and ImageClaimFailedException extend
     // PostException and are caught by handlePost below via most-specific-handler
     // dispatch. ImageNotAllowedForPostTypeException has its own handler so the

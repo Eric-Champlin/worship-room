@@ -249,6 +249,42 @@ function buildListPostsUrl(params: ListPostsParams): string {
   return `/api/v1/posts?${search.toString()}`
 }
 
+/**
+ * Spec 7.4 — GET /api/v1/users/me/friend-prayers-today.
+ *
+ * Returns up to 3 most-recent friend Prayer Wall posts created in the last
+ * 24 hours that the authenticated user has not completed a Quick Lift for.
+ * Auth-required; the apiFetch wrapper attaches the JWT automatically. The
+ * caller is expected to gate the call on `isAuthenticated` — calling this
+ * function unauthenticated will produce a 401 via the standard apiFetch
+ * pipeline.
+ *
+ * Same response envelope as listPosts (PostListResponse), so reuses
+ * mapPostDtos. Crisis-flag presence is surfaced via hasCrisisFlag for the
+ * same per-post crisis-suppression UI pattern used by the main feed
+ * (Spec 6.11b).
+ */
+export async function getFriendPrayersToday(): Promise<PostListResult> {
+  const url = '/api/v1/users/me/friend-prayers-today'
+  const cacheKey = `GET ${url}`
+  try {
+    const env = await apiFetchWithMeta<PostDto[], PostListMeta>(url)
+    const result: PostListResult = {
+      posts: mapPostDtos(env.data),
+      pagination: metaToPagination(env.meta),
+      hasCrisisFlag: hasAnyCrisisFlag(env.data),
+    }
+    cacheSet(cacheKey, result)
+    return result
+  } catch (e) {
+    if (e instanceof ApiError && e.code === 'NETWORK_ERROR') {
+      const cached = cacheGet<PostListResult>(cacheKey)
+      if (cached) return cached
+    }
+    throw e
+  }
+}
+
 /** GET /api/v1/posts/{id} — single post (optional auth). */
 export async function getPostById(id: string): Promise<PrayerRequest> {
   const url = `/api/v1/posts/${encodeURIComponent(id)}`

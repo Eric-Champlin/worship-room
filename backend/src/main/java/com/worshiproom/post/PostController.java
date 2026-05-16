@@ -62,17 +62,23 @@ public class PostController {
     private final EngagementService engagementService;
     private final ReactionWriteService reactionWriteService;
     private final BookmarkWriteService bookmarkWriteService;
+    private final FriendPrayersService friendPrayersService;
+    private final FriendPrayersRateLimitService friendPrayersRateLimitService;
 
     public PostController(PostService postService,
                           PostCommentService postCommentService,
                           EngagementService engagementService,
                           ReactionWriteService reactionWriteService,
-                          BookmarkWriteService bookmarkWriteService) {
+                          BookmarkWriteService bookmarkWriteService,
+                          FriendPrayersService friendPrayersService,
+                          FriendPrayersRateLimitService friendPrayersRateLimitService) {
         this.postService = postService;
         this.postCommentService = postCommentService;
         this.engagementService = engagementService;
         this.reactionWriteService = reactionWriteService;
         this.bookmarkWriteService = bookmarkWriteService;
+        this.friendPrayersService = friendPrayersService;
+        this.friendPrayersRateLimitService = friendPrayersRateLimitService;
     }
 
     @GetMapping("/posts")
@@ -184,6 +190,31 @@ public class PostController {
         log.info("Bookmarks requested viewerId={} page={} limit={}", viewerId, page, limit);
         PostListResponse body = engagementService.listBookmarks(
                 viewerId, page, limit, MDC.get("requestId"));
+        return ResponseEntity.ok(body);
+    }
+
+    /**
+     * Spec 7.4 — Daily Hub Pray tab friend surfacing.
+     *
+     * <p>Returns up to 3 most-recent posts from the authenticated user's active
+     * friends, created in the last 24 hours, that the user has NOT completed a
+     * Quick Lift session for. Authenticated only (SecurityConfig rule). Per-user
+     * rate-limited (60/min prod, 120/min dev).
+     *
+     * <p>URL is users-scoped ({@code /api/v1/users/me/...}) for namespace cohesion
+     * with other "me" reads even though the controller lives in the post package.
+     * Same precedent as FriendsController owning {@code /api/v1/users/me/friends}
+     * from the friends package.
+     */
+    @GetMapping("/users/me/friend-prayers-today")
+    public ResponseEntity<PostListResponse> friendPrayersToday(
+            @AuthenticationPrincipal AuthenticatedUser principal
+    ) {
+        UUID viewerId = principal.userId();
+        friendPrayersRateLimitService.checkAndConsume(viewerId);
+        String requestId = MDC.get("requestId");
+        log.info("Friend prayers requested viewerId={}", viewerId);
+        PostListResponse body = friendPrayersService.listFriendPrayersToday(viewerId, requestId);
         return ResponseEntity.ok(body);
     }
 
