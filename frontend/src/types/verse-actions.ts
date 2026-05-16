@@ -13,6 +13,7 @@ export type VerseAction =
   | 'note'
   | 'share'
   | 'pray'
+  | 'pray-with-passage'
   | 'journal'
   | 'meditate'
   | 'cross-refs'

@@ -94,8 +94,14 @@ describe('validateAction', () => {
   // Constant inventory sanity check
   // ---------------------------------------------------------------------------
 
-  it('DEEP_LINKABLE_ACTIONS contains exactly 6 actions', () => {
-    expect(DEEP_LINKABLE_ACTIONS).toHaveLength(6)
+  // Spec 7.1 — DEEP_LINKABLE_ACTIONS grew from 6 to 7 with the addition of
+  // 'pray-with-passage', whose sub-view shows the post-type picker.
+  it('DEEP_LINKABLE_ACTIONS contains exactly 7 actions', () => {
+    expect(DEEP_LINKABLE_ACTIONS).toHaveLength(7)
+  })
+
+  it('accepts pray-with-passage (Spec 7.1)', () => {
+    expect(validateAction('pray-with-passage')).toBe('pray-with-passage')
   })
 
   it('every DEEP_LINKABLE_ACTIONS entry round-trips through validateAction', () => {

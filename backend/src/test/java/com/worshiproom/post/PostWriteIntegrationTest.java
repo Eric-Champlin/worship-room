@@ -8,6 +8,8 @@ import com.worshiproom.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -537,6 +539,106 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.crisisFlag").value(false))
                 .andExpect(jsonPath("$.crisisResources").doesNotExist());
+    }
+
+    // =====================================================================
+    // Spec 7.1 — Bible to Prayer Wall Bridge (R4 + R7 regression guards)
+    // =====================================================================
+
+    /**
+     * Spec 7.1 R4 regression guard. The backend already accepts
+     * {@code scriptureReference + scriptureText} on every post type — this
+     * test locks in the contract. Phase 4.5 added the columns for discussion;
+     * Spec 7.1 doesn't change the schema, but it changes the frontend to
+     * surface the field on all 5 post types, so the read-write contract MUST
+     * remain unrestricted by post type.
+     */
+    @ParameterizedTest(name = "Spec 7.1 — {0} accepts scripture pair")
+    @ValueSource(strings = {
+            "prayer_request", "testimony", "question", "discussion", "encouragement"
+    })
+    void scripturePair_persistsForAllPostTypes(String postType) throws Exception {
+        // Fresh user per parameter to avoid rate-limit bucket sharing between invocations.
+        User gail = userRepository.saveAndFlush(new User(
+                "gail-71-" + postType + "@test.local", "$2a$10$x",
+                "Gail", "Garcia", "UTC"));
+        String gailJwt = jwtService.generateToken(gail.getId(), false);
+
+        // Backend (PostService line 226) requires category for prayer_request AND
+        // discussion. Other types accept null category. We mirror what the
+        // frontend's submitsAsCategory + D15 auto-fill do at submit time.
+        final String categoryLine;
+        if (postType.equals("prayer_request")) {
+            categoryLine = "\"category\": \"health\",";
+        } else if (postType.equals("discussion")) {
+            categoryLine = "\"category\": \"discussion\",";
+        } else {
+            categoryLine = "";
+        }
+        String body = """
+                {
+                  "postType": "%s",
+                  %s
+                  "content": "Holding this in prayer with this scripture.",
+                  "scriptureReference": "Romans 8:28",
+                  "scriptureText": "And we know that all things work together for good to those who love God, to those who are called according to his purpose."
+                }
+                """.formatted(postType, categoryLine);
+
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + gailJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.postType").value(postType))
+                .andExpect(jsonPath("$.data.scriptureReference").value("Romans 8:28"))
+                .andExpect(jsonPath("$.data.scriptureText",
+                        org.hamcrest.Matchers.containsString("all things work together for good")));
+    }
+
+    /**
+     * Spec 7.1 R7 regression guard + Gate-G-NO-PRAYER-SCRIPTURE-CRISIS-FALSE-POSITIVE.
+     *
+     * <p>{@link PostCrisisDetector} MUST NOT scan {@code scriptureText} —
+     * a legitimately quoted lament (e.g., Psalm 22:1's "forsaken") should
+     * never crisis-flag a post. The detection contract scans {@code content}
+     * (and {@code answered_text} per Spec 6.6b-deferred-2). Adding
+     * {@code scriptureText} to detection input would generate false-positive
+     * crisis flags on quoted scripture (Universal Rule 13).
+     */
+    @Test
+    void crisisDetection_doesNotScanScriptureText() throws Exception {
+        User hugo = userRepository.saveAndFlush(new User(
+                "hugo-71-crisis@test.local", "$2a$10$x", "Hugo", "Hayes", "UTC"));
+        String hugoJwt = jwtService.generateToken(hugo.getId(), false);
+
+        // Content is neutral; the scripture text contains the word "forsaken"
+        // — a legitimate quoted lament from Psalm 22:1. If the crisis
+        // detector scanned scriptureText, this would flip crisisFlag to true.
+        // Discussion requires category="discussion" (backend PostService line 226).
+        String body = """
+                {
+                  "postType": "discussion",
+                  "category": "discussion",
+                  "content": "Reflecting on this passage today.",
+                  "scriptureReference": "Psalm 22:1",
+                  "scriptureText": "My God, my God, why have you forsaken me?"
+                }
+                """;
+
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + hugoJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                // Crisis MUST remain false — Universal Rule 13 +
+                // Gate-G-NO-PRAYER-SCRIPTURE-CRISIS-FALSE-POSITIVE.
+                .andExpect(jsonPath("$.data.crisisFlag").value(false))
+                .andExpect(jsonPath("$.crisisResources").doesNotExist())
+                // The scripture pair still persists on the response body.
+                .andExpect(jsonPath("$.data.scriptureReference").value("Psalm 22:1"))
+                .andExpect(jsonPath("$.data.scriptureText",
+                        org.hamcrest.Matchers.containsString("forsaken")));
     }
 
     // =====================================================================

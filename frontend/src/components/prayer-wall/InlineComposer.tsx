@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useNightMode } from '@/hooks/useNightMode'
 import { getNightModeCopy } from '@/constants/night-mode-copy'
 import { WATCH_COMPOSER_PLACEHOLDER } from '@/constants/watch-copy'
@@ -42,9 +42,11 @@ interface ComposerCopy {
   showCategoryFieldset: boolean
   showChallengeCheckbox: boolean
   showAttributionNudge: boolean
-  /** Spec 4.5 — when true, render <ScriptureReferenceInput> below the textarea.
-   *  Currently set only on `discussion`. The field is OPTIONAL — composer submits
-   *  successfully whether or not the user fills it in. */
+  /** Spec 4.5 + Spec 7.1 — when true, render <ScriptureReferenceInput> below the textarea.
+   *  Post-Spec-7.1 set on all 5 post types. The field is OPTIONAL — composer submits
+   *  successfully whether or not the user fills it in. Pre-fill from a Bible action
+   *  is driven by the `prefilledScripture` prop and consumed via `ScriptureReferenceInput`'s
+   *  `initialRawInput`. */
   showScriptureReferenceField?: boolean
   /** Spec 4.6 — when explicitly false, the anonymous toggle is omitted from
    *  the DOM. Defaults to true (visible). Encouragement sets this to false. */
@@ -82,6 +84,8 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showCategoryFieldset: true,
     showChallengeCheckbox: true,
     showAttributionNudge: false,
+    // Spec 7.1 — scripture reference field is available on all 5 post types.
+    showScriptureReferenceField: true,
     // Spec 4.7b — practical-help tag picker on prayer_request only.
     showWaysToHelpPicker: true,
     waysToHelpHelperText:
@@ -97,6 +101,8 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showCategoryFieldset: false,
     showChallengeCheckbox: false,
     showAttributionNudge: true,
+    // Spec 7.1 — scripture reference field is available on all 5 post types.
+    showScriptureReferenceField: true,
     // Spec 4.6b — testimony composer accepts an optional image attachment.
     showImageUpload: true,
     imageUploadHelperText: 'Add a photo if it tells the story.',
@@ -112,6 +118,8 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showCategoryFieldset: false,
     showChallengeCheckbox: false,
     showAttributionNudge: false,
+    // Spec 7.1 — scripture reference field is available on all 5 post types.
+    showScriptureReferenceField: true,
     // Spec 4.6b — question composer accepts an optional image attachment.
     showImageUpload: true,
     imageUploadHelperText: 'A photo can help others understand your question.',
@@ -140,7 +148,8 @@ const composerCopyByType: Record<PostType, ComposerCopy> = {
     showChallengeCheckbox: false,
     showAnonymousToggle: false,
     showAttributionNudge: false,
-    showScriptureReferenceField: false,
+    // Spec 7.1 — scripture reference field is available on all 5 post types.
+    showScriptureReferenceField: true,
     submitsAsCategory: 'other',
     minHeight: '100px',
   },
@@ -193,9 +202,23 @@ interface InlineComposerProps {
    * a quieter, anti-pressure tone during 3am Watch hours.
    */
   watchActive?: boolean
+  /**
+   * Spec 7.1 — When set on initial open, the ScriptureReferenceInput
+   * pre-populates with this value (passed as `initialRawInput`; uncontrolled).
+   * Gate-G-DRAFT-WINS: a saved draft for this post type causes the pre-fill
+   * to be discarded if the user restores the draft.
+   */
+  prefilledScripture?: string
 }
 
-export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', onSubmit, watchActive = false }: InlineComposerProps) {
+export function InlineComposer({
+  isOpen,
+  onClose,
+  postType = 'prayer_request',
+  onSubmit,
+  watchActive = false,
+  prefilledScripture,
+}: InlineComposerProps) {
   const copy = composerCopyByType[postType]
   const limits = POST_TYPE_LIMITS[postType]
   // Spec 6.3 — Night-aware placeholder for prayer_request only. Other post
@@ -246,6 +269,31 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
   // submit ships with no scripture pair despite the user seeing one in the
   // field. Bumping this key on success/cancel discards the stale child instance.
   const [scriptureResetKey, setScriptureResetKey] = useState(0)
+  // Spec 7.1 — mirror prefilledScripture into local state so it can be
+  // cleared on "Restore draft" (Gate-G-DRAFT-WINS), successful submit, and
+  // cancel. After mount, local state is the source of truth so the parent
+  // doesn't fight us when re-opening the composer in a different flow.
+  const [effectivePrefilledScripture, setEffectivePrefilledScripture] =
+    useState<string | undefined>(prefilledScripture)
+  // Tracks the last prop value we already consumed into local state, so
+  // the useEffect below only fires for genuine prop transitions and does NOT
+  // re-apply the pre-fill after submit/cancel/restore-draft cleared the
+  // local state (the prop remains set until the parent re-renders).
+  const lastConsumedPrefillRef = useRef<string | undefined>(prefilledScripture)
+  // Capture the parent's pre-fill on transitions from undefined → defined.
+  // The InlineComposer is mounted on the PrayerWall page before the URL-driven
+  // useEffect fires, so the initial useState above receives `undefined`. When
+  // the parent later passes a real value, we need to remount the child so its
+  // uncontrolled `initialRawInput` initializer runs with the new value.
+  useEffect(() => {
+    if (prefilledScripture !== lastConsumedPrefillRef.current) {
+      lastConsumedPrefillRef.current = prefilledScripture
+      if (prefilledScripture !== undefined) {
+        setEffectivePrefilledScripture(prefilledScripture)
+        setScriptureResetKey((k) => k + 1)
+      }
+    }
+  }, [prefilledScripture])
   const handleScriptureChange = useCallback(
     (ref: string | null, text: string | null) => {
       setScriptureRef(ref)
@@ -275,6 +323,10 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
 
   const handleRestoreDraft = useCallback(() => {
     setContent(restoreDraft())
+    // Spec 7.1 Gate-G-DRAFT-WINS — restoring the draft discards the pre-fill.
+    // The scripture field returns to empty state via key bump.
+    setEffectivePrefilledScripture(undefined)
+    setScriptureResetKey((k) => k + 1)
     // Defer height recalc until after React commits the new value. State
     // updates are batched in event handlers, so reading scrollHeight
     // synchronously here would size the textarea for the pre-restore (empty)
@@ -386,6 +438,9 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
       setScriptureText(null)
       setScriptureFieldHasError(false)
       setScriptureResetKey((k) => k + 1)
+      // Spec 7.1 — clear pre-fill on successful submit so a subsequent
+      // open without `prefilledScripture` shows an empty field.
+      setEffectivePrefilledScripture(undefined)
       setImageUploadId(null)
       setImageAltText('')
       // Spec 4.7b — reset selection so the next prayer starts clean.
@@ -430,6 +485,9 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
     setScriptureText(null)
     setScriptureFieldHasError(false)
     setScriptureResetKey((k) => k + 1)
+    // Spec 7.1 — clear pre-fill on cancel so a subsequent open without
+    // `prefilledScripture` shows an empty field.
+    setEffectivePrefilledScripture(undefined)
     setImageUploadId(null)
     setImageAltText('')
     setHelpTags([])
@@ -512,6 +570,7 @@ export function InlineComposer({ isOpen, onClose, postType = 'prayer_request', o
         {copy.showScriptureReferenceField && (
           <ScriptureReferenceInput
             key={scriptureResetKey}
+            initialRawInput={effectivePrefilledScripture}
             onChange={handleScriptureChange}
             onValidityChange={setScriptureFieldHasError}
           />

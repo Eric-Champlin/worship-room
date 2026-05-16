@@ -72,6 +72,7 @@ const prayerWallBreadcrumbs = {
 import { getChallenge } from '@/data/challenges'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 import { isValidPostType, getPostType, type PostType } from '@/constants/post-types'
+import { parseReference } from '@/lib/search/reference-parser'
 
 const PRAYERS_PER_PAGE = 20
 
@@ -149,6 +150,9 @@ function PrayerWallContent() {
   // 4.7 — Composer Chooser state
   const [chooserOpen, setChooserOpen] = useState(false)
   const [chosenPostType, setChosenPostType] = useState<PostType>('prayer_request')
+  // Spec 7.1 — pre-fill scripture for InlineComposer when arriving from a
+  // Bible "Pray with this passage" action via `?compose=&scripture=` deep link.
+  const [prefilledScripture, setPrefilledScripture] = useState<string | undefined>(undefined)
   const [localComments, setLocalComments] = useState<Record<string, PrayerComment[]>>({})
   const [saveFormOpen, setSaveFormOpen] = useState<string | null>(null)
   const [savedPrayers, setSavedPrayers] = useState<Set<string>>(new Set())
@@ -311,6 +315,56 @@ function PrayerWallContent() {
       setChooserOpen(false)
     }
   }, [isAuthenticated, chooserOpen])
+
+  // Spec 7.1 — query-param-driven composer auto-open from Bible "Pray with
+  // this passage". URL contract: /prayer-wall?compose=<postType>&scripture=<reference>.
+  // Gate-G-URL-CLEARED-ON-OPEN: params are stripped immediately so reload /
+  // back-nav doesn't re-trigger. Gate-G-DEEP-LINK-GRACEFUL: invalid compose
+  // no-ops; invalid scripture opens composer with no pre-fill + quiet toast.
+  useEffect(() => {
+    const composeParam = searchParams.get('compose')
+    const scriptureParam = searchParams.get('scripture')
+    if (composeParam === null) return
+    if (!isValidPostType(composeParam)) {
+      // Gate-G-DEEP-LINK-GRACEFUL — invalid compose no-ops (no toast). Strip
+      // the bad params so they don't linger in the URL.
+      setSearchParams(
+        (prev) => {
+          prev.delete('compose')
+          prev.delete('scripture')
+          return prev
+        },
+        { replace: true },
+      )
+      return
+    }
+
+    // Validate scripture (if present). Invalid scripture is non-fatal —
+    // open the composer with no pre-fill + surface a quiet toast. Empty
+    // scripture does NOT trigger the toast (the user wasn't trying to set one).
+    let resolvedScripture: string | undefined = undefined
+    if (scriptureParam !== null && scriptureParam !== '') {
+      const parsed = parseReference(scriptureParam)
+      if (parsed) {
+        resolvedScripture = scriptureParam
+      } else {
+        showToast("Couldn't load that reference — you can type it in.")
+      }
+    }
+
+    setChosenPostType(composeParam)
+    setPrefilledScripture(resolvedScripture)
+    setComposerOpen(true)
+
+    setSearchParams(
+      (prev) => {
+        prev.delete('compose')
+        prev.delete('scripture')
+        return prev
+      },
+      { replace: true },
+    )
+  }, [searchParams, setSearchParams, showToast])
 
   // Tooltip for composer
   const composerRef = useRef<HTMLDivElement>(null)
@@ -508,6 +562,12 @@ function PrayerWallContent() {
         }
         setPrayers((prev) => [newPrayer, ...prev])
         setComposerOpen(false)
+        // Spec 7.1 — clear pre-fill on successful submit so a subsequent
+        // Bible-to-PrayerWall navigation with the SAME scripture re-triggers
+        // InlineComposer's transition-detection useEffect. Without this,
+        // React's setState bail-out on equal values would silently skip the
+        // pre-fill on the second navigation (success path bypasses onClose).
+        setPrefilledScripture(undefined)
         recordActivity('prayerWall', 'prayer_wall')
         const badgeData = getBadgeData()
         saveBadgeData({
@@ -549,6 +609,9 @@ function PrayerWallContent() {
         )
         setPrayers((prev) => [created, ...prev])
         setComposerOpen(false)
+        // Spec 7.1 — clear pre-fill on successful submit. See flag-off branch
+        // above for rationale (mirrors React setState bail-out on equal values).
+        setPrefilledScripture(undefined)
         recordActivity('prayerWall', 'prayer_wall')
         // Spec 6.8 — fire post-compose trigger after successful submit
         // (flag-on path). Same Gate-G-NO-TEXT-FLOW contract as flag-off.
@@ -1027,10 +1090,16 @@ function PrayerWallContent() {
             )}
             <InlineComposer
               isOpen={composerOpen}
-              onClose={() => setComposerOpen(false)}
+              onClose={() => {
+                setComposerOpen(false)
+                // Spec 7.1 — clear pre-fill on close so a subsequent open via
+                // the ComposerChooser doesn't inherit a stale scripture.
+                setPrefilledScripture(undefined)
+              }}
               postType={chosenPostType}
               onSubmit={handleComposerSubmit}
               watchActive={watchMode.active}
+              prefilledScripture={prefilledScripture}
             />
 
             {/* Spec 6.8 — Verse-Finds-You card (page-level mount; the trigger

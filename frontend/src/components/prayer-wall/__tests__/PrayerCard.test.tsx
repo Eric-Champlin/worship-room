@@ -814,3 +814,53 @@ describe('PrayerCard — Spec 6.6b answered text fallback + author affordances',
     ).not.toBeInTheDocument()
   })
 })
+
+// =====================================================================
+// Spec 7.1 — Bible to Prayer Wall Bridge: scripture chip across 5 post types
+// =====================================================================
+
+describe('PrayerCard — Spec 7.1 scripture chip across all 5 post types', () => {
+  const POST_TYPES_WITH_SCRIPTURE: Array<PrayerRequest['postType']> = [
+    'prayer_request',
+    'testimony',
+    'question',
+    'discussion',
+    'encouragement',
+  ]
+
+  POST_TYPES_WITH_SCRIPTURE.forEach((postType) => {
+    it(`renders ScriptureChip on ${postType} when scriptureReference is set`, () => {
+      const prayer: PrayerRequest = {
+        ...SHORT_PRAYER,
+        id: `prayer-${postType}-with-scripture`,
+        postType,
+        // encouragement uses 'other', others can keep family.
+        category: postType === 'encouragement' ? 'other' : 'family',
+        scriptureReference: 'Romans 8:28',
+        scriptureText:
+          'We know that all things work together for good for those who love God, for those who are called according to his purpose.',
+      }
+      renderCard(prayer, {})
+      // The ScriptureChip renders a link with the canonical aria pattern.
+      const chip = screen.getByRole('link', {
+        name: /Read Romans 8:28 in the Bible/,
+      })
+      expect(chip).toBeInTheDocument()
+      // Verse-level deep link: /bible/<book>/<chapter>?verse=<verseNumber>
+      expect(chip).toHaveAttribute('href', '/bible/romans/8?verse=28')
+    })
+  })
+
+  it('chip is NOT rendered when scriptureReference is null on any post type', () => {
+    const prayer: PrayerRequest = {
+      ...SHORT_PRAYER,
+      postType: 'prayer_request',
+      scriptureReference: undefined,
+      scriptureText: undefined,
+    }
+    renderCard(prayer, {})
+    expect(
+      screen.queryByRole('link', { name: /in the Bible/ }),
+    ).not.toBeInTheDocument()
+  })
+})

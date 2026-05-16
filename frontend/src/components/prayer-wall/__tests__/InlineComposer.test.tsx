@@ -646,23 +646,28 @@ describe('InlineComposer — Spec 4.5 discussion variant', () => {
     ).toBeInTheDocument()
   })
 
-  it('ScriptureReferenceInput does NOT render for prayer_request, testimony, question', () => {
+  // Spec 7.1 — scripture field is now enabled on ALL 5 post types. This
+  // test previously asserted it was discussion-only; updated to reflect the
+  // new contract (Gate-G-FIVE-TYPES-IDENTICAL-FIELD). The discussion-only
+  // assertion is preserved as a historical note in the comment above for
+  // documentation purposes.
+  it('ScriptureReferenceInput renders for ALL 5 post types post-Spec-7.1', () => {
     const { unmount: unmount1 } = renderComposer()
     expect(
-      screen.queryByLabelText(/Scripture reference \(optional\)/),
-    ).not.toBeInTheDocument()
+      screen.getByLabelText(/Scripture reference \(optional\)/),
+    ).toBeInTheDocument()
     unmount1()
 
     const { unmount: unmount2 } = renderTestimonyComposer()
     expect(
-      screen.queryByLabelText(/Scripture reference \(optional\)/),
-    ).not.toBeInTheDocument()
+      screen.getByLabelText(/Scripture reference \(optional\)/),
+    ).toBeInTheDocument()
     unmount2()
 
     const { unmount: unmount3 } = renderQuestionComposer()
     expect(
-      screen.queryByLabelText(/Scripture reference \(optional\)/),
-    ).not.toBeInTheDocument()
+      screen.getByLabelText(/Scripture reference \(optional\)/),
+    ).toBeInTheDocument()
     unmount3()
   })
 
@@ -1312,5 +1317,294 @@ describe('InlineComposer — composer drafts (Spec 6.9)', () => {
     ).toBeInTheDocument()
     // The textarea aria-label has switched to "Testimony".
     expect(screen.getByLabelText('Testimony')).toBeInTheDocument()
+  })
+})
+
+// =====================================================================
+// Spec 7.1 — Bible to Prayer Wall Bridge: prefilledScripture prop + 5-types
+// =====================================================================
+
+describe('InlineComposer — Spec 7.1 prefilledScripture', () => {
+  it('all 5 post types render ScriptureReferenceInput (Gate-G-FIVE-TYPES-IDENTICAL-FIELD)', () => {
+    const types: Array<
+      'prayer_request' | 'testimony' | 'question' | 'discussion' | 'encouragement'
+    > = ['prayer_request', 'testimony', 'question', 'discussion', 'encouragement']
+    for (const t of types) {
+      const { unmount } = render(
+        <MemoryRouter>
+          <InlineComposer
+            isOpen
+            onClose={vi.fn()}
+            postType={t}
+            onSubmit={vi.fn().mockResolvedValue(true)}
+          />
+        </MemoryRouter>,
+      )
+      expect(
+        screen.getByLabelText(/Scripture reference \(optional\)/i),
+      ).toBeInTheDocument()
+      unmount()
+    }
+  })
+
+  it('prefilledScripture pre-populates ScriptureReferenceInput on initial open', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'And we know that all things work together for good ...',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="question"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          prefilledScripture="Romans 8:28"
+        />
+      </MemoryRouter>,
+    )
+    const scriptureInput = screen.getByLabelText(/Scripture reference/) as HTMLInputElement
+    expect(scriptureInput.value).toBe('Romans 8:28')
+    // Verse text appears after lookup.
+    await waitFor(
+      () =>
+        expect(
+          screen.getByText(/all things work together for good/i),
+        ).toBeInTheDocument(),
+      { timeout: 1500 },
+    )
+  })
+
+  it('pre-fill survives across category-error blocked submit', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'And we know that all things work together for good ...',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="prayer_request"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          prefilledScripture="Romans 8:28"
+        />
+      </MemoryRouter>,
+    )
+    const scriptureInput = screen.getByLabelText(/Scripture reference/) as HTMLInputElement
+    expect(scriptureInput.value).toBe('Romans 8:28')
+    await user.type(screen.getByLabelText('Prayer request'), 'Please pray.')
+    await user.click(screen.getByText('Submit Prayer Request'))
+    // Category error appears, submit blocked, pre-fill remains.
+    expect(scriptureInput.value).toBe('Romans 8:28')
+  })
+
+  it('pre-fill cleared after successful submit', async () => {
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'And we know that all things work together for good ...',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    const { rerender } = render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="question"
+          onSubmit={onSubmit}
+          prefilledScripture="Romans 8:28"
+        />
+      </MemoryRouter>,
+    )
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe('Romans 8:28'),
+    )
+    // Wait for the lookup resolution so submit isn't held by validity.
+    await waitFor(
+      () =>
+        expect(
+          screen.getByText(/all things work together for good/i),
+        ).toBeInTheDocument(),
+      { timeout: 1500 },
+    )
+    await user.type(
+      screen.getByLabelText('Question'),
+      'How do we read this verse?',
+    )
+    await user.click(screen.getByText('Submit Question'))
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    // Re-render with no prefilledScripture; the field should be empty.
+    rerender(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="question"
+          onSubmit={onSubmit}
+        />
+      </MemoryRouter>,
+    )
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe(''),
+    )
+  })
+
+  it('pre-fill cleared after cancel', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const { rerender } = render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={onClose}
+          postType="question"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          prefilledScripture="Romans 8:28"
+        />
+      </MemoryRouter>,
+    )
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe('Romans 8:28'),
+    )
+    await user.click(screen.getByText('Cancel'))
+    expect(onClose).toHaveBeenCalled()
+    // Re-render with no prefilledScripture: subsequent open shows empty field.
+    rerender(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={onClose}
+          postType="question"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+        />
+      </MemoryRouter>,
+    )
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe(''),
+    )
+  })
+
+  it('Gate-G-DRAFT-WINS: restoring draft discards pre-fill', async () => {
+    // Seed a saved draft for prayer_request.
+    setDraft('prayer_request', 'an existing draft body')
+    expect(getDraft('prayer_request')?.content).toBe('an existing draft body')
+
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'And we know that all things work together for good ...',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="prayer_request"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          prefilledScripture="Romans 8:28"
+        />
+      </MemoryRouter>,
+    )
+    // Pre-fill is present initially.
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe('Romans 8:28'),
+    )
+    // Restore draft.
+    await user.click(screen.getByRole('button', { name: /restore draft/i }))
+    // Scripture field returns to empty.
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe(''),
+    )
+
+    // Clean up.
+    localStorage.removeItem(COMPOSER_DRAFTS_KEY)
+  })
+
+  it('Gate-G-DRAFT-WINS: discarding draft (Start fresh) keeps pre-fill', async () => {
+    setDraft('prayer_request', 'an existing draft body')
+
+    vi.mocked(loadChapterWeb).mockResolvedValue({
+      bookSlug: 'romans',
+      chapter: 8,
+      verses: [
+        {
+          number: 28,
+          text: 'And we know that all things work together for good ...',
+        },
+      ],
+      paragraphs: [],
+    } as never)
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <InlineComposer
+          isOpen
+          onClose={vi.fn()}
+          postType="prayer_request"
+          onSubmit={vi.fn().mockResolvedValue(true)}
+          prefilledScripture="Romans 8:28"
+        />
+      </MemoryRouter>,
+    )
+    // Pre-fill is present.
+    await waitFor(() =>
+      expect(
+        (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+      ).toBe('Romans 8:28'),
+    )
+    // Click the discard / start fresh button (its accessible name differs
+    // from the restore button; match anything that is not "restore").
+    const discardButton = screen.getByRole('button', {
+      name: /start fresh|discard|delete/i,
+    })
+    await user.click(discardButton)
+    // Pre-fill is still in the field.
+    expect(
+      (screen.getByLabelText(/Scripture reference/) as HTMLInputElement).value,
+    ).toBe('Romans 8:28')
+
+    localStorage.removeItem(COMPOSER_DRAFTS_KEY)
   })
 })

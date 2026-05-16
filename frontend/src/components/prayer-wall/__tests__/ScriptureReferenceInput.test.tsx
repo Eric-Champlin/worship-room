@@ -152,6 +152,85 @@ describe('ScriptureReferenceInput', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
+  describe('Spec 7.1 — initialRawInput prop', () => {
+    it('initialRawInput sets initial state and triggers lookup', async () => {
+      vi.mocked(loadChapterWeb).mockResolvedValue({
+        bookSlug: 'romans',
+        chapter: 8,
+        verses: [{ number: 28, text: 'And we know that all things work together for good ...' }],
+        paragraphs: [],
+      } as never)
+      const onChange = vi.fn()
+      render(
+        <ScriptureReferenceInput
+          onChange={onChange}
+          initialRawInput="Romans 8:28"
+        />,
+      )
+      // The input renders with the initial value.
+      expect(screen.getByLabelText(/Scripture reference/)).toHaveValue('Romans 8:28')
+      // The validation effect runs on mount — onChange fires with the resolved pair after lookup.
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith(
+          'Romans 8:28',
+          'And we know that all things work together for good ...',
+        ),
+      )
+    })
+
+    it('initialRawInput="" is equivalent to omitting the prop', () => {
+      const onChange = vi.fn()
+      render(<ScriptureReferenceInput onChange={onChange} initialRawInput="" />)
+      expect(screen.getByLabelText(/Scripture reference/)).toHaveValue('')
+      expect(onChange).toHaveBeenLastCalledWith(null, null)
+    })
+
+    it('bumping the key resets initialRawInput', () => {
+      const { rerender } = render(
+        <ScriptureReferenceInput
+          key={1}
+          onChange={vi.fn()}
+          initialRawInput="Romans 8:28"
+        />,
+      )
+      expect(screen.getByLabelText(/Scripture reference/)).toHaveValue('Romans 8:28')
+      rerender(
+        <ScriptureReferenceInput
+          key={2}
+          onChange={vi.fn()}
+          initialRawInput="John 3:16"
+        />,
+      )
+      expect(screen.getByLabelText(/Scripture reference/)).toHaveValue('John 3:16')
+    })
+
+    it('invalid initialRawInput sets state to invalid on mount', async () => {
+      const onChange = vi.fn()
+      render(
+        <ScriptureReferenceInput
+          onChange={onChange}
+          initialRawInput="NotARealBook 1:1"
+        />,
+      )
+      expect(await screen.findByRole('alert')).toHaveTextContent(/doesn't match/i)
+      expect(onChange).toHaveBeenLastCalledWith(null, null)
+    })
+
+    it('chapter-only initialRawInput sets state to chapter-only on mount', async () => {
+      const onChange = vi.fn()
+      render(
+        <ScriptureReferenceInput
+          onChange={onChange}
+          initialRawInput="Romans 8"
+        />,
+      )
+      expect(
+        await screen.findByText(/Specify a verse to attach scripture/),
+      ).toBeInTheDocument()
+      expect(onChange).toHaveBeenLastCalledWith(null, null)
+    })
+  })
+
   it('emits onValidityChange(true) for invalid input and (false) otherwise', async () => {
     vi.mocked(loadChapterWeb).mockResolvedValue({
       bookSlug: 'john',

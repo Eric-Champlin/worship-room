@@ -5,6 +5,7 @@ import {
   Bookmark,
   Share2,
   Heart,
+  HandHelping,
   BookOpen,
   Sparkles,
   Link2,
@@ -18,6 +19,7 @@ import {
 import { CrossRefsSubView, CrossRefBadge } from '@/components/bible/reader/CrossRefsSubView'
 import { ExplainSubView } from '@/components/bible/reader/ExplainSubView'
 import { ReflectSubView } from '@/components/bible/reader/ReflectSubView'
+import { PrayWithPassageSubView } from '@/components/bible/reader/PrayWithPassageSubView'
 import type {
   VerseSelection,
   VerseAction,
@@ -310,6 +312,22 @@ const pray: VerseActionHandler = {
   },
 }
 
+// Spec 7.1 \u2014 "Pray with this passage" routes to Prayer Wall composer with the
+// verse pre-filled. Distinct from the existing `pray` handler above (which
+// stays unchanged per Gate-G-EXISTING-PRAY-UNCHANGED). The sub-view (5
+// post-type buttons) is rendered by PrayWithPassageSubView.
+const prayWithPassage: VerseActionHandler = {
+  action: 'pray-with-passage',
+  label: 'Pray with this passage',
+  sublabel: 'Open Prayer Wall composer',
+  icon: HandHelping,
+  category: 'secondary',
+  hasSubView: true,
+  renderSubView: (props) => React.createElement(PrayWithPassageSubView, props),
+  isAvailable: () => true,
+  onInvoke: () => {},
+}
+
 const journal: VerseActionHandler = {
   action: 'journal',
   label: 'Journal about this',
@@ -479,6 +497,7 @@ const copyWithRef: VerseActionHandler = {
 const PRIMARY_ACTIONS: VerseActionHandler[] = [highlight, note, bookmark, share]
 const SECONDARY_ACTIONS: VerseActionHandler[] = [
   pray,
+  prayWithPassage,
   journal,
   meditate,
   crossRefs,

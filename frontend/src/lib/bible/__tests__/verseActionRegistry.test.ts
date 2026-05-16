@@ -9,6 +9,7 @@ import {
   getSelectionTextWithRef,
   copyToClipboard,
 } from '../verseActionRegistry'
+import { DEEP_LINKABLE_ACTIONS } from '@/lib/url/validateAction'
 import { applyHighlight } from '../highlightStore'
 import { toggleBookmark, getAllBookmarks, _resetCacheForTesting as resetBookmarkCache } from '../bookmarkStore'
 import { upsertNote, _resetCacheForTesting as resetNoteCache } from '../notes/store'
@@ -68,11 +69,13 @@ function createMockContext(): VerseActionContext {
 
 describe('verseActionRegistry', () => {
   describe('registry structure', () => {
-    it('exports all 14 actions (4 primary + 10 secondary)', () => {
+    // Spec 7.1 — secondary list grew from 10 to 11 with the addition of
+    // 'pray-with-passage' between 'pray' and 'journal'.
+    it('exports all 15 actions (4 primary + 11 secondary)', () => {
       const all = getAllActions()
-      expect(all).toHaveLength(14)
+      expect(all).toHaveLength(15)
       expect(getPrimaryActions()).toHaveLength(4)
-      expect(getSecondaryActions()).toHaveLength(10)
+      expect(getSecondaryActions()).toHaveLength(11)
     })
 
     it('getActionByType returns correct handler', () => {
@@ -361,7 +364,8 @@ describe('verseActionRegistry', () => {
 
     it('sub-view stubs render placeholder containing "ships in BB-"', () => {
       // Exclude implemented sub-views: highlight (BB-7), note (BB-8),
-      // cross-refs (BB-9), share (BB-13), explain (BB-30), reflect (BB-31)
+      // cross-refs (BB-9), share (BB-13), explain (BB-30), reflect (BB-31),
+      // pray-with-passage (Spec 7.1)
       const withSubViews = getAllActions().filter(
         (h) =>
           h.hasSubView &&
@@ -371,7 +375,8 @@ describe('verseActionRegistry', () => {
           h.action !== 'cross-refs' &&
           h.action !== 'share' &&
           h.action !== 'explain' &&
-          h.action !== 'reflect',
+          h.action !== 'reflect' &&
+          h.action !== 'pray-with-passage',
       )
 
       // If no stubs remain, this test is no longer needed — skip gracefully
@@ -722,6 +727,47 @@ describe('verseActionRegistry', () => {
       const result = await copyToClipboard('test')
       expect(result).toBe(true)
       expect(execCommand).toHaveBeenCalledWith('copy')
+    })
+  })
+
+  // ---------------------------------------------------------------------------
+  // Spec 7.1 — pray-with-passage handler
+  // ---------------------------------------------------------------------------
+
+  describe('prayWithPassage handler (Spec 7.1)', () => {
+    it('is registered with the expected label/sublabel/icon/hasSubView', () => {
+      const handler = getActionByType('pray-with-passage')
+      expect(handler).toBeDefined()
+      expect(handler!.label).toBe('Pray with this passage')
+      expect(handler!.sublabel).toBe('Open Prayer Wall composer')
+      expect(handler!.category).toBe('secondary')
+      expect(handler!.hasSubView).toBe(true)
+      expect(typeof handler!.renderSubView).toBe('function')
+    })
+
+    it('is in DEEP_LINKABLE_ACTIONS', () => {
+      expect(
+        (DEEP_LINKABLE_ACTIONS as readonly string[]).includes('pray-with-passage'),
+      ).toBe(true)
+    })
+
+    it('appears in SECONDARY_ACTIONS immediately after pray and before journal', () => {
+      const secondary = getSecondaryActions()
+      const prayIndex = secondary.findIndex((h) => h.action === 'pray')
+      const pwpIndex = secondary.findIndex((h) => h.action === 'pray-with-passage')
+      const journalIndex = secondary.findIndex((h) => h.action === 'journal')
+      expect(prayIndex).toBeGreaterThanOrEqual(0)
+      expect(pwpIndex).toBe(prayIndex + 1)
+      expect(journalIndex).toBe(pwpIndex + 1)
+    })
+
+    it('existing pray handler is unchanged (Gate-G-EXISTING-PRAY-UNCHANGED)', () => {
+      // Regression guard: pray remains a Daily Hub action with no sub-view.
+      const pray = getActionByType('pray')
+      expect(pray).toBeDefined()
+      expect(pray!.label).toBe('Pray about this')
+      expect(pray!.sublabel).toBe('Open in Daily Hub · Pray')
+      expect(pray!.hasSubView).toBe(false)
     })
   })
 })

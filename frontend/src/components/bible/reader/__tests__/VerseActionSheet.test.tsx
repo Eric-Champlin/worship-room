@@ -147,6 +147,8 @@ describe('VerseActionSheet', () => {
   it('renders secondary action items including Ask about this', () => {
     renderSheet()
     expect(screen.getByLabelText('Pray about this')).toBeInTheDocument()
+    // Spec 7.1 — new sibling action distinct from "Pray about this".
+    expect(screen.getByLabelText('Pray with this passage')).toBeInTheDocument()
     expect(screen.getByLabelText('Journal about this')).toBeInTheDocument()
     expect(screen.getByLabelText('Meditate on this')).toBeInTheDocument()
     expect(screen.getByLabelText('Cross-references')).toBeInTheDocument()
@@ -266,5 +268,82 @@ describe('VerseActionSheet', () => {
     const q = new URLSearchParams(navArg.slice(navArg.indexOf('?'))).get('q')
     expect(q).toContain('Help me understand')
     expect(q).toContain('John 3:16')
+  })
+
+  // -------------------------------------------------------------------------
+  // Spec 7.1 — Pray with this passage (sub-view + navigation)
+  // -------------------------------------------------------------------------
+
+  describe('Pray with this passage (Spec 7.1)', () => {
+    it('tapping "Pray with this passage" opens the sub-view with 5 post-type buttons', () => {
+      renderSheet()
+      fireEvent.click(screen.getByLabelText('Pray with this passage'))
+      // Sub-view body — 5 post-type buttons (labels from POST_TYPES). Using
+      // getByRole('button', { name }) avoids collision with the sub-view
+      // header span + the sr-only announcement region (both also carry the
+      // text "Pray with this passage").
+      expect(
+        screen.getByRole('button', { name: 'Prayer request' }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Testimony' }),
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Question' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Discussion' }),
+      ).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: 'Encouragement' }),
+      ).toBeInTheDocument()
+    })
+
+    it('tapping a post-type button navigates to /prayer-wall with compose + scripture params (single verse)', () => {
+      renderSheet()
+      fireEvent.click(screen.getByLabelText('Pray with this passage'))
+      fireEvent.click(screen.getByRole('button', { name: 'Question' }))
+      // SINGLE_VERSE is John 3:16 → URL-encoded "John 3:16" is "John%203%3A16".
+      expect(mockNavigate).toHaveBeenCalledWith(
+        '/prayer-wall?compose=question&scripture=John%203%3A16',
+      )
+    })
+
+    it('tapping a post-type button navigates with hyphen-minus for range references (NOT en-dash)', () => {
+      renderSheet({ selection: MULTI_VERSE })
+      fireEvent.click(screen.getByLabelText('Pray with this passage'))
+      fireEvent.click(screen.getByRole('button', { name: 'Discussion' }))
+      const navArg = mockNavigate.mock.calls[0][0] as string
+      expect(navArg).toBe(
+        '/prayer-wall?compose=discussion&scripture=John%203%3A16-18',
+      )
+      // Hyphen-minus (%2D when URL-encoded) NOT en-dash (%E2%80%93).
+      expect(navArg).not.toContain('%E2%80%93')
+    })
+
+    it('tapping a post-type button calls onClose with navigating:true', () => {
+      const onClose = vi.fn()
+      renderSheet({ onClose })
+      fireEvent.click(screen.getByLabelText('Pray with this passage'))
+      fireEvent.click(screen.getByRole('button', { name: 'Question' }))
+      expect(onClose).toHaveBeenCalledWith({ navigating: true })
+    })
+
+    it('back arrow returns to root view', () => {
+      renderSheet()
+      fireEvent.click(screen.getByLabelText('Pray with this passage'))
+      // Confirm we're in the sub-view (a post-type button is visible).
+      expect(
+        screen.getByRole('button', { name: 'Prayer request' }),
+      ).toBeInTheDocument()
+      // Tap the back arrow.
+      fireEvent.click(screen.getByLabelText('Back'))
+      // Root view returns: the original "Pray with this passage" button is back.
+      expect(
+        screen.getByLabelText('Pray with this passage'),
+      ).toBeInTheDocument()
+      // Sub-view content is gone.
+      expect(
+        screen.queryByRole('button', { name: 'Prayer request' }),
+      ).not.toBeInTheDocument()
+    })
   })
 })

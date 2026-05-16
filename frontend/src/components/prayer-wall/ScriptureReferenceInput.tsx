@@ -12,6 +12,11 @@ interface ScriptureReferenceInputProps {
    *  Allows the composer to disable submit on invalid (D12) since the three
    *  non-emitting states all share `(null, null)` from `onChange`. */
   onValidityChange?: (isInvalid: boolean) => void
+  /** Spec 7.1 — when set, the field starts with this raw input value
+   *  and the validation effect runs immediately on mount (so a valid
+   *  reference auto-resolves without keystrokes). Uncontrolled —
+   *  the parent bumps `key={...}` to push a new initial value after mount. */
+  initialRawInput?: string
 }
 
 type LookupState = 'empty' | 'invalid' | 'chapter-only' | 'looking-up' | 'valid'
@@ -19,8 +24,9 @@ type LookupState = 'empty' | 'invalid' | 'chapter-only' | 'looking-up' | 'valid'
 export function ScriptureReferenceInput({
   onChange,
   onValidityChange,
+  initialRawInput,
 }: ScriptureReferenceInputProps) {
-  const [rawInput, setRawInput] = useState('')
+  const [rawInput, setRawInput] = useState(initialRawInput ?? '')
   const [state, setState] = useState<LookupState>('empty')
   const [resolvedText, setResolvedText] = useState<string | null>(null)
   const lookupSeqRef = useRef(0)
