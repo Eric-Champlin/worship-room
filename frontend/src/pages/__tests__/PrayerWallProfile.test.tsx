@@ -95,4 +95,15 @@ describe('PrayerWallProfile', () => {
       'true',
     )
   })
+
+  it('Spec 7.2 — ScriptureChip on a profile post links with both ?scroll-to= and ?verse=', () => {
+    // Render PrayerWallProfile for user-3 (Emily, author of
+    // prayer-discussion-with-scripture). The fixture's scriptureReference is
+    // 'Romans 8:28' per frontend/src/mocks/prayer-wall-mock-data.ts.
+    renderProfile('user-3')
+    const chip = screen.getByRole('link', { name: /Read Romans 8:28 in the Bible/ })
+    const href = chip.getAttribute('href') ?? ''
+    expect(href).toContain('scroll-to=28')
+    expect(href).toContain('verse=28')
+  })
 })

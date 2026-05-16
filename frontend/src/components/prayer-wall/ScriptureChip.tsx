@@ -26,8 +26,16 @@ export function ScriptureChip({ reference, className }: ScriptureChipProps) {
     )
   }
 
-  const verseSuffix = parsed.verse !== undefined ? `?verse=${parsed.verse}` : ''
-  const path = `/bible/${parsed.book}/${parsed.chapter}${verseSuffix}`
+  const path = (() => {
+    const base = `/bible/${parsed.book}/${parsed.chapter}`
+    if (parsed.verse === undefined) return base
+    // BB-38: both ?scroll-to= (one-shot arrival glow) and ?verse= (persistent
+    // selection in the reader). Mirrors BiblePlanDay.tsx:193-200.
+    const params = new URLSearchParams()
+    params.set('scroll-to', String(parsed.verse))
+    params.set('verse', String(parsed.verse))
+    return `${base}?${params.toString()}`
+  })()
 
   return (
     <Link

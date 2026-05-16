@@ -1,20 +1,43 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ToastProvider } from '@/components/ui/Toast'
 import { AuthModalProvider } from '@/components/prayer-wall/AuthModalProvider'
 import { PrayerWallDashboard } from '../PrayerWallDashboard'
+import { _resetForTesting as resetReactionsStore } from '@/lib/prayer-wall/reactionsStore'
 
-// Mock useAuth to return a logged-in user for dashboard testing
+// Dynamic auth state — defaults to user-1 (Sarah Johnson) to preserve
+// existing test expectations. Individual tests may override via
+// authState.current = { ... } before calling renderDashboard().
+const authState = vi.hoisted(() => ({
+  current: {
+    user: { id: 'user-1', name: 'Sarah Johnson' } as { id: string; name: string } | null,
+    isAuthenticated: true,
+  },
+}))
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
-    isAuthenticated: true,
-    user: { id: 'user-1', name: 'Sarah Johnson' },
+    isAuthenticated: authState.current.isAuthenticated,
+    user: authState.current.user,
     login: vi.fn(),
     logout: vi.fn(),
   }),
 }))
+
+beforeEach(() => {
+  authState.current = {
+    user: { id: 'user-1', name: 'Sarah Johnson' },
+    isAuthenticated: true,
+  }
+  // Reset reactive store + localStorage so the Spec 7.2 bookmark seed below
+  // doesn't bleed between tests, and so the seeded
+  // prayer-discussion-with-scripture reaction surfaces immediately on
+  // dashboard mount. The reactionsStore module-level cache survives across
+  // tests by design (singleton pattern); _resetForTesting clears it.
+  resetReactionsStore()
+  localStorage.removeItem('wr_prayer_reactions')
+})
 
 vi.mock('@/hooks/useFaithPoints', () => ({
   useFaithPoints: () => ({
@@ -119,5 +142,35 @@ describe('PrayerWallDashboard', () => {
     renderDashboard()
     const tab = screen.getByRole('tab', { name: 'My Prayers' })
     expect(tab.className).toContain('focus-visible:ring-white/50')
+  })
+
+  it('Spec 7.2 — ScriptureChip on a dashboard post links with both ?scroll-to= and ?verse=', async () => {
+    // Dashboard's "My Prayers" view filters by MOCK_CURRENT_USER.id (user-1,
+    // Sarah, hardcoded in flag-off mode at PrayerWallDashboard.tsx:80) — NOT
+    // by the authenticated user. The only mock fixture carrying
+    // scriptureReference is prayer-discussion-with-scripture (authored by
+    // user-3, Emily). To surface it on the dashboard, seed wr_prayer_reactions
+    // so Sarah has bookmarked it, then switch to the Bookmarks tab — that tab
+    // filters by current-user reaction state rather than authorship.
+    localStorage.setItem(
+      'wr_prayer_reactions',
+      JSON.stringify({
+        'prayer-discussion-with-scripture': {
+          prayerId: 'prayer-discussion-with-scripture',
+          isPraying: false,
+          isBookmarked: true,
+          isCandle: false,
+          isPraising: false,
+          isCelebrating: false,
+        },
+      }),
+    )
+    const user = userEvent.setup()
+    renderDashboard()
+    await user.click(screen.getByRole('tab', { name: 'Bookmarks' }))
+    const chip = screen.getByRole('link', { name: /Read Romans 8:28 in the Bible/ })
+    const href = chip.getAttribute('href') ?? ''
+    expect(href).toContain('scroll-to=28')
+    expect(href).toContain('verse=28')
   })
 })

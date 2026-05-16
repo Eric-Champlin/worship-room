@@ -509,3 +509,28 @@ describe('BB-38 cold-load — auth gating invariance', () => {
     // No auth modal is expected at mount time.
   })
 })
+
+// ---------------------------------------------------------------------------
+// Spec 7.2 — Prayer Wall ScriptureChip flow-through
+// ---------------------------------------------------------------------------
+
+describe('Spec 7.2 — Prayer Wall ScriptureChip flow-through', () => {
+  it('ScriptureChip URL format navigates BibleReader to the verse', async () => {
+    // Mirror the canonical BB-38 cold-load test (BiblePlanDay precedent at
+    // BB-38 cold-load — plan-day + verse flow-through, line 481-491). The
+    // chip emits `/bible/<book>/<chapter>?scroll-to=<n>&verse=<n>`;
+    // BibleReader consumes ?scroll-to= and clears it after the one-shot
+    // arrival glow. This smoke test confirms the URL contract is consumable.
+    // Use /bible/john/3 (same fixture as the rest of this file) rather than
+    // /bible/romans/8 — Romans book-data lazy-load isn't pre-warmed in this
+    // test suite, while John IS the canonical pre-warmed fixture.
+    renderAtRoute('/bible/john/3?scroll-to=16&verse=16')
+
+    await waitFor(() => {
+      const spans = document.querySelectorAll('span[data-verse]')
+      expect(spans.length).toBeGreaterThan(0)
+    })
+    // Reader renders without crashing — chip URL contract is consumed correctly.
+    expect(screen.queryByText("That book doesn't exist.")).not.toBeInTheDocument()
+  })
+})

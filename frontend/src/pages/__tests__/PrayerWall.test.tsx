@@ -223,6 +223,18 @@ describe('PrayerWall', () => {
       screen.getAllByRole('button', { name: /^Health$/i })[0],
     ).toHaveAttribute('aria-pressed', 'false')
   })
+
+  it('Spec 7.2 — ScriptureChip on a feed card links with both ?scroll-to= and ?verse=', () => {
+    renderPage()
+    // Mock fixture id: 'prayer-discussion-with-scripture' carries
+    // scriptureReference: 'Romans 8:28'. The chip is a <Link> with aria-label
+    // "Read Romans 8:28 in the Bible".
+    const chip = screen.getByRole('link', { name: /Read Romans 8:28 in the Bible/ })
+    const href = chip.getAttribute('href') ?? ''
+    expect(href).toContain('scroll-to=28')
+    expect(href).toContain('verse=28')
+    expect(href.startsWith('/bible/romans/8')).toBe(true)
+  })
 })
 
 vi.mock('@/mocks/prayer-wall-mock-data', async (importOriginal) => {

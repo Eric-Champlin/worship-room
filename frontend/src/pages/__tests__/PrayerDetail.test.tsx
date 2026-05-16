@@ -136,4 +136,12 @@ describe('PrayerDetail', () => {
     renderDetail('prayer-1')
     expect(screen.getByText('Report')).toBeInTheDocument()
   })
+
+  it('Spec 7.2 — ScriptureChip on the detail card links with both ?scroll-to= and ?verse=', () => {
+    renderDetail('prayer-discussion-with-scripture')
+    const chip = screen.getByRole('link', { name: /Read Romans 8:28 in the Bible/ })
+    const href = chip.getAttribute('href') ?? ''
+    expect(href).toContain('scroll-to=28')
+    expect(href).toContain('verse=28')
+  })
 })

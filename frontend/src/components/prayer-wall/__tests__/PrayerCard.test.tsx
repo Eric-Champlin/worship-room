@@ -846,8 +846,10 @@ describe('PrayerCard — Spec 7.1 scripture chip across all 5 post types', () =>
         name: /Read Romans 8:28 in the Bible/,
       })
       expect(chip).toBeInTheDocument()
-      // Verse-level deep link: /bible/<book>/<chapter>?verse=<verseNumber>
-      expect(chip).toHaveAttribute('href', '/bible/romans/8?verse=28')
+      // Spec 7.2 BB-38 deep link: /bible/<book>/<chapter>?scroll-to=<n>&verse=<n>
+      // (Spec 7.1 originally asserted ?verse= only; Spec 7.2 added ?scroll-to=
+      // to wire the chip to BibleReader's one-shot arrival glow.)
+      expect(chip).toHaveAttribute('href', '/bible/romans/8?scroll-to=28&verse=28')
     })
   })
 
@@ -862,5 +864,33 @@ describe('PrayerCard — Spec 7.1 scripture chip across all 5 post types', () =>
     expect(
       screen.queryByRole('link', { name: /in the Bible/ }),
     ).not.toBeInTheDocument()
+  })
+})
+
+// =====================================================================
+// Spec 7.2 — Prayer Wall to Bible Bridge: chip render is state-independent
+// =====================================================================
+
+describe('PrayerCard — Spec 7.2 ScriptureChip state independence', () => {
+  it('chip render is independent of post state (answered, commented, categorized)', () => {
+    // Gate-G-CRISIS-CARD-CHIP-VISIBLE reframing: crisisFlag is server-side-only
+    // (per frontend/src/types/prayer-wall.ts). The frontend cannot introspect a
+    // crisis flag — instead this test proves no OTHER post-state property
+    // (isAnswered, category, commentCount, prayingCount, postType) suppresses
+    // the chip. The chip render condition at PrayerCard.tsx is exclusively
+    // `prayer.scriptureReference && (...)`.
+    const prayer: PrayerRequest = {
+      ...ANSWERED_PRAYER, // isAnswered: true, answeredText set
+      id: 'prayer-answered-with-scripture',
+      category: 'family',
+      commentCount: 50,
+      prayingCount: 100,
+      postType: 'prayer_request',
+      scriptureReference: 'Romans 8:28',
+    }
+    renderCard(prayer, {})
+    expect(
+      screen.getByRole('link', { name: /Read Romans 8:28 in the Bible/ }),
+    ).toBeInTheDocument()
   })
 })
