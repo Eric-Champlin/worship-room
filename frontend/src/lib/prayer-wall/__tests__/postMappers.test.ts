@@ -120,10 +120,26 @@ describe('postDtoToPrayerRequest', () => {
     expect(result).not.toHaveProperty('moderationStatus')
   })
 
-  it('drops visibility from the output', () => {
+  // Spec 7.7 — visibility was previously DROPPED by the mapper (deferred until
+  // Phase 8 per the old comment). 7.7 IS that unlock; the mapper now plumbs
+  // visibility through to PrayerRequest so PrayerCard can render the tier icon
+  // (Step 8) and InlineComposer (Steps 5-7) can set it on new posts.
+  it('plumbs visibility public from the DTO', () => {
+    const dto = buildPostDto({ visibility: 'public' })
+    const result = postDtoToPrayerRequest(dto)
+    expect(result.visibility).toBe('public')
+  })
+
+  it('plumbs visibility friends from the DTO', () => {
     const dto = buildPostDto({ visibility: 'friends' })
     const result = postDtoToPrayerRequest(dto)
-    expect(result).not.toHaveProperty('visibility')
+    expect(result.visibility).toBe('friends')
+  })
+
+  it('plumbs visibility private from the DTO', () => {
+    const dto = buildPostDto({ visibility: 'private' })
+    const result = postDtoToPrayerRequest(dto)
+    expect(result.visibility).toBe('private')
   })
 
   it('omits scriptureReference / scriptureText when null on the DTO', () => {

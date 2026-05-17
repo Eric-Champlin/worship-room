@@ -209,9 +209,9 @@ Phase 6 cutover complete 2026-05-15. 11 specs shipped, 1 deferred to Phase 8 (6.
 | 95  | 7.3  | Music During Prayer Wall                     | S    | Low    | ✅     |
 | 96  | 7.4  | Daily Hub Pray Tab Friend Surfacing          | M    | Medium | ✅     |
 | 97  | 7.5  | Local Support Bridges on Mental Health Posts | M    | Medium | ✅     |
-| 98  | 7.6  | Friends Pin to Top of Feed                   | L    | Medium | ⬜     |
-| 99  | 7.7  | Privacy Tiers (Public / Friends / Private)   | L    | High   | ⬜     |
-| 100 | 7.8  | Phase 7 Cutover                              | S    | Low    | ⬜     |
+| 98  | 7.6  | Friends Pin to Top of Feed                   | L    | Medium | ✅     |
+| 99  | 7.7  | Privacy Tiers (Public / Friends / Private)   | L    | High   | ✅     |
+| 100 | 7.8  | Phase 7 Cutover                              | S    | Low    | ✅     |
 
 ## Phase 8 — User Profiles (9 specs)
 

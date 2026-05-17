@@ -72,6 +72,8 @@ const prayerWallBreadcrumbs = {
 import { getChallenge } from '@/data/challenges'
 import type { PrayerRequest, PrayerComment } from '@/types/prayer-wall'
 import { isValidPostType, getPostType, type PostType } from '@/constants/post-types'
+import type { HelpTag } from '@/constants/ways-to-help'
+import type { PostVisibility } from '@/constants/visibility-options'
 import { parseReference } from '@/lib/search/reference-parser'
 
 const PRAYERS_PER_PAGE = 20
@@ -531,6 +533,11 @@ function PrayerWallContent() {
       // Spec 4.6b — image-claim parameters. Both null when no image attached.
       imageUploadId?: string | null,
       imageAltText?: string | null,
+      // Spec 4.7b — practical-help tags. Non-null only on prayer_request.
+      helpTags?: HelpTag[] | null,
+      // Spec 7.7 — privacy tier (12th positional arg). Defaults to 'public'
+      // when omitted; InlineComposer always supplies a value via DEFAULT_VISIBILITY.
+      visibility?: PostVisibility,
     ): Promise<boolean> => {
       if (!isAuthenticated) {
         openAuthModal?.(authModalCtaByType[postType])
@@ -554,6 +561,9 @@ function PrayerWallContent() {
           lastActivityAt: new Date().toISOString(),
           prayingCount: 0,
           commentCount: 0,
+          // Spec 7.7 — reflect the chosen visibility on the local mock so
+          // the PrayerCard renders the matching icon in flag-off mode.
+          visibility: visibility ?? 'public',
           // Spec 4.5 — persist scripture pair on the mock object so the
           // ScriptureChip renders for newly-posted discussions in flag-off mode.
           ...(scriptureReference && scriptureText
@@ -604,6 +614,17 @@ function PrayerWallContent() {
             // is non-blank when imageUploadId is set (submit-disabled rule).
             imageUploadId: imageUploadId ?? null,
             imageAltText: imageAltText ?? null,
+            // Spec 4.7b — practical-help tags. Backend rejects on non-prayer_request
+            // post types (HelpTagsNotAllowedForPostTypeException); guard at the
+            // call boundary.
+            helpTags:
+              postType === 'prayer_request' && helpTags && helpTags.length > 0
+                ? helpTags
+                : undefined,
+            // Spec 7.7 — privacy tier. Backend defaults to 'public' when
+            // omitted; we still pass the explicit value so the wire shape
+            // matches the user's selection.
+            visibility,
           },
           idempotencyKey
         )
@@ -665,6 +686,14 @@ function PrayerWallContent() {
   }, [isAuthenticated, openAuthModal])
 
   // QOTD response submission
+  // Spec 7.7 Plan-Time Divergence: the QOTD composer is a separate
+  // QotdComposer component (NOT a second mount of InlineComposer as the
+  // plan's recon mistakenly claimed). Its onSubmit signature remains
+  // (content, idempotencyKey) — adding a visibility selector to the QOTD
+  // surface is out of scope for 7.7 and would require modifying
+  // QotdComposer.tsx as well. QOTD responses default to 'public' and are
+  // visible to all on the QOTD list. A future spec can extend the QOTD
+  // composer if user testing surfaces a need for tier control there.
   const handleQotdSubmit = useCallback(
     async (content: string, idempotencyKey?: string): Promise<boolean> => {
       if (!isAuthenticated) {

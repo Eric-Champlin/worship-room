@@ -29,7 +29,9 @@ import { ImageUpload } from './ImageUpload'
 import { WaysToHelpPicker } from './WaysToHelpPicker'
 import { RestoreDraftPrompt } from './RestoreDraftPrompt'
 import { CounselorBridge } from './CounselorBridge'
+import { VisibilitySelector } from './VisibilitySelector'
 import { useComposerDraft } from '@/hooks/useComposerDraft'
+import { DEFAULT_VISIBILITY, type PostVisibility } from '@/constants/visibility-options'
 
 interface ComposerCopy {
   header: string
@@ -196,6 +198,11 @@ interface InlineComposerProps {
     // Spec 4.7b — optional practical-help tags. Only populated for
     // postType === 'prayer_request'; empty / null on all other types.
     helpTags?: HelpTag[] | null,
+    // Spec 7.7 — privacy tier (public/friends/private). Defaults to 'public'
+    // when omitted at the call site; backend also defaults to 'public' when
+    // the field is omitted from the request body. Appended at position 12
+    // (Plan-Time Divergence #1) to minimize call-site refactor risk.
+    visibility?: PostVisibility,
   ) => boolean | Promise<boolean>
   /**
    * Spec 6.4 — When true, swap the textarea placeholder to the Watch
@@ -261,6 +268,12 @@ export function InlineComposer({
   // Spec 4.7b — practical-help tag selection. Composer-scoped local state
   // (no reactive store; selection lives only inside the open composer).
   const [helpTags, setHelpTags] = useState<HelpTag[]>([])
+  // Spec 7.7 — privacy tier selection. Always defaults to PUBLIC (no
+  // sticky-last-used per R2). Composer-local state; the selected value is
+  // forwarded to onSubmit as the 12th positional argument and reset on
+  // successful submit and cancel.
+  const [selectedVisibility, setSelectedVisibility] =
+    useState<PostVisibility>(DEFAULT_VISIBILITY)
   // Spec 4.5 — InlineComposer hides via aria-hidden/inert (line 310-311) rather
   // than unmounting on close, so child components retain their internal state
   // across open/close cycles. ScriptureReferenceInput is uncontrolled (owns its
@@ -423,6 +436,9 @@ export function InlineComposer({
         // so the API payload is omitted (defense-in-depth alongside backend
         // cross-type rejection).
         postType === 'prayer_request' && helpTags.length > 0 ? helpTags : null,
+        // Spec 7.7 — privacy tier (12th positional arg, appended per
+        // Plan-Time Divergence #1).
+        selectedVisibility,
       )
       if (!success) return
       // Spec 6.9 — success-only draft clear. Failed submits (success === false
@@ -446,6 +462,9 @@ export function InlineComposer({
       setImageAltText('')
       // Spec 4.7b — reset selection so the next prayer starts clean.
       setHelpTags([])
+      // Spec 7.7 — always reset to PUBLIC default after a successful submit
+      // (no sticky-last-used per R2).
+      setSelectedVisibility(DEFAULT_VISIBILITY)
       // Generate a fresh idempotency key for the next prayer.
       setIdempotencyKey(
         typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}`
@@ -474,6 +493,7 @@ export function InlineComposer({
     scriptureRef,
     scriptureText,
     selectedCategory,
+    selectedVisibility,
   ])
 
   const handleCancel = useCallback(() => {
@@ -492,6 +512,8 @@ export function InlineComposer({
     setImageUploadId(null)
     setImageAltText('')
     setHelpTags([])
+    // Spec 7.7 — reset privacy tier to PUBLIC on cancel.
+    setSelectedVisibility(DEFAULT_VISIBILITY)
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
@@ -703,6 +725,20 @@ export function InlineComposer({
         )}
 
         <p className="mt-3 text-xs text-white/60">{copy.footerNote}</p>
+
+        {/* Spec 7.7 — Privacy tier selector. Always defaults to PUBLIC (R2);
+            disables in sync with composer submission state. Surfaces in the
+            single InlineComposer mount on /prayer-wall. The QOTD composer is
+            a separate QotdComposer component (NOT a second InlineComposer
+            mount as the plan's recon mistakenly claimed) and does not
+            include a visibility selector — out of scope for 7.7; QOTD
+            responses default to 'public'. See PrayerWall.tsx
+            handleQotdSubmit comment for the divergence record. */}
+        <VisibilitySelector
+          value={selectedVisibility}
+          onChange={setSelectedVisibility}
+          disabled={isSubmitting}
+        />
 
         <div className="mt-4 flex items-center justify-end gap-3">
           <Button type="button" variant="ghost" onClick={handleCancel}>

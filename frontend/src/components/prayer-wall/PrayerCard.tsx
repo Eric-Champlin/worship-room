@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { HandHelping, Heart, HelpCircle, MessagesSquare, Sparkles } from 'lucide-react'
+import { HandHelping, Heart, HelpCircle, Lock, MessagesSquare, Sparkles, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { ANIMATION_DURATIONS } from '@/constants/animation'
 import type { PostType } from '@/constants/post-types'
@@ -64,6 +64,43 @@ const POST_TYPE_ICONS: Record<PostType, LucideIcon> = {
 function TypeMarker({ postType }: { postType: PostType }) {
   const Icon = POST_TYPE_ICONS[postType]
   return <Icon className="h-3.5 w-3.5 text-white/40" aria-hidden="true" />
+}
+
+/**
+ * Spec 7.7 — Visibility tier marker. Renders a small lucide-react icon next
+ * to the post timestamp for non-public tiers; renders nothing for 'public'
+ * (Plan-Time Divergence #3 — absence of icon == Public is a clear visual
+ * rule; reduces noise on the dominant case). NOT interactive — pure visual
+ * cue per MPD-10. Shown to every viewer regardless of post ownership (R7).
+ */
+function VisibilityIcon({
+  visibility,
+}: {
+  visibility?: 'public' | 'friends' | 'private'
+}) {
+  if (visibility === 'friends') {
+    return (
+      <span
+        className="inline-flex items-center text-white/60"
+        title="Friends only"
+        aria-label="Visible to friends only"
+      >
+        <Users className="h-3.5 w-3.5" aria-hidden="true" />
+      </span>
+    )
+  }
+  if (visibility === 'private') {
+    return (
+      <span
+        className="inline-flex items-center text-white/60"
+        title="Private"
+        aria-label="Private — visible only to you"
+      >
+        <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+      </span>
+    )
+  }
+  return null
 }
 
 interface PrayerCardProps {
@@ -235,6 +272,9 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
                 >
                   {formatFullDate(prayer.createdAt)}
                 </time>
+                {/* Spec 7.7 — visibility tier marker (Users for friends, Lock
+                    for private, nothing for public). */}
+                <VisibilityIcon visibility={prayer.visibility} />
               </span>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
                 <CategoryBadge

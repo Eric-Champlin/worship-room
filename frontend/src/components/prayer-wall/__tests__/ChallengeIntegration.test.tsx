@@ -89,6 +89,7 @@ describe('InlineComposer — challenge integration', () => {
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
       null, // helpTags (Spec 4.7b) — null when no chips selected
+      'public', // visibility (Spec 7.7) — defaults to 'public'
     )
   })
 
@@ -116,6 +117,7 @@ describe('InlineComposer — challenge integration', () => {
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
       null, // helpTags (Spec 4.7b) — null when no chips selected
+      'public', // visibility (Spec 7.7) — defaults to 'public'
     )
   })
 

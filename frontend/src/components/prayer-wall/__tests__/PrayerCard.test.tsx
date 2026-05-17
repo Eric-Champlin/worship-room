@@ -894,3 +894,60 @@ describe('PrayerCard — Spec 7.2 ScriptureChip state independence', () => {
     ).toBeInTheDocument()
   })
 })
+
+// =====================================================================
+// Spec 7.7 — Visibility tier icon next to the timestamp
+// =====================================================================
+
+describe('PrayerCard — Spec 7.7 visibility icon', () => {
+  it('omits the visibility icon for public posts (Plan-Time Divergence #3)', () => {
+    const prayer: PrayerRequest = {
+      ...SHORT_PRAYER,
+      visibility: 'public',
+    }
+    renderCard(prayer)
+    // No "Visible to friends only" label and no "Private" label.
+    expect(
+      screen.queryByLabelText('Visible to friends only'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByLabelText(/^Private/),
+    ).not.toBeInTheDocument()
+  })
+
+  it('renders the Users icon for friends-tier posts', () => {
+    const prayer: PrayerRequest = {
+      ...SHORT_PRAYER,
+      visibility: 'friends',
+    }
+    renderCard(prayer)
+    const icon = screen.getByLabelText('Visible to friends only')
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveAttribute('title', 'Friends only')
+    // Not a button or link — pure visual marker per MPD-10.
+    expect(icon.tagName.toLowerCase()).toBe('span')
+  })
+
+  it('renders the Lock icon for private posts', () => {
+    const prayer: PrayerRequest = {
+      ...SHORT_PRAYER,
+      visibility: 'private',
+    }
+    renderCard(prayer)
+    const icon = screen.getByLabelText('Private — visible only to you')
+    expect(icon).toBeInTheDocument()
+    expect(icon).toHaveAttribute('title', 'Private')
+    expect(icon.tagName.toLowerCase()).toBe('span')
+  })
+
+  it('omits the icon when visibility is undefined (back-compat with old fixtures)', () => {
+    // SHORT_PRAYER has no visibility field — represents pre-7.7 mock data.
+    renderCard(SHORT_PRAYER)
+    expect(
+      screen.queryByLabelText('Visible to friends only'),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByLabelText(/^Private/),
+    ).not.toBeInTheDocument()
+  })
+})

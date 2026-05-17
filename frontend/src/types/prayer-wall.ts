@@ -97,10 +97,17 @@ export interface PrayerRequest {
   //     sites that pre-date 7.6 don't need to set it (PrayerCard renders
   //     the chip only when `=== true`).
   isFromFriend?: boolean
+  // --- Spec 7.7 — privacy tier set at create time by the author. Public is
+  //     the default. Friends-tier visible to viewer iff the viewer is an
+  //     active friend of the author (predicate composed in
+  //     PostSpecifications.visibleTo). Private visible only to the author.
+  //     PrayerCard renders a small Users icon for 'friends' and a Lock icon
+  //     for 'private'; no icon for 'public'. Optional `?` because pre-7.7
+  //     mock data may not include the field.
+  visibility?: 'public' | 'friends' | 'private'
   // --- Intentionally NOT exposed:
   // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
   // - moderationStatus — server pre-filters; UI assumes 'approved'
-  // - visibility — deferred until Phase 8 friend visibility
 }
 
 export interface PrayerComment {

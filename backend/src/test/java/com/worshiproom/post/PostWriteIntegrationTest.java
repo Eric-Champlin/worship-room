@@ -1087,4 +1087,139 @@ class PostWriteIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.data.helpTags").isArray())
                 .andExpect(jsonPath("$.data.helpTags").isEmpty());
     }
+
+    // =====================================================================
+    // Spec 7.7 — visibility tier persistence + validation
+    // =====================================================================
+
+    @Test
+    void createPost_persistsVisibilityPublic() throws Exception {
+        MvcResult result = mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "postType": "prayer_request",
+                                  "content": "Public visibility test.",
+                                  "category": "other",
+                                  "visibility": "public"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.visibility").value("public"))
+                .andReturn();
+
+        UUID postId = UUID.fromString(
+                mapper.readTree(result.getResponse().getContentAsString())
+                        .get("data").get("id").asText());
+        String dbVisibility = jdbc.queryForObject(
+                "SELECT visibility FROM posts WHERE id = ?", String.class, postId);
+        assertThat(dbVisibility).isEqualTo("public");
+    }
+
+    @Test
+    void createPost_persistsVisibilityFriends() throws Exception {
+        MvcResult result = mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "postType": "prayer_request",
+                                  "content": "Friends visibility test.",
+                                  "category": "other",
+                                  "visibility": "friends"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.visibility").value("friends"))
+                .andReturn();
+
+        UUID postId = UUID.fromString(
+                mapper.readTree(result.getResponse().getContentAsString())
+                        .get("data").get("id").asText());
+        String dbVisibility = jdbc.queryForObject(
+                "SELECT visibility FROM posts WHERE id = ?", String.class, postId);
+        assertThat(dbVisibility).isEqualTo("friends");
+    }
+
+    @Test
+    void createPost_persistsVisibilityPrivate() throws Exception {
+        MvcResult result = mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "postType": "prayer_request",
+                                  "content": "Private visibility test.",
+                                  "category": "other",
+                                  "visibility": "private"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.visibility").value("private"))
+                .andReturn();
+
+        UUID postId = UUID.fromString(
+                mapper.readTree(result.getResponse().getContentAsString())
+                        .get("data").get("id").asText());
+        String dbVisibility = jdbc.queryForObject(
+                "SELECT visibility FROM posts WHERE id = ?", String.class, postId);
+        assertThat(dbVisibility).isEqualTo("private");
+    }
+
+    @Test
+    void createPost_defaultsToPublicWhenVisibilityOmitted() throws Exception {
+        // Gate-G-DEFAULT-PUBLIC-PERSISTENCE — omitted visibility field
+        // resolves to 'public' (PostService.createPost line 378-380) and
+        // the response DTO reflects the same default.
+        MvcResult result = mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "postType": "prayer_request",
+                                  "content": "Visibility omitted.",
+                                  "category": "other"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.visibility").value("public"))
+                .andReturn();
+
+        UUID postId = UUID.fromString(
+                mapper.readTree(result.getResponse().getContentAsString())
+                        .get("data").get("id").asText());
+        String dbVisibility = jdbc.queryForObject(
+                "SELECT visibility FROM posts WHERE id = ?", String.class, postId);
+        assertThat(dbVisibility).isEqualTo("public");
+    }
+
+    @Test
+    void createPost_rejectsInvalidVisibilityString() throws Exception {
+        // JSR-303 @Pattern on CreatePostRequest.visibility rejects values
+        // outside the (public|friends|private) regex. PostValidationExceptionHandler
+        // maps to 400 INVALID_INPUT before PostService runs. The handler emits
+        // a generic message body ("Invalid request parameters") so field-specific
+        // detail is not surfaced to clients — pattern matches the sibling
+        // createPost_testimony5001Chars_returns400ViaJSR303 assertion shape.
+        mvc.perform(post("/api/v1/posts")
+                        .header("Authorization", "Bearer " + aliceJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "postType": "prayer_request",
+                                  "content": "Invalid visibility test.",
+                                  "category": "other",
+                                  "visibility": "secret"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+
+        // Defense-in-depth: no row was created in the database.
+        Long rowCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM posts WHERE user_id = ? AND content = 'Invalid visibility test.'",
+                Long.class, alice.getId());
+        assertThat(rowCount).isEqualTo(0L);
+    }
 }

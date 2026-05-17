@@ -11,6 +11,8 @@ import org.hibernate.Session;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -84,12 +86,16 @@ class PostMapperTest extends AbstractDataJpaTest {
     }
 
     private Post seedPost(UUID userId, boolean anonymous) {
+        return seedPost(userId, anonymous, PostVisibility.PUBLIC);
+    }
+
+    private Post seedPost(UUID userId, boolean anonymous, PostVisibility visibility) {
         UUID id = UUID.randomUUID();
         jdbc.update("""
                 INSERT INTO posts (id, user_id, post_type, content, is_anonymous, visibility, moderation_status)
-                VALUES (?, ?, 'prayer_request', 'mapper test content', ?, 'public', 'approved')
+                VALUES (?, ?, 'prayer_request', 'mapper test content', ?, ?, 'approved')
                 """,
-                id, userId, anonymous);
+                id, userId, anonymous, visibility.value());
         return jdbc.queryForObject(
                 "SELECT id FROM posts WHERE id = ?",
                 (rs, n) -> entityManager.find(Post.class, rs.getObject("id", UUID.class)),
@@ -123,6 +129,21 @@ class PostMapperTest extends AbstractDataJpaTest {
         assertThat(dto.postType()).isEqualTo("prayer_request");
         assertThat(dto.visibility()).isEqualTo("public");
         assertThat(dto.moderationStatus()).isEqualTo("approved");
+    }
+
+    /**
+     * Spec 7.7 — confirms PostMapper round-trips every PostVisibility enum value
+     * to the correct wire string on PostDto. The existing
+     * {@link #toDto_serializesEnumAsDbValue()} test covers only PUBLIC; this
+     * parameterized test covers all three enum values
+     * (Gate-G-DTO-VISIBILITY-MAPPED).
+     */
+    @ParameterizedTest
+    @EnumSource(PostVisibility.class)
+    void toDto_visibilityRoundTripsForAllEnumValues(PostVisibility visibility) {
+        Post post = seedPost(author.getId(), false, visibility);
+        PostDto dto = postMapper.toDto(post);
+        assertThat(dto.visibility()).isEqualTo(visibility.value());
     }
 
     @Test

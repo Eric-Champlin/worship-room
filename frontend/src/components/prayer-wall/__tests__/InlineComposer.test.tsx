@@ -116,6 +116,7 @@ describe('InlineComposer', () => {
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
       null, // helpTags (Spec 4.7b) — null when no chips selected
+      'public', // visibility (Spec 7.7) — defaults to 'public'
     )
   })
 
@@ -139,6 +140,7 @@ describe('InlineComposer', () => {
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
       null, // helpTags (Spec 4.7b) — null when no chips selected
+      'public', // visibility (Spec 7.7) — defaults to 'public'
     )
   })
 
@@ -313,7 +315,12 @@ describe('InlineComposer — accessibility', () => {
 
   it('category pills have role="radio"', () => {
     renderComposer()
-    const radios = screen.getAllByRole('radio')
+    // Scope to the category radiogroup — Spec 7.7 added a second radiogroup
+    // (Post visibility) with 3 chips, so the page-wide radio count is 13.
+    const categoryGroup = screen.getByRole('radiogroup', {
+      name: 'Prayer category',
+    })
+    const radios = within(categoryGroup).getAllByRole('radio')
     expect(radios).toHaveLength(10)
   })
 
@@ -329,7 +336,14 @@ describe('InlineComposer — accessibility', () => {
     const user = userEvent.setup()
     renderComposer()
     await user.click(screen.getByRole('radio', { name: 'Health' }))
-    const otherRadios = screen.getAllByRole('radio').filter((r) => r.textContent !== 'Health')
+    // Scope to the category radiogroup (Spec 7.7 added a sibling radiogroup
+    // for Post visibility; assertion should only check category siblings).
+    const categoryGroup = screen.getByRole('radiogroup', {
+      name: 'Prayer category',
+    })
+    const otherRadios = within(categoryGroup)
+      .getAllByRole('radio')
+      .filter((r) => r.textContent !== 'Health')
     for (const radio of otherRadios) {
       expect(radio).toHaveAttribute('aria-checked', 'false')
     }
@@ -337,15 +351,28 @@ describe('InlineComposer — accessibility', () => {
 
   it('only one pill has tabIndex 0', () => {
     renderComposer()
-    const radios = screen.getAllByRole('radio')
-    const withTabZero = radios.filter((r) => r.getAttribute('tabindex') === '0')
+    // Scope to the category radiogroup (Spec 7.7 added a sibling Visibility
+    // radiogroup that has its own independent roving tabindex — that's why
+    // the page-wide tabIndex=0 count is 2).
+    const categoryGroup = screen.getByRole('radiogroup', {
+      name: 'Prayer category',
+    })
+    const radios = within(categoryGroup).getAllByRole('radio')
+    const withTabZero = radios.filter(
+      (r) => r.getAttribute('tabindex') === '0',
+    )
     expect(withTabZero).toHaveLength(1)
   })
 
   it('ArrowRight moves focus to next pill', async () => {
     const user = userEvent.setup()
     renderComposer()
-    const radios = screen.getAllByRole('radio')
+    // Scope to category radiogroup so this test verifies category-pill
+    // keyboard nav, not visibility-pill keyboard nav.
+    const categoryGroup = screen.getByRole('radiogroup', {
+      name: 'Prayer category',
+    })
+    const radios = within(categoryGroup).getAllByRole('radio')
     radios[0].focus()
     await user.keyboard('{ArrowRight}')
     expect(radios[1]).toHaveFocus()
@@ -354,7 +381,12 @@ describe('InlineComposer — accessibility', () => {
   it('Enter selects focused pill', async () => {
     const user = userEvent.setup()
     renderComposer()
-    const radios = screen.getAllByRole('radio')
+    // Scope to the category radiogroup (Spec 7.7 added a second radiogroup
+    // for visibility; this test asserts category-pill keyboard selection).
+    const categoryGroup = screen.getByRole('radiogroup', {
+      name: 'Prayer category',
+    })
+    const radios = within(categoryGroup).getAllByRole('radio')
     radios[0].focus()
     await user.keyboard('{Enter}')
     expect(radios[0]).toHaveAttribute('aria-checked', 'true')
@@ -931,6 +963,7 @@ describe('InlineComposer — Spec 4.6 encouragement variant', () => {
       null, // imageUploadId (Spec 4.6b)
       null, // imageAltText (Spec 4.6b)
       null, // helpTags (Spec 4.7b) — null on encouragement composer
+      'public', // visibility (Spec 7.7) — defaults to 'public'
     )
   })
 })
@@ -1092,7 +1125,8 @@ describe('InlineComposer — Spec 4.6b image upload affordance', () => {
     await user.click(screen.getByText('Submit Prayer Request'))
 
     // Use toHaveBeenCalledWith for full-arg verification (matches the pattern
-    // elsewhere in this file). helpTags is the 11th positional arg.
+    // elsewhere in this file). helpTags is the 11th positional arg; visibility
+    // is the 12th (Spec 7.7).
     expect(onSubmit).toHaveBeenCalledWith(
       'Please pray.',          // content
       false,                   // isAnonymous
@@ -1105,6 +1139,7 @@ describe('InlineComposer — Spec 4.6b image upload affordance', () => {
       null,                    // imageUploadId (Spec 4.6b)
       null,                    // imageAltText (Spec 4.6b)
       ['meals'],               // helpTags (Spec 4.7b)
+      'public',                // visibility (Spec 7.7) — defaults to 'public'
     )
   })
 
@@ -1606,5 +1641,95 @@ describe('InlineComposer — Spec 7.1 prefilledScripture', () => {
     ).toBe('Romans 8:28')
 
     localStorage.removeItem(COMPOSER_DRAFTS_KEY)
+  })
+})
+
+// =====================================================================
+// Spec 7.7 — Privacy tier (VisibilitySelector integration)
+// =====================================================================
+
+describe('InlineComposer — Spec 7.7 visibility selector', () => {
+  it('renders the VisibilitySelector fieldset', () => {
+    renderComposer()
+    expect(
+      screen.getByRole('radiogroup', { name: 'Post visibility' }),
+    ).toBeInTheDocument()
+  })
+
+  it('VisibilitySelector appears BELOW the category fieldset in DOM order', () => {
+    renderComposer()
+    const categoryGroup = screen.getByRole('radiogroup', {
+      name: 'Prayer category',
+    })
+    const visibilityGroup = screen.getByRole('radiogroup', {
+      name: 'Post visibility',
+    })
+    // categoryGroup precedes visibilityGroup in document order.
+    expect(
+      categoryGroup.compareDocumentPosition(visibilityGroup) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('VisibilitySelector defaults to Public on mount', () => {
+    renderComposer()
+    expect(
+      screen.getByRole('radio', { name: /public/i }),
+    ).toHaveAttribute('aria-checked', 'true')
+    expect(
+      screen.getByRole('radio', { name: /friends/i }),
+    ).toHaveAttribute('aria-checked', 'false')
+    expect(
+      screen.getByRole('radio', { name: /private/i }),
+    ).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('submit passes the selected visibility as the 12th positional argument', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderComposer({ onSubmit })
+
+    await user.type(screen.getByLabelText('Prayer request'), 'Selecting friends visibility')
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByRole('radio', { name: /friends/i }))
+    await user.click(screen.getByText('Submit Prayer Request'))
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      'Selecting friends visibility',
+      false,
+      'health',
+      undefined,
+      expect.any(String),
+      'prayer_request',
+      null,
+      null,
+      null,
+      null,
+      null,
+      'friends', // Spec 7.7 — 12th positional arg
+    )
+  })
+
+  it('resets visibility to Public after a successful submit', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(true)
+    renderComposer({ onSubmit })
+
+    await user.type(screen.getByLabelText('Prayer request'), 'First prayer')
+    await user.click(screen.getByText('Health'))
+    await user.click(screen.getByRole('radio', { name: /private/i }))
+    expect(
+      screen.getByRole('radio', { name: /private/i }),
+    ).toHaveAttribute('aria-checked', 'true')
+
+    await user.click(screen.getByText('Submit Prayer Request'))
+
+    // After submit, Public is re-selected as the default (R2 — no sticky last used).
+    expect(
+      screen.getByRole('radio', { name: /public/i }),
+    ).toHaveAttribute('aria-checked', 'true')
+    expect(
+      screen.getByRole('radio', { name: /private/i }),
+    ).toHaveAttribute('aria-checked', 'false')
   })
 })

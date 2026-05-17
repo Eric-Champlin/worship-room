@@ -5,8 +5,8 @@
  * `@/types/api/prayer-wall`) into frontend types (from `@/types/prayer-wall`):
  *
  *   1. postDtoToPrayerRequest(dto) — flattens nested author, drops crisisFlag /
- *      moderationStatus / visibility, preserves Phase 3.7+ optional fields per
- *      D5.
+ *      moderationStatus; plumbs visibility (Spec 7.7); preserves Phase 3.7+
+ *      optional fields per D5.
  *
  *   2. commentDtoToPrayerComment(dto) — flattens nested author, drops fields
  *      not consumed by the current PrayerComment type (parentCommentId,
@@ -48,6 +48,9 @@ import type { HelpTag } from '@/constants/ways-to-help'
  *   - isFromFriend (Spec 7.6) → pass through; required boolean on the wire,
  *     surfaces as optional `boolean?` in PrayerRequest. PrayerCard renders
  *     the chip on `=== true` only — undefined/false fall through to no-chip.
+ *   - visibility (Spec 7.7) → pass-through. Optional `?` on PrayerRequest
+ *     because pre-7.7 mock data may omit it; backend always populates per
+ *     OpenAPI required field.
  *   - author.id          → userId (null for anonymous posts)
  *   - author.displayName → authorName
  *   - author.avatarUrl   → authorAvatarUrl
@@ -56,7 +59,7 @@ import type { HelpTag } from '@/constants/ways-to-help'
  *   - challengeId, qotdId → optional pass-through (skip when null)
  *   - postType, candleCount, bookmarkCount, updatedAt, scriptureReference,
  *     scriptureText → optional pass-through per D5
- *   - crisisFlag, moderationStatus, visibility → DROPPED (D6, D5 comment block)
+ *   - crisisFlag, moderationStatus → DROPPED (D6)
  */
 export function postDtoToPrayerRequest(dto: PostDto): PrayerRequest {
   const result: PrayerRequest = {
@@ -79,6 +82,7 @@ export function postDtoToPrayerRequest(dto: PostDto): PrayerRequest {
     bookmarkCount: dto.bookmarkCount,
     updatedAt: dto.updatedAt,
     isFromFriend: dto.isFromFriend, // Spec 7.6 — friend-pin marker (wire required → domain optional)
+    visibility: dto.visibility,     // Spec 7.7 — pass-through; backend always populates per OpenAPI required field
   }
   if (dto.challengeId !== null && dto.challengeId !== undefined) {
     result.challengeId = dto.challengeId
