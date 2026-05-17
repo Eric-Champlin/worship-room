@@ -4405,6 +4405,7 @@ components:
         - lastActivityAt
         - author
         - helpTags
+        - isFromFriend
       properties:
         id: { type: string, format: uuid }
         postType:
@@ -4482,6 +4483,15 @@ components:
             show different summaries to different viewers — the feed
             response carries `Cache-Control: private, no-store` to prevent
             cross-viewer cache leakage.
+        isFromFriend:
+          type: boolean
+          description: |
+            Spec 7.6 — true when this post is one of up to 3 friend posts
+            pinned to the top of the main feed (`GET /api/v1/posts`) for
+            the requesting authenticated viewer. False on the chronological
+            remainder, on every post in `getById` / author-posts /
+            answered-wall feeds, and for unauthenticated viewers. Per-viewer;
+            not cacheable across viewers.
 
     PostImage:
       description: |

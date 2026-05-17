@@ -153,6 +153,7 @@ When adding a new key, default to `wr_*` unless there is a specific reason to us
 | `wr_anniversary_milestones_shown`  | number[]              | Fired anniversary milestone celebrations     |
 | `wr_gratitude_callback_last_shown` | string (date)         | Gratitude callback toast last-shown tracking |
 | `wr_mybible_device_storage_seen`   | `"true"`              | MyBible logged-out device-local-storage banner dismissal flag (Spec 8B). Set when user dismisses the "Your data lives on this device" banner on `/bible/my`. Read on mount; if `"true"`, banner is hidden. Cleared only by user-initiated localStorage clearance — there is no in-app reset. |
+| `wr_counselor_bridge_dismissed`    | `"true"` (sessionStorage) | Spec 7.5 — Counselor bridge dismissal flag. Set when the user taps the X on the inline bridge that appears below the category fieldset on InlineComposer when `postType === 'prayer_request' && selectedCategory === 'mental-health'`. Once set, the bridge does NOT re-render in the same session, even if the user toggles the category away and back. Cleared on browser session end (tab close). Module: `services/counselor-bridge-storage.ts` (`shouldShowCounselorBridge` / `markCounselorBridgeDismissed`). Per-device, NOT synced to backend (no backend changes in Spec 7.5). Single consumer per page mount; plain CRUD, not a reactive store. |
 
 ### Push Notifications (BB-41)
 

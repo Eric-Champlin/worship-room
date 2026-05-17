@@ -326,4 +326,85 @@ class PostMapperTest extends AbstractDataJpaTest {
 
         assertThat(dto.helpTags()).containsExactly("just_prayer");
     }
+
+    // =====================================================================
+    // Spec 7.6 — isFromFriend flag in toDtoList (5 tests)
+    // =====================================================================
+
+    @Test
+    void toDtoList_withFriendPinSet_marksContainedPostsAsFromFriend() {
+        Post p1 = seedPost(author.getId(), false);
+        Post p2 = seedPost(author.getId(), false);
+        Post p3 = seedPost(author.getId(), false);
+
+        List<PostDto> dtos = postMapper.toDtoList(
+                List.of(p1, p2, p3),
+                java.util.Map.of(),
+                java.util.Set.of(p1.getId(), p3.getId()));
+
+        assertThat(dtos).hasSize(3);
+        // dtos may not be in input order if internal stream changes; assert by id lookup.
+        PostDto dto1 = dtos.stream().filter(d -> d.id().equals(p1.getId())).findFirst().orElseThrow();
+        PostDto dto2 = dtos.stream().filter(d -> d.id().equals(p2.getId())).findFirst().orElseThrow();
+        PostDto dto3 = dtos.stream().filter(d -> d.id().equals(p3.getId())).findFirst().orElseThrow();
+        assertThat(dto1.isFromFriend()).isTrue();
+        assertThat(dto2.isFromFriend()).isFalse();
+        assertThat(dto3.isFromFriend()).isTrue();
+    }
+
+    @Test
+    void toDtoList_withEmptyFriendPinSet_marksAllAsNotFromFriend() {
+        Post p1 = seedPost(author.getId(), false);
+        Post p2 = seedPost(author.getId(), false);
+        Post p3 = seedPost(author.getId(), false);
+
+        List<PostDto> dtos = postMapper.toDtoList(
+                List.of(p1, p2, p3),
+                java.util.Map.of(),
+                java.util.Set.of());
+
+        assertThat(dtos).hasSize(3);
+        assertThat(dtos).allMatch(d -> !d.isFromFriend());
+    }
+
+    @Test
+    void toDtoList_twoArgOverload_defaultsToNotFromFriend() {
+        // Regression guard that the 2-arg overload's Set.of() delegation works correctly.
+        Post p1 = seedPost(author.getId(), false);
+        Post p2 = seedPost(author.getId(), false);
+        Post p3 = seedPost(author.getId(), false);
+
+        List<PostDto> dtos = postMapper.toDtoList(List.of(p1, p2, p3), java.util.Map.of());
+
+        assertThat(dtos).hasSize(3);
+        assertThat(dtos).allMatch(d -> !d.isFromFriend());
+    }
+
+    @Test
+    void toDto_singlePost_defaultsToNotFromFriend() {
+        // Regression guard for the single-post path.
+        Post post = seedPost(author.getId(), false);
+
+        PostDto dto = postMapper.toDto(post);
+
+        assertThat(dto.isFromFriend()).isFalse();
+    }
+
+    @Test
+    void toDtoList_anonymousPostInFriendPin_stillMarkedAsFromFriend() {
+        // Spec 7.6 Gate-G-ANONYMOUS-CHIP-RESPECTED (backend half) — anonymous
+        // friend posts still get the chip; the author display is "Anonymous"
+        // (no identity leak), but the relationship indicator stands.
+        Post anonymous = seedPost(author.getId(), true);
+
+        List<PostDto> dtos = postMapper.toDtoList(
+                List.of(anonymous),
+                java.util.Map.of(),
+                java.util.Set.of(anonymous.getId()));
+
+        assertThat(dtos).hasSize(1);
+        assertThat(dtos.get(0).isFromFriend()).isTrue();
+        assertThat(dtos.get(0).author().displayName()).isEqualTo("Anonymous");
+        assertThat(dtos.get(0).author().id()).isNull();
+    }
 }

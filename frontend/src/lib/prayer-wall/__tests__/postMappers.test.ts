@@ -44,6 +44,7 @@ function buildPostDto(overrides: Partial<PostDto> = {}): PostDto {
       avatarUrl: 'https://i.pravatar.cc/150?u=sarah',
     },
     questionResolvedCommentId: null,
+    isFromFriend: false, // Spec 7.6 — required wire field, default false in fixture
     ...overrides,
   }
 }
@@ -228,6 +229,37 @@ describe('mapPostDtos — array integrity (cross-author leakage prevention)', ()
 
   it('returns an empty array when given an empty array', () => {
     expect(mapPostDtos([])).toEqual([])
+  })
+})
+
+// --- Spec 7.6 — isFromFriend pass-through ---
+
+describe('postDtoToPrayerRequest — Spec 7.6 isFromFriend', () => {
+  it('passes isFromFriend=true through to the PrayerRequest', () => {
+    const dto = buildPostDto({ isFromFriend: true })
+    const result = postDtoToPrayerRequest(dto)
+    expect(result.isFromFriend).toBe(true)
+  })
+
+  it('passes isFromFriend=false through to the PrayerRequest', () => {
+    const dto = buildPostDto({ isFromFriend: false })
+    const result = postDtoToPrayerRequest(dto)
+    expect(result.isFromFriend).toBe(false)
+  })
+
+  it('mapPostDtos preserves per-post isFromFriend flag across an array', () => {
+    // Cross-author leak guard extended for the new field — each PrayerRequest
+    // must carry its own isFromFriend value, not the value of a sibling.
+    const dtos: PostDto[] = [
+      buildPostDto({ id: 'post-a', isFromFriend: true }),
+      buildPostDto({ id: 'post-b', isFromFriend: false }),
+      buildPostDto({ id: 'post-c', isFromFriend: true }),
+    ]
+    const results = mapPostDtos(dtos)
+    expect(results).toHaveLength(3)
+    expect(results[0].isFromFriend).toBe(true)
+    expect(results[1].isFromFriend).toBe(false)
+    expect(results[2].isFromFriend).toBe(true)
   })
 })
 

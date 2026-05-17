@@ -61,7 +61,7 @@ public class PostMapper {
                             "Post " + post.getId() + " references missing user " + post.getUserId()));
             author = authorFor(user);
         }
-        return buildDto(post, author, null);
+        return buildDto(post, author, null, false);
     }
 
     /**
@@ -70,7 +70,7 @@ public class PostMapper {
      * Spec 6.5 feed inline data.
      */
     public List<PostDto> toDtoList(List<Post> posts) {
-        return toDtoList(posts, Map.of());
+        return toDtoList(posts, Map.of(), Set.of());
     }
 
     /**
@@ -83,6 +83,27 @@ public class PostMapper {
      * the empty map (or use the no-arg overload).
      */
     public List<PostDto> toDtoList(List<Post> posts, Map<UUID, IntercessorSummary> summaries) {
+        return toDtoList(posts, summaries, Set.of());
+    }
+
+    /**
+     * Spec 7.6 — map posts to DTOs, attaching per-post {@link IntercessorSummary}
+     * AND per-post {@code isFromFriend} flag for the friend-pin set. Posts whose
+     * id is in {@code friendPinPostIds} get {@code isFromFriend=true}; all others
+     * get {@code false}.
+     *
+     * <p>Used exclusively by {@code PostService.listFeed} when the viewer is
+     * authenticated and on page 1. Other call sites pass {@code Set.of()} via
+     * the {@link #toDtoList(List, Map)} overload.
+     *
+     * <p>Cross-author leak guard: the {@code isFromFriend} read is per-post
+     * via {@code friendPinPostIds.contains(p.getId())} — pure Set membership,
+     * no shared accumulator. Tests assert each output PostDto's flag matches
+     * the input pin set.
+     */
+    public List<PostDto> toDtoList(List<Post> posts,
+                                  Map<UUID, IntercessorSummary> summaries,
+                                  Set<UUID> friendPinPostIds) {
         Set<UUID> authorIds = posts.stream()
                 .filter(p -> !p.isAnonymous())
                 .map(Post::getUserId)
@@ -101,7 +122,8 @@ public class PostMapper {
                 }
                 author = authorFor(u);
             }
-            return buildDto(p, author, summaries.get(p.getId()));
+            boolean isFromFriend = friendPinPostIds.contains(p.getId());
+            return buildDto(p, author, summaries.get(p.getId()), isFromFriend);
         }).toList();
     }
 
@@ -113,7 +135,9 @@ public class PostMapper {
         return new AuthorDto(user.getId(), DisplayNameResolver.resolve(user), user.getAvatarUrl());
     }
 
-    private PostDto buildDto(Post p, AuthorDto author, @Nullable IntercessorSummary intercessorSummary) {
+    private PostDto buildDto(Post p, AuthorDto author,
+                            @Nullable IntercessorSummary intercessorSummary,
+                            boolean isFromFriend) {
         return new PostDto(
                 p.getId(),
                 p.getPostType().value(),
@@ -143,7 +167,8 @@ public class PostMapper {
                 p.getQuestionResolvedCommentId(),
                 imageFor(p),
                 parseHelpTagsRaw(p.getHelpTagsRaw()),
-                intercessorSummary
+                intercessorSummary,
+                isFromFriend
         );
     }
 

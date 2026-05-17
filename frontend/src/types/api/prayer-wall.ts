@@ -114,6 +114,12 @@ export interface PostDto {
   image?: PostImageDto
   /** Spec 4.7b — practical-help tags. Always present; empty array when no tags. Canonical order from server. Frontends typically filter out `just_prayer` before rendering pills. */
   helpTags: string[]
+  /** Spec 7.6 — true when this post is one of up to 3 friend posts pinned
+   *  to the top of the main feed (`GET /api/v1/posts`) for the requesting
+   *  authenticated viewer. False on the chronological remainder, on every
+   *  post in getById / author-posts / answered-wall feeds, and for
+   *  unauthenticated viewers. Per-viewer; not cacheable across viewers. */
+  isFromFriend: boolean
 }
 
 export interface PostListMeta {

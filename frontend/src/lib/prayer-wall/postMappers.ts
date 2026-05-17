@@ -45,6 +45,9 @@ import type { HelpTag } from '@/constants/ways-to-help'
  * Field-by-field decisions:
  *   - id, content, isAnonymous, isAnswered, answeredText, answeredAt,
  *     createdAt, lastActivityAt, prayingCount, commentCount → pass through.
+ *   - isFromFriend (Spec 7.6) → pass through; required boolean on the wire,
+ *     surfaces as optional `boolean?` in PrayerRequest. PrayerCard renders
+ *     the chip on `=== true` only — undefined/false fall through to no-chip.
  *   - author.id          → userId (null for anonymous posts)
  *   - author.displayName → authorName
  *   - author.avatarUrl   → authorAvatarUrl
@@ -75,6 +78,7 @@ export function postDtoToPrayerRequest(dto: PostDto): PrayerRequest {
     candleCount: dto.candleCount,
     bookmarkCount: dto.bookmarkCount,
     updatedAt: dto.updatedAt,
+    isFromFriend: dto.isFromFriend, // Spec 7.6 — friend-pin marker (wire required → domain optional)
   }
   if (dto.challengeId !== null && dto.challengeId !== undefined) {
     result.challengeId = dto.challengeId

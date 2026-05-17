@@ -15,6 +15,7 @@ import { AnsweredBadge } from './AnsweredBadge'
 import { PostImage } from './PostImage'
 import { WaysToHelpPills } from './WaysToHelpPills'
 import { CategoryBadge } from './CategoryBadge'
+import { FromFriendChip } from './FromFriendChip'
 import { QotdBadge } from './QotdBadge'
 import { ScriptureChip } from './ScriptureChip'
 import { IntercessorTimeline } from './IntercessorTimeline'
@@ -240,6 +241,7 @@ export function PrayerCard({ prayer, showFull = false, onCategoryClick, children
                   category={prayer.category}
                   onClick={onCategoryClick}
                 />
+                {prayer.isFromFriend === true && <FromFriendChip />}
                 {challengeData && (
                   <span
                     className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"

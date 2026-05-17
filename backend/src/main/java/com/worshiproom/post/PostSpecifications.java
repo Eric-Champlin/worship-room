@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.UUID;
 
 /**
@@ -215,6 +216,26 @@ public final class PostSpecifications {
             OffsetDateTime cutoff = OffsetDateTime.now(ZoneOffset.UTC).minusHours(24);
             return cb.greaterThanOrEqualTo(root.get("createdAt"), cutoff);
         };
+    }
+
+    /**
+     * Spec 7.6 — exclude posts whose id is in the given set. Used by
+     * {@link PostService#listFeed} to enforce no-duplication between the
+     * friend-pin set (positions 0-2) and the chronological remainder
+     * (Gate-G-NO-DUPLICATION).
+     *
+     * <p>Empty / null input returns a conjunction (no-op) — keeps SQL valid
+     * when there are no IDs to exclude. PostgreSQL rejects {@code NOT IN ()}
+     * with a syntax error, so the empty-collection guard is mandatory.
+     *
+     * <p>{@code root.get("id")} matches {@link Post#getId()} — the entity's
+     * primary key. Single SQL clause; no N+1.
+     */
+    public static Specification<Post> notInIds(@Nullable Collection<UUID> excludedIds) {
+        if (excludedIds == null || excludedIds.isEmpty()) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+        return (root, query, cb) -> cb.not(root.get("id").in(excludedIds));
     }
 
     /**

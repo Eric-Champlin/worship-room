@@ -15,7 +15,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -297,5 +299,44 @@ class PostSpecificationsTest extends AbstractDataJpaTest {
         List<Post> visible = postRepository.findAll(PostSpecifications.notExpired());
 
         assertThat(visible).extracting(Post::getId).doesNotContain(justExpired);
+    }
+
+    // ---------- Spec 7.6 — notInIds ----------
+
+    @Test
+    void notInIds_emptyCollection_returnsConjunction() {
+        UUID p1 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p2 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p3 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notInIds(Collections.emptySet()));
+
+        assertThat(visible).extracting(Post::getId).contains(p1, p2, p3);
+    }
+
+    @Test
+    void notInIds_nullCollection_returnsConjunction() {
+        UUID p1 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p2 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p3 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notInIds(null));
+
+        assertThat(visible).extracting(Post::getId).contains(p1, p2, p3);
+    }
+
+    @Test
+    void notInIds_excludesGivenIds() {
+        UUID p1 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p2 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p3 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p4 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+        UUID p5 = seedPost(author.getId(), PostVisibility.PUBLIC, ModerationStatus.APPROVED, false);
+
+        List<Post> visible = postRepository.findAll(PostSpecifications.notInIds(Set.of(p1, p3)));
+
+        assertThat(visible).extracting(Post::getId)
+                .contains(p2, p4, p5)
+                .doesNotContain(p1, p3);
     }
 }

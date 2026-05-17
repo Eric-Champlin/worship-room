@@ -72,7 +72,8 @@ class PostsIdempotencyServiceTest {
                 null,
                 null,
                 java.util.Set.of(),
-                null
+                null,
+                false   // Spec 7.6 — isFromFriend
         );
         return new CreatePostResponse(dto, null, java.util.Map.of("requestId", "rid"));
     }

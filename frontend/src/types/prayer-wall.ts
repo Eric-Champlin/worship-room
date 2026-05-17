@@ -89,6 +89,14 @@ export interface PrayerRequest {
   // (GET /api/v1/posts). Absent on getById / listAuthorPosts responses.
   // `firstThree` is classified server-side against the viewer's friend set.
   intercessorSummary?: IntercessorSummary
+  // --- Spec 7.6 — friend-pin marker. true when this post is one of up to 3
+  //     friend posts pinned to the top of the main Prayer Wall feed for the
+  //     authenticated viewer. False/undefined on the chronological remainder,
+  //     on author-posts, on single-post details, on the Answered Wall, and
+  //     for unauthenticated viewers. Optional `?: boolean` because old call
+  //     sites that pre-date 7.6 don't need to set it (PrayerCard renders
+  //     the chip only when `=== true`).
+  isFromFriend?: boolean
   // --- Intentionally NOT exposed:
   // - crisisFlag — server-side supersession only (Phase 3 Addendum #7)
   // - moderationStatus — server pre-filters; UI assumes 'approved'

@@ -37,12 +37,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -63,6 +66,9 @@ public class PostService {
 
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
+    /** Spec 7.6 — max number of friend posts pinned to top of main feed (page 1). */
+    private static final int FRIEND_PIN_LIMIT = 3;
+
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final UserResolverService userResolverService;
@@ -80,6 +86,7 @@ public class PostService {
     private final UploadService uploadService;
     private final IntercessorService intercessorService;
     private final AnsweredFeedCache answeredFeedCache;
+    private final FriendPrayersService friendPrayersService;
 
     public PostService(PostRepository postRepository,
                        PostMapper postMapper,
@@ -97,7 +104,8 @@ public class PostService {
                        ResolveRateLimitService resolveRateLimitService,
                        UploadService uploadService,
                        IntercessorService intercessorService,
-                       AnsweredFeedCache answeredFeedCache) {
+                       AnsweredFeedCache answeredFeedCache,
+                       FriendPrayersService friendPrayersService) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.userResolverService = userResolverService;
@@ -115,6 +123,7 @@ public class PostService {
         this.uploadService = uploadService;
         this.intercessorService = intercessorService;
         this.answeredFeedCache = answeredFeedCache;
+        this.friendPrayersService = friendPrayersService;
     }
 
     public PostListResponse listFeed(
@@ -128,6 +137,7 @@ public class PostService {
     ) {
         List<Post> posts;
         long totalElements;
+        Set<UUID> friendPinPostIds = Set.of();
 
         if (sort == SortKey.ANSWERED) {
             // Spec 6.6b — Answered Wall feed: viewer-agnostic cache layer
@@ -140,28 +150,85 @@ public class PostService {
             // authorActive() (Spec 6.6b — exclude deleted/banned authors).
             // Mute filter is intentionally NOT applied to the Answered Wall
             // feed — see AnsweredFeedCache JavaDoc for the rationale.
+            //
+            // Spec 7.6 — friend pinning is NOT applied here (R6 default (a)):
+            // the cached feed is shared across viewers, pin sets are per-viewer.
             AnsweredFeedCache.CachedAnsweredFeed cached =
                     answeredFeedCache.loadAnsweredFeedPublic(category, postType, qotdId, page, limit);
             posts = cached.posts();
             totalElements = cached.totalElements();
         } else {
+            // Spec 7.6 — friend-pin injection on page 1 only, authenticated
+            // viewers only. The principal feed branch composes the canonical
+            // visibility + mute + filter chain; friend pins augment the result
+            // ordering at positions 0-2 without changing the underlying
+            // visibility contract.
+            //
+            // Pin fetch is capped at min(FRIEND_PIN_LIMIT, limit) so the pin
+            // set never exceeds the client's requested page size — otherwise
+            // the response would carry more rows than `limit` AND the
+            // chronological remainder's PageRequest.of would crash on
+            // pageSize <= 0 (Spring requires size >= 1).
+            List<UUID> pinIds = (page == 1 && viewerId != null)
+                    ? friendPrayersService.getFriendPinPostIds(viewerId, Math.min(FRIEND_PIN_LIMIT, limit))
+                    : List.of();
+            friendPinPostIds = Set.copyOf(pinIds);
+
             Specification<Post> spec = PostSpecifications.visibleTo(viewerId)
                     .and(PostSpecifications.notMutedBy(viewerId))
                     .and(PostSpecifications.byCategory(category))
                     .and(PostSpecifications.byPostType(postType))
                     .and(PostSpecifications.byQotdId(qotdId))
-                    .and(PostSpecifications.notExpired()); // Spec 4.6 — encouragement 24h feed expiry
-            Pageable pageable = PageRequest.of(page - 1, limit, sortFor(sort));
-            Page<Post> resultPage = postRepository.findAll(spec, pageable);
-            posts = resultPage.getContent();
-            totalElements = resultPage.getTotalElements();
+                    .and(PostSpecifications.notExpired()) // Spec 4.6 — encouragement 24h feed expiry
+                    .and(PostSpecifications.notInIds(friendPinPostIds)); // Spec 7.6 — exclude pinned IDs from chronological remainder
+
+            int chronologicalLimit = limit - pinIds.size();
+            List<Post> chronologicalPosts;
+            long chronologicalTotal;
+            if (chronologicalLimit > 0) {
+                Pageable pageable = PageRequest.of(page - 1, chronologicalLimit, sortFor(sort));
+                Page<Post> resultPage = postRepository.findAll(spec, pageable);
+                chronologicalPosts = resultPage.getContent();
+                chronologicalTotal = resultPage.getTotalElements();
+            } else {
+                // Pin set exactly fills the requested page (e.g., limit=1 with one
+                // eligible friend post, or limit=3 with three). Skip the chronological
+                // fetch — PageRequest.of requires pageSize >= 1 — but still count the
+                // remainder via count(spec) so totalElements / hasNextPage stay correct.
+                chronologicalPosts = List.of();
+                chronologicalTotal = postRepository.count(spec);
+            }
+
+            // Build the unioned post list: friend pins first (in pinIds order — server-truth
+            // most-recent-first from getFriendPinPostIds), then chronological remainder.
+            if (pinIds.isEmpty()) {
+                posts = chronologicalPosts;
+            } else {
+                // Re-fetch the full Post entities for the pin set in order. The pin set
+                // is small (≤ FRIEND_PIN_LIMIT) — a single findAllById is fine; preserve
+                // order via a map lookup against the input pinIds list.
+                Map<UUID, Post> pinnedById = postRepository.findAllById(pinIds).stream()
+                        .collect(Collectors.toMap(Post::getId, Function.identity()));
+                List<Post> pinnedPosts = pinIds.stream()
+                        .map(pinnedById::get)
+                        .filter(Objects::nonNull)
+                        .toList();
+                posts = new ArrayList<>(pinnedPosts.size() + chronologicalPosts.size());
+                posts.addAll(pinnedPosts);
+                posts.addAll(chronologicalPosts);
+            }
+
+            // totalElements counts the unioned set: chronological-total + pinCount.
+            // The chronological query's notInIds(friendPinPostIds) already excluded the
+            // pin set, so chronologicalTotal carries only the remainder count.
+            totalElements = chronologicalTotal + pinIds.size();
         }
 
         // Spec 6.5 — attach per-post intercessor summary classified against the viewer's
         // friend set. Batched window-function query for the entire page (no N+1).
         // Computed per-request; never enters the answered-feed cache (ED-5 Option (b)).
         var summaries = intercessorService.buildFeedSummaries(posts, viewerId);
-        List<PostDto> dtos = postMapper.toDtoList(posts, summaries);
+        List<PostDto> dtos = postMapper.toDtoList(posts, summaries, friendPinPostIds);
         return new PostListResponse(dtos, buildMeta(page, limit, totalElements, requestId));
     }
 

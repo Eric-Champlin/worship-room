@@ -266,4 +266,119 @@ class FriendPrayersServiceTest extends AbstractIntegrationTest {
         assertThat(idsOf(resp)).containsExactly(p5, p4, p3);
         assertThat(idsOf(resp)).doesNotContain(p1, p2);
     }
+
+    // ─── Spec 7.6 — getFriendPinPostIds ────────────────────────────────────
+
+    @Test
+    void getFriendPinPostIds_returnsMostRecentN() {
+        seedFriendship(friend.getId(), viewer.getId());
+        OffsetDateTime base = OffsetDateTime.now(ZoneOffset.UTC).minusHours(1);
+        UUID p1 = seedPost(friend.getId(), "public", base.minusMinutes(50)); // oldest
+        UUID p2 = seedPost(friend.getId(), "public", base.minusMinutes(40));
+        UUID p3 = seedPost(friend.getId(), "public", base.minusMinutes(30));
+        UUID p4 = seedPost(friend.getId(), "public", base.minusMinutes(20));
+        UUID p5 = seedPost(friend.getId(), "public", base.minusMinutes(10)); // newest
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds).containsExactly(p5, p4, p3);
+        assertThat(pinIds).doesNotContain(p1, p2);
+    }
+
+    @Test
+    void getFriendPinPostIds_emptyWhenNoFriends() {
+        // No friend_relationships seeded.
+        seedPost(friend.getId(), "public", OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5));
+        seedPost(stranger.getId(), "public", OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5));
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds).isEmpty();
+    }
+
+    @Test
+    void getFriendPinPostIds_emptyWhenAllFriendPostsStale() {
+        seedFriendship(friend.getId(), viewer.getId());
+        // All friend posts older than 24h — must be excluded.
+        seedPost(friend.getId(), "public", OffsetDateTime.now(ZoneOffset.UTC).minusHours(25));
+        seedPost(friend.getId(), "public", OffsetDateTime.now(ZoneOffset.UTC).minusHours(48));
+        seedPost(friend.getId(), "public", OffsetDateTime.now(ZoneOffset.UTC).minusDays(3));
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds).isEmpty();
+    }
+
+    @Test
+    void getFriendPinPostIds_doesNotExcludeQuickLifted() {
+        // Spec 7.6 Gate-G-NO-QUICK-LIFT-EXCLUSION: pinning is presence-based, not engagement-based.
+        seedFriendship(friend.getId(), viewer.getId());
+        UUID liftedPostId = seedFreshFriendPost();
+        seedCompletedQuickLift(viewer.getId(), liftedPostId);
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        // Despite the completed Quick Lift, the post is STILL included.
+        assertThat(pinIds).contains(liftedPostId);
+    }
+
+    @Test
+    void getFriendPinPostIds_excludesBlocked() {
+        // Spec 7.6 Gate-G-ACTIVE-RELATIONSHIPS-ONLY.
+        seedFriendshipWithStatus(friend.getId(), viewer.getId(), "blocked");
+        seedFreshFriendPost();
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds).isEmpty();
+    }
+
+    @Test
+    void getFriendPinPostIds_respectsVisibility() {
+        // Spec 7.6 Gate-G-VISIBILITY-RESPECTED.
+        seedFriendship(friend.getId(), viewer.getId());
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(5);
+        UUID privatePost = seedPost(friend.getId(), "private", now);
+        UUID friendsOnlyPost = seedPost(friend.getId(), "friends", now.minusMinutes(1));
+        UUID publicPost = seedPost(friend.getId(), "public", now.minusMinutes(2));
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds)
+                .contains(friendsOnlyPost, publicPost)
+                .doesNotContain(privatePost);
+    }
+
+    @Test
+    void getFriendPinPostIds_respectsMute() {
+        // Viewer has muted the friend — friend's posts are excluded even though
+        // the friendship is still active.
+        seedFriendship(friend.getId(), viewer.getId());
+        seedMute(viewer.getId(), friend.getId());
+        seedFreshFriendPost();
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds).isEmpty();
+    }
+
+    @Test
+    void getFriendPinPostIds_excludesSelfPosts() {
+        // Spec 7.6 Gate-G-NO-SELF-PINNING. The friend_relationships table has
+        // an implicit CHECK via composite PK that user_id != friend_user_id,
+        // so the predicate byActiveFriendsOf(viewerId) is structurally
+        // incapable of returning the viewer's own posts. This test asserts
+        // defensively: seed an own-post + a friend post; assert only friend's
+        // post is pinned.
+        seedFriendship(friend.getId(), viewer.getId());
+        UUID viewerOwnPost = seedPost(viewer.getId(), "public",
+                OffsetDateTime.now(ZoneOffset.UTC).minusMinutes(2));
+        UUID friendPost = seedFreshFriendPost();
+
+        List<UUID> pinIds = friendPrayersService.getFriendPinPostIds(viewer.getId(), 3);
+
+        assertThat(pinIds)
+                .contains(friendPost)
+                .doesNotContain(viewerOwnPost);
+    }
 }

@@ -50,6 +50,7 @@ class PostEditWindowTest {
     @Mock private com.worshiproom.upload.UploadService uploadService;
     @Mock private IntercessorService intercessorService;
     @Mock private AnsweredFeedCache answeredFeedCache;
+    @Mock private FriendPrayersService friendPrayersService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -63,7 +64,7 @@ class PostEditWindowTest {
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
                 htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
-                uploadService, intercessorService, answeredFeedCache);
+                uploadService, intercessorService, answeredFeedCache, friendPrayersService);
     }
 
     private static Post buildPost(UUID id, UUID userId, OffsetDateTime createdAt) {
@@ -96,7 +97,8 @@ class PostEditWindowTest {
                 null,
                 null,
                 java.util.Set.of(),
-                null
+                null,
+                false   // Spec 7.6 — isFromFriend
         );
         when(postMapper.toDto(any(Post.class))).thenReturn(dto);
     }

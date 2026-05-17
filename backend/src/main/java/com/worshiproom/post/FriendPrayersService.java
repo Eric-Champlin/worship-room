@@ -66,6 +66,43 @@ public class FriendPrayersService {
         return new PostListResponse(dtos, buildMeta(dtos.size(), requestId));
     }
 
+    /**
+     * Spec 7.6 — returns the top-{@code limit} most-recent post IDs from the
+     * viewer's active friends, created in the last 24 hours, respecting
+     * visibility + mute. Distinct from {@link #listFriendPrayersToday}:
+     *
+     * <ul>
+     *   <li>Returns {@code List<UUID>} (IDs only) — caller does its own
+     *       page fetch and DTO mapping.</li>
+     *   <li>Does NOT exclude posts the viewer has Quick Lifted (Spec 7.6
+     *       MPD-6 + R4 — pinning is presence-based, not engagement-based).</li>
+     *   <li>Configurable limit (vs. {@code listFriendPrayersToday}'s fixed
+     *       3) so future surfaces can reuse with different pin counts.</li>
+     * </ul>
+     *
+     * <p>Order: most-recent first by {@code created_at DESC}. Empty list when
+     * the viewer has no active friends OR no eligible posts in the window.
+     *
+     * <p>{@code viewerId} must be non-null at the call site —
+     * {@link PostSpecifications#byActiveFriendsOf} documents the non-null
+     * contract. Callers MUST short-circuit on null viewerId before invoking.
+     */
+    public List<UUID> getFriendPinPostIds(UUID viewerId, int limit) {
+        Specification<Post> spec = PostSpecifications.visibleTo(viewerId)
+                .and(PostSpecifications.notMutedBy(viewerId))
+                .and(PostSpecifications.byActiveFriendsOf(viewerId))
+                .and(PostSpecifications.createdInLast24h());
+
+        Pageable pageable = PageRequest.of(0, limit,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<Post> posts = postRepository.findAll(spec, pageable).getContent();
+
+        log.info("friendPinPostIds viewerId={} returnedCount={}",
+                viewerId, posts.size());
+
+        return posts.stream().map(Post::getId).toList();
+    }
+
     private static PostListMeta buildMeta(int count, String requestId) {
         // Fixed pagination shape: page=1, limit=3, totalCount=actual returned
         // count, totalPages=1, no next/prev. The endpoint is not paginated —

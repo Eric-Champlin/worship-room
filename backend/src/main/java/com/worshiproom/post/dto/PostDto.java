@@ -48,5 +48,11 @@ public record PostDto(
         // Spec 6.5 — populated only by feed endpoint (listFeed). Null on
         // getById and listAuthorPosts. Global Jackson default-property-inclusion
         // = non_null drops the field from the wire format when null.
-        IntercessorSummary intercessorSummary
+        IntercessorSummary intercessorSummary,
+        // Spec 7.6 — true when this post is one of up to 3 friend posts
+        // pinned to the top of the main feed for the requesting viewer.
+        // False everywhere else (single-post fetch, author-posts feed,
+        // Answered Wall, chronological remainder on the main feed). Per-
+        // viewer; not cacheable across viewers.
+        boolean isFromFriend
 ) {}

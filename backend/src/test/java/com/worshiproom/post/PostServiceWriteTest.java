@@ -66,6 +66,7 @@ class PostServiceWriteTest {
     @Mock private com.worshiproom.upload.UploadService uploadService;
     @Mock private IntercessorService intercessorService;
     @Mock private AnsweredFeedCache answeredFeedCache;
+    @Mock private FriendPrayersService friendPrayersService;
 
     private final PostsRateLimitConfig config = new PostsRateLimitConfig();
     private PostService postService;
@@ -79,7 +80,7 @@ class PostServiceWriteTest {
                 activityService, userRepository, qotdQuestionRepository,
                 rateLimitService, idempotencyService, eventPublisher, config,
                 htmlSanitizerPolicy, entityManager, commentRepository, resolveRateLimitService,
-                uploadService, intercessorService, answeredFeedCache);
+                uploadService, intercessorService, answeredFeedCache, friendPrayersService);
     }
 
     private CreatePostRequest sampleRequest() {
@@ -117,7 +118,8 @@ class PostServiceWriteTest {
                 null,
                 null,
                 java.util.Set.of(),
-                null
+                null,
+                false   // Spec 7.6 — isFromFriend
         );
     }
 
@@ -619,7 +621,8 @@ class PostServiceWriteTest {
                 resolvedCommentId,
                 null,
                 java.util.Set.of(),
-                null
+                null,
+                false   // Spec 7.6 — isFromFriend
         );
     }
 

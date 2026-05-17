@@ -28,6 +28,7 @@ import { ScriptureReferenceInput } from './ScriptureReferenceInput'
 import { ImageUpload } from './ImageUpload'
 import { WaysToHelpPicker } from './WaysToHelpPicker'
 import { RestoreDraftPrompt } from './RestoreDraftPrompt'
+import { CounselorBridge } from './CounselorBridge'
 import { useComposerDraft } from '@/hooks/useComposerDraft'
 
 interface ComposerCopy {
@@ -664,6 +665,14 @@ export function InlineComposer({
               </p>
             )}
           </fieldset>
+        )}
+
+        {/* Spec 7.5 — Quiet bridge to /local-support/counselors when the user
+            composes a Mental Health prayer request. The bridge is dismissible
+            (session-scoped). Internal shouldShowCounselorBridge() check handles
+            the "already dismissed" case — when true, this renders nothing. */}
+        {postType === 'prayer_request' && selectedCategory === 'mental-health' && (
+          <CounselorBridge />
         )}
 
         {/* Spec 4.7b — practical-help tag picker (prayer_request only). */}
